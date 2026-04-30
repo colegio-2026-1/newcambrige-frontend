@@ -74,3 +74,5 @@ Sigue estos pasos para ejecutar el proyecto en tu entorno de desarrollo.
 4. **Ejecutar en modo desarrollo**
    ```bash
    npm run dev
+
+--prueba
