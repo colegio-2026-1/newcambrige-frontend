@@ -1,47 +1,36 @@
-import React, { useState, createContext, useContext } from "react";
-const AuthContext = createContext();
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { loginRequest, getMeRequest } from "../../api/authService";
 
-
-// ADVERTENCIA PARA FUTUROS DEVS DE ESTE PROYECTO:
-// ESTE CODIGO SOLO SIMULA LA CONEXION CON BACKEND, SE DEBE MODIGICAR
-
-
-export function AuthProvider({ children }) {
+export const useAuth = () => {
     const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
-    // LOGIN FALSO (sin backend)
-    const login = async (usuario, contrasena) => {
-        // Simula delay como si fuera servidor
-        await new Promise((res) => setTimeout(res, 800));
+    const login = async (username, password) => {
+    setLoading(true);
+    setError(null);
+    try {
+        const data = await loginRequest(username, password);
+        localStorage.setItem("access_token", data.access_token);
 
-        // Usuario fake
-        if (usuario === "admin" && contrasena === "1234") {
-            const fakeUser = {
-                usuario: "admin",
-                rol: "admin",
-                token: "fake-jwt-token"
-            };
+        const meResponse = await getMeRequest();
+        setUser(meResponse.data);
 
-            setUser(fakeUser);
-            localStorage.setItem("user", JSON.stringify(fakeUser));
-            return fakeUser;
-        }
-
-        throw new Error("Credenciales inválidas");
+        navigate("/dashboard");
+    } catch (err) {
+        setError(err.response?.data?.detail || "Error al iniciar sesión");
+    } finally {
+        setLoading(false);
+    }
     };
 
     const logout = () => {
-        setUser(null);
-        localStorage.removeItem("user");
+    localStorage.removeItem("access_token");
+    setUser(null);
+    navigate("/login");
     };
 
-    return (
-        <AuthContext.Provider value={{ user, login, logout }}>
-            {children}
-        </AuthContext.Provider>
-    );
-}
-
-export function useAuth() {
-    return useContext(AuthContext);
-}
+    return { user, loading, error, login, logout };
+};
