@@ -28,8 +28,9 @@ root/
 │ └── AuthStore.js # Estado global (Zustand) para sesión/usuario
 ├── modules/
 │ ├── auth/
-│ │ ├── LoginPage.jsx
-│ │ └── useAuth.js # Hook personalizado de autenticación
+│ │ ├── LoginPage.tsx
+│ │ ├── useAuth.tsx
+│ │ └── LoginPage.module.css # Hook personalizado de autenticación
 │ ├── salon/
 │ │ ├── SalonPage.jsx
 │ │ ├── PuptrePage.jsx
