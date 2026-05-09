@@ -9,7 +9,7 @@ Frontend de la plataforma integral de gestión escolar **Paz Salvo**, desarrolla
 - **React Router DOM** – Enrutamiento dinámico basado en roles.
 - **Axios** – Cliente HTTP con interceptores para autenticación.
 - **Zustand** – Estado global simple y liviano.
-
+- **lucide-react** – librerias para el manejo de icones "Provicional en desarrollo"
 ## 📁 Estructura del Proyecto
 ```bash
 root/
