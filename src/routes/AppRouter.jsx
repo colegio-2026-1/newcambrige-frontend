@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "../modules/auth/LoginPage";
 import Dashboard from "../modules/dashboard/DashboardPage";
+import SalonPage from '../modules/salon/SalonPage';
 
 // Protege rutas privadas
 const PrivateRoute = ({ children }) => {
@@ -13,6 +14,7 @@ const AppRouter = () => {
     <Routes>
       {/* Públicas */}
         <Route path="/" element={<LoginPage />} />
+        <Route path="/salon" element={<SalonPage />} />
 
       {/* Privadas */}
         <Route path="/dashboard" element={
