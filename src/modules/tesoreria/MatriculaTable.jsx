@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { allestudiantesRequest } from '../../api/endpoints'; 
 import '../../index.css'; 
 import TesoreriaSidebar from './TesoreriaSidebar';
+import Header from './headerTesoreria';
 
 const MatriculaTable = () => {
   const [estudiantes, setEstudiantes] = useState([]);
@@ -28,19 +29,18 @@ const navigate = useNavigate();
   }, []);
 
   return (
-    <div className="flex h-screen w-full bg-white overflow-hidden font-sans">
-      {/* Sidebar (Mantenemos el estilo) */}
-      <TesoreriaSidebar />
+    <div className="flex flex-col h-screen w-full bg-white overflow-hidden font-sans">
+  
+  <Header />
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col">
-        {/* Header Vinotinto */}
-        <header className="bg-[#8E2A25] text-white h-20 flex items-center px-8 shadow-lg">
-          <h2 className="flex-1 text-center text-xl font-light tracking-[0.2em] uppercase italic">
-            Sistema de Paz y Salvo - New Cambridge School
-          </h2>
-        </header>
-
+  
+  <div className="flex flex-1 overflow-hidden">
+   
+    <TesoreriaSidebar />
+      <main className="flex-1 overflow-y-auto bg-gray-50">
+        
+      
+     
         {/* Filtros Superiores */}
         <div className="p-4 bg-white border-b flex items-center justify-center gap-4 text-sm font-medium text-gray-600">
           <div className="flex items-center gap-2">
@@ -128,6 +128,7 @@ const navigate = useNavigate();
           </button>
         </div>
       </main>
+    </div>
     </div>
   );
 };

@@ -10,7 +10,7 @@ import { useState, useEffect } from 'react';
 
 const Sidebar = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const userName = user?.nombre || "Usuario";
   const idUser = user?.id_usuario;
   const [rolNombre, setRolNombre] = useState("Cargando...");
@@ -33,7 +33,7 @@ const Sidebar = () => {
 }, [idUser]);
 
   return (
-    <aside className="w-64 bg-crema-sidebar flex flex-col border-r border-gray-300 h-screen shadow-lg">
+    <aside className="w-64 bg-crema-sidebar flex flex-col border-r border-gray-300 h-full shadow-lg">
       <div className="p-8 flex flex-col items-center">
         
 
@@ -64,7 +64,7 @@ const Sidebar = () => {
         </div>
         <p className="text-xs font-black uppercase tracking-[0.2em]">{rol}</p>
         <p className="text-md font-medium">{userName}</p>
-        <button className="mt-6 p-2 hover:bg-vinotinto hover:text-white rounded-xl transition-all duration-300 border border-vinotinto/20">
+        <button onClick={logout} className="mt-6 p-2 hover:bg-vinotinto hover:text-white rounded-xl transition-all duration-300 border border-vinotinto/20">
           
           <span><img src={Logout} alt="Cerrar Sesión" className="w-6 h-6" /></span>
         </button>
