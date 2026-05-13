@@ -44,13 +44,13 @@ const Sidebar = () => {
             className="flex items-center space-x-4 text-vinotinto font-bold w-full p-3 hover:bg-white/40 rounded-lg transition-all group"
           >
            
-            <span className="flex items-center justify-center"><img src={Home} alt="Inicio" className="w-4 h-4" /></span>
+            <span className="flex items-center justify-center w-4 h-4"><img src={Home} alt="Inicio"/></span>
             <span className="text-lg">Inicio</span>
           </button>
           
           <button className="flex items-center space-x-4 text-gray-500 w-full p-3 hover:bg-white/40 rounded-lg transition-all group opacity-60">
             
-            <span className="w-6 h-6 bg-gray-200 rounded flex items-center justify-center"></span>
+            <span className="w-4 h-4 flex items-center justify-center"></span>
             <span className="text-lg">Estadísticas</span>
           </button>
         </nav>

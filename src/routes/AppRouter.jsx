@@ -99,7 +99,7 @@ const AppRouter = () => {
       */}
       {
         <Route
-          path="/tesoreria/*"
+          path="/tesoreria/"
           element={
             <PrivateRoute>
               <TesoreriaPage />
@@ -108,7 +108,7 @@ const AppRouter = () => {
         />
       }
   {      <Route
-          path="/matricula"
+          path="/tesoreria/matricula"
           element={
             <PrivateRoute>
               <MatriculaTable />
