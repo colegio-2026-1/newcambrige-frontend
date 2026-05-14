@@ -24,8 +24,26 @@ salones.forEach(s => {
 const matriculasMap = {};
 matriculas.forEach(m => {
   matriculasMap[m.id_estudiante] = m; 
-  console.log("Matricula cargada: ", m);
 });
+
+const obtenerEstiloEstado = (estado) => {
+  if (!estado) return { label: 'PENDIENTE', clase: 'bg-red-100 text-red-700' };
+
+  const texto = estado.toLowerCase();
+
+  // Lógica de palabras clave
+  if (texto.includes('pagó') || texto.includes('completo') || texto.includes('matriculado')) {
+    return { label: estado.toUpperCase(), clase: 'bg-green-100 text-green-700' };
+  }
+  if (texto.includes('debe') || texto.includes('mora') || texto.includes('debiendo')) {
+    return { label: estado.toUpperCase(), clase: 'bg-red-100 text-red-700' };
+  }
+  if (texto.includes('parcial') || texto.includes('abono') || texto.includes('mitad')) {
+    return { label: estado.toUpperCase(), clase: 'bg-blue-100 text-blue-700' };
+  }
+
+  return { label: estado.toUpperCase(), clase: 'bg-orange-50 text-orange-600 border border-orange-100' };
+};
   // Función para obtener los datos
   const cargarEstudiantes = async () => {
     try {
@@ -134,9 +152,16 @@ matriculas.forEach(m => {
         <td className="border border-gray-300 p-2 text-center text-sm">{salonesMap[est.id_salon]?.grado || 'N/A'}</td>
         <td className="border border-gray-300 p-2 text-center text-sm">{salonesMap[est.id_salon]?.grupo || 'N/A'}</td>
         <td className="border border-gray-300 p-2 text-center">
-          <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${matriculasMap[est.id_estudiante]?.estado ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-            {matriculasMap[est.id_estudiante]?.estado ? matriculasMap[est.id_estudiante]?.estado : 'PENDIENTE'}
-          </span>
+          {(() => {
+          const estadoDB = matriculasMap[est.id_estudiante]?.estado;
+          const { label, clase } = obtenerEstiloEstado(estadoDB);
+
+    return (
+      <span className={`px-2 py-1 rounded-full text-[10px] font-bold shadow-sm ${clase}`}>
+        {label}
+      </span>
+    );
+  })()}
         </td>
 <td className="border border-gray-300 p-2 text-center text-sm text-gray-500">
   {matriculasMap[est.id_estudiante]?.created_at 
