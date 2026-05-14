@@ -2,15 +2,23 @@
 import { LayoutGrid, BarChart3, User, LogOut, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
-import { allestudiantesRequest } from '../../api/endpoints'; 
+import { allestudiantesRequest, allsalonesRequest } from '../../api/endpoints'; 
 import '../../index.css'; 
 import TesoreriaSidebar from './TesoreriaSidebar';
 import Header from './TesoreriaHeader';
 
+
+
 const MatriculaTable = () => {
   const [estudiantes, setEstudiantes] = useState([]);
+  const [salones, setSalones] = useState([]);
   const [loading, setLoading] = useState(true);
 const navigate = useNavigate();
+
+const salonesMap = {};
+salones.forEach(s => {
+  salonesMap[s.id_salon] = s; 
+});
   // Función para obtener los datos
   const cargarEstudiantes = async () => {
     try {
@@ -23,9 +31,17 @@ const navigate = useNavigate();
     }
   };
 
-  // Se ejecuta una sola vez al montar el componente
+  const cargarSalones = async () => {
+    try {
+      const res = await allsalonesRequest();
+      setSalones(res.data);
+    } catch (error) {
+      console.error("Error cargando salones:", error);
+    }
+  };
   useEffect(() => {
     cargarEstudiantes();
+    cargarSalones();
   }, []);
 
   return (
@@ -97,8 +113,8 @@ const navigate = useNavigate();
         </td>
         <td className="border border-gray-300 p-2 text-center text-sm">{est.documento}</td>
         <td className="border border-gray-300 p-2 text-sm px-4">{est.nombre}</td>
-        <td className="border border-gray-300 p-2 text-center text-sm">{est.id_salon}</td>
-        <td className="border border-gray-300 p-2 text-center text-sm">{est.id_salon}</td>
+        <td className="border border-gray-300 p-2 text-center text-sm">{salonesMap[est.id_salon]?.grado || 'N/A'}</td>
+        <td className="border border-gray-300 p-2 text-center text-sm">{salonesMap[est.id_salon]?.grupo || 'N/A'}</td>
         <td className="border border-gray-300 p-2 text-center">
           <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${est.pago ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
             {est.pago ? 'PAGADO' : 'PENDIENTE'}
