@@ -2,7 +2,7 @@
 import { LayoutGrid, BarChart3, User, LogOut, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
-import { allestudiantesRequest, allsalonesRequest } from '../../api/endpoints'; 
+import { allestudiantesRequest, allsalonesRequest, allmatriculasRequest } from '../../api/endpoints'; 
 import '../../index.css'; 
 import TesoreriaSidebar from './TesoreriaSidebar';
 import Header from './TesoreriaHeader';
@@ -12,12 +12,19 @@ import Header from './TesoreriaHeader';
 const MatriculaTable = () => {
   const [estudiantes, setEstudiantes] = useState([]);
   const [salones, setSalones] = useState([]);
+  const [matriculas, setMatriculas] = useState([]);
   const [loading, setLoading] = useState(true);
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
 const salonesMap = {};
 salones.forEach(s => {
   salonesMap[s.id_salon] = s; 
+  
+});
+const matriculasMap = {};
+matriculas.forEach(m => {
+  matriculasMap[m.id_estudiante] = m; 
+  console.log("Matricula cargada: ", m);
 });
   // Función para obtener los datos
   const cargarEstudiantes = async () => {
@@ -39,9 +46,20 @@ salones.forEach(s => {
       console.error("Error cargando salones:", error);
     }
   };
+
+  const cargarMatriculas = async () => {
+    try {
+      const res = await allmatriculasRequest();
+      setMatriculas(res.data);
+    } catch (error) {
+      console.error("Error cargando matrículas:", error);
+    }
+  };
+
   useEffect(() => {
     cargarEstudiantes();
     cargarSalones();
+    cargarMatriculas();
   }, []);
 
   return (
@@ -116,13 +134,15 @@ salones.forEach(s => {
         <td className="border border-gray-300 p-2 text-center text-sm">{salonesMap[est.id_salon]?.grado || 'N/A'}</td>
         <td className="border border-gray-300 p-2 text-center text-sm">{salonesMap[est.id_salon]?.grupo || 'N/A'}</td>
         <td className="border border-gray-300 p-2 text-center">
-          <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${est.pago ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-            {est.pago ? 'PAGADO' : 'PENDIENTE'}
+          <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${matriculasMap[est.id_estudiante]?.estado ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+            {matriculasMap[est.id_estudiante]?.estado ? matriculasMap[est.id_estudiante]?.estado : 'PENDIENTE'}
           </span>
         </td>
-        <td className="border border-gray-300 p-2 text-center text-sm text-gray-500">
-          {est.created_at || '---'}
-        </td>
+<td className="border border-gray-300 p-2 text-center text-sm text-gray-500">
+  {matriculasMap[est.id_estudiante]?.created_at 
+    ? matriculasMap[est.id_estudiante].created_at.split('T')[0] 
+    : '---'}
+</td>
       </tr>
     ))
   ) : (
