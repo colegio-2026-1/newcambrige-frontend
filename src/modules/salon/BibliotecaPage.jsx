@@ -186,6 +186,10 @@ export default function BibliotecaPage() {
                     <tr>
 
                       <th style={styles.th}>
+                        <input type="checkbox" />
+                      </th>
+
+                      <th style={styles.th}>
                         CÓDIGO
                       </th>
 
@@ -230,6 +234,10 @@ export default function BibliotecaPage() {
                               : "#FFFFFF",
                         }}
                       >
+
+                        <td style={styles.td}>
+                          <input type="checkbox" />
+                        </td>
 
                         <td style={styles.td}></td>
                         <td style={styles.td}></td>
@@ -331,6 +339,10 @@ export default function BibliotecaPage() {
                     <tr>
 
                       <th style={styles.th}>
+                        <input type="checkbox" />
+                      </th>
+
+                      <th style={styles.th}>
                         ID
                       </th>
 
@@ -371,6 +383,10 @@ export default function BibliotecaPage() {
                               : "#FFFFFF",
                         }}
                       >
+
+                        <td style={styles.td}>
+                          <input type="checkbox" />
+                        </td>
 
                         <td style={styles.td}></td>
                         <td style={styles.td}></td>

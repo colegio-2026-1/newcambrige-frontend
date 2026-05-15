@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import logoUni from "../../assets/UP.png";
@@ -8,11 +8,31 @@ export default function PupitrePage() {
 
   const navigate = useNavigate();
 
+  // ================= LOGOS CON TRANSICIÓN =================
+
+  const logos = [logoNCS, logoUni];
+  const [logoIndex, setLogoIndex] = useState(0);
+
+  useEffect(() => {
+
+    const interval = setInterval(() => {
+
+      setLogoIndex((prev) => (prev + 1) % logos.length);
+
+    }, 3000);
+
+    return () => clearInterval(interval);
+
+  }, []);
+
+  // ================= MODAL =================
+
   const [showModal, setShowModal] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isPressing, setIsPressing] = useState(false);
 
   const alumnos = [
+
     {
       id: 1,
       codigo: "1234",
@@ -44,6 +64,7 @@ export default function PupitrePage() {
     },
 
     ...Array(10).fill({}),
+
   ];
 
   const getStatusStyle = (status) => {
@@ -76,6 +97,7 @@ export default function PupitrePage() {
     }
 
     return {};
+
   };
 
   return (
@@ -88,17 +110,19 @@ export default function PupitrePage() {
 
         <div style={styles.logoContainer}>
 
-          <img
-            src={logoNCS}
-            alt="Colegio"
-            style={styles.logo}
-          />
+          {logos.map((logo, i) => (
 
-          <img
-            src={logoUni}
-            alt="Unipamplona"
-            style={styles.logoUni}
-          />
+            <img
+              key={i}
+              src={logo}
+              alt="logo"
+              style={{
+                ...styles.logoFade,
+                opacity: logoIndex === i ? 1 : 0,
+              }}
+            />
+
+          ))}
 
         </div>
 
@@ -430,6 +454,7 @@ export default function PupitrePage() {
     </div>
 
   );
+
 }
 
 const styles = {
@@ -451,23 +476,27 @@ const styles = {
     justifyContent: "space-between",
     padding: "0 24px",
     boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+    position: "relative",
   },
 
+  // 🔥 NUEVO CONTENEDOR PARA FADE
   logoContainer: {
+    width: "170px",
+    height: "65px",
+    position: "relative",
     display: "flex",
     alignItems: "center",
-    gap: "10px",
-    width: "170px",
+    justifyContent: "center",
+    zIndex: 1,
   },
 
-  logo: {
-    height: "65px",
+  // 🔥 NUEVO ESTILO CON TRANSICIÓN
+  logoFade: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
     objectFit: "contain",
-  },
-
-  logoUni: {
-    height: "65px",
-    objectFit: "contain",
+    transition: "opacity 0.6s ease-in-out",
   },
 
   title: {

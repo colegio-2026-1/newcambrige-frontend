@@ -4,6 +4,7 @@ import Dashboard from "../modules/dashboard/DashboardPage";
 import SalonPage from '../modules/salon/SalonPage';
 import PupitrePage from "../modules/salon/PupitrePage";
 import BibliotecaPage from "../modules/salon/BibliotecaPage";
+import PruebasPage from "../modules/salon/PruebasPage";
 
 // Protege rutas privadas
 const PrivateRoute = ({ children }) => {
@@ -19,6 +20,7 @@ const AppRouter = () => {
         <Route path="/salon" element={<SalonPage />} />
         <Route path="/pupitres" element={<PupitrePage />} />
         <Route path="/biblioteca" element={<BibliotecaPage />} />
+        <Route path="/pruebas" element={<PruebasPage />} />
 
       {/* Privadas */}
         <Route path="/dashboard" element={
