@@ -1,0 +1,47 @@
+/* ============================================
+   ModuleLayout.css
+   Ubicación: src/components/layout/ModuleLayout.css
+   ============================================ */
+
+.module-layout {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+
+  width: 100%;
+  min-height: calc(100vh - var(--header-height));
+
+  background: var(--color-bg);
+}
+
+/* ── SIDEBAR ── */
+
+.module-sidebar {
+  flex-shrink: 0;
+}
+
+/* ── CONTENIDO CENTRAL ── */
+
+.module-content {
+  flex: 1;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  border-left:  var(--border-width) solid var(--color-border-light);
+  border-right: var(--border-width) solid var(--color-border-light);
+}
+
+/* ── BOTONES DERECHA ── */
+
+.module-actions {
+  flex-shrink: 0;
+  width: 160px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+
+  padding-bottom: var(--space-6);
+}

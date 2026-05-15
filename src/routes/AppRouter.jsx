@@ -8,6 +8,7 @@ import LoginPage from "../modules/auth/LoginPage";
 
 import Dashboard from "../modules/dashboard/DashboardPage";
 
+import TestPage from "../modules/test/TestPage";
 // ==============================
 // RUTA PRIVADA
 // ==============================
@@ -96,7 +97,10 @@ const AppRouter = () => {
         }
       />
       */}
-
+      <Route
+        path="/test"
+        element={<TestPage />}
+      />
       {/* ===================== */}
       {/* CATCH ALL */}
       {/* ===================== */}

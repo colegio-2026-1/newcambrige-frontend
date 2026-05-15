@@ -1,0 +1,75 @@
+/* ============================================
+   ActionButtons.css
+   Ubicación: src/components/shared/ActionButtons.css
+   ============================================ */
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+
+  padding: var(--space-4) var(--space-3);
+}
+
+/* ── BOTÓN BASE ── */
+
+.action-btn {
+  height: 40px;
+  padding: 0 var(--space-5);
+
+  border: none;
+  border-radius: var(--radius-full);
+
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  letter-spacing: var(--letter-wide);
+
+  cursor: pointer;
+  white-space: nowrap;
+
+  transition: background  var(--transition-fast),
+              transform   var(--transition-fast),
+              opacity     var(--transition-fast);
+}
+
+.action-btn:active:not(.action-btn--disabled) {
+  transform: scale(0.97);
+}
+
+/* ── VARIANTES ── */
+
+.action-btn--primary {
+  background: var(--color-secondary);
+  color: var(--color-text-white);
+}
+
+.action-btn--primary:hover:not(.action-btn--disabled) {
+  background: var(--color-secondary-dark);
+}
+
+.action-btn--secondary {
+  background: #6B7280;
+  color: var(--color-text-white);
+}
+
+.action-btn--secondary:hover:not(.action-btn--disabled) {
+  background: #4B5563;
+}
+
+.action-btn--danger {
+  background: #1a1a1a;
+  color: var(--color-text-white);
+}
+
+.action-btn--danger:hover:not(.action-btn--disabled) {
+  background: #000000;
+}
+
+/* ── DESACTIVADO ── */
+
+.action-btn--disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
