@@ -21,31 +21,47 @@ import Modal         from "../../components/shared/Modal";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  //para las tarjetas del dashboard
   const categories = [
-    { title: 'Matrícula', icon: <img src={MatriculaLogo} alt="Matrícula" className="w-16 h-16" />, path: "/tesoreria/matricula" },
-    { title: 'Pensión', icon: <img src={PensionLogo} alt="Pensión" className="w-16 h-16" />, path: "/tesoreria/pension" },
-    { title: 'Papelería', icon: <img src={PapeleriaLogo} alt="Papelería" className="w-16 h-16" />, path: "/tesoreria/papeleria" },
+    { title: 'Matrícula', icon: MatriculaLogo, path: "/tesoreria/matricula", roles: ["secretaria", "administrador", "admin", "tesoreria"] },
+    { title: 'Pensión', icon: PensionLogo, path: "/tesoreria/pension", roles: ["secretaria", "administrador", "admin", "tesoreria"] },
+    { title: 'Papelería', icon: PapeleriaLogo, path: "/tesoreria/papeleria", roles: ["secretaria", "administrador", "admin", "tesoreria"] },
   ];
+  //para el sidebar
+  const modulos = [
+    { label: "Notificaciones",    path: "/tesoreria/notificaciones", roles: ["secretaria", "administrador", "admin", "tesoreria"] },
+  ];
+
   const { user, logout } = useAuth();
   const userName = user?.nombre || "Usuario";
   const idUser = user?.id_usuario;
-  const [rolNombre, setRolNombre] = useState("Cargando...");
-  const rol = rolNombre[0]|| "Rol Desconocido";
+  const [roles, setRoles] = useState([]); 
+  const [cargandoRol, setCargandoRol] = useState(true);
+  const rol = roles[0]|| "Rol Desconocido";
+  console.log("Roles cargados: ", roles);
+  console.log("Rol username: ", userName);
+  
   useEffect(() => {
-    const obtenerRoles = async () => {
-      if (idUser) {
-        try {
-          const response = await allrolesuserRequest(idUser);
-          const nombres = response?.data;
-          setRolNombre(nombres);
-        } catch (error) {
-          console.error("Error al obtener el rol:", error);
-          setRolNombre("Error al cargar");
-        }
-      }
-    };
-    obtenerRoles();
-  }, [idUser]);
+  const obtenerRoles = async () => {
+    if (!idUser) return;
+    
+    try {
+      setCargandoRol(true);
+      const response = await allrolesuserRequest(idUser);
+      console.log("Respuesta de roles: ", response);
+      setRoles(response?.data || []); 
+    } catch (error) {
+      console.error("Error al obtener el rol:", error);
+      setRoles([]);
+    } finally {
+      setCargandoRol(false);
+    }
+  };
+  
+  obtenerRoles();
+}, [idUser]);
+
+ 
 
   return (
  <div>
@@ -54,36 +70,56 @@ const Dashboard = () => {
 
    <ModuleLayout
     sidebar={<Sidebar 
-            modulos={[
-              { label: "Notificaciones",    path: "/tesoreria/notificaciones" },
-            ]}
-            userIcon={user.icon || UserIcon}
+            modulos={modulos.filter(item => item && Array.isArray(item.roles) && roles.some(rol => item.roles.includes(rol)))}
+            userIcon={user?.icon || UserIcon}
             usuario={{ nombre: userName, rol: rol }}
             onLogout={logout}
     />}
-      children={<main className="flex-1 overflow-y-auto bg-gray-50">
-
-        {/* Contenido de Tarjetas */}
-        <section className="h-full w-full flex justify-center items-center gap-20 py-24 relative">
-          {categories.map((item, index) => (
-            <div key={index} className="relative group scale-110" onClick={ () => navigate(item.path)}>
-              {/* Sombra proyectada vinotinto (Efecto exacto) */}
-              <div className="absolute top-4 left-4 w-56 h-72 bg-vinotinto rounded-2xl shadow-lg transition-transform group-hover:translate-x-1 group-hover:translate-y-1"></div>
-              
-              {/* Tarjeta Blanca */}
-              <div className="relative bg-white border border-gray-100 rounded-2xl w-56 h-72 flex flex-col items-center justify-center p-8 shadow-2xl transition-all duration-300 group-hover:-translate-x-1 group-hover:-translate-y-1">
-                <h3 className="text-dorado text-3xl font-serif font-medium mb-10 tracking-wide text-center">
-                  {item.title}
-                </h3>
-                <div className="text-dorado transform transition-transform group-hover:scale-110">
-                  {item.icon}
-                </div>
-              </div>
+      children={
+        cargandoRol ? (
+  <div className="text-vinotinto font-serif text-xl italic animate-pulse">
+    Verificando credenciales institucionales...
+  </div>
+) : (
+  <section className="h-full w-full flex justify-center items-center gap-20 py-24 relative">
+    {categories
+      .filter(item => item && Array.isArray(item.roles) && roles.some(rol => item.roles.includes(rol)))
+      
+      .map((item, index) => (
+        <div key={index} className="relative group scale-110" onClick={() => navigate(item?.path)}>
+          {/* Sombra proyectada vinotinto */}
+          <div className="absolute top-4 left-4 w-56 h-72 bg-vinotinto rounded-2xl shadow-lg transition-transform group-hover:translate-x-1 group-hover:translate-y-1"></div>
+          
+          {/* Tarjeta Blanca */}
+          <div className="relative bg-white border border-gray-100 rounded-2xl w-56 h-72 flex flex-col items-center justify-center p-8 shadow-2xl transition-all duration-300 group-hover:-translate-x-1 group-hover:-translate-y-1">
+            <h3 className="text-dorado text-3xl font-serif font-medium mb-10 tracking-wide text-center">
+              {item?.title}
+            </h3>
+            <div className="text-dorado transform transition-transform group-hover:scale-110">
+              {item.icon ? (
+              <img 
+                src={item.icon} 
+                alt={item.title} 
+                className="w-16 h-16 object-contain" 
+              />
+            ) : (
+              <div className="w-16 h-16 bg-gray-100 rounded-full" />
+            )}
             </div>
-          ))}
-        </section>
-      </main>}  
-      />
+          </div>
+        </div>
+      ))}
+      
+      {/* Si terminó de cargar pero el usuario no tiene roles permitidos para ninguna tarjeta */}
+      {categories.filter(item => item && Array.isArray(item.roles) && roles.some(rol => item.roles.includes(rol))).length === 0 && (
+        <div className="text-gray-400 italic text-center">
+          Tu usuario no tiene módulos asignados.
+        </div>
+      )}
+  </section>
+)}
+        
+/>
       
     </div>
    

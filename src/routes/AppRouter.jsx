@@ -5,7 +5,7 @@ import {
 } from "react-router-dom";
 
 import LoginPage from "../modules/auth/LoginPage";
-import TesoreriaPage from "../modules/tesoreria/TesoreriaMainPage";
+
 import TesoreriaMatricula from "../modules/tesoreria/TesoreriaMatricula";
 import Dashboard from "../modules/dashboard/DashboardPage";
 import TesoreriaNotificaciones from "../modules/tesoreria/TesoreriaNotificaciones";
@@ -102,16 +102,7 @@ const AppRouter = () => {
         }
       />
       */}
-      {
-        <Route
-          path="/tesoreria/"
-          element={
-            <PrivateRoute>
-              <TesoreriaPage />
-            </PrivateRoute>
-          }
-        />
-      }
+      
   {      <Route
           path="/tesoreria/matricula"
           element={

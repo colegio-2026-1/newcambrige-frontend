@@ -10,7 +10,7 @@ import { useState, useEffect } from 'react';
 
 const Sidebar = () => {
   const menuOptions = {
-  home: { label: 'Inicio', path: '/tesoreria', icon: Home  },
+  home: { label: 'Inicio', path: '/dashboard', icon: Home  },
   estadisticas: { label: 'Estadísticas', path: '/tesoreria/estadisticas', icon: ''},
   notificaciones: { label: 'Notificaciones', path: '/tesoreria/notificaciones', icon: '' }
   };
