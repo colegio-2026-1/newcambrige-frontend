@@ -13,6 +13,7 @@ import TesoreriaEstadistica from "../modules/tesoreria/TesoreriaEstadistica";
 import TesoreriaPension from "../modules/tesoreria/TesoreriaPension";
 import TesoreriaPapeleria from "../modules/tesoreria/TesoreriaPapeleria";
 
+import TestPage from "../modules/test/TestPage";
 // ==============================
 // RUTA PRIVADA
 // ==============================
@@ -152,6 +153,12 @@ const AppRouter = () => {
           <TesoreriaPapeleria />
           </PrivateRoute>} />
       }
+      
+      <Route
+        path="/test"
+        element={<TestPage />}
+      />
+
       {/* ===================== */}
       {/* CATCH ALL */}
       {/* ===================== */}
