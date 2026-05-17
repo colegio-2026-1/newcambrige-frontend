@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-
+import { getPruebasRequest } from "../../api/endpoints";
 
 import Header from "../../components/layout/Header";
 import ModuleLayout from "../../components/layout/ModuleLayout";
@@ -23,14 +23,13 @@ export default function PruebasPage() {
 
   // COLUMNAS
   const columns = [
-    { key: "codigo", label: "CÓDIGO" },
-    { key: "nombre", label: "NOMBRE COMPLETO" },
-    { key: "grado", label: "GRADO" },
-    { key: "grupo", label: "GRUPO" },
-    { key: "tipo_prueba", label: "TIPO DE PRUEBA" },
-    { key: "pago", label: "PAGO" },
-    { key: "fecha_pago", label: "FECHA DE PAGO" },
-  ];
+  { key: "codigo", label: "CÓDIGO" },
+  { key: "nombre", label: "NOMBRE COMPLETO" },
+  { key: "grado", label: "GRADO" },
+  { key: "grupo", label: "GRUPO" },
+  { key: "tipo_prueba", label: "TIPO DE PRUEBA" },
+  { key: "estado", label: "ESTADO" },  // ← cambiar "pago" por "estado"
+];
 
   // ✅ TRAER DATOS DEL API
   useEffect(() => {
@@ -38,7 +37,9 @@ export default function PruebasPage() {
       try {
         setLoading(true);
         const response = await getPruebasRequest();
-        setRows(response.data);
+        console.log("Respuesta API:", response.data);
+        const data = response.data;
+        setRows(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Error:", error);
         setError(error.message);
@@ -51,7 +52,7 @@ export default function PruebasPage() {
             grado: "10",
             grupo: "A",
             tipo_prueba: "Sexto",
-            pago: "Completó",
+            estado: "Completó",
             fecha_pago: "01 - 06 - 2026",
           },
           {
@@ -61,7 +62,7 @@ export default function PruebasPage() {
             grado: "9",
             grupo: "B",
             tipo_prueba: "Quinto",
-            pago: "Pendiente",
+            estado: "Pendiente",
             fecha_pago: "",
           },
           {
@@ -71,7 +72,7 @@ export default function PruebasPage() {
             grado: "11",
             grupo: "A",
             tipo_prueba: "Undécimo",
-            pago: "Completó",
+            estado: "Completó",
             fecha_pago: "15 - 05 - 2026",
           },
         ]);
@@ -101,7 +102,7 @@ export default function PruebasPage() {
     }
 
     // Validar si ya completó el pago - si completó, no puede hacer la prueba
-    if (fila.pago === "Completó") {
+    if (fila.estado === "Completado") {
       alert(
         `EL ESTUDIANTE [${fila.nombre}], NO ESTÁ\nHABILITADO PARA EL TIPO DE\nPRUEBA [${fila.tipo_prueba}].`
       );

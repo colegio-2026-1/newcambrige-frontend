@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-
+import { getLibrosRequest, getPrestamosRequest } from "../../api/endpoints";
 
 
 import Header from "../../components/layout/Header";
@@ -34,8 +34,10 @@ export default function BibliotecaPage() {
         setLoading(true);
         const responseLibros = await getLibrosRequest();
         const responsePrestamos = await getPrestamosRequest();
-        setLibros(responseLibros.data);
-        setPrestamos(responsePrestamos.data);
+        const dataLibros = responseLibros.data;
+        const dataPrestamos = responsePrestamos.data;
+        setLibros(Array.isArray(dataLibros) ? dataLibros : []);
+        setPrestamos(Array.isArray(dataPrestamos) ? dataPrestamos : []);
       } catch (error) {
         console.error("Error:", error);
         setError(error.message);

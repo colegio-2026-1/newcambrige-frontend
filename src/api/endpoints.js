@@ -1,41 +1,37 @@
-import axios from "axios";
-
-const API = "http://localhost:8000"; // backend
+import axiosClient from "./axiosClient";
 
 // ======================
 // 📚 BIBLIOTECA
 // ======================
 export const getLibrosRequest = () =>
-  axios.get(`${API}/libros`);
+  axiosClient.get(`/api/salones/libros`);
 
 export const createLibroRequest = (data) =>
-  axios.post(`${API}/libros`, data);
+  axiosClient.post(`/api/salones/libros`, data);
 
 export const updateLibroRequest = (id, data) =>
-  axios.put(`${API}/libros/${id}`, data);
+  axiosClient.put(`/api/salones/libros/${id}`, data);
 
 export const deleteLibroRequest = (id) =>
-  axios.delete(`${API}/libros/${id}`);
+  axiosClient.delete(`/api/salones/libros/${id}`);
 
 export const getPrestamosRequest = () =>
-  axios.get(`${API}/prestamos`);
-
+  axiosClient.get(`/api/salones/prestamos`);
 
 // ======================
 // 🪑 PUPITRES
 // ======================
 export const getPupitresRequest = () =>
-  axios.get(`${API}/pupitres`);
+  axiosClient.get(`/api/salones/pupitres`);
 
 export const updatePupitreRequest = (id, data) =>
-  axios.put(`${API}/pupitres/${id}`, data);
-
+  axiosClient.put(`/api/salones/pupitres/${id}`, data);
 
 // ======================
 // 🧪 PRUEBAS
 // ======================
 export const getPruebasRequest = () =>
-  axios.get(`${API}/pruebas`);
+  axiosClient.get(`/api/salones/pruebas`);
 
 export const createPruebaRequest = (data) =>
-  axios.post(`${API}/pruebas`, data);
+  axiosClient.post(`/api/salones/pruebas`, data);

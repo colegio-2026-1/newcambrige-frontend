@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getPupitresRequest } from "../../api/endpoints";
 
 
 import Header from "../../components/layout/Header";
@@ -26,7 +27,7 @@ export default function PupitrePage() {
     { key: "nombre", label: "NOMBRE COMPLETO" },
     { key: "grado", label: "GRADO" },
     { key: "grupo", label: "GRUPO" },
-    { key: "pago", label: "PAGO" },
+    { key: "estado", label: "ESTADO" },
     { key: "fecha_pago", label: "FECHA DE PAGO" },
   ];
 
@@ -36,7 +37,9 @@ export default function PupitrePage() {
       try {
         setLoading(true);
         const response = await getPupitresRequest();
-        setRows(response.data);
+        console.log("Respuesta API pupitres:", response.data);
+        const data = response.data;
+        setRows(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Error:", error);
         setError(error.message);
@@ -48,7 +51,7 @@ export default function PupitrePage() {
             nombre: "Nombre Gomez Somel",
             grado: "10",
             grupo: "A",
-            pago: "Pendiente",
+            estado: "Pendiente",
             fecha_pago: "",
           },
           {
@@ -57,7 +60,7 @@ export default function PupitrePage() {
             nombre: "Juan Pérez",
             grado: "9",
             grupo: "B",
-            pago: "Pendiente",
+            estado: "Pendiente",
             fecha_pago: "",
           },
           {
@@ -66,7 +69,7 @@ export default function PupitrePage() {
             nombre: "Laura Gómez",
             grado: "11",
             grupo: "A",
-            pago: "Pagado",
+            estado: "Pagado",
             fecha_pago: "12/05/2026",
           },
         ]);
