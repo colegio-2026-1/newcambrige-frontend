@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { getPupitresRequest } from "../../api/endpoints";
 
 import Header from "../../components/layout/Header";
 import ModuleLayout from "../../components/layout/ModuleLayout";

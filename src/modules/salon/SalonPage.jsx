@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { getSalonesRequest } from "../../api/endpoints";
+import { useState } from "react";
 
 import Header from "../../components/layout/Header";
 import Sidebar from "../../components/layout/Sidebar";
@@ -10,7 +9,7 @@ import BibliotecaIcon from "../../assets/Salón/biblioteca.svg";
 import PruebasIcon from "../../assets/Salón/pruebas.svg";
 
 import userIcon from "../../assets/Login/usuario_login.svg";
-import LogOutIcon from "../../assets/logout/cerrar_sesion.svg";
+// import LogOutIcon from "../../assets/logout/cerrar_sesion.svg";
 
 export default function SalonPage() {
   const navigate = useNavigate();
@@ -20,30 +19,7 @@ export default function SalonPage() {
     rol: "Titular",
   });
 
-  const [salones, setSalones] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // ✅ TRAER DATOS DEL API
-  useEffect(() => {
-    const obtenerSalones = async () => {
-      try {
-        setLoading(true);
-        const response = await getSalonesRequest();
-        setSalones(response.data);
-        console.log("Salones obtenidos:", response.data);
-      } catch (error) {
-        console.error("Error al obtener salones:", error);
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    obtenerSalones();
-  }, []);
-
-  // MÓDULOS (Esto no cambió, son los módulos de acceso rápido)
+  // MÓDULOS
   const modulos = [
     {
       id: "pupitres",
@@ -74,11 +50,8 @@ export default function SalonPage() {
 
   const handleLogout = () => {
     console.log("Cerrando sesión...");
-    // navigate("/login");
+    navigate("/login");
   };
-
-  if (loading) return <div>Cargando salones...</div>;
-  if (error) return <div>Error: {error}</div>;
 
   return (
     <div
@@ -104,7 +77,7 @@ export default function SalonPage() {
         {/* SIDEBAR */}
         <Sidebar
           moduloActual=""
-          modulos={[]}
+          modulos={modulos}
           usuario={usuario}
           userIcon={userIcon}
           onLogout={handleLogout}
@@ -161,7 +134,7 @@ export default function SalonPage() {
                   e.currentTarget.style.background = "var(--color-white)";
                 }}
               >
-                {/* NOMBRE */}
+                {/* TITULO */}
                 <h2
                   style={{
                     fontFamily: "var(--font-display)",
@@ -188,29 +161,6 @@ export default function SalonPage() {
                 />
               </div>
             ))}
-          </div>
-
-          {/* INFORMACIÓN DE SALONES (opcional - para mostrar los datos) */}
-          <div
-            style={{
-              position: "absolute",
-              bottom: "2rem",
-              right: "2rem",
-              padding: "1rem",
-              background: "#F5F5F5",
-              borderRadius: "0.8rem",
-              maxWidth: "300px",
-              fontSize: "0.9rem",
-              color: "#666",
-            }}
-          >
-            <h4>Salones disponibles: {salones.length}</h4>
-            {salones.slice(0, 3).map((salon) => (
-              <p key={salon.id_salon}>
-                Grado: {salon.grado} - Grupo: {salon.grupo}
-              </p>
-            ))}
-            {salones.length > 3 && <p>... y más</p>}
           </div>
         </div>
       </div>

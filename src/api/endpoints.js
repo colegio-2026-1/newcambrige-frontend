@@ -17,33 +17,33 @@ const API_ENDPOINTS = {
     DELETE: (id) => `/api/salones/${id}`,
   },
 
-  // ======== PRUEBA ========
+  // ======== PRUEBA (Usa el mismo endpoint que SALON por ahora) ========
   PRUEBA: {
-    LIST: "/api/salones/pruebas",
-    GET: (id) => `/api/salones/pruebas/${id}`,
-    CREATE: "/api/salones/pruebas",
-    UPDATE: (id) => `/api/salones/pruebas/${id}`,
-    DELETE: (id) => `/api/salones/pruebas/${id}`,
+    LIST: "/api/salones",  // ← Temporal: usa salones
+    GET: (id) => `/api/salones/${id}`,
+    CREATE: "/api/salones",
+    UPDATE: (id) => `/api/salones/${id}`,
+    DELETE: (id) => `/api/salones/${id}`,
   },
 
-  // ======== PUPITRE ========
+  // ======== PUPITRE (Usa el mismo endpoint que SALON por ahora) ========
   PUPITRE: {
-    LIST: "/api/salones/pupitres",
-    GET: (id) => `/api/salones/pupitres/${id}`,
-    CREATE: "/api/salones/pupitres",
-    UPDATE: (id) => `/api/salones/pupitres/${id}`,
-    DELETE: (id) => `/api/salones/pupitres/${id}`,
+    LIST: "/api/salones",  // ← Temporal: usa salones
+    GET: (id) => `/api/salones/${id}`,
+    CREATE: "/api/salones",
+    UPDATE: (id) => `/api/salones/${id}`,
+    DELETE: (id) => `/api/salones/${id}`,
   },
 
-  // ======== BIBLIOTECA (Inventario Libro) ========
+  // ======== BIBLIOTECA (Usa el mismo endpoint que SALON por ahora) ========
   BIBLIOTECA: {
-    LIST: "/api/salones/libros",
-    GET: (id) => `/api/salones/libros/${id}`,
-    CREATE: "/api/salones/libros",
-    UPDATE: (id) => `/api/salones/libros/${id}`,
-    DELETE: (id) => `/api/salones/libros/${id}`,
-    PRESTAMOS: "/api/salones/prestamos",
-    CREAR_PRESTAMO: "/api/salones/prestamos",
+    LIST: "/api/salones",  // ← Temporal: usa salones
+    GET: (id) => `/api/salones/${id}`,
+    CREATE: "/api/salones",
+    UPDATE: (id) => `/api/salones/${id}`,
+    DELETE: (id) => `/api/salones/${id}`,
+    PRESTAMOS: "/api/salones",  // ← Temporal: usa salones
+    CREAR_PRESTAMO: "/api/salones",  // ← Temporal: usa salones
   },
 };
 

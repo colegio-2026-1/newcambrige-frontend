@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getPruebasRequest } from "../../api/endpoints";
+
 
 import Header from "../../components/layout/Header";
 import ModuleLayout from "../../components/layout/ModuleLayout";
