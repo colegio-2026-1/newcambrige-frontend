@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getPruebasRequest } from "../../api/endpoints";
 
 import Header from "../../components/layout/Header";
 import ModuleLayout from "../../components/layout/ModuleLayout";
@@ -15,8 +16,10 @@ export default function PruebasPage() {
 
   const [fila, setFila] = useState(null);
   const [modal, setModal] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [formValues, setFormValues] = useState({});
+  const [rows, setRows] = useState([]);
+  const [error, setError] = useState(null);
 
   // COLUMNAS
   const columns = [
@@ -29,39 +32,56 @@ export default function PruebasPage() {
     { key: "fecha_pago", label: "FECHA DE PAGO" },
   ];
 
-  // FILAS
-  const rows = [
-    {
-      id: 1,
-      codigo: "5311",
-      nombre: "Nombre Gomez Somel",
-      grado: "10",
-      grupo: "A",
-      tipo_prueba: "Sexto",
-      pago: "Completó",
-      fecha_pago: "01 - 06 - 2026",
-    },
-    {
-      id: 2,
-      codigo: "5312",
-      nombre: "Juan Pérez",
-      grado: "9",
-      grupo: "B",
-      tipo_prueba: "Quinto",
-      pago: "Pendiente",
-      fecha_pago: "",
-    },
-    {
-      id: 3,
-      codigo: "5313",
-      nombre: "Laura Gómez",
-      grado: "11",
-      grupo: "A",
-      tipo_prueba: "Undécimo",
-      pago: "Completó",
-      fecha_pago: "15 - 05 - 2026",
-    },
-  ];
+  // ✅ TRAER DATOS DEL API
+  useEffect(() => {
+    const obtenerPruebas = async () => {
+      try {
+        setLoading(true);
+        const response = await getPruebasRequest();
+        setRows(response.data);
+      } catch (error) {
+        console.error("Error:", error);
+        setError(error.message);
+        // Si hay error, mantén los datos de ejemplo
+        setRows([
+          {
+            id: 1,
+            codigo: "5311",
+            nombre: "Nombre Gomez Somel",
+            grado: "10",
+            grupo: "A",
+            tipo_prueba: "Sexto",
+            pago: "Completó",
+            fecha_pago: "01 - 06 - 2026",
+          },
+          {
+            id: 2,
+            codigo: "5312",
+            nombre: "Juan Pérez",
+            grado: "9",
+            grupo: "B",
+            tipo_prueba: "Quinto",
+            pago: "Pendiente",
+            fecha_pago: "",
+          },
+          {
+            id: 3,
+            codigo: "5313",
+            nombre: "Laura Gómez",
+            grado: "11",
+            grupo: "A",
+            tipo_prueba: "Undécimo",
+            pago: "Completó",
+            fecha_pago: "15 - 05 - 2026",
+          },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    obtenerPruebas();
+  }, []);
 
   const handleSearch = (filtros) => {
     console.log(filtros);
@@ -97,6 +117,8 @@ export default function PruebasPage() {
     console.log("Pago validado para:", fila);
     setModal(false);
   };
+
+  if (loading) return <div>Cargando pruebas...</div>;
 
   return (
     <div>

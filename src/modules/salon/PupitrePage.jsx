@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getPupitresRequest } from "../../api/endpoints";
 
 import Header from "../../components/layout/Header";
 import ModuleLayout from "../../components/layout/ModuleLayout";
@@ -11,11 +12,13 @@ import Modal from "../../components/shared/Modal";
 
 import userIcon from "../../assets/Login/usuario_login.svg";
 
-export default function PupitresPage() {
+export default function PupitrePage() {
 
   const [fila, setFila] = useState(null);
   const [modal, setModal] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [rows, setRows] = useState([]);
+  const [error, setError] = useState(null);
 
   // COLUMNAS
   const columns = [
@@ -27,36 +30,53 @@ export default function PupitresPage() {
     { key: "fecha_pago", label: "FECHA DE PAGO" },
   ];
 
-  // FILAS
-  const rows = [
-    {
-      id: 1,
-      codigo: "5311",
-      nombre: "Nombre Gomez Somel",
-      grado: "10",
-      grupo: "A",
-      pago: "Pendiente",
-      fecha_pago: "",
-    },
-    {
-      id: 2,
-      codigo: "5312",
-      nombre: "Juan Pérez",
-      grado: "9",
-      grupo: "B",
-      pago: "Pendiente",
-      fecha_pago: "",
-    },
-    {
-      id: 3,
-      codigo: "5313",
-      nombre: "Laura Gómez",
-      grado: "11",
-      grupo: "A",
-      pago: "Pagado",
-      fecha_pago: "12/05/2026",
-    },
-  ];
+  // ✅ TRAER DATOS DEL API
+  useEffect(() => {
+    const obtenerPupitres = async () => {
+      try {
+        setLoading(true);
+        const response = await getPupitresRequest();
+        setRows(response.data);
+      } catch (error) {
+        console.error("Error:", error);
+        setError(error.message);
+        // Si hay error, mantén los datos de ejemplo
+        setRows([
+          {
+            id: 1,
+            codigo: "5311",
+            nombre: "Nombre Gomez Somel",
+            grado: "10",
+            grupo: "A",
+            pago: "Pendiente",
+            fecha_pago: "",
+          },
+          {
+            id: 2,
+            codigo: "5312",
+            nombre: "Juan Pérez",
+            grado: "9",
+            grupo: "B",
+            pago: "Pendiente",
+            fecha_pago: "",
+          },
+          {
+            id: 3,
+            codigo: "5313",
+            nombre: "Laura Gómez",
+            grado: "11",
+            grupo: "A",
+            pago: "Pagado",
+            fecha_pago: "12/05/2026",
+          },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    obtenerPupitres();
+  }, []);
 
   const handleSearch = (filtros) => {
     console.log(filtros);
@@ -79,6 +99,8 @@ export default function PupitresPage() {
     console.log("Modal abierto, fila actual:", fila);
     setModal(true);
   };
+
+  if (loading) return <div>Cargando pupitres...</div>;
 
   return (
     <div>

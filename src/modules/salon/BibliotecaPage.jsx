@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getLibrosRequest, getPrestamosRequest } from "../../api/endpoints";
 
 import Header from "../../components/layout/Header";
 import ModuleLayout from "../../components/layout/ModuleLayout";
@@ -16,20 +17,46 @@ export default function BibliotecaPage() {
   const [pestanaActiva, setPestanaActiva] = useState("inicio");
   const [filaSeleccionada, setFilaSeleccionada] = useState(null);
   const [modal, setModal] = useState(false);
-  const [modalTipo, setModalTipo] = useState("agregar"); // agregar, editar
+  const [modalTipo, setModalTipo] = useState("agregar");
   const [formValues, setFormValues] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [modalAsignar, setModalAsignar] = useState(false);
   const [modalDevolver, setModalDevolver] = useState(false);
+  const [libros, setLibros] = useState([]);
+  const [prestamos, setPrestamos] = useState([]);
+  const [error, setError] = useState(null);
 
-  // DATOS PARA TABLA INVENTARIO DE LIBROS
-  const libros = [
-    { id: 1, nombre: "Matemáticas 6", autor: "Santillana", edicion: "3era", disponible: "Disponible", estado_fisico: "Bueno" },
-    { id: 2, nombre: "Lenguaje 7", autor: "Norma", edicion: "2da", disponible: "No disponible", estado_fisico: "Dañado" },
-    { id: 3, nombre: "Ciencias 8", autor: "SM", edicion: "1era", disponible: "Disponible", estado_fisico: "Bueno" },
-    { id: 4, nombre: "Historia 9", autor: "Santillana", edicion: "2da", disponible: "Disponible", estado_fisico: "Regular" },
-    { id: 5, nombre: "Inglés 10", autor: "Oxford", edicion: "4ta", disponible: "No disponible", estado_fisico: "Muy dañado" },
-  ];
+  // ✅ TRAER DATOS DEL API
+  useEffect(() => {
+    const cargarDatos = async () => {
+      try {
+        setLoading(true);
+        const responseLibros = await getLibrosRequest();
+        const responsePrestamos = await getPrestamosRequest();
+        setLibros(responseLibros.data);
+        setPrestamos(responsePrestamos.data);
+      } catch (error) {
+        console.error("Error:", error);
+        setError(error.message);
+        // Si hay error, mantén los datos de ejemplo
+        setLibros([
+          { id: 1, nombre: "Matemáticas 6", autor: "Santillana", edicion: "3era", disponible: "Disponible", estado_fisico: "Bueno" },
+          { id: 2, nombre: "Lenguaje 7", autor: "Norma", edicion: "2da", disponible: "No disponible", estado_fisico: "Dañado" },
+          { id: 3, nombre: "Ciencias 8", autor: "SM", edicion: "1era", disponible: "Disponible", estado_fisico: "Bueno" },
+          { id: 4, nombre: "Historia 9", autor: "Santillana", edicion: "2da", disponible: "Disponible", estado_fisico: "Regular" },
+          { id: 5, nombre: "Inglés 10", autor: "Oxford", edicion: "4ta", disponible: "No disponible", estado_fisico: "Muy dañado" },
+        ]);
+        setPrestamos([
+          { id: 1, codigo: "5301", nombre: "Juan Pérez López", grado: "6", grupo: "A", titulo_libro: "Matemáticas 6", fecha_entrega: "15/05/2026", estado: "Entregado" },
+          { id: 2, codigo: "5302", nombre: "María García Rodríguez", grado: "7", grupo: "B", titulo_libro: "Lenguaje 7", fecha_entrega: "14/05/2026", estado: "Entregado" },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    cargarDatos();
+  }, []);
 
   // DATOS PARA TABLA INICIO (INFORMACIÓN DE ESTUDIANTES Y LIBROS)
   const estadisticas = [
@@ -218,6 +245,8 @@ export default function BibliotecaPage() {
     console.log("Libro devuelto:", formValues);
     cerrarModalDevolver();
   };
+
+  if (loading) return <div>Cargando biblioteca...</div>;
 
   return (
     <div>
