@@ -38,8 +38,7 @@ const Dashboard = () => {
   const [roles, setRoles] = useState([]); 
   const [cargandoRol, setCargandoRol] = useState(true);
   const rol = roles[0]|| "Rol Desconocido";
-  console.log("Roles cargados: ", roles);
-  console.log("Rol username: ", userName);
+
   
   useEffect(() => {
   const obtenerRoles = async () => {
@@ -48,7 +47,7 @@ const Dashboard = () => {
     try {
       setCargandoRol(true);
       const response = await allrolesuserRequest(idUser);
-      console.log("Respuesta de roles: ", response);
+      
       setRoles(response?.data || []); 
     } catch (error) {
       console.error("Error al obtener el rol:", error);
