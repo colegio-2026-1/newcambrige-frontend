@@ -1,771 +1,269 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
-import logoUni from "../../assets/UP.png";
-import logoNCS from "../../assets/NCS.png";
+import Header from "../../components/layout/Header";
+import ModuleLayout from "../../components/layout/ModuleLayout";
+import Sidebar from "../../components/layout/Sidebar";
 
-export default function PupitrePage() {
+import SearchBar from "../../components/shared/SearchBar";
+import DataTable from "../../components/shared/DataTable";
+import ActionButtons from "../../components/shared/ActionButtons";
+import Modal from "../../components/shared/Modal";
 
-  const navigate = useNavigate();
+import userIcon from "../../assets/Login/usuario_login.svg";
 
-  // ================= LOGOS CON TRANSICIÓN =================
+export default function PupitresPage() {
 
-  const logos = [logoNCS, logoUni];
-  const [logoIndex, setLogoIndex] = useState(0);
+  const [fila, setFila] = useState(null);
+  const [modal, setModal] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-
-    const interval = setInterval(() => {
-
-      setLogoIndex((prev) => (prev + 1) % logos.length);
-
-    }, 3000);
-
-    return () => clearInterval(interval);
-
-  }, []);
-
-  // ================= MODAL =================
-
-  const [showModal, setShowModal] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const [isPressing, setIsPressing] = useState(false);
-
-  const alumnos = [
-
-    {
-      id: 1,
-      codigo: "1234",
-      nombre: "María Paz Castro P.",
-      grado: "Sexto",
-      grupo: "A",
-      pago: "Completo",
-      fecha: "01 - 06 - 2026",
-    },
-
-    {
-      id: 2,
-      codigo: "",
-      nombre: "",
-      grado: "",
-      grupo: "",
-      pago: "Pendiente",
-      fecha: "",
-    },
-
-    {
-      id: 3,
-      codigo: "",
-      nombre: "",
-      grado: "",
-      grupo: "",
-      pago: "Crítico",
-      fecha: "",
-    },
-
-    ...Array(10).fill({}),
-
+  // COLUMNAS
+  const columns = [
+    { key: "codigo", label: "CÓDIGO" },
+    { key: "nombre", label: "NOMBRE COMPLETO" },
+    { key: "grado", label: "GRADO" },
+    { key: "grupo", label: "GRUPO" },
+    { key: "pago", label: "PAGO" },
+    { key: "fecha_pago", label: "FECHA DE PAGO" },
   ];
 
-  const getStatusStyle = (status) => {
+  // FILAS
+  const rows = [
+    {
+      id: 1,
+      codigo: "5311",
+      nombre: "Nombre Gomez Somel",
+      grado: "10",
+      grupo: "A",
+      pago: "Pendiente",
+      fecha_pago: "",
+    },
+    {
+      id: 2,
+      codigo: "5312",
+      nombre: "Juan Pérez",
+      grado: "9",
+      grupo: "B",
+      pago: "Pendiente",
+      fecha_pago: "",
+    },
+    {
+      id: 3,
+      codigo: "5313",
+      nombre: "Laura Gómez",
+      grado: "11",
+      grupo: "A",
+      pago: "Pagado",
+      fecha_pago: "12/05/2026",
+    },
+  ];
 
-    if (status === "Completo") {
+  const handleSearch = (filtros) => {
+    console.log(filtros);
 
-      return {
-        color: "#456450",
-        fontWeight: "600",
-      };
+    setLoading(true);
 
-    }
+    setTimeout(() => {
+      setLoading(false);
+    }, 800);
+  };
 
-    if (status === "Pendiente") {
+  // DEBUG: Log cada vez que fila cambia
+  const handleRowClick = (f) => {
+    console.log("Fila clickeada:", f);
+    setFila(f);
+  };
 
-      return {
-        color: "#C9A646",
-        fontWeight: "600",
-      };
-
-    }
-
-    if (status === "Crítico") {
-
-      return {
-        color: "#8E2A25",
-        fontWeight: "600",
-      };
-
-    }
-
-    return {};
-
+  // DEBUG: Log cuando se abre/cierra modal
+  const handleModalOpen = () => {
+    console.log("Modal abierto, fila actual:", fila);
+    setModal(true);
   };
 
   return (
+    <div>
 
-    <div style={styles.container}>
+      <style>
+        {`
+    .action-btn--primary:hover{
+      background: #2E5FA7 !important;
+      transform: translateY(2px);
+    }
 
-      {/* ================= HEADER ================= */}
+    .datatable-row--selected td{
+      background: #E8E3E3 !important;
+    }
 
-      <header style={styles.header}>
+    .datatable-row--selected .datatable-td-check{
+      background: #E8E3E3 !important;
+    }
 
-        <div style={styles.logoContainer}>
+    .datatable-check{
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem !important;
+      font-weight: bold;
+      width: 100%;
+      color: #2E5FA7 !important;
+    }
 
-          {logos.map((logo, i) => (
+    .datatable-td-check{
+      width: 50px !important;
+      min-width: 50px !important;
+      max-width: 50px !important;
+      text-align: center !important;
+      padding: 0.75rem !important;
+      background: #FFFFFF;
+    }
 
-            <img
-              key={i}
-              src={logo}
-              alt="logo"
-              style={{
-                ...styles.logoFade,
-                opacity: logoIndex === i ? 1 : 0,
-              }}
+    .datatable-row--selected .datatable-td-check {
+      background: #E8E3E3 !important;
+    }
+
+    .datatable-row--clickable{
+      cursor: pointer;
+    }
+
+    .datatable-row--clickable:hover {
+      background-color: #F5F5F5 !important;
+    }
+  `}
+      </style>
+
+      {/* HEADER */}
+      <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
+
+      {/* LAYOUT */}
+      <ModuleLayout
+        sidebar={
+          <Sidebar
+            moduloActual=""
+            modulos={[]}
+            usuario={{
+              nombre: "Nombre usuario",
+              rol: "Titular",
+            }}
+            userIcon={userIcon}
+            onLogout={() => console.log("logout")}
+          />
+        }
+
+        actions={
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "flex-end",
+              paddingRight: "1rem",
+              marginTop: "0.4rem",
+            }}
+          >
+            <ActionButtons
+              filaSeleccionada={fila}
+              botones={[
+                {
+                  label: "Validar Pago",
+                  onClick: handleModalOpen,
+                  variante: "primary",
+                },
+              ]}
             />
+          </div>
+        }
+      >
 
-          ))}
+        {/* SEARCHBAR */}
+        <SearchBar
+          loading={loading}
+          onSearch={handleSearch}
+          fields={[
+            {
+              key: "codigo",
+              label: "Código",
+              type: "text",
+            },
+            {
+              key: "nombre",
+              label: "Nombre",
+              type: "text",
+            },
+            {
+              key: "grado",
+              label: "Grado",
+              type: "select",
+              options: ["6", "7", "8", "9", "10", "11"],
+            },
+            {
+              key: "grupo",
+              label: "Grupo",
+              type: "select",
+              options: ["1", "2", "3"],
+            },
+            {
+              key: "anio",
+              label: "Año",
+              type: "select",
+              options: ["2025", "2026"],
+            },
+          ]}
+        />
 
+        {/* TABLA */}
+        <div
+          style={{
+            marginTop: "1rem",
+            background: "#FFFFFF",
+            borderRadius: "0.8rem",
+            overflow: "hidden",
+            border: "1px solid #D9D9D9",
+          }}
+        >
+          <DataTable
+            columns={columns}
+            rows={rows}
+            emptyText=""
+            onRowClick={handleRowClick}
+          />
         </div>
 
-        <h1 style={styles.title}>
-          SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL
-        </h1>
+      </ModuleLayout>
 
-      </header>
-
-      {/* ================= MAIN ================= */}
-
-      <div style={styles.mainContent}>
-
-        {/* ================= SIDEBAR ================= */}
-
-        <aside style={styles.sidebar}>
-
-          <div style={styles.sidebarTop}>
-
-            <div
-              style={styles.inicioBtn}
-              onClick={() => navigate("/salon")}
-            >
-              <span style={{ fontSize: "18px" }}>⊞</span>
-              Inicio
-            </div>
-
+      {/* MODAL */}
+      <Modal
+        title="CONFIRMACIÓN"
+        isOpen={modal}
+        fields={[]}
+        values={{}}
+        onChange={() => {}}
+        onAccept={() => {
+          console.log("Pago validado para:", fila);
+          setModal(false);
+        }}
+        onCancel={() => setModal(false)}
+      >
+        <div
+          style={{
+            textAlign: "center",
+            fontSize: "1.4rem",
+            lineHeight: 1.5,
+            padding: "1rem",
+          }}
+        >
+          ¿CONFIRMAS QUE EL ESTUDIANTE
+          <br />
+          <strong>[{fila?.nombre ? fila.nombre.toUpperCase() : "SIN SELECCIONAR"}]</strong>
+          <br />
+          HA CUMPLIDO CON EL PAGO DEL
+          <br />
+          CONCEPTO DE PUPITRES?
+          <br />
+          {/* DEBUG: Mostrar el objeto fila */}
+          <div style={{fontSize: "0.8rem", marginTop: "1rem", color: "#666"}}>
+            DEBUG: {fila ? JSON.stringify(fila) : "No hay fila seleccionada"}
           </div>
-
-          <div style={styles.userSection}>
-
-            <div style={styles.avatarCircle}>
-              👤
-            </div>
-
-            <p style={styles.userTitle}>
-              TITULAR
-            </p>
-
-            <p style={styles.userName}>
-              Nombre usuario
-            </p>
-
-            <button style={styles.logoutBtn}>
-              ↪
-            </button>
-
-          </div>
-
-        </aside>
-
-        {/* ================= CONTENT ================= */}
-
-        <main style={styles.contentArea}>
-
-          {/* ================= FILTERS ================= */}
-
-          <div style={styles.filterBar}>
-
-            <div style={styles.filters}>
-
-              <label style={styles.label}>
-                Código
-              </label>
-
-              <input
-                type="text"
-                style={styles.input}
-              />
-
-              <label style={styles.label}>
-                Nombre
-              </label>
-
-              <input
-                type="text"
-                style={styles.input}
-              />
-
-              <label style={styles.label}>
-                Grado
-              </label>
-
-              <select style={styles.select}>
-                <option></option>
-              </select>
-
-              <label style={styles.label}>
-                Grupo
-              </label>
-
-              <select style={styles.select}>
-                <option></option>
-              </select>
-
-              <label style={styles.label}>
-                Año
-              </label>
-
-              <select style={styles.select}>
-                <option></option>
-              </select>
-
-              <button style={styles.searchBtn}>
-                Buscar
-              </button>
-
-            </div>
-
-          </div>
-
-          {/* ================= TABLE ================= */}
-
-          <div style={styles.tableContainer}>
-
-            <table style={styles.table}>
-
-              <thead>
-
-                <tr>
-
-                  <th style={styles.th}></th>
-
-                  <th style={styles.th}>
-                    CÓDIGO
-                  </th>
-
-                  <th style={styles.th}>
-                    NOMBRE COMPLETO
-                  </th>
-
-                  <th style={styles.th}>
-                    GRADO
-                  </th>
-
-                  <th style={styles.th}>
-                    GRUPO
-                  </th>
-
-                  <th style={styles.th}>
-                    PAGO
-                  </th>
-
-                  <th style={styles.th}>
-                    FECHA DE PAGO
-                  </th>
-
-                </tr>
-
-              </thead>
-
-              <tbody>
-
-                {alumnos.map((alum, i) => (
-
-                  <tr
-                    key={i}
-                    style={{
-                      ...styles.tr,
-
-                      backgroundColor:
-                        i % 2 === 0
-                          ? "#E9E9E7"
-                          : "#FFFFFF",
-                    }}
-                  >
-
-                    <td style={styles.td}>
-
-                      {alum.id && (
-                        <input
-                          type="checkbox"
-                          defaultChecked={i === 0}
-                        />
-                      )}
-
-                    </td>
-
-                    <td style={styles.td}>
-                      {alum.codigo}
-                    </td>
-
-                    <td style={styles.td}>
-                      {alum.nombre}
-                    </td>
-
-                    <td style={styles.td}>
-                      {alum.grado}
-                    </td>
-
-                    <td style={styles.td}>
-                      {alum.grupo}
-                    </td>
-
-                    <td style={styles.td}>
-
-                      {alum.pago && (
-
-                        <span style={getStatusStyle(alum.pago)}>
-                          {alum.pago}
-                        </span>
-
-                      )}
-
-                    </td>
-
-                    <td style={styles.td}>
-                      {alum.fecha}
-                    </td>
-
-                  </tr>
-
-                ))}
-
-              </tbody>
-
-            </table>
-
-          </div>
-
-          {/* ================= BUTTON ================= */}
-
-          <div style={styles.footerAction}>
-
-            <button
-              style={{
-                ...styles.btnValidar,
-
-                backgroundColor:
-                  (isHovered || isPressing)
-                    ? "#C9A646"
-                    : "#2E5FA7",
-
-                transform:
-                  (isHovered || isPressing)
-                    ? "translateY(3px)"
-                    : "translateY(0)",
-
-                boxShadow:
-                  (isHovered || isPressing)
-                    ? "none"
-                    : "0 4px #1B3C68",
-              }}
-
-              onMouseEnter={() => setIsHovered(true)}
-
-              onMouseLeave={() => {
-                setIsHovered(false);
-                setIsPressing(false);
-              }}
-
-              onMouseDown={() => setIsPressing(true)}
-
-              onMouseUp={() => {
-                setIsPressing(false);
-                setShowModal(true);
-              }}
-            >
-              Validar Pago
-            </button>
-
-          </div>
-
-        </main>
-
-      </div>
-
-      {/* ================= MODAL ================= */}
-
-      {showModal && (
-
-        <div style={styles.modalOverlay}>
-
-          <div style={styles.modalBox}>
-
-            <button
-              style={styles.closeModal}
-              onClick={() => setShowModal(false)}
-            >
-              ×
-            </button>
-
-            <div style={styles.modalIcon}>
-              ⓘ
-            </div>
-
-            <p style={styles.modalText}>
-
-              ¿CONFIRMAS QUE EL ESTUDIANTE
-              <br />
-
-              <strong>
-                MARÍA PAZ CASTRO P.
-              </strong>
-
-              <br />
-
-              HA CUMPLIDO CON EL PAGO
-              <br />
-
-              DEL CONCEPTO DE PUPITRES?
-
-            </p>
-
-            <div style={styles.modalButtons}>
-
-              <button
-                style={styles.btnAceptar}
-                onClick={() => setShowModal(false)}
-              >
-                Aceptar
-              </button>
-
-              <button
-                style={styles.btnCancelar}
-                onClick={() => setShowModal(false)}
-              >
-                Cancelar
-              </button>
-
-            </div>
-
-          </div>
-
         </div>
-
-      )}
-
+      </Modal>
     </div>
-
   );
-
 }
-
-const styles = {
-
-  container: {
-    display: "flex",
-    flexDirection: "column",
-    height: "100vh",
-    backgroundColor: "#E9E9E7",
-    fontFamily: "'Inter', sans-serif",
-    overflow: "hidden",
-  },
-
-  header: {
-    height: "100px",
-    backgroundColor: "#8E2A25",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: "0 24px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-    position: "relative",
-  },
-
-  // 🔥 NUEVO CONTENEDOR PARA FADE
-  logoContainer: {
-    width: "170px",
-    height: "65px",
-    position: "relative",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 1,
-  },
-
-  // 🔥 NUEVO ESTILO CON TRANSICIÓN
-  logoFade: {
-    position: "absolute",
-    width: "100%",
-    height: "100%",
-    objectFit: "contain",
-    transition: "opacity 0.6s ease-in-out",
-  },
-
-  title: {
-    flex: 1,
-    textAlign: "center",
-    color: "#FFFFFF",
-    fontSize: "26px",
-    fontWeight: "700",
-    fontFamily: "serif",
-    letterSpacing: "1px",
-  },
-
-  mainContent: {
-    display: "flex",
-    flex: 1,
-  },
-
-  sidebar: {
-    width: "210px",
-    backgroundColor: "#ECECEB",
-    borderRight: "1px solid #CFCFCF",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "space-between",
-    padding: "20px 0",
-  },
-
-  sidebarTop: {
-    padding: "0 18px",
-  },
-
-  inicioBtn: {
-    width: "100%",
-    height: "42px",
-    backgroundColor: "#F1F1F1",
-    border: "1px solid #D5D5D5",
-    borderRadius: "8px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "8px",
-    cursor: "pointer",
-    fontWeight: "600",
-    color: "#5A1D1A",
-  },
-
-  userSection: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    marginBottom: "15px",
-  },
-
-  avatarCircle: {
-    width: "65px",
-    height: "65px",
-    borderRadius: "50%",
-    backgroundColor: "#F5F5F5",
-    border: "1px solid #D0D0D0",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "32px",
-    marginBottom: "10px",
-  },
-
-  userTitle: {
-    margin: 0,
-    fontSize: "12px",
-    fontWeight: "700",
-    color: "#333333",
-  },
-
-  userName: {
-    margin: "3px 0 12px",
-    fontSize: "14px",
-    color: "#333333",
-  },
-
-  logoutBtn: {
-    border: "none",
-    background: "none",
-    color: "#2E5FA7",
-    fontSize: "24px",
-    cursor: "pointer",
-  },
-
-  contentArea: {
-    flex: 1,
-    padding: "12px",
-    display: "flex",
-    flexDirection: "column",
-  },
-
-  filterBar: {
-    display: "flex",
-    alignItems: "center",
-    backgroundColor: "#F5F5F5",
-    border: "1px solid #CFCFCF",
-    borderRadius: "12px 12px 0 0",
-    padding: "10px 14px",
-  },
-
-  filters: {
-    display: "grid",
-    gridTemplateColumns:
-      "auto 1.1fr auto 2fr auto 1fr auto 1fr auto 1fr auto",
-    alignItems: "center",
-    gap: "12px",
-    width: "100%",
-  },
-
-  label: {
-    fontSize: "14px",
-    color: "#333333",
-    whiteSpace: "nowrap",
-  },
-
-  input: {
-    width: "100%",
-    height: "30px",
-    borderRadius: "8px",
-    border: "1px solid #BBBBBB",
-    backgroundColor: "#F2F2F2",
-    padding: "0 10px",
-    outline: "none",
-  },
-
-  select: {
-    width: "100%",
-    height: "32px",
-    borderRadius: "8px",
-    border: "1px solid #BBBBBB",
-    backgroundColor: "#F2F2F2",
-    padding: "0 6px",
-    outline: "none",
-  },
-
-  searchBtn: {
-    backgroundColor: "#2E5FA7",
-    color: "#FFFFFF",
-    border: "none",
-    borderRadius: "18px",
-    padding: "8px 24px",
-    cursor: "pointer",
-    fontSize: "14px",
-    boxShadow: "0 2px #1B3C68",
-  },
-
-  tableContainer: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-    border: "1px solid #CFCFCF",
-    borderTop: "none",
-    borderRadius: "0 0 14px 14px",
-    overflow: "hidden",
-  },
-
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-  },
-
-  th: {
-    height: "36px",
-    backgroundColor: "#EFEFEF",
-    border: "1px solid #CFCFCF",
-    textAlign: "center",
-    fontSize: "12px",
-    fontWeight: "700",
-    color: "#333333",
-  },
-
-  tr: {
-    height: "32px",
-  },
-
-  td: {
-    height: "32px",
-    border: "1px solid #D6D6D6",
-    textAlign: "center",
-    fontSize: "13px",
-    color: "#333333",
-    padding: "3px 6px",
-  },
-
-  footerAction: {
-    display: "flex",
-    justifyContent: "flex-end",
-    marginTop: "14px",
-  },
-
-  btnValidar: {
-    border: "none",
-    borderRadius: "28px",
-    padding: "12px 30px",
-    color: "#FFFFFF",
-    fontSize: "17px",
-    cursor: "pointer",
-    transition: "all 0.1s ease",
-  },
-
-  modalOverlay: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.45)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 999,
-  },
-
-  modalBox: {
-    width: "420px",
-    backgroundColor: "#FFFFFF",
-    borderRadius: "18px",
-    padding: "30px",
-    position: "relative",
-    textAlign: "center",
-  },
-
-  closeModal: {
-    position: "absolute",
-    top: "10px",
-    right: "16px",
-    border: "none",
-    background: "none",
-    fontSize: "28px",
-    cursor: "pointer",
-  },
-
-  modalIcon: {
-    fontSize: "42px",
-    marginBottom: "12px",
-  },
-
-  modalText: {
-    fontSize: "17px",
-    lineHeight: "1.6",
-    color: "#333333",
-  },
-
-  modalButtons: {
-    marginTop: "20px",
-    display: "flex",
-    justifyContent: "center",
-    gap: "20px",
-  },
-
-  btnAceptar: {
-    backgroundColor: "#C9A646",
-    border: "none",
-    borderRadius: "18px",
-    padding: "10px 28px",
-    cursor: "pointer",
-    fontWeight: "600",
-  },
-
-  btnCancelar: {
-    backgroundColor: "#2E5FA7",
-    color: "#FFFFFF",
-    border: "none",
-    borderRadius: "18px",
-    padding: "10px 28px",
-    cursor: "pointer",
-    fontWeight: "600",
-  },
-
-};

@@ -9,6 +9,7 @@ import BibliotecaIcon from "../../assets/Salón/biblioteca.svg";
 import PruebasIcon from "../../assets/Salón/pruebas.svg";
 
 import userIcon from "../../assets/Login/usuario_login.svg";
+import LogOutIcon from "../../assets/logout/cerrar_sesion.svg";
 
 export default function SalonPage() {
   const navigate = useNavigate();
@@ -126,9 +127,11 @@ export default function SalonPage() {
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = "translateY(-4px)";
+        e.currentTarget.style.background = "#DCD4BE";
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.background = "var(--color-white)";
       }}
     >
       {/* NOMBRE */}
