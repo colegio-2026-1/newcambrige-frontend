@@ -43,31 +43,6 @@ body {
 }
 
 /* =========================
-   WRAPPER
-========================= */
-
-.content-wrapper {
-    display: flex;
-    width: 100%;
-    min-height: calc(100vh - var(--header-height));
-    margin-top: 10px;
-}
-
-/* =========================
-   MAIN
-========================= */
-
-.main-content {
-    flex: 1;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 40px;
-}
-
-/* =========================
    GRID
 ========================= */
 
@@ -142,14 +117,12 @@ body {
 ========================= */
 
 @media (max-width: 1200px) {
-
     .cards-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
 @media (max-width: 900px) {
-
     .dashboard-card {
         max-width: 280px;
         height: 280px;
@@ -162,11 +135,6 @@ body {
 }
 
 @media (max-width: 700px) {
-
-    .content-wrapper {
-        flex-direction: column;
-    }
-
     .cards-grid {
         grid-template-columns: 1fr;
     }
