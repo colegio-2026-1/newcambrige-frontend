@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import "./header.css";
 
-import escudo1 from "../../assets/Escudos/NCS.png";
-import escudo2 from "../../assets/Escudos/UP.png";
+import escudo1 from "../../assets/Escudos/NCS.svg";
+import escudo2 from "../../assets/Escudos/UP.svg";
 
 const logos = [escudo1, escudo2];
 
