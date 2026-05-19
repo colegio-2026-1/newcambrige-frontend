@@ -1,7 +1,7 @@
 
 import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
-import { allestudiantesRequest, allsalonesRequest, allmatriculasRequest, allrolesuserRequest, crearMatriculaRequest } from '../../api/endpoints'; 
+import { allestudiantesRequest, allsalonesRequest, allmatriculasRequest, allrolesuserRequest, crearMatriculaRequest, allaniosacademicosRequest } from '../../api/endpoints'; 
 
 
 import { useAuth } from "../../modules/auth/useAuth";
@@ -18,9 +18,11 @@ import Modal         from "../../components/shared/Modal";
 
 const MatriculaTable = () => {
   const [estudiantes, setEstudiantes] = useState([]);
+  const [estudiantesFiltrados, setEstudiantesFiltrados] = useState([]);
   const [salones, setSalones] = useState([]);
   const [matriculas, setMatriculas] = useState([]);
   const navigate = useNavigate();
+  const [periodos, setPeriodos] = useState([]);
   const rolespermitidos =  ["secretaria", "administrador", "admin", "tesoreria"]
    //para el sidebar
   const modulos = [
@@ -35,6 +37,10 @@ const matriculasMap = {};
 matriculas.forEach(m => {
   matriculasMap[m.id_estudiante] = m; 
 });
+const periodosMap = {};
+periodos.forEach(p => {
+  periodosMap[p.id_periodo] = p;
+});
 
 const { user, logout } = useAuth();
   const userName = user?.nombre || "Usuario";
@@ -44,8 +50,8 @@ const { user, logout } = useAuth();
   const rol = roles[0]|| "Rol Desconocido";
   const [fila,       setFila]       = useState(null);
   const [modal,      setModal]      = useState(false);
-    const [modal2,      setModal2]      = useState(false);
-  const [formValues, setFormValues] = useState({});
+  const [modal2,      setModal2]      = useState(false);
+  
 
   const crearMatricula = async () => {
   if (!fila || !fila.id_estudiante) {
@@ -54,6 +60,7 @@ const { user, logout } = useAuth();
   }
 
   try {
+    
     // Pasamos el objeto limpio con los nombres que espera tu FastAPI
     await crearMatriculaRequest({
       estudiante_id: Number(fila.id_estudiante),
@@ -90,7 +97,8 @@ const { user, logout } = useAuth();
   const cargarEstudiantes = async () => {
     try {
       const res = await allestudiantesRequest();
-      setEstudiantes(res.data); 
+      setEstudiantes(res.data);
+      setEstudiantesFiltrados(res.data); 
     } catch (error) {
       console.error("Error cargando estudiantes:", error);
     } 
@@ -113,12 +121,34 @@ const { user, logout } = useAuth();
       console.error("Error cargando matrículas:", error);
     }
   };
+  const cargarPeriodos = async () => {
+    try {
+      const res = await allaniosacademicosRequest();
+      setPeriodos(res.data);
+    } catch (error) {
+      console.error("Error cargando periodos:", error);
+    }
+  };
 
   useEffect(() => {
     cargarEstudiantes();
     cargarSalones();
     cargarMatriculas();
+    cargarPeriodos();
+    
   }, []);
+
+
+  const FiltrarEstudiantes = (filtros) => {
+    setEstudiantesFiltrados(estudiantes.filter(e => {
+      const cumpleDocumento = e.documento.toString().includes(filtros.documento);
+      const cumpleNombre = e.nombre.toLowerCase().includes(filtros.nombre.toLowerCase());
+      const cumpleGrado = filtros.Grado ? ((salonesMap[e.id_salon]?.grado).toString() === filtros.Grado) : true;
+      const cumpleGrupo = filtros.Grupo ? (salonesMap[e.id_salon]?.grupo).toString() === filtros.Grupo : true;
+      const cumplePeriodo = filtros.Periodo ? periodosMap[salonesMap[e.id_salon]?.id_periodo]?.nombre === filtros.Periodo : true;
+      return cumpleDocumento && cumpleNombre && cumpleGrado && cumpleGrupo && cumplePeriodo;
+    }));
+  };
 
   return (
     <div >
@@ -139,7 +169,7 @@ const { user, logout } = useAuth();
                 <ActionButtons
                   filaSeleccionada={fila}
                   botones={[
-                    { label: "Validar Pago",  onClick: () => { fila.pago === 'Pagado' ? setModal2(true) : setModal2(true); }, siempreActivo: false  , variante: "primary" }
+                    { label: "Validar Pago",  onClick: () => { matriculasMap[fila?.id_estudiante ] ? setModal2(true) : setModal(true); }, siempreActivo: false  , variante: "primary" }
                   ]}
                 />
               }
@@ -150,11 +180,11 @@ const { user, logout } = useAuth();
                       fields={[
                         { key: "documento", label: "Código",          type: "text" },
                         { key: "nombre",    label: "Nombre",type: "text" },
-                        { key: "Grado",   label: "Grado",         type: "select", options: [] },
-                        { key: "Grupo",   label: "Grupo",         type: "select", options: [] },
-                        { key: "Periodo",   label: "Periodo",         type: "select", options: [] },
+                        { key: "Grado",   label: "Grado",         type: "select", options: Array.from(new Set(Object.values(salonesMap).map(s => s.grado).filter(Boolean))) },
+                        { key: "Grupo",   label: "Grupo",         type: "select", options: Array.from(new Set(Object.values(salonesMap).map(s => s.grupo).filter(Boolean))) },
+                        { key: "Periodo",   label: "Periodo",         type: "select", options: Array.from(new Set(Object.values(periodos).map(s => s.nombre).filter(Boolean)))},
                       ]}
-                      onSearch={(f) => console.log(f)}
+                      onSearch={(f) =>{  FiltrarEstudiantes(f);}}
                     />
 
                     <DataTable
@@ -173,6 +203,7 @@ const { user, logout } = useAuth();
                                     <span>{salonesMap[val.id_salon]?.grupo}</span>)
                                   }
                                 },
+                               
                                 { key: "pago", label: "Pago",
                                   render: (_,val) => {
                                     const idEst = val.id_estudiante;
@@ -190,7 +221,7 @@ const { user, logout } = useAuth();
                                   )
                                  }}
                               ]}
-                              rows={estudiantes} 
+                              rows={estudiantesFiltrados} 
                               
                               onRowClick={(f) => setFila(f)}
                             />
@@ -204,20 +235,19 @@ const { user, logout } = useAuth();
                              
 
   <Modal
-  title={`¿Confirmas que el estudiante ${fila?.nombre || ""} ha realizado el pago?`}
+  title={`¿Confirmas que el estudiante ${fila?.nombre || ""} ha realizado el pago de la matrícula?`}
   isOpen={modal}
   onAccept={() => { crearMatricula(); setModal(false); }}
   onCancel={() => setModal(false)}
 />
 <Modal
-  title={`El estudiante ${fila?.nombre || ""} ya ha realizado el pago`}
+  title={`El estudiante ${fila?.nombre || ""} ya ha realizado el pago de la matrícula.`}
   isOpen={modal2}
   onAccept={() => { setModal2(false); }}
   onCancel={() => setModal2(false)}
 />
         
-      
-     
+
 
     </div>
    
