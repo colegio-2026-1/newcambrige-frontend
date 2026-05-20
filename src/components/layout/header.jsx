@@ -25,7 +25,7 @@ export default function Header({ title = " " }) {
     useEffect(() => {
         const interval = setInterval(() => {
             setIndex((prev) => (prev + 1) % logos.length);
-        }, 10000);
+        }, 5000);
         return () => clearInterval(interval);
     }, []);
 

@@ -4,6 +4,9 @@
 
 
 import { useState } from "react";
+import { Home } from "lucide-react";
+
+import EjemploIcon from "../../assets/Tesoreria/notificaciones.svg";
 
 import Header from "../../components/layout/header";
 import ModuleLayout from "../../components/layout/ModuleLayout";
@@ -29,9 +32,8 @@ export default function TestPage() {
   const [formValues, setFormValues] = useState({});
 
   const menuItems = [
-    "Inventario Libros",
-    "Uniformes",
-    "Instrumentos",
+    { label: "Inicio", icon: <Home /> },
+    { label: "Ejemplo de boton", icon: EjemploIcon },
   ];
 
   return (
