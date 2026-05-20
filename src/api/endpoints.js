@@ -35,3 +35,6 @@ export const getPruebasRequest = () =>
 
 export const createPruebaRequest = (data) =>
   axiosClient.post(`/api/salones/pruebas`, data);
+
+export const updateEstadoPruebaRequest = (id, estado) =>
+  axiosClient.put(`/api/salones/pruebas/${id}/estado?estado=${estado}`);
