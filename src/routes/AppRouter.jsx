@@ -13,7 +13,10 @@ import TesoreriaEstadistica from "../modules/tesoreria/TesoreriaEstadistica";
 import TesoreriaPension from "../modules/tesoreria/TesoreriaPension";
 import TesoreriaPapeleria from "../modules/tesoreria/TesoreriaPapeleria";
 
-import TestPage from "../modules/test/TestPage";
+import Home from "../modules/Home/HomePage";
+
+
+import TestPage from "../modules/test/testPage";
 // ==============================
 // RUTA PRIVADA
 // ==============================
@@ -61,16 +64,16 @@ const AppRouter = () => {
       />
 
       {/* ===================== */}
-      {/* DASHBOARD */}
+      {/* HOME */}
       {/* ===================== */}
 
       <Route
-        path="/dashboard"
+        path="/home"
         element={
 
           <PrivateRoute>
 
-            <Dashboard />
+            <Home />
 
           </PrivateRoute>
 
@@ -147,7 +150,9 @@ const AppRouter = () => {
       
       <Route
         path="/test"
-        element={<TestPage />}
+        element={
+          <TestPage />
+        }
       />
 
       {/* ===================== */}

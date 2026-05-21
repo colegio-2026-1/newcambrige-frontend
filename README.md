@@ -22,15 +22,19 @@ root/
 ├── main.jsx # Bootstrap de React
 ├── App.jsx # Router principal
 ├── api/
-│ ├── axios.js # Instancia de Axios con interceptores
-│ └── endpoints.js # Centralización de URLs de API
+│ ├── authService.js # Instancia de Axios con interceptores
+│ ├── axiosClient.js
+│ ├── endpoints.js  # Centralización de URLs de API
+│ └── useAuth.jsx 
 ├── store/
 │ └── AuthStore.js # Estado global (Zustand) para sesión/usuario
 ├── modules/
 │ ├── auth/
 │ │ ├── LoginPage.tsx
-│ │ ├── useAuth.tsx
-│ │ └── LoginPage.module.css # Hook personalizado de autenticación
+│ │ └── LoginPage.module.css
+│ ├── Home/
+│ │ ├── HomePage.jsx
+│ │ └── HomePage.css 
 │ ├── salon/
 │ │ ├── SalonPage.jsx
 │ │ ├── PuptrePage.jsx
@@ -45,7 +49,8 @@ root/
 │ ├── ui/ # Botones, badges, modales, toasts
 │ └── layout/ # Sidebar, header, contenedor principal
 └── routes/
-└── ProtectedRoute.jsx # Valida rol antes de renderizar
+│ ├── AppRoutes.jsx 
+│ └── ProtectedRoute.jsx 
 ```
 
 ## 🚀 Instalación y uso en local
