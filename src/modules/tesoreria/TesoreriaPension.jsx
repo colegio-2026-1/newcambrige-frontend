@@ -170,7 +170,7 @@ periodos.forEach(p => {
                             { key: "Grupo",   label: "Grupo",         type: "select", options: Array.from(new Set(Object.values(salonesMap).map(s => s.grupo).filter(Boolean))) },
                             { key: "Periodo",   label: "Periodo",         type: "select", options: Array.from(new Set(Object.values(periodos).map(s => s.nombre).filter(Boolean)))},
                           ]}
-                          onSearch={(f) => {  FiltrarEstudiantes(f); }}
+                          onSearch={(f) => {  FiltrarEstudiantes(f); console.log(f);}}
                         />
     
                         <DataTable

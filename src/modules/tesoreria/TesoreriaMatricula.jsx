@@ -41,7 +41,10 @@ const periodosMap = {};
 periodos.forEach(p => {
   periodosMap[p.id_periodo] = p;
 });
-
+const periodoMapname = {};
+periodos.forEach(p => {
+  periodoMapname[p.nombre] = p;
+});
 const { user, logout } = useAuth();
   const userName = user?.nombre || "Usuario";
   const idUser = user?.id_usuario;
@@ -51,7 +54,13 @@ const { user, logout } = useAuth();
   const [fila,       setFila]       = useState(null);
   const [modal,      setModal]      = useState(false);
   const [modal2,      setModal2]      = useState(false);
-  
+  const [filtros, setFiltros] = useState({
+    documento: "",
+    nombre: "",
+    Grado: "",
+    Grupo: "",
+    Periodo: ""
+  });
 
   const crearMatricula = async () => {
   if (!fila || !fila.id_estudiante) {
@@ -125,6 +134,7 @@ const { user, logout } = useAuth();
     try {
       const res = await allaniosacademicosRequest();
       setPeriodos(res.data);
+      setFiltros(prev => ({ ...prev, Periodo: res.data[0]?.nombre || "" }));
     } catch (error) {
       console.error("Error cargando periodos:", error);
     }
@@ -180,11 +190,35 @@ const { user, logout } = useAuth();
                       fields={[
                         { key: "documento", label: "Código",          type: "text" },
                         { key: "nombre",    label: "Nombre",type: "text" },
-                        { key: "Grado",   label: "Grado",         type: "select", options: Array.from(new Set(Object.values(salonesMap).map(s => s.grado).filter(Boolean))) },
-                        { key: "Grupo",   label: "Grupo",         type: "select", options: Array.from(new Set(Object.values(salonesMap).map(s => s.grupo).filter(Boolean))) },
+                        { key: "Grado",   label: "Grado",         type: "select", 
+                          options: filtros.Periodo ?   Array.from(new Set(Object.values(salonesMap).filter(s => s.id_periodo === periodoMapname[filtros.Periodo]?.id_periodo).map(s => s.grado).filter(Boolean))) : []},
+                        { key: "Grupo",   label: "Grupo",        type: "select", options: filtros.Grado 
+        ? Array.from(new Set(
+            Object.values(salonesMap)
+              .filter(s => (s.grado).toString() === filtros.Grado)
+              .map(s => s.grupo)
+              .filter(Boolean)
+          ))
+        : [] },
                         { key: "Periodo",   label: "Periodo",         type: "select", options: Array.from(new Set(Object.values(periodos).map(s => s.nombre).filter(Boolean)))},
                       ]}
-                      onSearch={(f) =>{  FiltrarEstudiantes(f);}}
+                      initialValues={{ Periodo: periodos[0]?.nombre }}
+                      onChange={(key, value) => {
+    setFiltros(prev => {
+      const nuevosFiltros = { ...prev, [key]: value };
+      
+      if (key === "Grado") {
+        nuevosFiltros.Grupo = "";
+      }
+      if (key === "Periodo") {
+        nuevosFiltros.Grado = "";
+        nuevosFiltros.Grupo = "";
+      }
+      
+      return nuevosFiltros;
+    });
+  }}
+                      onSearch={(f) =>{  FiltrarEstudiantes(f); setFiltros(f);}}
                     />
 
                     <DataTable

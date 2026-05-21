@@ -33,10 +33,11 @@ import "./SearchBar.css";
  *  />
  */
 
-export default function SearchBar({ fields = [], onSearch, loading = false }) {
+export default function SearchBar({ fields = [], onSearch, loading = false, initialValues = {}, onChange }) {
 
 const initialState = fields.reduce((acc, f) => {
-    acc[f.key] = "";
+    acc[f.key] = initialValues[f.key] || "";
+
     return acc;
 }, {});
 
@@ -44,6 +45,7 @@ const [values, setValues] = useState(initialState);
 
 const handleChange = (key, value) => {
     setValues((prev) => ({ ...prev, [key]: value }));
+    if (onChange) onChange(key, value);
 };
 
 const handleSearch = () => {
