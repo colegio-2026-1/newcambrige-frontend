@@ -1,0 +1,382 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&display=swap');
+
+@font-face {
+  font-family: 'HeyGotcha';
+  src: url('../../assets/fonts/HeyGotchaRegular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* RESET */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ROOT */
+.login-root {
+  --red: #8E2A25;
+  --blue: #2E5FA7;
+  --white: #FFFFFF;
+  --dark: #333333;
+  --gray: #E9E9E7;
+
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Lato', sans-serif;
+
+  padding: 20px;
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+}
+
+.login-root::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* TARJETA */
+.login-card {
+  position: relative;
+  z-index: 1;
+  background: var(--white);
+  border-radius: 26px;
+
+  padding: 70px 40px 80px;
+  width: 100%;
+  max-width: 520px;
+
+  box-shadow: 0 30px 75px rgba(0, 0, 0, 0.35);
+}
+
+/* TÍTULO */
+.login-title {
+  font-family: 'HeyGotcha', cursive;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--red);
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+/* INPUT GROUP */
+.input-group {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid #dcdcdc;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 28px;
+  background: #f5f5f5;
+  transition: all 0.2s ease;
+}
+
+.input-group:focus-within {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 5px rgba(46, 95, 167, 0.15);
+}
+
+/* ICONO */
+.input-icon {
+  width: 58px;
+  height: 58px;
+  background: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid #d0d0d0;
+}
+
+.input-icon svg {
+  width: 22px;
+  height: 22px;
+  fill: var(--blue);
+}
+
+/* INPUT */
+.input-field {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 18px;
+  background: transparent;
+  font-size: 1.1rem;
+  color: var(--dark);
+}
+
+.input-field::placeholder {
+  color: #888;
+}
+
+/* ERROR */
+.login-error {
+  font-size: 0.95rem;
+  color: var(--red);
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+/* BOTÓN */
+.login-btn {
+  margin-top: 30px;
+  width: 100%;
+  padding: 18px;
+  border: none;
+  border-radius: 8px;
+  background: var(--red);
+  color: var(--white);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(142, 42, 37, 0.4);
+  transition: all 0.2s ease;
+}
+
+.login-btn:hover:not(:disabled) {
+  background: #7a2320;
+  transform: translateY(-2px);
+}
+
+.login-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 3px 10px rgba(142, 42, 37, 0.3);
+}
+
+.login-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* SPINNER */
+.btn-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* ========================= */
+/* RESPONSIVE */
+/* ========================= */
+
+/* Tablets */
+@media (max-width: 768px) {
+  .login-card {
+    padding: 50px 40px 60px;
+    max-width: 460px;
+  }
+
+  .login-title {
+    font-size: 1.6rem;
+    margin-bottom: 35px;
+  }
+
+  .input-icon {
+    width: 52px;
+    height: 52px;
+  }
+
+  .input-field {
+    font-size: 1rem;
+  }
+}
+
+/* Móviles */
+@media (max-width: 480px) {
+  .login-root {
+    padding: 15px;
+  }
+
+  .login-card {
+    padding: 40px 25px 50px;
+    border-radius: 18px;
+  }
+
+  .login-title {
+    font-size: 1.3rem;
+    letter-spacing: 0.1em;
+    margin-bottom: 30px;
+  }
+
+  .input-group {
+    margin-bottom: 20px;
+  }
+
+  .input-icon {
+    width: 46px;
+    height: 46px;
+  }
+
+  .input-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .input-field {
+    padding: 14px;
+    font-size: 0.95rem;
+  }
+
+  .login-btn {
+    padding: 14px;
+    font-size: 1rem;
+  }
+}
+
+/* Móviles pequeños */
+@media (max-width: 360px) {
+  .login-card {
+    padding: 30px 18px 40px;
+  }
+
+  .login-title {
+    font-size: 1.15rem;
+  }
+}
+
+
+/* ========================= */
+/* POPUP OVERLAY */
+/* ========================= */
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+
+  background: rgba(0, 0, 0, 0.55);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 9999;
+
+  backdrop-filter: blur(3px);
+}
+
+/* ========================= */
+/* POPUP CARD */
+/* ========================= */
+
+.popup-card {
+  width: 420px;
+  max-width: 90%;
+
+  background: #ffffff;
+
+  border-radius: 18px;
+
+  overflow: hidden;
+
+  animation: popupShow 0.25s ease;
+}
+
+/* ========================= */
+/* HEADER */
+/* ========================= */
+
+.popup-header {
+  background: #8E2A25;
+
+  color: white;
+
+  padding: 18px 24px;
+
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* ========================= */
+/* BODY */
+/* ========================= */
+
+.popup-body {
+  padding: 28px 24px;
+
+  color: #333;
+
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* ========================= */
+/* FOOTER */
+/* ========================= */
+
+.popup-footer {
+  padding: 0 24px 24px;
+
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ========================= */
+/* BUTTON */
+/* ========================= */
+
+.popup-btn {
+  border: none;
+
+  background: #8E2A25;
+  color: white;
+
+  padding: 10px 18px;
+
+  border-radius: 10px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.popup-btn:hover {
+  opacity: 0.9;
+}
+
+/* ========================= */
+/* ANIMATION */
+/* ========================= */
+
+@keyframes popupShow {
+
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

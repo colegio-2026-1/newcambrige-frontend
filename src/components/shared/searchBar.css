@@ -1,0 +1,136 @@
+/* ============================================
+SearchBar.css
+Ubicación: src/components/shared/SearchBar.css
+   ============================================ */
+
+.searchbar-wrapper {
+    width: 100%;
+
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--space-3) var(--space-5);
+
+    padding: var(--space-4) var(--space-6);
+
+    background: var(--color-white);
+
+    border-bottom: var(--border-width) solid var(--color-border-light);
+
+    box-shadow: var(--shadow-sm);
+}
+
+/* ── CAMPO (label + input apilados) ── */
+
+.searchbar-field {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.searchbar-label {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--color-text);
+    white-space: nowrap;
+}
+
+/* ── INPUTS Y SELECTS ── */
+
+.searchbar-input {
+    height: 32px;
+    min-width: 130px;
+
+    padding: 0 var(--space-2);
+
+    background: var(--color-input-bg);
+
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-sm);
+
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-text);
+
+    outline: none;
+    transition: border-color var(--transition-fast),
+        box-shadow   var(--transition-fast);
+}
+
+.searchbar-input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(142, 42, 37, 0.15);
+}
+
+.searchbar-select {
+    cursor: pointer;
+    min-width: 110px;
+
+    appearance: none;
+    -webkit-appearance: none;
+
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%238E2A25' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+
+    padding-right: var(--space-6);
+}
+
+/* ── BOTÓN BUSCAR ── */
+
+.searchbar-btn {
+    height: 36px;
+    padding: 0 var(--space-6);
+
+    background: var(--color-secondary);
+    color: var(--color-text-white);
+
+    border: none;
+    border-radius: var(--radius-full);
+
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: var(--font-bold);
+    letter-spacing: var(--letter-wide);
+
+    cursor: pointer;
+
+    transition: background var(--transition-fast),
+    transform   var(--transition-fast);
+
+    margin-left: auto;
+}
+
+.searchbar-btn:hover {
+    background: var(--color-secondary-dark);
+}
+
+.searchbar-btn:active {
+    transform: scale(0.97);
+}
+
+.searchbar-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ── RESPONSIVE ── */
+
+@media (max-width: 768px) {
+  .searchbar-field {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.searchbar-input {
+    width: 100%;
+    min-width: unset;
+}
+
+.searchbar-btn {
+    width: 100%;
+    margin-left: 0;
+}
+}
