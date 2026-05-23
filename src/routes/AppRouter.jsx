@@ -6,13 +6,9 @@ import {
 
 import LoginPage from "../modules/auth/LoginPage";
 
-import Dashboard from "../modules/dashboard/DashboardPage";
-import SalonPage from '../modules/salon/SalonPage';
-import PupitrePage from "../modules/salon/PupitrePage";
-import BibliotecaPage from "../modules/salon/BibliotecaPage";
-import PruebasPage from "../modules/salon/PruebasPage";
+import Home from "../modules/Home/HomePage";
 
-import TestPage from "../modules/test/TestPage";
+import TestPage from "../modules/test/testPage";
 // ==============================
 // RUTA PRIVADA
 // ==============================
@@ -66,16 +62,16 @@ const AppRouter = () => {
       />
 
       {/* ===================== */}
-      {/* DASHBOARD */}
+      {/* HOME */}
       {/* ===================== */}
 
       <Route
-        path="/dashboard"
+        path="/home"
         element={
 
           <PrivateRoute>
 
-            <Dashboard />
+            <Home />
 
           </PrivateRoute>
 
@@ -109,7 +105,9 @@ const AppRouter = () => {
       */}
       <Route
         path="/test"
-        element={<TestPage />}
+        element={
+          <TestPage />
+        }
       />
       {/* ===================== */}
       {/* CATCH ALL */}

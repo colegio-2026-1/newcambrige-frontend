@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "./SearchBar.css";
+import "./searchBar.css";
 
 /**
  * SearchBar — componente reutilizable para todos los módulos

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "./useAuth";
+import { useAuth } from "./../../api/useAuth";
 import { useLocation, useNavigate } from "react-router-dom"; // <-- Importar si usas React Router
 import bgImage from "../../assets/Fondo_login.jpg";
 import styles from "./LoginPage.module.css";

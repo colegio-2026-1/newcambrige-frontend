@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import "./Header.css";
+import "./header.css";
 
-import escudo1 from "../../assets/Escudos/NCS.png";
-import escudo2 from "../../assets/Escudos/UP.png";
+import escudo1 from "../../assets/Escudos/NCS.svg";
+import escudo2 from "../../assets/Escudos/UP.svg";
 
 const logos = [escudo1, escudo2];
 
@@ -18,39 +18,37 @@ const logos = [escudo1, escudo2];
  *  <Header title="UNIFORMES" />
  */
 
-export default function Header({ title = "NEW CAMBRIDGE SCHOOL" }) {
+export default function Header({ title = " " }) {
 
     const [index, setIndex] = useState(0);
 
     useEffect(() => {
-    const interval = setInterval(() => {
-        setIndex((prev) => (prev + 1) % logos.length);
-    }, 3500);
-    return () => clearInterval(interval);
+        const interval = setInterval(() => {
+            setIndex((prev) => (prev + 1) % logos.length);
+        }, 5000);
+        return () => clearInterval(interval);
     }, []);
 
     return (
-    <header className="header">
+        <header className="header">
+            {/* LOGOS */}
+            <div className="header-logos-container">
+                <div className="header-logos">
+                    {logos.map((logo, i) => (
+                        <img
+                            key={i}
+                            src={logo}
+                            alt="Logo institucional"
+                            className={`header-logo ${index === i ? "active" : ""}`}
+                        />
+                    ))}
+                </div>
+            </div>
 
-        <div className="header-logos">
-        {logos.map((logo, i) => (
-            <img
-            key={i}
-            src={logo}
-            alt="Logo institucional"
-            className="header-logo"
-            style={{
-                opacity:   index === i ? 1 : 0,
-                transform: index === i ? "scale(1)" : "scale(0.96)",
-            }}
-            />
-        ))}
-        </div>
-
-        <div className="header-title">
-        <h1>{title}</h1>
-        </div>
-
-    </header>
+            {/* TITULO */}
+            <div className="header-title">
+                <h1>{title}</h1>
+            </div>
+        </header>
     );
 }

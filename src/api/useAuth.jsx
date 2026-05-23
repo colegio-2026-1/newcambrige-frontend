@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   loginRequest,
   getMeRequest
-} from "../../api/authService";
+} from "./authService";
 
 export const useAuth = () => {
 
@@ -50,7 +50,7 @@ export const useAuth = () => {
 
       setUser(meResponse.data);
 
-      navigate("/dashboard");
+      navigate("/home");
 
     } catch (err) {
 

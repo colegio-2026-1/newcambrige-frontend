@@ -1,181 +1,192 @@
-/* ============================================
-   Sidebar.css
-   Ubicación: src/components/layout/Sidebar.css
-   ============================================ */
-
-/* ── CONTENEDOR ── */
+/* =========================
+   SIDEBAR
+========================= */
 
 .sidebar {
-  width: 130px;
-  min-width: 130px;
-  min-height: calc(100vh - var(--header-height));
+    width: 300px;
+    min-width: 300px;
+    max-width: 300px;
 
-  background: var(--color-bg);
+    background: #efefef;
 
-  border-right: var(--border-width) solid var(--color-border-light);
+    display: flex;
+    flex-direction: column;
+    height: 100%;               
 
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-
-  padding: var(--space-4) 0;
+    border-right: 1px solid #ddd;
 }
 
-/* ── ZONA SUPERIOR ── */
+/* =========================
+   MENU
+========================= */
 
-.sidebar-top {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: var(--space-2);
+.sidebar-menu {
+    display: flex;
+    flex-direction: column;
 }
 
-/* BOTÓN INICIO */
+.menu-item {
+    border: none;
+    background: transparent;
 
-.sidebar-inicio {
-  margin: 0 var(--space-3);
-  padding: var(--space-2) var(--space-3);
+    padding: 24px 30px;
 
-  background: transparent;
-  border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-  font-family: var(--font-body);
-  font-size: var(--text-base);
-  font-weight: var(--font-medium);
-  color: var(--color-text);
+    text-align: center;
 
-  text-align: left;
-  cursor: pointer;
+    font-size: 1.8rem;
+    color: #6b2020;
 
-  border-bottom: var(--border-width) solid var(--color-border-light);
+    cursor: pointer;
 
-  transition: color var(--transition-fast);
+    transition: 0.2s;
+
+    font-family: "HeyGotcha", serif;
+
+    font-weight: normal;
 }
 
-.sidebar-inicio:hover {
-  color: var(--color-primary);
+.menu-item:hover {
+    background: #dddddd;
 }
 
-/* TÍTULO MÓDULO ACTUAL */
+.menu-item.active {
+    background: white;
 
-.sidebar-modulo-actual {
-  margin: var(--space-3) var(--space-3) var(--space-1);
+    color: #8e2a25;
 
-  padding: var(--space-2) var(--space-3);
-
-  border-left: 3px solid var(--color-primary);
+    box-shadow: inset 4px 0 0 #8e2a25;
 }
 
-.sidebar-modulo-actual span {
-  font-family: var(--font-display);
-  font-size: var(--text-sm);
-  font-weight: var(--font-medium);
-  color: var(--color-primary);
-  line-height: 1.3;
-}
-
-/* LINKS OTROS MÓDULOS */
-
-.sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding: 0 var(--space-3);
-}
-
-.sidebar-link {
-  padding: var(--space-2) var(--space-3);
-
-  background: transparent;
-  border: none;
-  border-radius: var(--radius-sm);
-
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-
-  text-align: left;
-  cursor: pointer;
-
-  transition: background var(--transition-fast),
-              color      var(--transition-fast);
-}
-
-.sidebar-link:hover {
-  background: rgba(142, 42, 37, 0.07);
-  color: var(--color-primary);
-}
-
-.sidebar-link--active {
-  background: rgba(142, 42, 37, 0.10);
-  color: var(--color-primary);
-  font-weight: var(--font-medium);
-}
-
-/* ── ZONA USUARIO ── */
+/* =========================
+   USER 
+========================= */
 
 .sidebar-user {
-  display: flex;
-  flex-direction: column;
+    margin-top: auto;          
+    padding: 35px 20px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 10px;
+
+    color: #5a1b1b;
+
+    font-family: "HeyGotcha", serif;
+
+    border-top: none !important;
+    box-shadow: none !important;
+}
+
+.sidebar-user svg {
+    color: #7d1616;
+}
+
+.titular-label {
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+    font-weight: bold;
+}
+
+.sidebar-user h3 {
+    font-size: 1.1rem;
+    text-align: center;
+    letter-spacing: 1px;
+    font-weight: normal;
+}
+
+.sidebar-user p {
+    font-size: 0.9rem;
+    text-align: center;
+    color: #666;
+    word-break: break-word;
+}
+
+/* =========================
+   BOTON LOGOUT
+========================= */
+
+.logout-button {
+    margin-top: 10px;
+
+    width: 40px;
+    height: 40px;
+
+    border-radius: 10px;
+
+    border: none;
+
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    transition:
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+.logout-button:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transform: translateY(-2px);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 900px) {
+    .sidebar {
+        width: 240px;
+        min-width: 240px;
+        max-width: 240px;
+    }
+
+    .menu-item {
+        font-size: 1.4rem;
+    }
+}
+
+@media (max-width: 700px) {
+    .sidebar {
+        width: 100%;
+        min-width: 100%;
+        max-width: 100%;
+        height: auto;           
+    }
+}
+
+.menu-icon {
+  display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
-
-  padding: var(--space-4) var(--space-3);
-
-  border-top: var(--border-width) solid var(--color-border-light);
+  justify-content: center;
+  width: 40px;
 }
 
-.sidebar-user-icon {
-  width: 52px;
-  height: 52px;
-  object-fit: contain;
-
-  border: var(--border-width) solid var(--color-border-light);
-  border-radius: 50%;
-
-  padding: var(--space-1);
+.menu-icon svg {
+  width: 30px;
+  height: 30px;
 }
 
-.sidebar-user-rol {
-  font-family: var(--font-body);
-  font-size: var(--text-xs);
-  font-weight: var(--font-bold);
-  letter-spacing: var(--letter-wide);
-  color: var(--color-primary);
-
-  text-align: center;
-  margin: 0;
+.menu-icon img {
+  width: 40px;
+  height: 40px;
 }
 
-.sidebar-user-nombre {
-  font-family: var(--font-body);
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
-
-  text-align: center;
-  margin: 0;
-
-  word-break: break-word;
+.sidebar-user svg {
+  width: 100px;
+  height: 100px;
 }
 
-/* BOTÓN LOGOUT */
-
-.sidebar-logout {
-  margin-top: var(--space-2);
-
-  background: transparent;
-  border: none;
-
-  font-size: var(--text-lg);
-  color: var(--color-text-muted);
-
-  cursor: pointer;
-
-  transition: color var(--transition-fast),
-              transform var(--transition-fast);
-}
-
-.sidebar-logout:hover {
-  color: var(--color-primary);
-  transform: translateX(3px);
+.logout-button svg {
+  width: 30px;
+  height: 30px;
 }

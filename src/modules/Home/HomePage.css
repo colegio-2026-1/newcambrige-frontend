@@ -1,0 +1,152 @@
+/* =========================
+   FUENTE PERSONALIZADA
+========================= */
+
+@font-face {
+    font-family: "HeyGotcha";
+    src: url("../../assets/fonts/HeyGotchaRegular.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* =========================
+   RESET
+========================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    background: #f5f5f5;
+    font-family: "HeyGotcha", serif;
+    overflow-x: hidden;
+}
+
+/* =========================
+   CONTENEDOR GENERAL
+========================= */
+
+.dashboard-container {
+    width: 100%;
+    min-height: 100vh;
+    background: #f4f4f4;
+}
+
+/* =========================
+   GRID
+========================= */
+
+.cards-grid {
+    width: 100%;
+    max-width: 1200px;
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 40px;
+}
+
+/* =========================
+   CARD
+========================= */
+
+.dashboard-card {
+    width: 100%;
+    max-width: 320px;
+    height: 320px;
+
+    background: white;
+
+    border-radius: 18px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    margin: auto;
+
+    position: relative;
+
+    box-shadow:
+        20px 20px 0px #8f1010,
+        0 20px 20px rgba(0, 0, 0, 0.15);
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-6px);
+}
+
+.dashboard-card h2 {
+    color: #4a2c2c;
+
+    font-size: 1.9rem;
+
+    margin-bottom: 25px;
+
+    font-weight: normal;
+
+    font-family: "HeyGotcha", serif;
+
+    text-align: center;
+}
+
+.card-icon img {
+    width: 180px;
+    height: 180px;
+
+    object-fit: contain;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 1200px) {
+    .cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .dashboard-card {
+        max-width: 280px;
+        height: 280px;
+    }
+
+    .card-icon img {
+        width: 140px;
+        height: 140px;
+    }
+}
+
+@media (max-width: 700px) {
+    .cards-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-card {
+        width: 100%;
+        max-width: 300px;
+        height: 300px;
+    }
+
+    .card-icon img {
+        width: 150px;
+        height: 150px;
+    }
+}
