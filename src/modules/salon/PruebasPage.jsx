@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { Home } from "lucide-react";
+
 import { getPruebasRequest } from "../../api/endpoints";
 
 import Header from "../../components/layout/Header";
@@ -21,29 +23,48 @@ export default function PruebasPage() {
   const [rows, setRows] = useState([]);
   const [error, setError] = useState(null);
 
+  // BOTÓN SIDEBAR
+  const menuItems = [
+    {
+      label: "Inicio",
+      icon: <Home />,
+      path: "/home",
+    },
+  ];
+
   // COLUMNAS
   const columns = [
-  { key: "codigo", label: "CÓDIGO" },
-  { key: "nombre", label: "NOMBRE COMPLETO" },
-  { key: "grado", label: "GRADO" },
-  { key: "grupo", label: "GRUPO" },
-  { key: "tipo_prueba", label: "TIPO DE PRUEBA" },
-  { key: "estado", label: "ESTADO" },  // ← cambiar "pago" por "estado"
-];
+    { key: "codigo", label: "CÓDIGO" },
+    { key: "nombre", label: "NOMBRE COMPLETO" },
+    { key: "grado", label: "GRADO" },
+    { key: "grupo", label: "GRUPO" },
+    { key: "tipo_prueba", label: "TIPO DE PRUEBA" },
+    { key: "estado", label: "ESTADO" },
+  ];
 
-  // ✅ TRAER DATOS DEL API
+  // TRAER DATOS
   useEffect(() => {
+
     const obtenerPruebas = async () => {
+
       try {
+
         setLoading(true);
+
         const response = await getPruebasRequest();
+
         console.log("Respuesta API:", response.data);
+
         const data = response.data;
+
         setRows(Array.isArray(data) ? data : []);
+
       } catch (error) {
+
         console.error("Error:", error);
+
         setError(error.message);
-        // Si hay error, mantén los datos de ejemplo
+
         setRows([
           {
             id: 1,
@@ -76,15 +97,21 @@ export default function PruebasPage() {
             fecha_pago: "15 - 05 - 2026",
           },
         ]);
+
       } finally {
+
         setLoading(false);
+
       }
+
     };
 
     obtenerPruebas();
+
   }, []);
 
   const handleSearch = (filtros) => {
+
     console.log(filtros);
 
     setLoading(true);
@@ -92,80 +119,81 @@ export default function PruebasPage() {
     setTimeout(() => {
       setLoading(false);
     }, 800);
+
   };
 
-  // MANEJADOR PARA VALIDAR PAGO
+  // VALIDAR PAGO
   const handleValidarPago = () => {
+
     if (!fila) {
       alert("Debes seleccionar una fila");
       return;
     }
 
-    // Validar si ya completó el pago - si completó, no puede hacer la prueba
     if (fila.estado === "Completado") {
+
       alert(
         `EL ESTUDIANTE [${fila.nombre}], NO ESTÁ\nHABILITADO PARA EL TIPO DE\nPRUEBA [${fila.tipo_prueba}].`
       );
+
       return;
+
     }
 
-    // Si el pago está pendiente, mostrar confirmación
     setFormValues(fila);
-    setModal(true);
-  };
 
-  const handleModalAccept = () => {
-    console.log("Pago validado para:", fila);
-    setModal(false);
+    setModal(true);
+
   };
 
   if (loading) return <div>Cargando pruebas...</div>;
 
   return (
+
     <div>
 
       <style>
         {`
-    .action-btn--primary:hover{
-      background: #2E5FA7 !important;
-      transform: translateY(2px);
-    }
+          .action-btn--primary:hover{
+            background: #2E5FA7 !important;
+            transform: translateY(2px);
+          }
 
-    .datatable-row--selected td{
-      background: #E8E3E3 !important;
-    }
+          .datatable-row--selected td{
+            background: #E8E3E3 !important;
+          }
 
-    .datatable-check{
-      display: inline-flex !important;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem !important;
-      font-weight: bold;
-      width: 100%;
-      color: #2E5FA7 !important;
-    }
+          .datatable-check{
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem !important;
+            font-weight: bold;
+            width: 100%;
+            color: #2E5FA7 !important;
+          }
 
-    .datatable-td-check{
-      width: 50px !important;
-      min-width: 50px !important;
-      max-width: 50px !important;
-      text-align: center !important;
-      padding: 0.75rem !important;
-      background: #FFFFFF;
-    }
+          .datatable-td-check{
+            width: 50px !important;
+            min-width: 50px !important;
+            max-width: 50px !important;
+            text-align: center !important;
+            padding: 0.75rem !important;
+            background: #FFFFFF;
+          }
 
-    .datatable-row--selected .datatable-td-check {
-      background: #E8E3E3 !important;
-    }
+          .datatable-row--selected .datatable-td-check {
+            background: #E8E3E3 !important;
+          }
 
-    .datatable-row--clickable{
-      cursor: pointer;
-    }
+          .datatable-row--clickable{
+            cursor: pointer;
+          }
 
-    .datatable-row--clickable:hover {
-      background-color: #F5F5F5 !important;
-    }
-  `}
+          .datatable-row--clickable:hover {
+            background-color: #F5F5F5 !important;
+          }
+        `}
       </style>
 
       {/* HEADER */}
@@ -173,16 +201,14 @@ export default function PruebasPage() {
 
       {/* LAYOUT */}
       <ModuleLayout
+
         sidebar={
           <Sidebar
-            moduloActual="Pruebas"
-            modulos={[]}
-            usuario={{
-              nombre: "Nombre usuario",
-              rol: "Titular",
-            }}
-            userIcon={userIcon}
-            onLogout={() => console.log("logout")}
+            menuItems={menuItems}
+            selectedMenu={"Inicio"}
+            setSelectedMenu={() => {}}
+            user="Nombre usuario"
+            logout={() => console.log("logout")}
           />
         }
 
@@ -198,6 +224,7 @@ export default function PruebasPage() {
             ]}
           />
         }
+
       >
 
         {/* SEARCHBAR */}
@@ -246,12 +273,14 @@ export default function PruebasPage() {
             border: "1px solid #D9D9D9",
           }}
         >
+
           <DataTable
             columns={columns}
             rows={rows}
             emptyText=""
             onRowClick={(f) => setFila(f)}
           />
+
         </div>
 
       </ModuleLayout>
@@ -269,6 +298,7 @@ export default function PruebasPage() {
         }}
         onCancel={() => setModal(false)}
       >
+
         <div
           style={{
             textAlign: "center",
@@ -285,7 +315,11 @@ export default function PruebasPage() {
           <br />
           CONCEPTO DE PRUEBAS?
         </div>
+
       </Modal>
+
     </div>
+
   );
+
 }

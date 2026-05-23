@@ -1,114 +1,106 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { Home } from "lucide-react";
 
-import Header from "../../components/layout/Header";
+import Header from "../../components/layout/header";
+import ModuleLayout from "../../components/layout/ModuleLayout";
 import Sidebar from "../../components/layout/Sidebar";
 
-import PupitresIcon from "../../assets/Salón/pupitres.svg";
-import BibliotecaIcon from "../../assets/Salón/biblioteca.svg";
-import PruebasIcon from "../../assets/Salón/pruebas.svg";
-
-import userIcon from "../../assets/Login/usuario_login.svg";
-// import LogOutIcon from "../../assets/logout/cerrar_sesion.svg";
+import PupitresIcon from "../../assets/Salon/pupitres.svg";
+import BibliotecaIcon from "../../assets/Salon/biblioteca.svg";
+import PruebasIcon from "../../assets/Salon/pruebas.svg";
 
 export default function SalonPage() {
+
   const navigate = useNavigate();
 
-  const [usuario] = useState({
-    nombre: "Nombre usuario",
-    rol: "Titular",
-  });
+  const [selectedMenu, setSelectedMenu] = useState("Inicio");
 
-  // MÓDULOS
+  // ITEMS SIDEBAR
+  const menuItems = [
+    {
+      label: "inicio",
+      icon: <Home />,
+      path: "/home",
+    }
+  ];
+
+  // TARJETAS
   const modulos = [
     {
       id: "pupitres",
       label: "Pupitres",
       path: "/pupitres",
       icon: PupitresIcon,
-      descripcion: "Gestión y asignación de pupitres del salón.",
     },
     {
       id: "biblioteca",
       label: "Biblioteca",
       path: "/biblioteca",
       icon: BibliotecaIcon,
-      descripcion: "Control e inventario de libros disponibles.",
     },
     {
       id: "pruebas",
       label: "Pruebas",
       path: "/pruebas",
       icon: PruebasIcon,
-      descripcion: "Administración y seguimiento de evaluaciones.",
     },
   ];
 
-  const handleNavigate = (path) => {
-    navigate(path);
-  };
-
-  const handleLogout = () => {
-    console.log("Cerrando sesión...");
-    navigate("/login");
-  };
-
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        width: "100%",
-        minHeight: "100vh",
-        background: "var(--color-bg)",
-      }}
-    >
+
+    <div className="dashboard-container">
+
       {/* HEADER */}
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
 
-      {/* CONTENIDO PRINCIPAL */}
-      <div
-        style={{
-          display: "flex",
-          flex: 1,
-          width: "100%",
-        }}
+      {/* LAYOUT BASE */}
+      <ModuleLayout
+
+        sidebar={
+
+          <Sidebar
+            menuItems={menuItems}
+            selectedMenu={selectedMenu}
+            setSelectedMenu={setSelectedMenu}
+            user="Nombre usuario"
+            logout={() => navigate("/")}
+          />
+
+        }
+
       >
-        {/* SIDEBAR */}
-        <Sidebar
-          moduloActual=""
-          modulos={modulos}
-          usuario={usuario}
-          userIcon={userIcon}
-          onLogout={handleLogout}
-        />
 
         {/* CONTENIDO */}
         <div
           style={{
-            flex: 1,
+            width: "100%",
+            height: "100%",
             display: "flex",
-            alignItems: "center",
             justifyContent: "center",
+            alignItems: "center",
             padding: "2rem",
-            borderLeft: "1px solid var(--color-border-light)",
           }}
         >
-          {/* GRID DE TARJETAS */}
+
+          {/* GRID */}
           <div
             style={{
               width: "100%",
               maxWidth: "1100px",
               display: "flex",
               justifyContent: "center",
+              alingItems: "center",
               gap: "2.5rem",
               flexWrap: "wrap",
             }}
           >
+
             {modulos.map((modulo) => (
+
               <div
                 key={modulo.id}
-                onClick={() => handleNavigate(modulo.path)}
+                onClick={() => navigate(modulo.path)}
                 style={{
                   width: "230px",
                   height: "230px",
@@ -134,6 +126,7 @@ export default function SalonPage() {
                   e.currentTarget.style.background = "var(--color-white)";
                 }}
               >
+
                 {/* TITULO */}
                 <h2
                   style={{
@@ -159,11 +152,18 @@ export default function SalonPage() {
                     objectFit: "contain",
                   }}
                 />
+
               </div>
+
             ))}
+
           </div>
+
         </div>
-      </div>
+
+      </ModuleLayout>
+
     </div>
+
   );
 }

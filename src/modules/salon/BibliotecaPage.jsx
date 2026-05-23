@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-import { getLibrosRequest, getPrestamosRequest } from "../../api/endpoints";
+import { Home, BookOpen } from "lucide-react";
+
+import {
+  getLibrosRequest,
+  getPrestamosRequest,
+} from "../../api/endpoints";
 
 import Header from "../../components/layout/Header";
 import ModuleLayout from "../../components/layout/ModuleLayout";
@@ -10,14 +15,14 @@ import DataTable from "../../components/shared/DataTable";
 import ActionButtons from "../../components/shared/ActionButtons";
 import Modal from "../../components/shared/Modal";
 
-import userIcon from "../../assets/Login/usuario_login.svg";
-
 export default function BibliotecaPage() {
 
   const [pestanaActiva, setPestanaActiva] = useState("inicio");
+
   const [filaSeleccionada, setFilaSeleccionada] = useState(null);
 
   const [modal, setModal] = useState(false);
+
   const [modalTipo, setModalTipo] = useState("agregar");
 
   const [formValues, setFormValues] = useState({});
@@ -25,14 +30,41 @@ export default function BibliotecaPage() {
   const [loading, setLoading] = useState(true);
 
   const [modalAsignar, setModalAsignar] = useState(false);
+
   const [modalDevolver, setModalDevolver] = useState(false);
 
   const [libros, setLibros] = useState([]);
+
   const [prestamos, setPrestamos] = useState([]);
 
   // =========================
-  // TRAER DATOS DEL BACKEND
+  // SIDEBAR
   // =========================
+
+  const menuItems = [
+    {
+      label: "Inicio",
+      icon: <Home />,
+      onClick: () => {
+        setPestanaActiva("inicio");
+        setFilaSeleccionada(null);
+      },
+    },
+
+    {
+      label: "Inventario",
+      icon: <BookOpen />,
+      onClick: () => {
+        setPestanaActiva("libros");
+        setFilaSeleccionada(null);
+      },
+    },
+  ];
+
+  // =========================
+  // TRAER DATOS
+  // =========================
+
   useEffect(() => {
 
     const cargarDatos = async () => {
@@ -44,28 +76,44 @@ export default function BibliotecaPage() {
         // =========================
         // PRÉSTAMOS
         // =========================
-        const responsePrestamos = await getPrestamosRequest();
 
-        console.log("PRESTAMOS:", responsePrestamos.data);
+        const responsePrestamos =
+          await getPrestamosRequest();
 
-        const prestamosFormateados = Array.isArray(responsePrestamos.data)
-          ? responsePrestamos.data.map((p) => ({
-              id: p.id_prestamo,
-              codigo: p.codigo || "",
-              nombre: p.nombre || "",
-              grado: p.grado || "",
-              grupo: p.grupo || "",
-              titulo_libro: p.libro || "",
-              fecha_entrega: p.fecha_devolucion || "",
-              estado: p.estado ? "Entregado" : "Pendiente",
-            }))
-          : [];
+        const prestamosFormateados =
+          Array.isArray(responsePrestamos.data)
+
+            ? responsePrestamos.data.map((p) => ({
+                id: p.id_prestamo,
+
+                codigo: p.codigo || "",
+
+                nombre: p.nombre || "",
+
+                grado: p.grado || "",
+
+                grupo: p.grupo || "",
+
+                titulo_libro: p.libro || "",
+
+                fecha_entrega:
+                  p.fecha_devolucion || "",
+
+                estado: p.estado
+                  ? "Entregado"
+                  : "Pendiente",
+              }))
+
+            : [];
 
         setPrestamos(prestamosFormateados);
 
       } catch (error) {
 
-        console.error("ERROR PRESTAMOS:", error);
+        console.error(
+          "ERROR PRESTAMOS:",
+          error
+        );
 
         setPrestamos([]);
 
@@ -76,26 +124,40 @@ export default function BibliotecaPage() {
         // =========================
         // LIBROS
         // =========================
-        const responseLibros = await getLibrosRequest();
 
-        console.log("LIBROS:", responseLibros.data);
+        const responseLibros =
+          await getLibrosRequest();
 
-        const librosFormateados = Array.isArray(responseLibros.data)
-          ? responseLibros.data.map((l) => ({
-              id: l.id_libro,
-              nombre: l.nombre || "",
-              autor: l.autor || "",
-              edicion: l.edicion || "",
-              disponible: l.disponible ? "Disponible" : "No disponible",
-              estado_fisico: l.estado_fisico || "Bueno",
-            }))
-          : [];
+        const librosFormateados =
+          Array.isArray(responseLibros.data)
+
+            ? responseLibros.data.map((l) => ({
+                id: l.id_libro,
+
+                nombre: l.nombre || "",
+
+                autor: l.autor || "",
+
+                edicion: l.edicion || "",
+
+                disponible: l.disponible
+                  ? "Disponible"
+                  : "No disponible",
+
+                estado_fisico:
+                  l.estado_fisico || "Bueno",
+              }))
+
+            : [];
 
         setLibros(librosFormateados);
 
       } catch (error) {
 
-        console.error("ERROR LIBROS:", error);
+        console.error(
+          "ERROR LIBROS:",
+          error
+        );
 
         setLibros([]);
 
@@ -114,16 +176,29 @@ export default function BibliotecaPage() {
   // =========================
   // COLUMNAS INICIO
   // =========================
+
   const columnasInicio = [
     { key: "codigo", label: "CÓDIGO" },
+
     { key: "nombre", label: "NOMBRE COMPLETO" },
+
     { key: "grado", label: "GRADO" },
+
     { key: "grupo", label: "GRUPO" },
-    { key: "titulo_libro", label: "TÍTULO DEL LIBRO" },
-    { key: "fecha_devolucion", label: "FECHA DE ENTREGA" },
+
+    {
+      key: "titulo_libro",
+      label: "TÍTULO DEL LIBRO",
+    },
+
+    {
+      key: "fecha_entrega",
+      label: "FECHA DE ENTREGA",
+    },
 
     {
       key: "estado",
+
       label: "ESTADO",
 
       render: (val) => {
@@ -150,52 +225,99 @@ export default function BibliotecaPage() {
   // =========================
   // COLUMNAS LIBROS
   // =========================
+
   const columnasLibros = [
     { key: "id", label: "ID" },
-    { key: "nombre", label: "TÍTULO DEL LIBRO" },
+
+    {
+      key: "nombre",
+      label: "TÍTULO DEL LIBRO",
+    },
+
     { key: "autor", label: "AUTOR" },
+
     { key: "edicion", label: "EDICIÓN" },
 
     {
       key: "disponible",
+
       label: "DISPONIBILIDAD",
 
       render: (val) => (
-        <span className={val === "Disponible" ? "badge--ok" : "badge--no"}>
+        <span
+          className={
+            val === "Disponible"
+              ? "badge--ok"
+              : "badge--no"
+          }
+        >
           {val}
         </span>
       ),
     },
 
-    { key: "estado_fisico", label: "ESTADO FÍSICO" },
+    {
+      key: "estado_fisico",
+      label: "ESTADO FÍSICO",
+    },
   ];
 
   // =========================
   // CAMPOS MODAL
   // =========================
+
   const camposModal = [
-    { key: "nombre", label: "Título del Libro", type: "text" },
-    { key: "autor", label: "Autor", type: "text" },
-    { key: "edicion", label: "Edición", type: "text" },
+    {
+      key: "nombre",
+      label: "Título del Libro",
+      type: "text",
+    },
+
+    {
+      key: "autor",
+      label: "Autor",
+      type: "text",
+    },
+
+    {
+      key: "edicion",
+      label: "Edición",
+      type: "text",
+    },
 
     {
       key: "disponible",
+
       label: "Disponibilidad",
+
       type: "select",
-      options: ["Disponible", "No disponible"],
+
+      options: [
+        "Disponible",
+        "No disponible",
+      ],
     },
 
     {
       key: "estado_fisico",
+
       label: "Estado Físico",
+
       type: "select",
-      options: ["Bueno", "Regular", "Dañado", "Muy dañado"],
+
+      options: [
+        "Bueno",
+        "Regular",
+        "Dañado",
+        "Muy dañado",
+      ],
     },
   ];
 
   // =========================
   // SEARCH
   // =========================
+
   const handleSearch = (filtros) => {
 
     console.log("Filtros:", filtros);
@@ -205,10 +327,13 @@ export default function BibliotecaPage() {
   // =========================
   // MODALES
   // =========================
+
   const abrirModalAgregar = () => {
 
     setModalTipo("agregar");
+
     setFormValues({});
+
     setModal(true);
 
   };
@@ -216,11 +341,17 @@ export default function BibliotecaPage() {
   const abrirModalEditar = (fila) => {
 
     if (!fila) {
-      alert("Debes seleccionar un libro");
+
+      alert(
+        "Debes seleccionar un libro"
+      );
+
       return;
+
     }
 
     setModalTipo("editar");
+
     setFormValues(fila);
 
     setModal(true);
@@ -230,6 +361,7 @@ export default function BibliotecaPage() {
   const cerrarModal = () => {
 
     setModal(false);
+
     setFormValues({});
 
   };
@@ -237,9 +369,14 @@ export default function BibliotecaPage() {
   // =========================
   // LOADING
   // =========================
+
   if (loading) {
 
-    return <div>Cargando biblioteca...</div>;
+    return (
+      <div>
+        Cargando biblioteca...
+      </div>
+    );
 
   }
 
@@ -286,68 +423,129 @@ export default function BibliotecaPage() {
       <ModuleLayout
 
         sidebar={
+
           <Sidebar
-            moduloActual="Biblioteca"
-            modulos={[]}
-            usuario={{
-              nombre: "Nombre usuario",
-              rol: "Titular",
+            menuItems={menuItems}
+
+            selectedMenu={
+              pestanaActiva === "inicio"
+                ? "Inicio"
+                : "Inventario"
+            }
+
+            setSelectedMenu={(menu) => {
+
+              if (menu === "Inicio") {
+                setPestanaActiva("inicio");
+              }
+
+              if (menu === "Inventario") {
+                setPestanaActiva("libros");
+              }
+
+              setFilaSeleccionada(null);
+
             }}
-            userIcon={userIcon}
-            onLogout={() => console.log("logout")}
+
+            user="Nombre usuario"
+
+            logout={() =>
+              console.log("logout")
+            }
           />
+
         }
 
         actions={
 
           <ActionButtons
 
-            filaSeleccionada={filaSeleccionada}
+            filaSeleccionada={
+              filaSeleccionada
+            }
 
             botones={
               pestanaActiva === "inicio"
 
                 ? [
+
                     {
-                      label: "Asignar Libro",
-                      onClick: () => setModalAsignar(true),
-                      variante: "primary",
+                      label:
+                        "Asignar Libro",
+
+                      onClick: () =>
+                        setModalAsignar(true),
+
+                      variante:
+                        "primary",
                     },
 
                     {
-                      label: "Devolver Libro",
-                      onClick: () => setModalDevolver(true),
-                      variante: "secondary",
+                      label:
+                        "Devolver Libro",
+
+                      onClick: () =>
+                        setModalDevolver(true),
+
+                      variante:
+                        "secondary",
                     },
                   ]
 
                 : [
+
                     {
-                      label: "Agregar Libro",
-                      onClick: abrirModalAgregar,
+                      label:
+                        "Agregar Libro",
+
+                      onClick:
+                        abrirModalAgregar,
+
                       siempreActivo: true,
-                      variante: "primary",
+
+                      variante:
+                        "primary",
                     },
 
                     {
-                      label: "Editar Libro",
-                      onClick: () => abrirModalEditar(filaSeleccionada),
-                      variante: "secondary",
+                      label:
+                        "Editar Libro",
+
+                      onClick: () =>
+                        abrirModalEditar(
+                          filaSeleccionada
+                        ),
+
+                      variante:
+                        "secondary",
                     },
 
                     {
-                      label: "Eliminar Libro",
+                      label:
+                        "Eliminar Libro",
+
                       onClick: () => {
 
-                        if (!filaSeleccionada) {
-                          alert("Debes seleccionar un libro");
+                        if (
+                          !filaSeleccionada
+                        ) {
+
+                          alert(
+                            "Debes seleccionar un libro"
+                          );
+
                           return;
+
                         }
 
-                        alert("Libro eliminado");
+                        alert(
+                          "Libro eliminado"
+                        );
 
                       },
-                      variante: "danger",
+
+                      variante:
+                        "danger",
                     },
                   ]
             }
@@ -358,88 +556,22 @@ export default function BibliotecaPage() {
 
       >
 
-        {/* TABS */}
-        <div
-          style={{
-            display: "flex",
-            gap: "0",
-            borderBottom: "2px solid #D9D9D9",
-            marginBottom: "1.5rem",
-            background: "#FFFFFF",
-            borderRadius: "0.8rem 0.8rem 0 0",
-            overflow: "hidden",
-          }}
-        >
-
-          <button
-            style={{
-              padding: "1rem 2rem",
-              cursor: "pointer",
-              border: "none",
-              background:
-                pestanaActiva === "inicio"
-                  ? "#F5F5F5"
-                  : "transparent",
-              fontSize: "1rem",
-              fontWeight: "600",
-              color:
-                pestanaActiva === "inicio"
-                  ? "#2E5FA7"
-                  : "#666",
-              borderBottom:
-                pestanaActiva === "inicio"
-                  ? "3px solid #2E5FA7"
-                  : "3px solid transparent",
-              transition: "all 0.3s ease",
-            }}
-            onClick={() => {
-              setPestanaActiva("inicio");
-              setFilaSeleccionada(null);
-            }}
-          >
-            Inicio
-          </button>
-
-          <button
-            style={{
-              padding: "1rem 2rem",
-              cursor: "pointer",
-              border: "none",
-              background:
-                pestanaActiva === "libros"
-                  ? "#F5F5F5"
-                  : "transparent",
-              fontSize: "1rem",
-              fontWeight: "600",
-              color:
-                pestanaActiva === "libros"
-                  ? "#2E5FA7"
-                  : "#666",
-              borderBottom:
-                pestanaActiva === "libros"
-                  ? "3px solid #2E5FA7"
-                  : "3px solid transparent",
-              transition: "all 0.3s ease",
-            }}
-            onClick={() => {
-              setPestanaActiva("libros");
-              setFilaSeleccionada(null);
-            }}
-          >
-            Inventario de Libros
-          </button>
-
-        </div>
-
+        {/* ========================= */}
         {/* PESTAÑA INICIO */}
+        {/* ========================= */}
+
         {pestanaActiva === "inicio" && (
 
           <div>
 
             <SearchBar
+
               loading={loading}
+
               onSearch={handleSearch}
+
               fields={[
+
                 {
                   key: "codigo",
                   label: "Código",
@@ -456,14 +588,40 @@ export default function BibliotecaPage() {
                   key: "grado",
                   label: "Grado",
                   type: "select",
-                  options: ["6", "7", "8", "9", "10", "11"],
+
+                  options: [
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                    "10",
+                    "11",
+                  ],
                 },
 
                 {
                   key: "grupo",
                   label: "Grupo",
                   type: "select",
-                  options: ["A", "B", "C"],
+
+                  options: [
+                    "A",
+                    "B",
+                    "C",
+                  ],
+                },
+
+                {
+                  key: "anio",
+                  label: "Año",
+                  type: "select",
+
+                  options: [
+                    "2023",
+                    "2024",
+                    "2025",
+                    "2026",
+                  ],
                 },
               ]}
             />
@@ -471,18 +629,28 @@ export default function BibliotecaPage() {
             <div
               style={{
                 marginTop: "1rem",
+
                 background: "#FFFFFF",
+
                 borderRadius: "0.8rem",
+
                 overflow: "hidden",
-                border: "1px solid #D9D9D9",
+
+                border:
+                  "1px solid #D9D9D9",
               }}
             >
 
               <DataTable
                 columns={columnasInicio}
+
                 rows={prestamos}
+
                 emptyText="No hay préstamos"
-                onRowClick={(f) => setFilaSeleccionada(f)}
+
+                onRowClick={(f) =>
+                  setFilaSeleccionada(f)
+                }
               />
 
             </div>
@@ -491,18 +659,27 @@ export default function BibliotecaPage() {
 
         )}
 
+        {/* ========================= */}
         {/* PESTAÑA LIBROS */}
+        {/* ========================= */}
+
         {pestanaActiva === "libros" && (
 
           <div>
 
             <SearchBar
+
               loading={loading}
+
               onSearch={handleSearch}
+
               fields={[
+
                 {
                   key: "nombre",
-                  label: "Título del Libro",
+                  label:
+                    "Título del Libro",
+
                   type: "text",
                 },
 
@@ -523,18 +700,28 @@ export default function BibliotecaPage() {
             <div
               style={{
                 marginTop: "1rem",
+
                 background: "#FFFFFF",
+
                 borderRadius: "0.8rem",
+
                 overflow: "hidden",
-                border: "1px solid #D9D9D9",
+
+                border:
+                  "1px solid #D9D9D9",
               }}
             >
 
               <DataTable
                 columns={columnasLibros}
+
                 rows={libros}
+
                 emptyText="No hay libros"
-                onRowClick={(f) => setFilaSeleccionada(f)}
+
+                onRowClick={(f) =>
+                  setFilaSeleccionada(f)
+                }
               />
 
             </div>
@@ -545,22 +732,38 @@ export default function BibliotecaPage() {
 
       </ModuleLayout>
 
+      {/* ========================= */}
       {/* MODAL */}
+      {/* ========================= */}
+
       <Modal
-        title={modalTipo === "agregar" ? "AGREGAR LIBRO" : "EDITAR LIBRO"}
+        title={
+          modalTipo === "agregar"
+            ? "AGREGAR LIBRO"
+            : "EDITAR LIBRO"
+        }
+
         isOpen={modal}
+
         fields={camposModal}
+
         values={formValues}
+
         onChange={(key, val) =>
           setFormValues((p) => ({
             ...p,
             [key]: val,
           }))
         }
+
         onAccept={() => {
+
           console.log(formValues);
+
           cerrarModal();
+
         }}
+
         onCancel={cerrarModal}
       />
 

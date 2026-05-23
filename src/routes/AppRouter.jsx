@@ -6,6 +6,13 @@ import {
 
 import LoginPage from "../modules/auth/LoginPage";
 
+
+
+import SalonPage from '../modules/salon/SalonPage';
+import PupitrePage from "../modules/salon/PupitrePage";
+import BibliotecaPage from "../modules/salon/BibliotecaPage";
+import PruebasPage from "../modules/salon/PruebasPage";
+
 import Home from "../modules/Home/HomePage";
 
 import TestPage from "../modules/test/testPage";
