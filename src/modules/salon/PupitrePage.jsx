@@ -10,33 +10,26 @@ import DataTable from "../../components/shared/DataTable";
 import ActionButtons from "../../components/shared/ActionButtons";
 import Modal from "../../components/shared/Modal";
 
-import userIcon from "../../assets/Login/usuario_login.svg";
-
 export default function PupitrePage() {
-
   const [fila, setFila] = useState(null);
   const [modal, setModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState([]);
   const [error, setError] = useState(null);
 
-  // COLUMNAS
   const columns = [
     { key: "codigo", label: "CÓDIGO" },
     { key: "nombre", label: "NOMBRE COMPLETO" },
     { key: "grado", label: "GRADO" },
     { key: "grupo", label: "GRUPO" },
-    { key: "pago", label: "PAGO" },
+    { key: "estado", label: "PAGO" },
     { key: "fecha_pago", label: "FECHA DE PAGO" },
   ];
 
-  // TRAER DATOS
+  // TRAER DATOS SOLO BACKEND
   useEffect(() => {
-
     const obtenerPupitres = async () => {
-
       try {
-
         setLoading(true);
 
         const response = await getPupitresRequest();
@@ -47,164 +40,56 @@ export default function PupitrePage() {
 
         setRows(Array.isArray(data) ? data : []);
 
+        setError(null);
       } catch (error) {
-
         console.error("Error:", error);
-
         setError(error.message);
 
-        // DATOS DE EJEMPLO
-        setRows([
-          {
-            id: 1,
-            codigo: "5311",
-            nombre: "Nombre Gomez Somel",
-            grado: "10",
-            grupo: "A",
-            pago: "Pendiente",
-            fecha_pago: "",
-          },
-          {
-            id: 2,
-            codigo: "5312",
-            nombre: "Juan Pérez",
-            grado: "9",
-            grupo: "B",
-            pago: "Pendiente",
-            fecha_pago: "",
-          },
-          {
-            id: 3,
-            codigo: "5313",
-            nombre: "Laura Gómez",
-            grado: "11",
-            grupo: "A",
-            pago: "Pagado",
-            fecha_pago: "12/05/2026",
-          },
-        ]);
-
+        // SIN DATOS MOCK: solo backend
+        setRows([]);
       } finally {
-
         setLoading(false);
-
       }
-
     };
 
     obtenerPupitres();
-
   }, []);
 
-  // SEARCH
   const handleSearch = (filtros) => {
-
-    console.log(filtros);
-
-    setLoading(true);
-
-    setTimeout(() => {
-      setLoading(false);
-    }, 800);
-
+    console.log("Filtros:", filtros);
+    // aquí luego puedes conectar backend si tienes endpoint de búsqueda
   };
 
-  // FILA
   const handleRowClick = (f) => {
-
-    console.log("Fila clickeada:", f);
-
     setFila(f);
-
   };
 
-  // MODAL
   const handleModalOpen = () => {
-
     if (!fila) {
       alert("Debes seleccionar una fila");
       return;
     }
-
-    console.log("Modal abierto, fila actual:", fila);
-
     setModal(true);
-
   };
 
   if (loading) return <div>Cargando pupitres...</div>;
 
+  if (error) return <div>Error cargando datos: {error}</div>;
+
   return (
-
     <div>
-
-      <style>
-        {`
-          .action-btn--primary:hover{
-            background: #2E5FA7 !important;
-            transform: translateY(2px);
-          }
-
-          .datatable-row--selected td{
-            background: #E8E3E3 !important;
-          }
-
-          .datatable-row--selected .datatable-td-check{
-            background: #E8E3E3 !important;
-          }
-
-          .datatable-check{
-            display: inline-flex !important;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem !important;
-            font-weight: bold;
-            width: 100%;
-            color: #2E5FA7 !important;
-          }
-
-          .datatable-td-check{
-            width: 50px !important;
-            min-width: 50px !important;
-            max-width: 50px !important;
-            text-align: center !important;
-            padding: 0.75rem !important;
-            background: #FFFFFF;
-          }
-
-          .datatable-row--selected .datatable-td-check {
-            background: #E8E3E3 !important;
-          }
-
-          .datatable-row--clickable{
-            cursor: pointer;
-          }
-
-          .datatable-row--clickable:hover {
-            background-color: #F5F5F5 !important;
-          }
-        `}
-      </style>
-
-      {/* HEADER */}
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
 
-      {/* LAYOUT */}
       <ModuleLayout
-
         sidebar={
           <Sidebar
-            moduloActual=""
-            modulos={[]}
-            usuario={{
-              nombre: "Nombre usuario",
-              rol: "Titular",
-            }}
-            userIcon={userIcon}
-            onLogout={() => console.log("logout")}
+            menuItems={[{ label: "Inicio", path: "/home" }]}
+            selectedMenu={"Inicio"}
+            setSelectedMenu={() => {}}
+            user="Nombre usuario"
+            logout={() => console.log("logout")}
           />
         }
-
         actions={
           <div
             style={{
@@ -227,24 +112,13 @@ export default function PupitrePage() {
             />
           </div>
         }
-
       >
-
-        {/* SEARCHBAR */}
         <SearchBar
           loading={loading}
           onSearch={handleSearch}
           fields={[
-            {
-              key: "codigo",
-              label: "Código",
-              type: "text",
-            },
-            {
-              key: "nombre",
-              label: "Nombre",
-              type: "text",
-            },
+            { key: "codigo", label: "Código", type: "text" },
+            { key: "nombre", label: "Nombre", type: "text" },
             {
               key: "grado",
               label: "Grado",
@@ -266,7 +140,6 @@ export default function PupitrePage() {
           ]}
         />
 
-        {/* TABLA */}
         <div
           style={{
             marginTop: "1rem",
@@ -276,19 +149,15 @@ export default function PupitrePage() {
             border: "1px solid #D9D9D9",
           }}
         >
-
           <DataTable
             columns={columns}
             rows={rows}
-            emptyText=""
+            emptyText="No hay datos disponibles"
             onRowClick={handleRowClick}
           />
-
         </div>
-
       </ModuleLayout>
 
-      {/* MODAL */}
       <Modal
         title="CONFIRMACIÓN"
         isOpen={modal}
@@ -296,15 +165,11 @@ export default function PupitrePage() {
         values={{}}
         onChange={() => {}}
         onAccept={() => {
-
           console.log("Pago validado para:", fila);
-
           setModal(false);
-
         }}
         onCancel={() => setModal(false)}
       >
-
         <div
           style={{
             textAlign: "center",
@@ -313,41 +178,17 @@ export default function PupitrePage() {
             padding: "1rem",
           }}
         >
-
           ¿CONFIRMAS QUE EL ESTUDIANTE
-
           <br />
-
           <strong>
-            [{fila?.nombre ? fila.nombre.toUpperCase() : "SIN SELECCIONAR"}]
+            [{fila?.nombre?.toUpperCase() || "SIN SELECCIONAR"}]
           </strong>
-
           <br />
-
           HA CUMPLIDO CON EL PAGO DEL
-
           <br />
-
           CONCEPTO DE PUPITRES?
-
-          <br />
-
-          <div
-            style={{
-              fontSize: "0.8rem",
-              marginTop: "1rem",
-              color: "#666",
-            }}
-          >
-            DEBUG: {fila ? JSON.stringify(fila) : "No hay fila seleccionada"}
-          </div>
-
         </div>
-
       </Modal>
-
     </div>
-
   );
-
 }

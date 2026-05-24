@@ -55,7 +55,7 @@ import { checkSessionRequest } from "../../api/authService";
 export default function ModuleLayout({ sidebar, actions, children }) {
 
   // VALIDACIÓN DE SESIÓN (aqui se cambia el tiempo de cada cuanto se manda el checkeo)
-  useEffect(() => {
+ /* useEffect(() => {
     const interval = setInterval(async () => {
       try {
         await checkSessionRequest();
@@ -66,7 +66,7 @@ export default function ModuleLayout({ sidebar, actions, children }) {
 
     return () => clearInterval(interval);
   }, []);
-
+*/
   return (
     <div className="module-layout">
       {/* SIDEBAR IZQUIERDO */}

@@ -6,12 +6,19 @@ import {
 
 import LoginPage from "../modules/auth/LoginPage";
 
+
 import TesoreriaMatricula from "../modules/tesoreria/TesoreriaMatricula";
 import TesoreriaNotificaciones from "../modules/tesoreria/TesoreriaNotificaciones";
 import TesoreriaEstadistica from "../modules/tesoreria/TesoreriaEstadistica";
 import TesoreriaPension from "../modules/tesoreria/TesoreriaPension";
 import TesoreriaPapeleria from "../modules/tesoreria/TesoreriaPapeleria";
 import Tesoreria from "../modules/tesoreria/Tesoreria";
+
+
+import SalonPage from "../modules/salon/SalonPage";
+import PupitrePage from "../modules/salon/PupitrePage";
+import BibliotecaPage from "../modules/salon/BibliotecaPage";
+import PruebasPage from "../modules/salon/PruebasPage";
 
 import Home from "../modules/Home/HomePage";
 
@@ -57,8 +64,9 @@ const AppRouter = () => {
         <Route path="/" element={<LoginPage />} />
         <Route path="/salon" element={<SalonPage />} />
         <Route path="/pupitres" element={<PupitrePage />} />
-        <Route path="/biblioteca" element={<BibliotecaPage />} />
+        <Route path="/biblioteca/*" element={<BibliotecaPage />} />
         <Route path="/pruebas" element={<PruebasPage />} />
+        
 
       {/* ===================== */}
       {/* LOGIN */}

@@ -12,18 +12,14 @@ import DataTable from "../../components/shared/DataTable";
 import ActionButtons from "../../components/shared/ActionButtons";
 import Modal from "../../components/shared/Modal";
 
-import userIcon from "../../assets/Login/usuario_login.svg";
-
 export default function PruebasPage() {
 
   const [fila, setFila] = useState(null);
   const [modal, setModal] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [formValues, setFormValues] = useState({});
   const [rows, setRows] = useState([]);
   const [error, setError] = useState(null);
 
-  // BOTÓN SIDEBAR
   const menuItems = [
     {
       label: "Inicio",
@@ -32,97 +28,77 @@ export default function PruebasPage() {
     },
   ];
 
+  // =========================
   // COLUMNAS
+  // =========================
   const columns = [
     { key: "codigo", label: "CÓDIGO" },
     { key: "nombre", label: "NOMBRE COMPLETO" },
     { key: "grado", label: "GRADO" },
     { key: "grupo", label: "GRUPO" },
     { key: "tipo_prueba", label: "TIPO DE PRUEBA" },
-    { key: "estado", label: "ESTADO" },
+
+    {
+      key: "estado",
+      label: "PAGO",
+      render: (val) => (
+        <span className={val ? "badge--ok" : "badge--warning"}>
+          {val ? "✓" : "–"}
+        </span>
+      ),
+    },
+
+    {
+      key: "fecha_pago",
+      label: "FECHA DE PAGO",
+      render: (val) => val ? val : "—",
+    },
   ];
 
+  // =========================
   // TRAER DATOS
+  // =========================
   useEffect(() => {
 
     const obtenerPruebas = async () => {
 
       try {
-
         setLoading(true);
 
         const response = await getPruebasRequest();
-
-        console.log("Respuesta API:", response.data);
-
         const data = response.data;
 
-        setRows(Array.isArray(data) ? data : []);
+        // 🔥 NORMALIZACIÓN CRÍTICA
+        const clean = Array.isArray(data)
+          ? data.map((p) => ({
+              ...p,
+
+              // asegura boolean real
+              estado: Boolean(p.estado),
+
+              // asegura fecha consistente
+              fecha_pago: p.fecha_pago ?? null,
+            }))
+          : [];
+
+        setRows(clean);
 
       } catch (error) {
-
-        console.error("Error:", error);
-
+        console.error(error);
         setError(error.message);
-
-        setRows([
-          {
-            id: 1,
-            codigo: "5311",
-            nombre: "Nombre Gomez Somel",
-            grado: "10",
-            grupo: "A",
-            tipo_prueba: "Sexto",
-            estado: "Completó",
-            fecha_pago: "01 - 06 - 2026",
-          },
-          {
-            id: 2,
-            codigo: "5312",
-            nombre: "Juan Pérez",
-            grado: "9",
-            grupo: "B",
-            tipo_prueba: "Quinto",
-            estado: "Pendiente",
-            fecha_pago: "",
-          },
-          {
-            id: 3,
-            codigo: "5313",
-            nombre: "Laura Gómez",
-            grado: "11",
-            grupo: "A",
-            tipo_prueba: "Undécimo",
-            estado: "Completó",
-            fecha_pago: "15 - 05 - 2026",
-          },
-        ]);
-
+        setRows([]);
       } finally {
-
         setLoading(false);
-
       }
-
     };
 
     obtenerPruebas();
 
   }, []);
 
-  const handleSearch = (filtros) => {
-
-    console.log(filtros);
-
-    setLoading(true);
-
-    setTimeout(() => {
-      setLoading(false);
-    }, 800);
-
-  };
-
+  // =========================
   // VALIDAR PAGO
+  // =========================
   const handleValidarPago = () => {
 
     if (!fila) {
@@ -130,78 +106,43 @@ export default function PruebasPage() {
       return;
     }
 
-    if (fila.estado === "Completado") {
-
+    // 🔥 CORREGIDO: estado es boolean
+    if (fila.estado === true) {
       alert(
-        `EL ESTUDIANTE [${fila.nombre}], NO ESTÁ\nHABILITADO PARA EL TIPO DE\nPRUEBA [${fila.tipo_prueba}].`
+        `EL ESTUDIANTE [${fila.nombre}] YA TIENE PAGO REGISTRADO.`
       );
-
       return;
-
     }
 
-    setFormValues(fila);
-
     setModal(true);
-
   };
 
   if (loading) return <div>Cargando pruebas...</div>;
 
   return (
-
     <div>
 
-      <style>
-        {`
-          .action-btn--primary:hover{
-            background: #2E5FA7 !important;
-            transform: translateY(2px);
-          }
+      <style>{`
+        .badge--ok {
+          padding: 0.4rem 0.8rem;
+          background: #D4EDDA;
+          color: #155724;
+          border-radius: 0.4rem;
+          font-weight: 600;
+        }
 
-          .datatable-row--selected td{
-            background: #E8E3E3 !important;
-          }
+        .badge--warning {
+          padding: 0.4rem 0.8rem;
+          background: #FFF3CD;
+          color: #856404;
+          border-radius: 0.4rem;
+          font-weight: 600;
+        }
+      `}</style>
 
-          .datatable-check{
-            display: inline-flex !important;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem !important;
-            font-weight: bold;
-            width: 100%;
-            color: #2E5FA7 !important;
-          }
-
-          .datatable-td-check{
-            width: 50px !important;
-            min-width: 50px !important;
-            max-width: 50px !important;
-            text-align: center !important;
-            padding: 0.75rem !important;
-            background: #FFFFFF;
-          }
-
-          .datatable-row--selected .datatable-td-check {
-            background: #E8E3E3 !important;
-          }
-
-          .datatable-row--clickable{
-            cursor: pointer;
-          }
-
-          .datatable-row--clickable:hover {
-            background-color: #F5F5F5 !important;
-          }
-        `}
-      </style>
-
-      {/* HEADER */}
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
 
-      {/* LAYOUT */}
       <ModuleLayout
-
         sidebar={
           <Sidebar
             menuItems={menuItems}
@@ -211,7 +152,6 @@ export default function PruebasPage() {
             logout={() => console.log("logout")}
           />
         }
-
         actions={
           <ActionButtons
             filaSeleccionada={fila}
@@ -224,68 +164,19 @@ export default function PruebasPage() {
             ]}
           />
         }
-
       >
 
-        {/* SEARCHBAR */}
-        <SearchBar
-          loading={loading}
-          onSearch={handleSearch}
-          fields={[
-            {
-              key: "codigo",
-              label: "Código",
-              type: "text",
-            },
-            {
-              key: "nombre",
-              label: "Nombre",
-              type: "text",
-            },
-            {
-              key: "grado",
-              label: "Grado",
-              type: "select",
-              options: ["6", "7", "8", "9", "10", "11"],
-            },
-            {
-              key: "grupo",
-              label: "Grupo",
-              type: "select",
-              options: ["A", "B", "C"],
-            },
-            {
-              key: "anio",
-              label: "Año",
-              type: "select",
-              options: ["2025", "2026"],
-            },
-          ]}
-        />
-
-        {/* TABLA */}
-        <div
-          style={{
-            marginTop: "1rem",
-            background: "#FFFFFF",
-            borderRadius: "0.8rem",
-            overflow: "hidden",
-            border: "1px solid #D9D9D9",
-          }}
-        >
-
+        <div style={{ marginTop: "1rem" }}>
           <DataTable
             columns={columns}
             rows={rows}
-            emptyText=""
+            emptyText="No hay datos"
             onRowClick={(f) => setFila(f)}
           />
-
         </div>
 
       </ModuleLayout>
 
-      {/* MODAL */}
       <Modal
         title="CONFIRMACIÓN"
         isOpen={modal}
@@ -299,27 +190,12 @@ export default function PruebasPage() {
         onCancel={() => setModal(false)}
       >
 
-        <div
-          style={{
-            textAlign: "center",
-            fontSize: "1.4rem",
-            lineHeight: 1.5,
-            padding: "1rem",
-          }}
-        >
-          ¿CONFIRMAS QUE EL ESTUDIANTE
-          <br />
-          <strong>[{fila?.nombre?.toUpperCase()}]</strong>
-          <br />
-          HA CUMPLIDO CON EL PAGO DEL
-          <br />
-          CONCEPTO DE PRUEBAS?
+        <div style={{ textAlign: "center", fontSize: "1.2rem" }}>
+          ¿Confirmas pago del estudiante <b>{fila?.nombre}</b>?
         </div>
 
       </Modal>
 
     </div>
-
   );
-
 }
