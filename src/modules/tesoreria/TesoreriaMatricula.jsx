@@ -15,7 +15,7 @@ import Modal         from "../../components/shared/Modal";
 
 
 
-const MatriculaTable = () => {
+const TesoreriaMatricula = () => {
   const [estudiantes, setEstudiantes] = useState([]);
   const [estudiantesFiltrados, setEstudiantesFiltrados] = useState([]);
   const [salones, setSalones] = useState([]);
@@ -64,11 +64,11 @@ const MatriculaTable = () => {
     return;
   }
   try {
-    await crearMatriculaRequest({
-      estudiante_id: Number(fila.id_estudiante),
-      periodo_id: Number(salonesMap[fila.id_salon]?.id_periodo)
-    });
-    cargarMatriculas();
+    await crearMatriculaRequest(
+      Number(fila.id_estudiante),
+      Number(salonesMap[fila.id_salon]?.id_periodo)
+    );
+    cargarMatriculas(salonesMap[fila.id_salon]?.id_periodo);
     setFila(null); 
   } catch (error) {
     console.error("Error al crear la matrícula:", error);
@@ -285,4 +285,4 @@ const MatriculaTable = () => {
   );
 };
 
-export default MatriculaTable;
+export default TesoreriaMatricula;
