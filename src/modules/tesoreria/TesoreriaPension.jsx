@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import {allestudiantesbyperiodoRequest, allsalonesbyperiodoRequest, allmatriculasbyperiodoRequest, allrolesuserRequest, crearMatriculaRequest, allaniosacademicosRequest, alldetallematriculabyperiodoRequest } from '../../api/endpoints'; 
+import {allestudiantesbyperiodoRequest, allsalonesbyperiodoRequest, allmatriculasbyperiodoRequest, 
+  allrolesuserRequest, crearMatriculaRequest, allaniosacademicosRequest, 
+  alldetallematriculabyperiodoRequest, alltipoconceptoRequest } from '../../api/endpoints'; 
 
 import { Home } from "lucide-react";
 import { useAuth } from "../../api/useAuth";
@@ -13,6 +15,7 @@ import Modal         from "../../components/shared/Modal";
 
 
 const TesoreriaPension = () => {
+  const tiporecibed="Papeleria";
   const [estudiantes, setEstudiantes] = useState([]);
   const [estudiantesFiltrados, setEstudiantesFiltrados] = useState([]);
   const [estudiantesMatriculados, setEstudiantesMatriculados] = useState([]);
@@ -31,6 +34,8 @@ const TesoreriaPension = () => {
   const [modal,      setModal]      = useState(false);
   const [modalVer,      setModalVer]      = useState(false);
   const [cargandoPeriodos, setCargandoPeriodos] = useState(true);
+  const [cargandotipo, setCargandoTipo] = useState(true);
+  const [tipo, setTipo] = useState([]);
   const [mesesSeleccionados, setMesesSeleccionados] = useState({}); 
   const [filtros, setFiltros] = useState({
     documento: "",
@@ -38,11 +43,15 @@ const TesoreriaPension = () => {
     Grado: "",
     Grupo: "",
     Periodo: ""
-  }); 
+  });
+  const meses = [
+      "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+      "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre"
+    ]; 
   //para el sidebar
   const modulos = [
     { label: "Inicio", icon: <Home />,    path: "/home" },
-    { label: "Estadisticas",    path: "/tesoreria/estadisticas", roles: rolespermitidos },
+    
   ];
   //maps para acceso rápido a datos relacionados
   const salonesMap = {};
@@ -60,6 +69,10 @@ const TesoreriaPension = () => {
   const detalleMap = {};
   detalles.forEach(d=>{
     detalleMap[d.id_matricula] = d
+  });
+  const tipoMap = {};
+  tipo.forEach(t=>{
+    tipoMap[t.nombre] = t
   });
 //crear detalle
 
@@ -108,9 +121,9 @@ const cargarEstudiantes = async (id_periodo) => {
     }
   };
 
-  const cargarDetalles = async (id_periodo) => {
+  const cargarDetalles = async (id_periodo, id_tipo) => {
     try {
-      const res = await alldetallematriculabyperiodoRequest(id_periodo);
+      const res = await alldetallematriculabyperiodoRequest(id_periodo, id_tipo);
       Setdetalles(res.data);
     } catch (error) {
       console.error("Error cargando detalle matrículas:", error);
@@ -128,21 +141,33 @@ const cargarEstudiantes = async (id_periodo) => {
     }
   };
 
+    const cargarTipos = async () => {
+    try {
+      const res = await alltipoconceptoRequest();
+      setTipo(res.data);
+      setCargandoTipo(false);
+    } catch (error) {
+      console.error("Error cargando periodos:", error);
+    }
+  };
+
   useEffect(() => {
     cargarPeriodos();
+    cargarTipos();
   }, []);    
   
   
   useEffect(() => {
       const idPeriodoActual = periodoMapname[filtros.Periodo]?.id_periodo;
-      if(idPeriodoActual){
+      const tipoexiste = (tipoMap[tiporecibed] && !cargandotipo) ? true : false;
+      if(idPeriodoActual && tipoexiste){
+      const id_tipo=tipoMap[tiporecibed]?.id_tipo;
       cargarEstudiantes(idPeriodoActual);
       cargarSalones(idPeriodoActual);
       cargarMatriculas(idPeriodoActual);
-      cargarDetalles(idPeriodoActual);
-     
+      cargarDetalles(idPeriodoActual, id_tipo);
       }  
-    }, [filtros.Periodo]);
+    }, [filtros.Periodo, tipo]);
     
   useEffect(() => {
     const Matriculados = estudiantes.filter(e => matriculasMap[e.id_estudiante]);
@@ -183,21 +208,28 @@ const cargarEstudiantes = async (id_periodo) => {
                   
                      <ActionButtons
                        filaSeleccionada={fila}
-                       botones={roles.some(rol => rolespermitidos.includes(rol)) ? [
+                       botones={(roles.some(rol => rolespermitidos.includes(rol)) && tipoMap[tiporecibed] && !cargandotipo ) ? [
                          { label: "Validar Pago",  
                            onClick: () => {  setModal(true); }, 
                            siempreActivo: false , variante: "primary", 
-                           disabled: matriculasMap[fila?.id_estudiante]  || !periodoMapname[filtros.Periodo]?.activo || 
+                           disabled: (detalleMap[matriculasMap[fila?.id_estudiante]?.id_matricula]?.mes == mesesSeleccionados[fila?.id_estudiante])  || !periodoMapname[filtros.Periodo]?.activo || 
                                      (fila &&  salonesMap[fila.id_salon]?.id_periodo !== periodoMapname[filtros.Periodo]?.id_periodo)  },
+                          { label: "Ver",  
+                           onClick: () => {  setModalVer(true); }, 
+                           siempreActivo: false , variante: "secondary", 
+                           disabled: (detalleMap[matriculasMap[fila?.id_estudiante]?.id_matricula]?.mes == mesesSeleccionados[fila?.id_estudiante])  || !periodoMapname[filtros.Periodo]?.activo || 
+                                     (fila &&  salonesMap[fila.id_salon]?.id_periodo !== periodoMapname[filtros.Periodo]?.id_periodo)  }
+                              
                                ] : []}
                      />
                    }
                  >
-      {cargandoRol || cargandoPeriodos ? (
+                  
+      {cargandoRol || cargandoPeriodos || cargandotipo? (
               <div className="text-gray-400 italic text-center">
-                Cargando Modulo Matricula...
+                Cargando Modulo {tiporecibed}...
               </div>
-            ) : (            
+            ) : (     tipoMap[tiporecibed] && !cargandotipo ? (      
             roles.some(rol => rolespermitidos.includes(rol)) ? (
             <div>
                  <SearchBar
@@ -257,10 +289,7 @@ const cargarEstudiantes = async (id_periodo) => {
                                           key: "mes",
                                           label: "Mes",
                                           render: (_, val) => {
-    const meses = [
-      "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-      "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre"
-    ];
+    
 
     const idEst = val.id_estudiante;
 
@@ -294,7 +323,7 @@ const cargarEstudiantes = async (id_periodo) => {
                                                                 { key: "pago", label: "Pago",
                                                                       render: (_,val) => {
                                                                         const idEst = val.id_estudiante;
-                                                                        const estadodetalle=Array.from(new Set(Object.values(detalleMap).filter(d => d.id_matricula == matriculasMap[idEst]?.id_matricula).filter(d => d.mes == mesesSeleccionados[idEst]).map(d => d.estado).filter(Boolean)))
+                                                                        const estadodetalle=Array.from(new Set(Object.values(detalleMap).filter(d => d.id_matricula == matriculasMap[idEst]?.id_matricula).filter(d => d.mes == mesesSeleccionados[idEst].toLowerCase()).map(d => d.estado).filter(Boolean)))
                                                                        return(
                                                                         <span className={estadodetalle.length > 0   ? "badge--ok" : "badge--no"}>
                                                                           {estadodetalle.length > 0  ? "Pagado" : "Pendiente"}
@@ -304,7 +333,7 @@ const cargarEstudiantes = async (id_periodo) => {
                                                                     { key: "fecha_pago", label: "Fecha de Pago",
                                                                       render: (_,val) => {
                                                                         const idEst = val.id_estudiante;
-                                                                        const estadodetalle=Array.from(new Set(Object.values(detalleMap).filter(d => d.id_matricula == matriculasMap[idEst]?.id_matricula).filter(d => d.mes == mesesSeleccionados[idEst]).map(d => d.created_at).filter(Boolean)))
+                                                                        const estadodetalle=Array.from(new Set(Object.values(detalleMap).filter(d => d.id_matricula == matriculasMap[idEst]?.id_matricula).filter(d => d.mes == mesesSeleccionados[idEst].toLowerCase()).map(d => d.created_at).filter(Boolean)))
                                                           
                                                                         return(
                                                                         <span>{estadodetalle.length > 0  ? new Date(estadodetalle).toLocaleDateString() : "---"}</span>
@@ -312,13 +341,18 @@ const cargarEstudiantes = async (id_periodo) => {
                                                                      }}
                                                                   ]}
                                                                   rows={estudiantesFiltrados} 
-                                                                  onRowClick={(f) => {setFila(f); console.log(mesesSeleccionados[f?.id_estudiante]);} }
+                                                                  onRowClick={(f) => {setFila(f); console.log((detalleMap[matriculasMap[f?.id_estudiante]?.id_matricula]?.mes));} }
                                                                 />
                                                                 </div>
                                                                 ) : (
                                                                 <div className="text-gray-400 italic text-center">
                                                                 Tu usuario no tiene permisos para acceder a este módulo.
-                                                               </div>)  )}
+                                                               </div>)  ) : (
+                                                                <div className="text-gray-400 italic text-center">
+                                                                Error tipo detalle {tiporecibed} no existe
+                                                               </div>
+
+                                                               ))}
                                                         </ModuleLayout>
                  
     
@@ -330,7 +364,7 @@ const cargarEstudiantes = async (id_periodo) => {
     />
    
     <Modal
-      title={`El estudiante ${fila?.nombre || ""} ya ha realizado el pago de los meses $.`}
+      title={`El estudiante ya ha realizado el pago de los meses`}
       isOpen={modalVer}
       onAccept={() => { setModalVer(false); }}
       onCancel={() => setModalVer(false)}
