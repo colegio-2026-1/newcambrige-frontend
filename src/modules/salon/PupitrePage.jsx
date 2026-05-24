@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { getPupitresRequest } from "../../api/endpoints";
 
-
 import Header from "../../components/layout/Header";
 import ModuleLayout from "../../components/layout/ModuleLayout";
 import Sidebar from "../../components/layout/Sidebar";
@@ -27,23 +26,34 @@ export default function PupitrePage() {
     { key: "nombre", label: "NOMBRE COMPLETO" },
     { key: "grado", label: "GRADO" },
     { key: "grupo", label: "GRUPO" },
-    { key: "estado", label: "ESTADO" },
+    { key: "pago", label: "PAGO" },
     { key: "fecha_pago", label: "FECHA DE PAGO" },
   ];
 
-  // ✅ TRAER DATOS DEL API
+  // TRAER DATOS
   useEffect(() => {
+
     const obtenerPupitres = async () => {
+
       try {
+
         setLoading(true);
+
         const response = await getPupitresRequest();
+
         console.log("Respuesta API pupitres:", response.data);
+
         const data = response.data;
+
         setRows(Array.isArray(data) ? data : []);
+
       } catch (error) {
+
         console.error("Error:", error);
+
         setError(error.message);
-        // Si hay error, mantén los datos de ejemplo
+
+        // DATOS DE EJEMPLO
         setRows([
           {
             id: 1,
@@ -51,7 +61,7 @@ export default function PupitrePage() {
             nombre: "Nombre Gomez Somel",
             grado: "10",
             grupo: "A",
-            estado: "Pendiente",
+            pago: "Pendiente",
             fecha_pago: "",
           },
           {
@@ -60,7 +70,7 @@ export default function PupitrePage() {
             nombre: "Juan Pérez",
             grado: "9",
             grupo: "B",
-            estado: "Pendiente",
+            pago: "Pendiente",
             fecha_pago: "",
           },
           {
@@ -69,19 +79,26 @@ export default function PupitrePage() {
             nombre: "Laura Gómez",
             grado: "11",
             grupo: "A",
-            estado: "Pagado",
+            pago: "Pagado",
             fecha_pago: "12/05/2026",
           },
         ]);
+
       } finally {
+
         setLoading(false);
+
       }
+
     };
 
     obtenerPupitres();
+
   }, []);
 
+  // SEARCH
   const handleSearch = (filtros) => {
+
     console.log(filtros);
 
     setLoading(true);
@@ -89,71 +106,84 @@ export default function PupitrePage() {
     setTimeout(() => {
       setLoading(false);
     }, 800);
+
   };
 
-  // DEBUG: Log cada vez que fila cambia
+  // FILA
   const handleRowClick = (f) => {
+
     console.log("Fila clickeada:", f);
+
     setFila(f);
+
   };
 
-  // DEBUG: Log cuando se abre/cierra modal
+  // MODAL
   const handleModalOpen = () => {
+
+    if (!fila) {
+      alert("Debes seleccionar una fila");
+      return;
+    }
+
     console.log("Modal abierto, fila actual:", fila);
+
     setModal(true);
+
   };
 
   if (loading) return <div>Cargando pupitres...</div>;
 
   return (
+
     <div>
 
       <style>
         {`
-    .action-btn--primary:hover{
-      background: #2E5FA7 !important;
-      transform: translateY(2px);
-    }
+          .action-btn--primary:hover{
+            background: #2E5FA7 !important;
+            transform: translateY(2px);
+          }
 
-    .datatable-row--selected td{
-      background: #E8E3E3 !important;
-    }
+          .datatable-row--selected td{
+            background: #E8E3E3 !important;
+          }
 
-    .datatable-row--selected .datatable-td-check{
-      background: #E8E3E3 !important;
-    }
+          .datatable-row--selected .datatable-td-check{
+            background: #E8E3E3 !important;
+          }
 
-    .datatable-check{
-      display: inline-flex !important;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem !important;
-      font-weight: bold;
-      width: 100%;
-      color: #2E5FA7 !important;
-    }
+          .datatable-check{
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem !important;
+            font-weight: bold;
+            width: 100%;
+            color: #2E5FA7 !important;
+          }
 
-    .datatable-td-check{
-      width: 50px !important;
-      min-width: 50px !important;
-      max-width: 50px !important;
-      text-align: center !important;
-      padding: 0.75rem !important;
-      background: #FFFFFF;
-    }
+          .datatable-td-check{
+            width: 50px !important;
+            min-width: 50px !important;
+            max-width: 50px !important;
+            text-align: center !important;
+            padding: 0.75rem !important;
+            background: #FFFFFF;
+          }
 
-    .datatable-row--selected .datatable-td-check {
-      background: #E8E3E3 !important;
-    }
+          .datatable-row--selected .datatable-td-check {
+            background: #E8E3E3 !important;
+          }
 
-    .datatable-row--clickable{
-      cursor: pointer;
-    }
+          .datatable-row--clickable{
+            cursor: pointer;
+          }
 
-    .datatable-row--clickable:hover {
-      background-color: #F5F5F5 !important;
-    }
-  `}
+          .datatable-row--clickable:hover {
+            background-color: #F5F5F5 !important;
+          }
+        `}
       </style>
 
       {/* HEADER */}
@@ -161,6 +191,7 @@ export default function PupitrePage() {
 
       {/* LAYOUT */}
       <ModuleLayout
+
         sidebar={
           <Sidebar
             moduloActual=""
@@ -196,6 +227,7 @@ export default function PupitrePage() {
             />
           </div>
         }
+
       >
 
         {/* SEARCHBAR */}
@@ -244,12 +276,14 @@ export default function PupitrePage() {
             border: "1px solid #D9D9D9",
           }}
         >
+
           <DataTable
             columns={columns}
             rows={rows}
             emptyText=""
             onRowClick={handleRowClick}
           />
+
         </div>
 
       </ModuleLayout>
@@ -262,11 +296,15 @@ export default function PupitrePage() {
         values={{}}
         onChange={() => {}}
         onAccept={() => {
+
           console.log("Pago validado para:", fila);
+
           setModal(false);
+
         }}
         onCancel={() => setModal(false)}
       >
+
         <div
           style={{
             textAlign: "center",
@@ -275,20 +313,41 @@ export default function PupitrePage() {
             padding: "1rem",
           }}
         >
+
           ¿CONFIRMAS QUE EL ESTUDIANTE
+
           <br />
-          <strong>[{fila?.nombre ? fila.nombre.toUpperCase() : "SIN SELECCIONAR"}]</strong>
+
+          <strong>
+            [{fila?.nombre ? fila.nombre.toUpperCase() : "SIN SELECCIONAR"}]
+          </strong>
+
           <br />
+
           HA CUMPLIDO CON EL PAGO DEL
+
           <br />
+
           CONCEPTO DE PUPITRES?
+
           <br />
-          {/* DEBUG: Mostrar el objeto fila */}
-          <div style={{fontSize: "0.8rem", marginTop: "1rem", color: "#666"}}>
+
+          <div
+            style={{
+              fontSize: "0.8rem",
+              marginTop: "1rem",
+              color: "#666",
+            }}
+          >
             DEBUG: {fila ? JSON.stringify(fila) : "No hay fila seleccionada"}
           </div>
+
         </div>
+
       </Modal>
+
     </div>
+
   );
+
 }
