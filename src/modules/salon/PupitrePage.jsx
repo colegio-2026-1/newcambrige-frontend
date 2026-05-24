@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { getPupitresRequest } from "../../api/endpoints";
+import { useNavigate } from "react-router-dom";
+import { getPupitresRequest, updatePupitreRequest } from "../../api/endpoints";
 
 import Header from "../../components/layout/Header";
 import ModuleLayout from "../../components/layout/ModuleLayout";
@@ -11,10 +12,12 @@ import ActionButtons from "../../components/shared/ActionButtons";
 import Modal from "../../components/shared/Modal";
 
 export default function PupitrePage() {
+  const navigate = useNavigate();
   const [fila, setFila] = useState(null);
   const [modal, setModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState([]);
+  const [rowsFiltered, setRowsFiltered] = useState([]);
   const [error, setError] = useState(null);
 
   const columns = [
@@ -22,7 +25,20 @@ export default function PupitrePage() {
     { key: "nombre", label: "NOMBRE COMPLETO" },
     { key: "grado", label: "GRADO" },
     { key: "grupo", label: "GRUPO" },
-    { key: "estado", label: "PAGO" },
+    {
+      key: "estado",
+      label: "PAGO",
+      render: (val, row) => (
+        <span
+          className={val ? "badge--ok" : "badge--warning"}
+          style={{ cursor: "pointer" }}
+          onClick={() => handleToggleEstado(row)}
+          title="Click para cambiar estado"
+        >
+          {val ? "✓" : "–"}
+        </span>
+      ),
+    },
     { key: "fecha_pago", label: "FECHA DE PAGO" },
   ];
 
@@ -39,14 +55,13 @@ export default function PupitrePage() {
         const data = response.data;
 
         setRows(Array.isArray(data) ? data : []);
-
+        setRowsFiltered(Array.isArray(data) ? data : []);
         setError(null);
       } catch (error) {
         console.error("Error:", error);
         setError(error.message);
-
-        // SIN DATOS MOCK: solo backend
         setRows([]);
+        setRowsFiltered([]);
       } finally {
         setLoading(false);
       }
@@ -55,21 +70,145 @@ export default function PupitrePage() {
     obtenerPupitres();
   }, []);
 
-  const handleSearch = (filtros) => {
-    console.log("Filtros:", filtros);
-    // aquí luego puedes conectar backend si tienes endpoint de búsqueda
+  // CAMBIAR ESTADO INDIVIDUAL
+  const handleToggleEstado = async (row) => {
+    try {
+      const nuevoEstado = !row.estado;
+      
+      // Actualizar en BD
+      await updatePupitreRequest(row.id_mantenimiento, { estado: nuevoEstado });
+
+      // Actualizar en el estado local
+      const rowsActualizados = rows.map((r) =>
+        r.id_mantenimiento === row.id_mantenimiento
+          ? { 
+              ...r, 
+              estado: nuevoEstado,
+              fecha_pago: nuevoEstado ? new Date().toLocaleDateString('es-ES') : ""
+            }
+          : r
+      );
+
+      setRows(rowsActualizados);
+      setRowsFiltered(rowsActualizados);
+      setFila(null);
+    } catch (error) {
+      console.error("Error al actualizar estado:", error);
+      alert("Error al actualizar el estado");
+    }
   };
 
-  const handleRowClick = (f) => {
-    setFila(f);
-  };
-
-  const handleModalOpen = () => {
+  // VALIDAR PAGO (abre modal de confirmación)
+  const handleValidarPago = () => {
     if (!fila) {
       alert("Debes seleccionar una fila");
       return;
     }
     setModal(true);
+  };
+
+  // CONFIRMAR VALIDACIÓN DE PAGO
+  const handleConfirmarPago = async () => {
+    try {
+      const nuevoEstado = true; // Marcar como pagado
+      
+      // Actualizar en BD
+      await updatePupitreRequest(fila.id_mantenimiento, { estado: nuevoEstado });
+
+      // Actualizar en el estado local
+      const rowsActualizados = rows.map((r) =>
+        r.id_mantenimiento === fila.id_mantenimiento
+          ? { 
+              ...r, 
+              estado: nuevoEstado,
+              fecha_pago: new Date().toLocaleDateString('es-ES')
+            }
+          : r
+      );
+
+      setRows(rowsActualizados);
+      setRowsFiltered(rowsActualizados);
+      setFila(null);
+      setModal(false);
+      
+      alert("Pago validado correctamente");
+    } catch (error) {
+      console.error("Error al validar pago:", error);
+      alert("Error al validar el pago");
+    }
+  };
+
+  // MARCAR TODO
+  const handleMarcarTodo = () => {
+    const cantidad = rowsFiltered.length;
+    const confirmacion = window.confirm(
+      `¿Confirmas marcar como pagado a los ${cantidad} estudiantes?`
+    );
+
+    if (!confirmacion) return;
+
+    const fechaHoy = new Date().toLocaleDateString('es-ES');
+    const rowsActualizados = rows.map((r) => ({ 
+      ...r, 
+      estado: true,
+      fecha_pago: fechaHoy
+    }));
+    
+    setRows(rowsActualizados);
+    setRowsFiltered(rowsActualizados);
+  };
+
+  // DESMARCAR TODO
+  const handleDesmarcarTodo = () => {
+    const cantidad = rowsFiltered.length;
+    const confirmacion = window.confirm(
+      `¿Confirmas marcar como pendiente a los ${cantidad} estudiantes?`
+    );
+
+    if (!confirmacion) return;
+
+    const rowsActualizados = rows.map((r) => ({ 
+      ...r, 
+      estado: false,
+      fecha_pago: ""
+    }));
+    
+    setRows(rowsActualizados);
+    setRowsFiltered(rowsActualizados);
+  };
+
+  // BUSCAR
+  const handleSearch = (filtros) => {
+    console.log("Filtros:", filtros);
+
+    // Filtrar por los criterios que vienen del SearchBar
+    let filtered = rows;
+
+    if (filtros.codigo) {
+      filtered = filtered.filter((r) =>
+        r.codigo?.toLowerCase().includes(filtros.codigo.toLowerCase())
+      );
+    }
+
+    if (filtros.nombre) {
+      filtered = filtered.filter((r) =>
+        r.nombre?.toLowerCase().includes(filtros.nombre.toLowerCase())
+      );
+    }
+
+    if (filtros.grado) {
+      filtered = filtered.filter((r) => r.grado?.toString() === filtros.grado);
+    }
+
+    if (filtros.grupo) {
+      filtered = filtered.filter((r) => r.grupo?.toString() === filtros.grupo);
+    }
+
+    setRowsFiltered(filtered);
+  };
+
+  const handleRowClick = (f) => {
+    setFila(f);
   };
 
   if (loading) return <div>Cargando pupitres...</div>;
@@ -78,12 +217,50 @@ export default function PupitrePage() {
 
   return (
     <div>
+      <style>
+        {`
+          .badge--ok {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            background: #D4EDDA;
+            color: #155724;
+            border-radius: 0.4rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+          }
+
+          .badge--ok:hover {
+            background: #28a745;
+            color: white;
+          }
+
+          .badge--warning {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            background: #FFF3CD;
+            color: #856404;
+            border-radius: 0.4rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+          }
+
+          .badge--warning:hover {
+            background: #ffc107;
+            color: white;
+          }
+        `}
+      </style>
+
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
 
       <ModuleLayout
         sidebar={
           <Sidebar
-            menuItems={[{ label: "Inicio", path: "/home" }]}
+            menuItems={[{ label: "Inicio", path: "/salon" }]}
             selectedMenu={"Inicio"}
             setSelectedMenu={() => {}}
             user="Nombre usuario"
@@ -96,6 +273,7 @@ export default function PupitrePage() {
               width: "100%",
               display: "flex",
               justifyContent: "flex-end",
+              gap: "0.5rem",
               paddingRight: "1rem",
               marginTop: "0.4rem",
             }}
@@ -103,13 +281,13 @@ export default function PupitrePage() {
             <ActionButtons
               filaSeleccionada={fila}
               botones={[
-                {
-                  label: "Validar Pago",
-                  onClick: handleModalOpen,
-                  variante: "primary",
-                },
-              ]}
-            />
+            {
+              label: "Validar Pago",
+              onClick: handleValidarPago,
+              variante: "primary",
+             },
+            ]}
+          />
           </div>
         }
       >
@@ -123,13 +301,13 @@ export default function PupitrePage() {
               key: "grado",
               label: "Grado",
               type: "select",
-              options: ["6", "7", "8", "9", "10", "11"],
+              options: ["6", "7", "8", "9", "10", "16"],
             },
             {
               key: "grupo",
               label: "Grupo",
               type: "select",
-              options: ["1", "2", "3"],
+              options: ["A", "B", "C"],
             },
             {
               key: "anio",
@@ -149,9 +327,21 @@ export default function PupitrePage() {
             border: "1px solid #D9D9D9",
           }}
         >
+          <div
+            style={{
+              padding: "0.5rem 1rem",
+              background: "#f5f5f5",
+              borderBottom: "1px solid #D9D9D9",
+              fontSize: "0.9rem",
+              fontWeight: "600",
+            }}
+          >
+            {rowsFiltered.length} estudiantes
+          </div>
+
           <DataTable
             columns={columns}
-            rows={rows}
+            rows={rowsFiltered}
             emptyText="No hay datos disponibles"
             onRowClick={handleRowClick}
           />
@@ -164,10 +354,7 @@ export default function PupitrePage() {
         fields={[]}
         values={{}}
         onChange={() => {}}
-        onAccept={() => {
-          console.log("Pago validado para:", fila);
-          setModal(false);
-        }}
+        onAccept={handleConfirmarPago}
         onCancel={() => setModal(false)}
       >
         <div

@@ -94,7 +94,7 @@ export default function BibliotecaPage() {
             grupo: p.grupo || "",
             titulo_libro: p.libro || "",
             fecha_entrega: p.fecha_devolucion || "",
-            estado: p.estado ? "Entregado" : "Pendiente",
+            estado: p.estado ? "Devuelto" : "Prestado",
           }))
         : [];
 
@@ -117,8 +117,8 @@ export default function BibliotecaPage() {
             nombre: l.nombre || "",
             autor: l.autor || "",
             edicion: l.edicion || "",
-            disponible: l.disponible ? "Disponible" : "No disponible",
-            estado_fisico: l.estado_fisico || "Bueno",
+            disponible: l.disponible ? "Disponible" : "Prestado",
+            estado_fisico: l.estado_fisico || "Excelente",
           }))
         : [];
 
@@ -195,13 +195,13 @@ export default function BibliotecaPage() {
       key: "disponible",
       label: "Disponibilidad",
       type: "select",
-      options: ["Disponible", "No disponible"],
+      options: ["Disponible", "Prestado"],
     },
     {
       key: "estado_fisico",
       label: "Estado Físico",
       type: "select",
-      options: ["Bueno", "Regular", "Dañado", "Muy dañado"],
+      options: ["Exclente", "Regular", "Malo"],
     },
   ];
 
