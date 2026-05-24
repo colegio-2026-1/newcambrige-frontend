@@ -36,14 +36,14 @@ export default function ActionButtons({
   return (
     <div className="action-buttons">
       {botones.map((btn, i) => {
-        const desactivado = !btn.siempreActivo && !filaSeleccionada;
+        const desactivado = (!btn.siempreActivo && !filaSeleccionada) || btn.disabled;
 
         return (
           <button
             key={i}
             className={`action-btn action-btn--${btn.variante ?? "primary"} ${desactivado ? "action-btn--disabled" : ""}`}
             onClick={() => !desactivado && btn.onClick?.(filaSeleccionada)}
-            disabled={desactivado}
+            disabled={desactivado }
             title={desactivado ? "Selecciona una fila primero" : btn.label}
           >
             {btn.label}

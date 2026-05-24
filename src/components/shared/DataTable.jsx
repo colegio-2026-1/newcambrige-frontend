@@ -47,6 +47,7 @@ export default function DataTable({
   rows = [],
   onRowClick,
   emptyText = "No se encontraron resultados",
+  
 }) {
   const [filaSeleccionada, setFilaSeleccionada] = useState(null);
 
