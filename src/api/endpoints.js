@@ -43,5 +43,5 @@ export const allestudiantesRequest = () => axiosClient.get("/api/estudiantes/");
 export const allrolesuserRequest = (id) => axiosClient.get(`/api/usuarios/${id}/roles`);
 export const allsalonesRequest = () => axiosClient.get("/api/salones/");
 export const allmatriculasRequest = () => axiosClient.get("/api/secretaria/matriculas/");
-export const allaniosacademicosRequest =() => axiosClient.get("/api/parametros/periodos");
+export const allaniosacademicosRequest =() => axiosClient.get("/api/parametros/parametrizacion/anio-escolar");
 export const crearMatriculaRequest = ({ estudiante_id, periodo_id }) => axiosClient.post(`/api/tesoreria/registrar-pago?estudiante_id=${estudiante_id}&periodo_id=${periodo_id}`, null);

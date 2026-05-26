@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getPupitresRequest, updatePupitreRequest } from "../../api/endpoints";
+
+import axiosClient from "../../api/axiosClient";
+
+import {
+  getPupitresRequest,
+  updatePupitreRequest,
+  allsalonesRequest,
+  allaniosacademicosRequest,
+} from "../../api/endpoints";
 
 import Header from "../../components/layout/Header";
 import ModuleLayout from "../../components/layout/ModuleLayout";
@@ -13,207 +21,384 @@ import Modal from "../../components/shared/Modal";
 
 export default function PupitrePage() {
   const navigate = useNavigate();
+
   const [fila, setFila] = useState(null);
+
   const [modal, setModal] = useState(false);
+
+  const [mensajeConfirmacion, setMensajeConfirmacion] = useState("");
+
   const [loading, setLoading] = useState(true);
+
   const [rows, setRows] = useState([]);
   const [rowsFiltered, setRowsFiltered] = useState([]);
+
+  const [salones, setSalones] = useState([]);
+  const [periodos, setPeriodos] = useState([]);
+
   const [error, setError] = useState(null);
+
+  // =========================
+  // MAPS RELACIONALES
+  // =========================
+
+  const salonesMap = {};
+
+  salones.forEach((s) => {
+    salonesMap[s.id_salon] = s;
+  });
+
+  const periodosMap = {};
+
+  periodos.forEach((p) => {
+    periodosMap[p.id_periodo] = p;
+  });
+
+  // =========================
+  // COLUMNAS TABLA
+  // =========================
 
   const columns = [
     { key: "codigo", label: "CÓDIGO" },
+
     { key: "nombre", label: "NOMBRE COMPLETO" },
-    { key: "grado", label: "GRADO" },
-    { key: "grupo", label: "GRUPO" },
+
     {
-      key: "estado",
-      label: "PAGO",
-      render: (val, row) => (
-        <span
-          className={val ? "badge--ok" : "badge--warning"}
-          style={{ cursor: "pointer" }}
-          onClick={() => handleToggleEstado(row)}
-          title="Click para cambiar estado"
-        >
-          {val ? "✓" : "–"}
+      key: "grado",
+      label: "GRADO",
+
+      render: (_, row) => (
+        <span>
+          {salonesMap[row.id_salon]?.grado ||
+            row.grado}
         </span>
       ),
     },
-    { key: "fecha_pago", label: "FECHA DE PAGO" },
+
+    {
+      key: "grupo",
+      label: "GRUPO",
+
+      render: (_, row) => (
+        <span>
+          {salonesMap[row.id_salon]?.grupo ||
+            row.grupo}
+        </span>
+      ),
+    },
+
+    {
+      key: "estado",
+      label: "PAGO",
+
+      render: (val) => (
+        <span
+          className={
+            val === "visto"
+              ? "badge--ok"
+              : "badge--warning"
+          }
+        >
+          {val === "visto" ? "✓" : "–"}
+        </span>
+      ),
+    },
+
+    {
+      key: "fecha_pago",
+      label: "FECHA DE PAGO",
+
+      render: (val) => {
+    if (!val || val === "") return <span>---</span>;
+    return <span>{val}</span>;  // 👈 Solo esto, ya viene formateada
+  },
+},
   ];
 
-  // TRAER DATOS SOLO BACKEND
+  // =========================
+  // CARGAR PUPITRES
+  // =========================
+
+  const cargarPupitres = async () => {
+    try {
+      const response = await getPupitresRequest();
+
+      const data = response.data || [];
+
+      setRows(data);
+
+      setRowsFiltered(data);
+    } catch (error) {
+      console.error(
+        "Error cargando pupitres:",
+        error
+      );
+
+      setError(error.message);
+    }
+  };
+
+  // =========================
+  // CARGAR SALONES
+  // =========================
+
+  const cargarSalones = async () => {
+    try {
+      const response = await allsalonesRequest();
+
+      setSalones(response.data || []);
+    } catch (error) {
+      console.error(
+        "Error cargando salones:",
+        error
+      );
+    }
+  };
+
+  // =========================
+  // CARGAR PERIODOS (USANDO ENDPOINT)
+  // =========================
+
+  const cargarPeriodos = async () => {
+    try {
+      const response = await allaniosacademicosRequest();
+
+      setPeriodos(response.data || []);
+
+      console.log(
+        "Periodos cargados:",
+        response.data
+      );
+    } catch (error) {
+      console.error(
+        "Error cargando periodos:",
+        error
+      );
+    }
+  };
+
+  // =========================
+  // USE EFFECT
+  // =========================
+
   useEffect(() => {
-    const obtenerPupitres = async () => {
+    const cargarTodo = async () => {
       try {
         setLoading(true);
 
-        const response = await getPupitresRequest();
-
-        console.log("Respuesta API pupitres:", response.data);
-
-        const data = response.data;
-
-        setRows(Array.isArray(data) ? data : []);
-        setRowsFiltered(Array.isArray(data) ? data : []);
-        setError(null);
+        await Promise.all([
+          cargarPupitres(),
+          cargarSalones(),
+          cargarPeriodos(),
+        ]);
       } catch (error) {
-        console.error("Error:", error);
-        setError(error.message);
-        setRows([]);
-        setRowsFiltered([]);
+        console.error(error);
       } finally {
         setLoading(false);
       }
     };
 
-    obtenerPupitres();
+    cargarTodo();
   }, []);
 
-  // CAMBIAR ESTADO INDIVIDUAL
-  const handleToggleEstado = async (row) => {
-    try {
-      const nuevoEstado = !row.estado;
-      
-      // Actualizar en BD
-      await updatePupitreRequest(row.id_mantenimiento, { estado: nuevoEstado });
+  // =========================
+  // FILTRAR
+  // =========================
 
-      // Actualizar en el estado local
-      const rowsActualizados = rows.map((r) =>
-        r.id_mantenimiento === row.id_mantenimiento
-          ? { 
-              ...r, 
-              estado: nuevoEstado,
-              fecha_pago: nuevoEstado ? new Date().toLocaleDateString('es-ES') : ""
-            }
-          : r
-      );
-
-      setRows(rowsActualizados);
-      setRowsFiltered(rowsActualizados);
-      setFila(null);
-    } catch (error) {
-      console.error("Error al actualizar estado:", error);
-      alert("Error al actualizar el estado");
-    }
-  };
-
-  // VALIDAR PAGO (abre modal de confirmación)
-  const handleValidarPago = () => {
-    if (!fila) {
-      alert("Debes seleccionar una fila");
-      return;
-    }
-    setModal(true);
-  };
-
-  // CONFIRMAR VALIDACIÓN DE PAGO
-  const handleConfirmarPago = async () => {
-    try {
-      const nuevoEstado = true; // Marcar como pagado
-      
-      // Actualizar en BD
-      await updatePupitreRequest(fila.id_mantenimiento, { estado: nuevoEstado });
-
-      // Actualizar en el estado local
-      const rowsActualizados = rows.map((r) =>
-        r.id_mantenimiento === fila.id_mantenimiento
-          ? { 
-              ...r, 
-              estado: nuevoEstado,
-              fecha_pago: new Date().toLocaleDateString('es-ES')
-            }
-          : r
-      );
-
-      setRows(rowsActualizados);
-      setRowsFiltered(rowsActualizados);
-      setFila(null);
-      setModal(false);
-      
-      alert("Pago validado correctamente");
-    } catch (error) {
-      console.error("Error al validar pago:", error);
-      alert("Error al validar el pago");
-    }
-  };
-
-  // MARCAR TODO
-  const handleMarcarTodo = () => {
-    const cantidad = rowsFiltered.length;
-    const confirmacion = window.confirm(
-      `¿Confirmas marcar como pagado a los ${cantidad} estudiantes?`
-    );
-
-    if (!confirmacion) return;
-
-    const fechaHoy = new Date().toLocaleDateString('es-ES');
-    const rowsActualizados = rows.map((r) => ({ 
-      ...r, 
-      estado: true,
-      fecha_pago: fechaHoy
-    }));
-    
-    setRows(rowsActualizados);
-    setRowsFiltered(rowsActualizados);
-  };
-
-  // DESMARCAR TODO
-  const handleDesmarcarTodo = () => {
-    const cantidad = rowsFiltered.length;
-    const confirmacion = window.confirm(
-      `¿Confirmas marcar como pendiente a los ${cantidad} estudiantes?`
-    );
-
-    if (!confirmacion) return;
-
-    const rowsActualizados = rows.map((r) => ({ 
-      ...r, 
-      estado: false,
-      fecha_pago: ""
-    }));
-    
-    setRows(rowsActualizados);
-    setRowsFiltered(rowsActualizados);
-  };
-
-  // BUSCAR
-  const handleSearch = (filtros) => {
-    console.log("Filtros:", filtros);
-
-    // Filtrar por los criterios que vienen del SearchBar
+  const FiltrarEstudiantes = (filtros) => {
     let filtered = rows;
 
-    if (filtros.codigo) {
+    // CÓDIGO
+    if (filtros.documento) {
       filtered = filtered.filter((r) =>
-        r.codigo?.toLowerCase().includes(filtros.codigo.toLowerCase())
+        r.codigo
+          ?.toString()
+          .includes(filtros.documento)
       );
     }
 
+    // NOMBRE
     if (filtros.nombre) {
       filtered = filtered.filter((r) =>
-        r.nombre?.toLowerCase().includes(filtros.nombre.toLowerCase())
+        r.nombre
+          ?.toLowerCase()
+          .includes(
+            filtros.nombre.toLowerCase()
+          )
       );
     }
 
-    if (filtros.grado) {
-      filtered = filtered.filter((r) => r.grado?.toString() === filtros.grado);
+    // GRADO
+    if (filtros.Grado) {
+      filtered = filtered.filter(
+        (r) =>
+          (
+            salonesMap[r.id_salon]?.grado ||
+            r.grado
+          )?.toString() ===
+          filtros.Grado.toString()
+      );
     }
 
-    if (filtros.grupo) {
-      filtered = filtered.filter((r) => r.grupo?.toString() === filtros.grupo);
+    // GRUPO
+    if (filtros.Grupo) {
+      filtered = filtered.filter(
+        (r) =>
+          (
+            salonesMap[r.id_salon]?.grupo ||
+            r.grupo
+          )?.toString() ===
+          filtros.Grupo.toString()
+      );
+    }
+
+    // PERIODO
+    if (filtros.Periodo) {
+      filtered = filtered.filter((r) => {
+        const salon =
+          salonesMap[r.id_salon];
+
+        const periodo =
+          periodosMap[salon?.id_periodo];
+
+        return (
+          periodo?.nombre?.toString() ===
+          filtros.Periodo.toString()
+        );
+      });
     }
 
     setRowsFiltered(filtered);
   };
 
+  // =========================
+  // CLICK FILA
+  // =========================
+
   const handleRowClick = (f) => {
+    console.log(
+      "Fila seleccionada:",
+      f
+    );
+
     setFila(f);
+
+    setMensajeConfirmacion("");
   };
 
-  if (loading) return <div>Cargando pupitres...</div>;
+  // =========================
+  // VALIDAR PAGO
+  // =========================
 
-  if (error) return <div>Error cargando datos: {error}</div>;
+  const handleValidarPago = () => {
+    if (!fila) {
+      alert(
+        "Debes seleccionar una fila"
+      );
+
+      return;
+    }
+
+    setMensajeConfirmacion("");
+
+    setModal(true);
+  };
+
+  // =========================
+  // CONFIRMAR PAGO
+  // =========================
+
+  const handleConfirmarPago = async () => {
+    try {
+      const nuevoEstado = "visto";
+
+      const fechaActual = new Date()
+        .toISOString()
+        .split("T")[0];
+
+      // Realizar la actualización en el servidor
+      await updatePupitreRequest(
+        fila.id_mantenimiento,
+        {
+          estado: nuevoEstado,
+          fecha_pago: fechaActual,
+        }
+      );
+
+      // Actualizar el estado local con la fecha correcta
+      const rowsActualizados = rows.map(
+        (r) =>
+          r.id_mantenimiento ===
+          fila.id_mantenimiento
+            ? {
+                ...r,
+                estado: nuevoEstado,
+                fecha_pago: fechaActual,
+              }
+            : r
+      );
+
+      setRows(rowsActualizados);
+      setRowsFiltered(rowsActualizados);
+
+      // Actualizar fila seleccionada para que refleje cambios
+      setFila({
+        ...fila,
+        estado: nuevoEstado,
+        fecha_pago: fechaActual,
+      });
+
+      // Mostrar mensaje de confirmación
+      setMensajeConfirmacion(
+        `El pago de ${fila.nombre} fue validado correctamente`
+      );
+
+      // Cerrar modal después de 2 segundos
+      setTimeout(() => {
+        setModal(false);
+        setMensajeConfirmacion("");
+        setFila(null);
+      }, 2000);
+    } catch (error) {
+      console.error(
+        "Error al validar pago:",
+        error.response?.data || error
+      );
+
+      setMensajeConfirmacion(
+        "Error al validar el pago. Por favor, intenta de nuevo."
+      );
+
+      // Cerrar modal después de 3 segundos en caso de error
+      setTimeout(() => {
+        setModal(false);
+        setMensajeConfirmacion("");
+      }, 3000);
+    }
+  };
+
+  // =========================
+  // LOADING / ERROR
+  // =========================
+
+  if (loading)
+    return (
+      <div>
+        Cargando pupitres...
+      </div>
+    );
+
+  if (error)
+    return (
+      <div>
+        Error cargando datos:
+        {error}
+      </div>
+    );
+
+  // =========================
+  // RENDER
+  // =========================
 
   return (
     <div>
@@ -227,13 +412,6 @@ export default function PupitrePage() {
             border-radius: 0.4rem;
             font-weight: 600;
             font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-          }
-
-          .badge--ok:hover {
-            background: #28a745;
-            color: white;
           }
 
           .badge--warning {
@@ -244,13 +422,6 @@ export default function PupitrePage() {
             border-radius: 0.4rem;
             font-weight: 600;
             font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-          }
-
-          .badge--warning:hover {
-            background: #ffc107;
-            color: white;
           }
         `}
       </style>
@@ -260,11 +431,18 @@ export default function PupitrePage() {
       <ModuleLayout
         sidebar={
           <Sidebar
-            menuItems={[{ label: "Inicio", path: "/salon" }]}
+            menuItems={[
+              {
+                label: "Inicio",
+                path: "/salon",
+              },
+            ]}
             selectedMenu={"Inicio"}
             setSelectedMenu={() => {}}
             user="Nombre usuario"
-            logout={() => console.log("logout")}
+            logout={() =>
+              console.log("logout")
+            }
           />
         }
         actions={
@@ -272,7 +450,8 @@ export default function PupitrePage() {
             style={{
               width: "100%",
               display: "flex",
-              justifyContent: "flex-end",
+              justifyContent:
+                "flex-end",
               gap: "0.5rem",
               paddingRight: "1rem",
               marginTop: "0.4rem",
@@ -281,41 +460,86 @@ export default function PupitrePage() {
             <ActionButtons
               filaSeleccionada={fila}
               botones={[
-            {
-              label: "Validar Pago",
-              onClick: handleValidarPago,
-              variante: "primary",
-             },
-            ]}
-          />
+                {
+                  label: "Validar Pago",
+
+                  onClick:
+                    handleValidarPago,
+                  disabled: !fila || fila?.estado === "visto",  //  Agrega esto
+                  variante: "primary",
+                },
+              ]}
+            />
           </div>
         }
       >
         <SearchBar
-          loading={loading}
-          onSearch={handleSearch}
           fields={[
-            { key: "codigo", label: "Código", type: "text" },
-            { key: "nombre", label: "Nombre", type: "text" },
             {
-              key: "grado",
+              key: "documento",
+              label: "Código",
+              type: "text",
+            },
+
+            {
+              key: "nombre",
+              label: "Nombre",
+              type: "text",
+            },
+
+            {
+              key: "Grado",
               label: "Grado",
               type: "select",
-              options: ["6", "7", "8", "9", "10", "16"],
+
+              options: Array.from(
+                new Set(
+                  Object.values(
+                    salonesMap
+                  )
+                    .map((s) => s.grado)
+                    .filter(Boolean)
+                )
+              ),
             },
+
             {
-              key: "grupo",
+              key: "Grupo",
               label: "Grupo",
               type: "select",
-              options: ["A", "B", "C"],
+
+              options: Array.from(
+                new Set(
+                  Object.values(
+                    salonesMap
+                  )
+                    .map((s) => s.grupo)
+                    .filter(Boolean)
+                )
+              ),
             },
+
             {
-              key: "anio",
-              label: "Año",
+              key: "Periodo",
+              label: "Periodo",
               type: "select",
-              options: ["2025", "2026"],
+
+              options: Array.from(
+                new Set(
+                  Object.values(
+                    periodosMap
+                  )
+                    .map((p) => p.nombre)
+                    .filter(Boolean)
+                )
+              ),
             },
           ]}
+          onSearch={(f) => {
+            FiltrarEstudiantes(f);
+
+            console.log(f);
+          }}
         />
 
         <div
@@ -324,58 +548,79 @@ export default function PupitrePage() {
             background: "#FFFFFF",
             borderRadius: "0.8rem",
             overflow: "hidden",
-            border: "1px solid #D9D9D9",
+            border:
+              "1px solid #D9D9D9",
           }}
         >
           <div
             style={{
               padding: "0.5rem 1rem",
               background: "#f5f5f5",
-              borderBottom: "1px solid #D9D9D9",
+              borderBottom:
+                "1px solid #D9D9D9",
               fontSize: "0.9rem",
               fontWeight: "600",
             }}
           >
-            {rowsFiltered.length} estudiantes
+            {rowsFiltered.length}{" "}
+            estudiantes
           </div>
 
           <DataTable
             columns={columns}
             rows={rowsFiltered}
             emptyText="No hay datos disponibles"
-            onRowClick={handleRowClick}
+            onRowClick={
+              handleRowClick
+            }
           />
         </div>
       </ModuleLayout>
 
       <Modal
-        title="CONFIRMACIÓN"
-        isOpen={modal}
-        fields={[]}
-        values={{}}
-        onChange={() => {}}
-        onAccept={handleConfirmarPago}
-        onCancel={() => setModal(false)}
+  title="CONFIRMACIÓN"
+  isOpen={modal}
+  fields={[]}
+  values={{}}
+  onChange={() => {}}
+  onAccept={handleConfirmarPago}
+  onCancel={() => {
+    setModal(false);
+    setMensajeConfirmacion("");
+  }}
+>
+  <div
+    style={{
+      textAlign: "center",
+      fontSize: "1.2rem",
+      lineHeight: 1.6,
+      padding: "2rem 1rem",
+      minHeight: "150px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    }}
+  >
+    {!mensajeConfirmacion ? (
+      <div>
+        <p>¿CONFIRMAS QUE EL ESTUDIANTE</p>
+        <strong style={{ fontSize: "1.4rem", color: "#1976d2", display: "block", margin: "1rem 0" }}>
+          {fila?.nombre || "SIN ESTUDIANTE"}
+        </strong>
+        <p>HA CUMPLIDO CON EL PAGO DEL CONCEPTO DE PUPITRES?</p>
+      </div>
+    ) : (
+      <strong
+        style={{
+          fontSize: "1.3rem",
+          color: mensajeConfirmacion.includes("Error") ? "#d32f2f" : "#388e3c",
+        }}
       >
-        <div
-          style={{
-            textAlign: "center",
-            fontSize: "1.4rem",
-            lineHeight: 1.5,
-            padding: "1rem",
-          }}
-        >
-          ¿CONFIRMAS QUE EL ESTUDIANTE
-          <br />
-          <strong>
-            [{fila?.nombre?.toUpperCase() || "SIN SELECCIONAR"}]
-          </strong>
-          <br />
-          HA CUMPLIDO CON EL PAGO DEL
-          <br />
-          CONCEPTO DE PUPITRES?
-        </div>
-      </Modal>
+        {mensajeConfirmacion}
+      </strong>
+    )}
+  </div>
+</Modal>
     </div>
   );
 }
