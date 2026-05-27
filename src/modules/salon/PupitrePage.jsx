@@ -109,10 +109,10 @@ export default function PupitrePage() {
       label: "FECHA DE PAGO",
 
       render: (val) => {
-    if (!val || val === "") return <span>---</span>;
-    return <span>{val}</span>;  // 👈 Solo esto, ya viene formateada
-  },
-},
+        if (!val || val === "") return <span>---</span>;
+        return <span>{val}</span>;  // Solo esto, ya viene formateada
+      },
+    },
   ];
 
   // =========================
@@ -310,13 +310,14 @@ export default function PupitrePage() {
 
   const handleConfirmarPago = async () => {
     try {
+      if (!fila) return;
+
       const nuevoEstado = "visto";
 
       const fechaActual = new Date()
         .toISOString()
         .split("T")[0];
 
-      // Realizar la actualización en el servidor
       await updatePupitreRequest(
         fila.id_mantenimiento,
         {
@@ -325,56 +326,40 @@ export default function PupitrePage() {
         }
       );
 
-      // Actualizar el estado local con la fecha correcta
-      const rowsActualizados = rows.map(
-        (r) =>
-          r.id_mantenimiento ===
-          fila.id_mantenimiento
-            ? {
-                ...r,
-                estado: nuevoEstado,
-                fecha_pago: fechaActual,
-              }
-            : r
+      const rowsActualizados = rows.map((r) =>
+        r.id_mantenimiento === fila.id_mantenimiento
+          ? {
+              ...r,
+              estado: nuevoEstado,
+              fecha_pago: fechaActual,
+            }
+          : r
       );
 
       setRows(rowsActualizados);
       setRowsFiltered(rowsActualizados);
 
-      // Actualizar fila seleccionada para que refleje cambios
-      setFila({
-        ...fila,
-        estado: nuevoEstado,
-        fecha_pago: fechaActual,
-      });
+      setFila(null);
 
-      // Mostrar mensaje de confirmación
-      setMensajeConfirmacion(
-        `El pago de ${fila.nombre} fue validado correctamente`
-      );
+      // CERRAR MODAL
+      setModal(false);
 
-      // Cerrar modal después de 2 segundos
-      setTimeout(() => {
-        setModal(false);
-        setMensajeConfirmacion("");
-        setFila(null);
-      }, 2000);
     } catch (error) {
       console.error(
         "Error al validar pago:",
         error.response?.data || error
       );
 
-      setMensajeConfirmacion(
-        "Error al validar el pago. Por favor, intenta de nuevo."
+      alert(
+        "Error al validar el pago"
       );
-
-      // Cerrar modal después de 3 segundos en caso de error
-      setTimeout(() => {
-        setModal(false);
-        setMensajeConfirmacion("");
-      }, 3000);
     }
+  };
+
+  const cerrarModal = () => {
+    setModal(false);
+    setMensajeConfirmacion("");
+    setFila(null);
   };
 
   // =========================
@@ -423,6 +408,35 @@ export default function PupitrePage() {
             font-weight: 600;
             font-size: 0.9rem;
           }
+
+          /* Aseguramos el centrado total del wrapper de campos en este modal */
+          .confirmacion-modal-fix .modal-fields {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 100% !important;
+          }
+
+          /* Forzamos que la fila de campos sea un contenedor en bloque y centrado */
+          .confirmacion-modal-fix .modal-field {
+            display: block !important;
+            width: 100% !important;
+            text-align: center !important;
+          }
+
+          /* Quitamos estilos de etiquetas tradicionales heredados de Modal.css que alinean a la izquierda */
+          .confirmacion-modal-fix .modal-label {
+            display: block !important;
+            text-align: center !important;
+            width: 100% !important;
+            margin: 0 auto !important;
+          }
+          
+          /* Escondemos por completo el input renderizado por defecto */
+          .confirmacion-modal-fix .modal-input {
+            display: none !important;
+          }
         `}
       </style>
 
@@ -455,6 +469,7 @@ export default function PupitrePage() {
               gap: "0.5rem",
               paddingRight: "1rem",
               marginTop: "0.4rem",
+              paddingTop: "0.4rem",
             }}
           >
             <ActionButtons
@@ -465,7 +480,7 @@ export default function PupitrePage() {
 
                   onClick:
                     handleValidarPago,
-                  disabled: !fila || fila?.estado === "visto",  //  Agrega esto
+                  disabled: !fila || fila?.estado === "visto",
                   variante: "primary",
                 },
               ]}
@@ -577,50 +592,47 @@ export default function PupitrePage() {
         </div>
       </ModuleLayout>
 
-      <Modal
-  title="CONFIRMACIÓN"
-  isOpen={modal}
-  fields={[]}
-  values={{}}
-  onChange={() => {}}
-  onAccept={handleConfirmarPago}
-  onCancel={() => {
-    setModal(false);
-    setMensajeConfirmacion("");
-  }}
->
-  <div
-    style={{
-      textAlign: "center",
-      fontSize: "1.2rem",
-      lineHeight: 1.6,
-      padding: "2rem 1rem",
-      minHeight: "150px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-    }}
-  >
-    {!mensajeConfirmacion ? (
-      <div>
-        <p>¿CONFIRMAS QUE EL ESTUDIANTE</p>
-        <strong style={{ fontSize: "1.4rem", color: "#1976d2", display: "block", margin: "1rem 0" }}>
-          {fila?.nombre || "SIN ESTUDIANTE"}
-        </strong>
-        <p>HA CUMPLIDO CON EL PAGO DEL CONCEPTO DE PUPITRES?</p>
+      <div className="confirmacion-modal-fix">
+        <Modal
+          title="CONFIRMACIÓN"
+          isOpen={modal}
+          values={{}}
+          onChange={() => {}}
+          onAccept={handleConfirmarPago}
+          onCancel={() => {
+            setModal(false);
+            setFila(null);
+          }}
+          fields={[
+            {
+              key: "mensaje_alerta",
+              label: (
+                <div
+                  style={{
+                    display: "block",
+                    textAlign: "center",
+                    padding: "1rem 0.5rem",
+                    fontSize: "1.15rem",
+                    fontWeight: "bold",
+                    color: "#000000",
+                    textTransform: "uppercase",
+                    lineHeight: "1.6",
+                    fontFamily: "inherit",
+                    width: "100%"
+                  }}
+                >
+                  ¿CONFIRMAS QUE EL ESTUDIANTE{" "}
+                  <span style={{ color: "#1976D2", fontWeight: "bold" }}>
+                    {fila?.nombre ? fila.nombre.toUpperCase() : "[NOMBRE]"}
+                  </span>
+                  , HA CUMPLIDO CON EL PAGO DEL CONCEPTO DE PUPITRES?
+                </div>
+              ),
+              type: "text",
+            },
+          ]}
+        />
       </div>
-    ) : (
-      <strong
-        style={{
-          fontSize: "1.3rem",
-          color: mensajeConfirmacion.includes("Error") ? "#d32f2f" : "#388e3c",
-        }}
-      >
-        {mensajeConfirmacion}
-      </strong>
-    )}
-  </div>
-</Modal>
     </div>
   );
 }
