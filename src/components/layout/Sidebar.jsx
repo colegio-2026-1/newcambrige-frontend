@@ -1,14 +1,19 @@
+// Sidebar.js
 import { useNavigate } from "react-router-dom";
 import { LogOut, UserCircle2 } from "lucide-react";
 import { useAuth } from "../../api/useAuth";
 import "./Sidebar.css";
 
+
 export default function Sidebar({
-  menuItems = [],
+  menuItems = [], // ahora cada elemento: { label: string, icon?: ReactNode }
   selectedMenu,
   setSelectedMenu,
   user: propUser,
 }) {
+
+  
+
   const navigate = useNavigate();
   const { user: authUser, logout } = useAuth();
   const user = propUser || authUser;
@@ -16,19 +21,13 @@ export default function Sidebar({
   const handleNavigation = (item, e) => {
     e.preventDefault();
     e.stopPropagation();
-    setSelectedMenu(item);
+    //setSelectedMenu(item.label);
+    
+    //(es solo un planteamiento de redireccion se debe modificar segun sea el caso)
 
-    //este switch se quita cuando haya navegacion OJO
-
-    switch (item) {
-      
-    }
-
-    //y se pone lo de abajo (es solo un planteamiento de redireccion se debe modificar segun sea el caso)
-
-    // // Genera la ruta: convierte a minúsculas, reemplaza espacios por guiones
+    // Genera la ruta: convierte a minúsculas, reemplaza espacios por guiones
     // const path = `/${item.toLowerCase().replace(/\s+/g, '-')}`;
-    // navigate(path);
+    navigate(item.path);
   };
 
   const handleLogout = (e) => {
@@ -43,21 +42,30 @@ export default function Sidebar({
         {menuItems.map((item) => (
           <button
             type="button"
-            key={item}
-            className={`menu-item ${selectedMenu === item ? "active" : ""}`}
+            key={item.label}
+            className={`menu-item ${selectedMenu === item.label ? "active" : ""}`}
             onClick={(e) => handleNavigation(item, e)}
           >
-            {item}
+            {item.icon && (
+              <span className="menu-icon">
+                {typeof item.icon === 'string' ? (
+                  <img src={item.icon} alt={item.label} />
+                ) : (
+                  item.icon
+                )}
+              </span>
+            )}
+            <span className="menu-label">{item.label}</span>
           </button>
         ))}
       </nav>
       <div className="sidebar-user">
-        <UserCircle2 size={100} />
-        <span className="titular-label">TITULAR</span>
+        <UserCircle2  />
+        <span className="titular-label">{user.rol ?? "Rol no asignado"}</span>
         <h3>{user?.nombre ?? "Nombre usuario"}</h3>
-        <p>{user?.correo}</p>
         <button type="button" className="logout-button" onClick={handleLogout}>
-          <LogOut size={30} />
+          <LogOut />
+
         </button>
       </div>
     </aside>

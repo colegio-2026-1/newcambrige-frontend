@@ -76,7 +76,10 @@ export default function ModuleLayout({ sidebar, actions, children }) {
       <div className="module-content">{children}</div>
 
       {/* BOTONES DERECHA */}
-      <div className="module-actions">{actions}</div>
+      {actions && (
+        <div className="module-actions">{actions}</div>
+      )}
+
     </div>
   );
 }

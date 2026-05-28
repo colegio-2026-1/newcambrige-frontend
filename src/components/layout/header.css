@@ -4,8 +4,7 @@
 
 .header {
     width: 100%;
-    
-    height: 130px; 
+    height: 130px;
 
     background: var(--color-primary);
 
@@ -17,65 +16,182 @@
     position: relative;
 
     box-shadow: var(--shadow-header);
+
+    overflow: hidden;
 }
 
 /* ── CONTENEDOR DE LOGOS ── */
 .header-logos {
     position: relative;
+
     width: 110px;
     height: 110px;
+
     flex-shrink: 0;
+
     z-index: 2;
 }
 
-/* ── LOGOS  ── */
+/* ── LOGOS ── */
 .header-logo {
     position: absolute;
-    top: 5px;
-    left: 10px;
+
+    top: 50%;
+    left: 73px;
 
     width: 100px;
     height: 100px;
 
+    transform: translateY(-50%);
+
     object-fit: contain;
 
-    opacity: 0;                       
-    transition: opacity var(--transition-slow), transform var(--transition-slow);
+    opacity: 0;
+
+    transition:
+        opacity var(--transition-slow),
+        transform var(--transition-slow);
 }
 
 .header-logo.active {
-    opacity: 1;                       
+    opacity: 1;
 }
 
 /* ── TÍTULO ── */
 .header-title {
     position: absolute;
+
     left: 50%;
     transform: translateX(-50%);
 
     display: flex;
     justify-content: center;
+    align-items: center;
+
+    width: 100%;
+
+    padding: 0 160px;
 
     pointer-events: none;
 }
 
 .header-title h1 {
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
+    font-family: "HeyGotcha", serif;
+
+    font-size: 40px;
     font-weight: var(--font-medium);
+
     letter-spacing: var(--letter-wider);
 
     color: var(--color-text-white);
+
     text-align: center;
+
+    line-height: 1.2;
 
     white-space: nowrap;
 }
 
-/* ── RESPONSIVE ── */
-@media (max-width: 768px) {
+/* ============================================
+   TABLETS
+   ============================================ */
+@media (max-width: 1024px) {
+    .header {
+        height: 115px;
+    }
+
+    .header-logos {
+        width: 95px;
+        height: 95px;
+    }
+
+    .header-logo {
+        width: 85px;
+        height: 85px;
+
+        left: 60px;
+    }
+
+    .header-title {
+        padding: 0 120px;
+    }
+
     .header-title h1 {
-        font-size: var(--text-lg);
+        font-size: 32px;
+    }
+}
+
+/* ============================================
+   MÓVILES
+   ============================================ */
+@media (max-width: 768px) {
+    .header {
+        height: auto;
+
+        flex-direction: column;
+
+        justify-content: center;
+
+        padding:
+            var(--space-5)
+            var(--space-4);
+    }
+
+    .header-logos {
+        width: 80px;
+        height: 80px;
+
+        margin-bottom: 10px;
+    }
+
+    .header-logo {
+        top: 50%;
+        left: 50%;
+
+        width: 70px;
+        height: 70px;
+
+        transform: translate(-50%, -50%);
+    }
+
+    .header-title {
+        position: relative;
+
+        left: unset;
+
+        transform: none;
+
+        width: 100%;
+
+        padding: 0;
+    }
+
+    .header-title h1 {
+        font-size: 24px;
+
         white-space: normal;
-        text-align: center;
+
+        line-height: 1.3;
+
+        letter-spacing: 1px;
+    }
+}
+
+/* ============================================
+   MÓVILES PEQUEÑOS
+   ============================================ */
+@media (max-width: 480px) {
+    .header-logos {
+        width: 70px;
+        height: 70px;
+    }
+
+    .header-logo {
+        width: 60px;
+        height: 60px;
+    }
+
+    .header-title h1 {
+        font-size: 20px;
     }
 }

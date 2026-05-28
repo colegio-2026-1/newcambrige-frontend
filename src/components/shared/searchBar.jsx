@@ -33,10 +33,11 @@ import "./searchBar.css";
  *  />
  */
 
-export default function SearchBar({ fields = [], onSearch, loading = false }) {
+export default function SearchBar({ fields = [], onSearch, loading = false, initialValues = {}, onChange, cleanFilter }) {
 
 const initialState = fields.reduce((acc, f) => {
-    acc[f.key] = "";
+    acc[f.key] = initialValues[f.key] || "";
+
     return acc;
 }, {});
 
@@ -44,10 +45,18 @@ const [values, setValues] = useState(initialState);
 
 const handleChange = (key, value) => {
     setValues((prev) => ({ ...prev, [key]: value }));
+    if (onChange) onChange(key, value);
 };
 
 const handleSearch = () => {
-    if (onSearch) onSearch(values);
+    if (onSearch){
+        onSearch(values);
+        //limpiar filtros después de la búsqueda
+        if(cleanFilter){
+            setValues(cleanFilter);
+        }
+    }
+         
 };
 
 const handleKeyDown = (e) => {
@@ -78,11 +87,12 @@ return (
             </select>
         ) : (
             <input
-            type="text"
+            type={field.type === "number" ? "number" : "text"}
             className="searchbar-input"
             value={values[field.key]}
             onChange={(e) => handleChange(field.key, e.target.value)}
             onKeyDown={handleKeyDown}
+            maxLength={field.maxLength}
             />
         )}
 
