@@ -1,8 +1,6 @@
 import axiosClient from "./axiosClient";
 
-// ======================
-// 📚 BIBLIOTECA
-// ======================
+
 export const getLibrosRequest = () =>
   axiosClient.get(`/api/salones/libros`);
 
@@ -18,18 +16,21 @@ export const deleteLibroRequest = (id) =>
 export const getPrestamosRequest = () =>
   axiosClient.get(`/api/salones/prestamos`);
 
-// ======================
-// 🪑 PUPITRES
-// ======================
+// Crear el préstamo (el backend pondrá el libro en disponible = false)
+export const asignarLibroRequest = (data) =>
+  axiosClient.post(`/api/salones/prestamos`, data);
+
+// Registrar devolución (el backend pondrá el libro en disponible = true)
+export const devolverLibroRequest = (id, data) =>
+  axiosClient.put(`/api/salones/prestamos/${id}/devolver`, data);
+
+
 export const getPupitresRequest = () =>
   axiosClient.get(`/api/salones/pupitres`);
 
 export const updatePupitreRequest = (id, data) =>
   axiosClient.put(`/api/salones/pupitres/${id}`, data);
 
-// ======================
-// 🧪 PRUEBAS
-// ======================
 export const getPruebasRequest = () =>
   axiosClient.get(`/api/salones/pruebas`);
 
@@ -57,3 +58,5 @@ export const allsalonesbyperiodoRequest = (id_periodo) => axiosClient.get(`/api/
 export const allmatriculasbyperiodoRequest = (id_periodo) => axiosClient.get(`/api/secretaria/matriculas/periodo/${id_periodo}`);
 export const alldetallematriculabyperiodoRequest = (id_periodo,tipo) => axiosClient.get(`api/secretaria/detalles-matricula/periodo/tipo-detalle/?periodo_id=${id_periodo}&id_tipo=${tipo}`);
 
+export const allsalonesRequest = () =>
+  axiosClient.get("/api/salones/");
