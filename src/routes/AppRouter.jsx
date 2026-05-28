@@ -9,6 +9,17 @@ import LoginPage from "../modules/auth/LoginPage";
 import Home from "../modules/Home/HomePage";
 
 import TestPage from "../modules/test/testPage";
+
+// BANDA
+import BandaLayout from "../modules/banda/layout/BandaLayout";
+import BandaHomePage from "../modules/banda/BandaHomePage";
+
+// INVENTARIO
+import InventarioPage from "../modules/banda/inventario/pages/InventarioPage";
+
+// ASIGNACIONES
+import AsignacionesPage from "../modules/banda/asignaciones/pages/AsignacionesPage";
+
 // ==============================
 // RUTA PRIVADA
 // ==============================
@@ -97,6 +108,36 @@ const AppRouter = () => {
         }
       />
       */}
+      {/* ====================== */}
+      {/* MODULO BANDA */}
+      {/* ====================== */}
+
+      <Route
+        path="/banda"
+        element={
+          <PrivateRoute>
+            <BandaLayout />
+          </PrivateRoute>
+        }
+      >
+
+        <Route
+          index
+          element={<BandaHomePage />}
+        />
+
+        <Route
+          path="inventario"
+          element={<InventarioPage />}
+        />
+
+        <Route
+          path="asignaciones"
+          element={<AsignacionesPage />}
+        />
+
+      </Route>
+
       <Route
         path="/test"
         element={
