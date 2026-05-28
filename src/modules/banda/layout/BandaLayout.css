@@ -1,0 +1,41 @@
+/* =========================================
+   BANDA LAYOUT
+========================================= */
+
+.banda-layout {
+  display: flex;
+  height: 100vh;
+
+  background: var(--color-bg);
+
+  font-family: var(--font-body);
+
+  overflow: hidden;
+}
+
+/* =========================================
+   CONTENIDO
+========================================= */
+
+.banda-layout__content {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+}
+
+/* =========================================
+   MAIN
+========================================= */
+
+.banda-layout__main {
+  flex: 1;
+
+  overflow-y: auto;
+
+  padding: 28px;
+
+  background: var(--color-bg);
+}
