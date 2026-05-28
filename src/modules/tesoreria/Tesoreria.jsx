@@ -21,14 +21,14 @@ const Tesoreria = () => {
   const navigate = useNavigate();
   //para las tarjetas del dashboard
   const cards = [
-    { title: 'Matrícula', icon: MatriculaLogo, path: "/tesoreria/matricula", roles: ["secretaria", "administrador", "admin", "tesoreria"] },
-    { title: 'Pensión', icon: PensionLogo, path: "/tesoreria/pension", roles: ["secretaria", "administrador", "admin", "tesoreria"] },
-    { title: 'Papelería', icon: PapeleriaLogo, path: "/tesoreria/papeleria", roles: ["secretaria", "administrador", "admin", "tesoreria"] },
+    { title: 'Matrícula', icon: MatriculaLogo, path: "/tesoreria/matricula", roles: ["secretaria",  "admin", "tesoreria"] },
+    { title: 'Pensión', icon: PensionLogo, path: "/tesoreria/pension", roles: ["secretaria",  "admin", "tesoreria"] },
+    { title: 'Papelería', icon: PapeleriaLogo, path: "/tesoreria/papeleria", roles: ["secretaria",  "admin", "tesoreria"] },
   ];
   //para el sidebar
   const modulos = [
     { label: "Inicio", icon: <Home />,    path: "/home" },
-    { label: "Notificaciones",    path: "/tesoreria/notificaciones", roles: ["secretaria", "administrador", "admin", "tesoreria"] },  
+    { label: "Notificaciones",    path: "/tesoreria/notificaciones", roles: ["secretaria", "admin", "tesoreria"] },  
   ];
   //variables de autenticación y roles
   const { user, logout } = useAuth();

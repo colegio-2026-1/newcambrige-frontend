@@ -1,7 +1,6 @@
 
-import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
-import { allestudiantesRequest, allsalonesRequest, allmatriculasRequest, allrolesuserRequest, crearMatriculaRequest, allaniosacademicosRequest } from '../../api/endpoints'; 
+import {allestudiantesbyperiodoRequest, allsalonesbyperiodoRequest, allmatriculasbyperiodoRequest, allrolesuserRequest, crearMatriculaRequest, allaniosacademicosRequest } from '../../api/endpoints'; 
 
 import { Home } from "lucide-react";
 import { useAuth } from "../../api/useAuth";
@@ -15,13 +14,13 @@ import Modal         from "../../components/shared/Modal";
 
 
 
-const MatriculaTable = () => {
+const TesoreriaMatricula = () => {
   const [estudiantes, setEstudiantes] = useState([]);
   const [estudiantesFiltrados, setEstudiantesFiltrados] = useState([]);
   const [salones, setSalones] = useState([]);
   const [matriculas, setMatriculas] = useState([]);
   const [periodos, setPeriodos] = useState([]);
-  const rolespermitidos =  ["secretaria", "administrador", "admin", "tesoreria"]
+  const rolespermitidos =  ["secretaria", "admin", "tesoreria"]
   const { user, logout } = useAuth();
   const userName = user?.nombre || "Usuario";
   const idUser = user?.id_usuario;
@@ -40,8 +39,7 @@ const MatriculaTable = () => {
   }); 
   //para el sidebar
   const modulos = [
-    { label: "Inicio", icon: <Home />,    path: "/home" },
-    { label: "Estadisticas",    path: "/tesoreria/estadisticas", roles: rolespermitidos },
+    { label: "Inicio", icon: <Home />,    path: "/Tesoreria" }
   ];
   //maps para acceso rápido a datos relacionados
   const salonesMap = {};
@@ -51,10 +49,6 @@ const MatriculaTable = () => {
   const matriculasMap = {};
   matriculas.forEach(m => {
     matriculasMap[m.id_estudiante] = m; 
-  });
-  const periodosMap = {};
-  periodos.forEach(p => {
-    periodosMap[p.id_periodo] = p;
   });
   const periodoMapname = {};
   periodos.forEach(p => {
@@ -68,11 +62,11 @@ const MatriculaTable = () => {
     return;
   }
   try {
-    await crearMatriculaRequest({
-      estudiante_id: Number(fila.id_estudiante),
-      periodo_id: Number(salonesMap[fila.id_salon]?.id_periodo)
-    });
-    cargarMatriculas();
+    await crearMatriculaRequest(
+      Number(fila.id_estudiante),
+      Number(salonesMap[fila.id_salon]?.id_periodo)
+    );
+    cargarMatriculas(salonesMap[fila.id_salon]?.id_periodo);
     setFila(null); 
   } catch (error) {
     console.error("Error al crear la matrícula:", error);
@@ -97,9 +91,9 @@ const MatriculaTable = () => {
   obtenerRoles();
   }, [idUser]);
 
-  const cargarEstudiantes = async () => {
+  const cargarEstudiantes = async (id_periodo) => {
     try {
-      const res = await allestudiantesRequest();
+      const res = await allestudiantesbyperiodoRequest(id_periodo);
       setEstudiantes(res.data);
       setEstudiantesFiltrados(res.data); 
     } catch (error) {
@@ -107,18 +101,18 @@ const MatriculaTable = () => {
     } 
   };
 
-  const cargarSalones = async () => {
+  const cargarSalones = async (id_periodo) => {
     try {
-      const res = await allsalonesRequest();
+      const res = await allsalonesbyperiodoRequest(id_periodo);
       setSalones(res.data);
     } catch (error) {
       console.error("Error cargando salones:", error);
     }
   };
 
-  const cargarMatriculas = async () => {
+  const cargarMatriculas = async (id_periodo) => {
     try {
-      const res = await allmatriculasRequest();
+      const res = await allmatriculasbyperiodoRequest(id_periodo);
       setMatriculas(res.data);
     } catch (error) {
       console.error("Error cargando matrículas:", error);
@@ -137,27 +131,29 @@ const MatriculaTable = () => {
   };
 
   useEffect(() => {
-    cargarEstudiantes();
-    cargarSalones();
-    cargarMatriculas();
     cargarPeriodos();
   }, []);
 
   useEffect(() => {
-        const filtroinit = estudiantes.filter(e => periodoMapname[filtros.Periodo] ? salonesMap[e.id_salon]?.id_periodo === periodoMapname[filtros.Periodo]?.id_periodo : true);
-        setEstudiantesFiltrados(filtroinit);
-      }, [estudiantes, matriculas]);
+    const idPeriodoActual = periodoMapname[filtros.Periodo]?.id_periodo;
+    if(idPeriodoActual){
+    cargarEstudiantes(idPeriodoActual);
+    cargarSalones(idPeriodoActual);
+    cargarMatriculas(idPeriodoActual);
+    }
+  
+  }, [filtros.Periodo]);
+
   
   //funcion para filtrar estudiantes según criterios de búsqueda
   const FiltrarEstudiantes = (filtros) => {
     setEstudiantesFiltrados(estudiantes.filter(e => {
       const cumpleDocumento = e.documento.toString().includes(filtros.documento);
       const cumpleNombre = e.nombre.toLowerCase().includes(filtros.nombre.toLowerCase());
-      const cumpleGrado = filtros.Grado ? ((salonesMap[e.id_salon]?.grado).toString() === filtros.Grado) : true;
+      const cumpleGrado = filtros.Grado ? (salonesMap[e.id_salon]?.grado).toString() === filtros.Grado : true;
       const cumpleGrupo = filtros.Grupo ? (salonesMap[e.id_salon]?.grupo).toString() === filtros.Grupo : true;
-      const cumplePeriodo = filtros.Periodo ? periodosMap[salonesMap[e.id_salon]?.id_periodo]?.nombre === filtros.Periodo : true;
       
-      return cumpleDocumento && cumpleNombre && cumpleGrado && cumpleGrupo && cumplePeriodo;
+      return cumpleDocumento && cumpleNombre && cumpleGrado && cumpleGrupo;
     }));
   };
 
@@ -166,7 +162,6 @@ const MatriculaTable = () => {
     <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
     <ModuleLayout 
     sidebar={<Sidebar 
-       moduloActual="Matrícula"
             menuItems={modulos.filter(modulo => {
                 if (!modulo) return false;
                 if (!modulo.roles || !Array.isArray(modulo.roles) || modulo.roles.length === 0) return true;
@@ -178,13 +173,13 @@ const MatriculaTable = () => {
             actions={
                 <ActionButtons
                   filaSeleccionada={fila}
-                  botones={[
+                  botones={ roles.some(rol => rolespermitidos.includes(rol)) ?[
                     { label: "Validar Pago",  
                       onClick: () => {  setModal(true); }, 
                       siempreActivo: false , variante: "primary", 
                       disabled: matriculasMap[fila?.id_estudiante]  || !periodoMapname[filtros.Periodo]?.activo || 
                                 (fila &&  salonesMap[fila.id_salon]?.id_periodo !== periodoMapname[filtros.Periodo]?.id_periodo)  },
-                          ]}
+                          ] : []}
                 />
               }
             >  
@@ -200,13 +195,13 @@ const MatriculaTable = () => {
                   { key: "documento", label: "Código", type: "number", maxLength:10 },
                   { key: "nombre",    label: "Nombre",type: "text", maxLength:100 },
                   { key: "Grado",   label: "Grado",         type: "select", 
-                    options: filtros.Periodo ? Array.from(new Set(Object.values(salonesMap)
+                    options: Array.from(new Set(Object.values(salonesMap)
                     .filter(s => s.id_periodo === periodoMapname[filtros.Periodo]?.id_periodo)
-                    .map(s => s.grado).filter(Boolean))) : []},
+                    .map(s => s.grado).filter(Boolean))) },
                   { key: "Grupo",   label: "Grupo",        type: "select", 
-                    options: filtros.Grado ? Array.from(new Set(Object.values(salonesMap)
+                    options:  Array.from(new Set(Object.values(salonesMap)
                     .filter(s => (s.grado).toString() === filtros.Grado)
-                    .map(s => s.grupo).filter(Boolean))): [] },
+                    .map(s => s.grupo).filter(Boolean))) },
                   { key: "Periodo",   label: "Periodo", type: "select", 
                     options: Array.from(new Set(Object.values(periodos).map(s => s.nombre).filter(Boolean)))},
                       ]}
@@ -231,7 +226,8 @@ const MatriculaTable = () => {
                     />
 
                     <DataTable
-                              key={`${filtros.Grado}-${filtros.Grupo}-${filtros.Periodo}-${filtros.nombre}-${filtros.documento}`}
+                              key={`${matriculas}`}
+                              pageSize={10}
                               columns={[
                                 { key: "documento", label: "Documento" },
                                 { key: "nombre",   label: "Nombre" },
@@ -286,4 +282,4 @@ const MatriculaTable = () => {
   );
 };
 
-export default MatriculaTable;
+export default TesoreriaMatricula;

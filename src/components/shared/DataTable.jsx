@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./DataTable.css";
 
 /**
@@ -47,9 +47,24 @@ export default function DataTable({
   rows = [],
   onRowClick,
   emptyText = "No se encontraron resultados",
+  pageSize = null
   
 }) {
+
+
   const [filaSeleccionada, setFilaSeleccionada] = useState(null);
+  const [paginaActual, setPaginaActual] = useState(1);
+
+  useEffect(() => {
+    setFilaSeleccionada(null);
+    setPaginaActual(1);        
+  }, [rows]);
+
+   useEffect(() => {
+    setFilaSeleccionada(null);
+    onRowClick?.(null); 
+            
+  }, [paginaActual]);
 
   const handleClick = (row) => {
     const nueva = filaSeleccionada === row ? null : row;
@@ -57,9 +72,15 @@ export default function DataTable({
     onRowClick?.(nueva);
   };
 
+  const tienePaginacion = pageSize &&  pageSize > 0;
+  const totalPaginas = tienePaginacion ? Math.ceil(rows.length / pageSize) : 1;
+  const filasMapeadas = tienePaginacion
+    ? rows.slice((paginaActual - 1) * pageSize, paginaActual * pageSize)
+    : rows;
+
   return (
     <div className="datatable-wrapper">
-
+      <div className="datatable-main-content" style={{ display: "flex", flexDirection: "column", width: "100%", overflow: "hidden" }}>
       {/* TABLA */}
       <div className="datatable-scroll">
         <table className="datatable">
@@ -84,7 +105,7 @@ export default function DataTable({
                 </td>
               </tr>
             ) : (
-              rows.map((row, i) => {
+              filasMapeadas.map((row, i) => {
                 const seleccionada = filaSeleccionada === row;
                 return (
                   <tr
@@ -112,6 +133,36 @@ export default function DataTable({
           </tbody>
 
         </table>
+      </div>
+
+    {tienePaginacion && totalPaginas > 1 && (
+          <div className="datatable-pagination">
+            <span className="pagination-info">
+              Página <strong>{paginaActual}</strong> de <strong>{totalPaginas}</strong> ({rows.length} registros en total)
+            </span>
+            
+            <div className="pagination-buttons">
+              <button
+                type="button"
+                className="pagination-btn"
+                disabled={paginaActual === 1}
+                onClick={() => setPaginaActual(prev => Math.max(prev - 1, 1))}
+              >
+                Anterior
+              </button>
+              
+              <button
+                type="button"
+                className="pagination-btn"
+                disabled={paginaActual === totalPaginas}
+                onClick={() => setPaginaActual(prev => Math.min(prev + 1, totalPaginas))}
+              >
+                Siguiente
+              </button>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );
