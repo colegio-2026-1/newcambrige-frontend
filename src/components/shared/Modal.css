@@ -217,3 +217,50 @@
     grid-template-columns: 1fr;
 }
 }
+/* diseño de cards*/
+.modal-field:has(.cards-container) {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.cards-container {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr); 
+  gap: 15px;
+  width: 100%;
+  max-width: 450px;
+  margin: var(--space-4) auto;
+}
+
+.cards-item {
+  grid-column: span 2; 
+  box-sizing: border-box;
+  display: block;
+  text-align: center;
+  background-color: var(--color-white, #ffffff);
+  border: 2px solid var(--color-text, #1a1a1a);
+  border-radius: 20px;
+  padding: 10px 5px;
+  font-family: var(--font-display), sans-serif;
+  font-size: var(--text-sm, 1.1rem);
+  font-weight: var(--font-bold, bold);
+  letter-spacing: var(--letter-wide, 0.5px);
+  color: var(--color-text, #1a1a1a);
+  user-select: none;
+}
+
+
+.cards-item:nth-child(10) {
+  grid-column: 2 / span 2; 
+}
+
+.cards-item:nth-child(11) {
+  grid-column: 4 / span 2; 
+}
+.cards-item.is-paid {
+  background-color: rgba(46, 125, 50, 0.15);
+  color: #2e7d32;
+  border-color: rgba(46, 125, 50, 0.4);
+}
