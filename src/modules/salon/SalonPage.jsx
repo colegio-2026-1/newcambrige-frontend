@@ -19,9 +19,9 @@ export default function SalonPage() {
   // ITEMS SIDEBAR
   const menuItems = [
     {
-      label: "inicio",
+      label: "Home",
       icon: <Home />,
-      path: "/home",
+      path: "/home ",
     }
   ];
 

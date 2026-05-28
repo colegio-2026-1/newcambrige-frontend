@@ -66,7 +66,6 @@ const AppRouter = () => {
         <Route path="/pupitres" element={<PupitrePage />} />
         <Route path="/biblioteca/*" element={<BibliotecaPage />} />
         <Route path="/pruebas" element={<PruebasPage />} />
-        
 
       {/* ===================== */}
       {/* LOGIN */}

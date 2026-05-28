@@ -83,7 +83,7 @@ export default function PruebasPage() {
             val === "visto" ? "badge--ok" : "badge--warning"
           }
         >
-          {val === "visto" ? "✓" : "–"}
+          {val === "visto" ? "Pagado" : "Pendiente"}
         </span>
       ),
     },

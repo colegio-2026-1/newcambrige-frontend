@@ -99,7 +99,7 @@ export default function PupitrePage() {
               : "badge--warning"
           }
         >
-          {val === "visto" ? "✓" : "–"}
+          {val === "visto" ? "Pagado" : "Pendiente"}
         </span>
       ),
     },
@@ -494,7 +494,10 @@ export default function PupitrePage() {
               key: "documento",
               label: "Código",
               type: "text",
-            },
+              onInput: (e) => {
+                e.target.value = e.target.value.replace(/\D/g, "");
+              },
+          },
 
             {
               key: "nombre",
