@@ -25,8 +25,7 @@ import BandaHomePage from "../modules/banda/BandaHomePage";
 // INVENTARIO
 import InventarioPage from "../modules/banda/inventario/pages/InventarioPage";
 
-// ASIGNACIONES
-import AsignacionesPage from "../modules/banda/asignaciones/pages/AsignacionesPage";
+import PrestamosPage from "../modules/banda/prestamos/pages/PrestamosPage";
 
 // ==============================
 // RUTA PRIVADA
@@ -189,11 +188,10 @@ const AppRouter = () => {
           path="inventario"
           element={<InventarioPage />}
         />
-
         <Route
-          path="asignaciones"
-          element={<AsignacionesPage />}
-        />
+  path="prestamos"
+  element={<PrestamosPage />}
+/>
 
       </Route>
 
