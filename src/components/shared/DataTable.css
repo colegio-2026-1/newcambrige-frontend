@@ -1,0 +1,231 @@
+/* ============================================
+   DataTable.css
+   Ubicación: src/components/shared/DataTable.css
+   ============================================ */
+
+/* ── CONTENEDOR PRINCIPAL ── */
+
+.datatable-wrapper {
+  display: flex;
+  width: 100%;
+  border: var(--border-width) solid var(--color-text);
+}
+
+/* ── TÍTULO LATERAL ── */
+
+.datatable-sidetitle {
+  min-width: 90px;
+  max-width: 110px;
+
+  background: var(--color-white);
+
+  border-right: var(--border-width) solid var(--color-text);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: var(--space-3);
+}
+
+.datatable-sidetitle span {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-primary);
+  letter-spacing: var(--letter-wide);
+
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* ── SCROLL HORIZONTAL ── */
+
+.datatable-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* ── TABLA ── */
+
+.datatable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+/* ── ENCABEZADO ── */
+
+.datatable thead tr {
+  background: var(--color-white);
+}
+
+.datatable th {
+  padding: var(--space-2) var(--space-3);
+
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+  letter-spacing: var(--letter-wide);
+  color: var(--color-text);
+
+  text-align: center;
+  text-transform: uppercase;
+
+  border: var(--border-width) solid var(--color-text);
+}
+
+/* ── FILAS ── */
+
+.datatable tbody tr:nth-child(even) {
+  background: var(--color-input-bg);
+}
+
+.datatable tbody tr:nth-child(odd) {
+  background: var(--color-white);
+}
+
+.datatable td {
+  padding: var(--space-2) var(--space-3);
+
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+
+  text-align: center;
+
+  border: var(--border-width) solid var(--color-text);
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── COLUMNA CHECK ── */
+
+.datatable-th-check,
+.datatable-td-check {
+  width: 32px;
+  min-width: 32px;
+  text-align: center;
+  border: var(--border-width) solid var(--color-text);
+  padding: 0;
+}
+
+.datatable-check {
+  font-size: var(--text-md);
+  font-weight: var(--font-bold);
+  color: var(--color-text);
+}
+
+/* ── FILA SELECCIONADA ── */
+
+.datatable-row--selected td {
+  background: rgba(142, 42, 37, 0.08) !important;
+}
+
+/* ── FILA CLICKEABLE ── */
+
+.datatable-row--clickable {
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.datatable-row--clickable:hover {
+  background: rgba(142, 42, 37, 0.07) !important;
+}
+
+/* ── SIN RESULTADOS ── */
+
+.datatable-empty {
+  padding: var(--space-8) !important;
+  color: var(--color-text-muted) !important;
+  font-style: italic;
+  text-align: center !important;
+}
+
+/* ── BADGES (para columnas con render) ── */
+
+.badge--ok {
+  display: inline-block;
+  padding: 2px var(--space-3);
+
+  background: var(--color-success-bg);
+  color: var(--color-success);
+
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+}
+
+.badge--no {
+  display: inline-block;
+  padding: 2px var(--space-3);
+
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+}
+
+.badge--warn {
+  display: inline-block;
+  padding: 2px var(--space-3);
+
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+}
+
+/* ── CONTROLES DE PAGINACIÓN ── */
+
+.datatable-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-white);
+  border-top: var(--border-width) solid var(--color-text);
+}
+
+.pagination-info {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+.pagination-buttons {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* ── BOTONES DE PAGINACIÓN ── */
+
+.pagination-btn {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+  color: var(--color-text);
+  background: var(--color-white);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--color-text);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-wide);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: var(--color-input-bg);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: var(--color-input-bg);
+}

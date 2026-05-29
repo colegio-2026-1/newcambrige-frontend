@@ -1,0 +1,192 @@
+/* =========================
+   SIDEBAR
+========================= */
+
+.sidebar {
+    width: 300px;
+    min-width: 300px;
+    max-width: 300px;
+
+    background: #efefef;
+
+    display: flex;
+    flex-direction: column;
+    height: 100%;               
+
+    border-right: 1px solid #ddd;
+}
+
+/* =========================
+   MENU
+========================= */
+
+.sidebar-menu {
+    display: flex;
+    flex-direction: column;
+}
+
+.menu-item {
+    border: none;
+    background: transparent;
+
+    padding: 24px 30px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    text-align: center;
+
+    font-size: 1.8rem;
+    color: #6b2020;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+
+    font-family: "HeyGotcha", serif;
+
+    font-weight: normal;
+}
+
+.menu-item:hover {
+    background: #dddddd;
+}
+
+.menu-item.active {
+    background: white;
+
+    color: #8e2a25;
+
+    box-shadow: inset 4px 0 0 #8e2a25;
+}
+
+/* =========================
+   USER 
+========================= */
+
+.sidebar-user {
+    margin-top: auto;          
+    padding: 35px 20px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 10px;
+
+    color: #5a1b1b;
+
+    font-family: "HeyGotcha", serif;
+
+    border-top: none !important;
+    box-shadow: none !important;
+}
+
+.sidebar-user svg {
+    color: #7d1616;
+}
+
+.titular-label {
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+    font-weight: bold;
+}
+
+.sidebar-user h3 {
+    font-size: 1.1rem;
+    text-align: center;
+    letter-spacing: 1px;
+    font-weight: normal;
+}
+
+.sidebar-user p {
+    font-size: 0.9rem;
+    text-align: center;
+    color: #666;
+    word-break: break-word;
+}
+
+/* =========================
+   BOTON LOGOUT
+========================= */
+
+.logout-button {
+    margin-top: 10px;
+
+    width: 40px;
+    height: 40px;
+
+    border-radius: 10px;
+
+    border: none;
+
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    transition:
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+.logout-button:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transform: translateY(-2px);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 900px) {
+    .sidebar {
+        width: 240px;
+        min-width: 240px;
+        max-width: 240px;
+    }
+
+    .menu-item {
+        font-size: 1.4rem;
+    }
+}
+
+@media (max-width: 700px) {
+    .sidebar {
+        width: 100%;
+        min-width: 100%;
+        max-width: 100%;
+        height: auto;           
+    }
+}
+
+.menu-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+}
+
+.menu-icon svg {
+  width: 30px;
+  height: 30px;
+}
+
+.menu-icon img {
+  width: 40px;
+  height: 40px;
+}
+
+.sidebar-user svg {
+  width: 100px;
+  height: 100px;
+}
+
+.logout-button svg {
+  width: 30px;
+  height: 30px;
+}

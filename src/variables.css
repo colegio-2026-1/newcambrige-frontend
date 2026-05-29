@@ -1,0 +1,94 @@
+/* ============================================
+VARIABLES GLOBALES — NEW CAMBRIDGE SCHOOL
+Importar en main.jsx o index.css:
+@import './styles/variables.css';
+   ============================================ */
+
+:root {
+
+  /* ── COLORES PRIMARIOS ── */
+--color-primary:        #8E2A25;   /* rojo institucional */
+--color-primary-dark:   #6B1F1B;   /* hover / sombras */
+--color-primary-light:  #B03530;   /* estados activos */
+
+  /* ── COLORES SECUNDARIOS ── */
+--color-secondary:      #1B3A5C;   /* azul oscuro — botones Aceptar */
+--color-secondary-dark: #122840;   /* hover botón */
+
+  /* ── NEUTROS ── */
+--color-white:          #FFFFFF;
+--color-bg:             #F5F0E8;   /* fondo general crema */
+--color-input-bg:       #EDE8DC;   /* fondo de inputs */
+--color-border:         #8E2A25;   /* borde inputs (rojo tenue) */
+--color-border-light:   #C9B99A;   /* borde suave */
+
+  /* ── TEXTO ── */
+--color-text:           #1A1A1A;   /* texto principal */
+--color-text-muted:     #6B6560;   /* texto secundario / placeholders */
+--color-text-white:     #FFFFFF;
+
+  /* ── ESTADOS ── */
+--color-success:        #2E7D4F;
+--color-success-bg:     #DFF2E9;
+--color-warning:        #A06000;
+--color-warning-bg:     #FFF3CD;
+--color-danger:         #8E2A25;
+--color-danger-bg:      #FDECEA;
+--color-info:           #1B3A5C;
+--color-info-bg:        #E0EAF4;
+
+  /* ── TIPOGRAFÍA ── */
+--font-display:         'Cinzel', serif;          /* títulos / headers */
+--font-body:            'Lato', sans-serif;        /* texto general */
+
+--text-xs:    11px;
+--text-sm:    13px;
+--text-base:  15px;
+--text-md:    17px;
+--text-lg:    20px;
+--text-xl:    26px;
+--text-2xl:   32px;
+--text-3xl:   38px;
+
+--font-normal:  400;
+--font-medium:  500;
+--font-bold:    700;
+
+--letter-wide:  1px;
+--letter-wider: 2px;
+
+  /* ── ESPACIADO ── */
+--space-1:   4px;
+--space-2:   8px;
+--space-3:   12px;
+--space-4:   16px;
+--space-5:   20px;
+--space-6:   24px;
+--space-8:   32px;
+--space-10:  40px;
+--space-12:  48px;
+
+  /* ── BORDES ── */
+--radius-sm:   4px;
+--radius-md:   8px;
+--radius-lg:   18px;
+--radius-full: 999px;
+
+--border-width: 1.5px;
+
+  /* ── SOMBRAS ── */
+--shadow-card:   10px 10px 0px var(--color-primary);
+--shadow-sm:     0 2px 6px rgba(0,0,0,0.10);
+--shadow-md:     0 4px 14px rgba(0,0,0,0.13);
+--shadow-header: 0px 2px 10px rgba(0,0,0,0.15);
+
+  /* ── TRANSICIONES ── */
+--transition-fast:   0.15s ease;
+--transition-base:   0.3s ease;
+--transition-slow:   0.5s ease;
+
+  /* ── LAYOUT ── */
+--header-height:  110px;
+--sidebar-width:  240px;
+--content-max:    1280px;
+}

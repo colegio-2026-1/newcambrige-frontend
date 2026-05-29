@@ -1,0 +1,169 @@
+import { useState, useEffect } from "react";
+import "./DataTable.css";
+
+/**
+ * DataTable — componente reutilizable para todos los módulos
+ *
+ * Props:
+ *  columns  {Array}  — definición de columnas
+ *             { key, label, render?: (value, row) => JSX }
+ *  rows     {Array}  — datos a mostrar (array de objetos)
+ *  onRowClick {Function} — opcional, se llama con la fila al hacer click
+ *  emptyText {String} — texto cuando no hay resultados
+ *
+ * Ejemplo — Inventario Libros:
+ *  <DataTable
+ *    columns={[
+ *      { key: 'id_libro',   label: 'ID' },
+ *      { key: 'nombre',     label: 'Título del Libro' },
+ *      { key: 'autor',      label: 'Autor' },
+ *      { key: 'disponible', label: 'Disponibilidad',
+ *          render: (val) => <span className={val ? 'badge--ok' : 'badge--no'}>{val ? 'Disponible' : 'No disponible'}</span> },
+ *    ]}
+ *    rows={libros}
+ *    onRowClick={(fila) => abrirModal(fila)}
+ *  />
+ *
+ * Ejemplo — Inventario Instrumentos:
+ *    columns={[
+ *      { key: 'id_instrumento', label: 'ID' },
+ *      { key: 'nombre',         label: 'Instrumento' },
+ *      { key: 'categoria',      label: 'Tipo' },
+ *      { key: 'ubicacion',      label: 'Ubicación' },
+ *      { key: 'disponible',     label: 'Disponibilidad' },
+ *    ]}
+ *
+ * Ejemplo — Estudiantes:
+ *    columns={[
+ *      { key: 'documento', label: 'Código' },
+ *      { key: 'nombre',    label: 'Nombre' },
+ *      { key: 'grado',     label: 'Grado' },
+ *      { key: 'grupo',     label: 'Grupo' },
+ *    ]}
+ */
+
+export default function DataTable({
+  columns = [],
+  rows = [],
+  onRowClick,
+  emptyText = "No se encontraron resultados",
+  pageSize = null
+  
+}) {
+
+
+  const [filaSeleccionada, setFilaSeleccionada] = useState(null);
+  const [paginaActual, setPaginaActual] = useState(1);
+
+  useEffect(() => {
+    setFilaSeleccionada(null);
+    setPaginaActual(1);        
+  }, [rows]);
+
+   useEffect(() => {
+    setFilaSeleccionada(null);
+    onRowClick?.(null); 
+            
+  }, [paginaActual]);
+
+  const handleClick = (row) => {
+    const nueva = filaSeleccionada === row ? null : row;
+    setFilaSeleccionada(nueva);
+    onRowClick?.(nueva);
+  };
+
+  const tienePaginacion = pageSize &&  pageSize > 0;
+  const totalPaginas = tienePaginacion ? Math.ceil(rows.length / pageSize) : 1;
+  const filasMapeadas = tienePaginacion
+    ? rows.slice((paginaActual - 1) * pageSize, paginaActual * pageSize)
+    : rows;
+
+  return (
+    <div className="datatable-wrapper">
+      <div className="datatable-main-content" style={{ display: "flex", flexDirection: "column", width: "100%", overflow: "hidden" }}>
+      {/* TABLA */}
+      <div className="datatable-scroll">
+        <table className="datatable">
+
+          <thead>
+            <tr>
+              <th className="datatable-th-check"></th>
+              {columns.map((col) => (
+                <th key={col.key}>{col.label}</th>
+              ))}
+            </tr>
+          </thead>
+
+          <tbody>
+            {rows.length === 0 ? (
+              <tr>
+                <td
+                  className="datatable-empty"
+                  colSpan={columns.length + 1}
+                >
+                  {emptyText}
+                </td>
+              </tr>
+            ) : (
+              filasMapeadas.map((row, i) => {
+                const seleccionada = filaSeleccionada === row;
+                return (
+                  <tr
+                    key={row.id ?? i}
+                    className={`
+                      ${onRowClick ? "datatable-row--clickable" : ""}
+                      ${seleccionada ? "datatable-row--selected" : ""}
+                    `}
+                    onClick={() => handleClick(row)}
+                  >
+                    <td className="datatable-td-check">
+                      {seleccionada && <span className="datatable-check">✓</span>}
+                    </td>
+                    {columns.map((col) => (
+                      <td key={col.key}>
+                        {col.render
+                          ? col.render(row[col.key], row)
+                          : row[col.key] ?? "—"}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+
+        </table>
+      </div>
+
+    {tienePaginacion && totalPaginas > 1 && (
+          <div className="datatable-pagination">
+            <span className="pagination-info">
+              Página <strong>{paginaActual}</strong> de <strong>{totalPaginas}</strong> ({rows.length} registros en total)
+            </span>
+            
+            <div className="pagination-buttons">
+              <button
+                type="button"
+                className="pagination-btn"
+                disabled={paginaActual === 1}
+                onClick={() => setPaginaActual(prev => Math.max(prev - 1, 1))}
+              >
+                Anterior
+              </button>
+              
+              <button
+                type="button"
+                className="pagination-btn"
+                disabled={paginaActual === totalPaginas}
+                onClick={() => setPaginaActual(prev => Math.min(prev + 1, totalPaginas))}
+              >
+                Siguiente
+              </button>
+            </div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,67 @@
+/* ModuleLayout.css  */
+
+.module-layout {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  width: 100%;
+  min-height: calc(100vh - 130px);
+  background: #f4f4f4;
+  font-family: "HeyGotcha", serif;
+}
+
+/* Sidebar izquierdo */
+.module-sidebar {
+  flex-shrink: 0;
+
+}
+
+/* Contenido central */
+.module-content {
+  flex: 1;
+  min-width: 0;
+  background: #f4f4f4;
+  border-radius: 18px;
+  margin: 20px;
+  padding: 24px;
+  /* box-shadow: 0 20px 20px rgba(0, 0, 0, 0.05); */
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-x: auto;
+}
+
+/* Botones de acción a la derecha */
+.module-actions {
+  flex-shrink: 0;
+  width: 200px;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 12px;
+  border-left: 1px solid #ddd;
+}
+
+/* Ajustes responsivos */
+@media (max-width: 768px) {
+  .module-layout {
+    flex-direction: column;
+  }
+
+  .module-sidebar {
+    width: 100%;
+  }
+
+  .module-actions {
+    width: 100%;
+    flex-direction: row;
+    justify-content: center;
+    padding: 12px;
+  }
+
+  .module-content {
+    margin: 12px;
+    padding: 16px;
+  }
+}
