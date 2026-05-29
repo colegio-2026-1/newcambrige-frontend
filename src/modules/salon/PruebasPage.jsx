@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { useAuth } from "../../api/useAuth";
 import {
   getPruebasRequest,
   updateEstadoPruebaRequest,
@@ -24,6 +24,7 @@ export default function PruebasPage() {
   const [modal, setModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState([]);
+  const { user, logout } = useAuth();
   const [rowsFiltered, setRowsFiltered] = useState([]);
   const [salones, setSalones] = useState([]);
   const [periodos, setPeriodos] = useState([]);
@@ -356,7 +357,7 @@ export default function PruebasPage() {
             ]}
             selectedMenu={"Inicio"}
             setSelectedMenu={() => {}}
-            user="Nombre usuario"
+            user={{ nombre: user?.nombre || "Usuario", rol: user?.rol || "" }}
             logout={() => console.log("logout")}
           />
         }

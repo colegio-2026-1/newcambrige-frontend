@@ -61,10 +61,6 @@ const AppRouter = () => {
     <Routes>
       {/* Públicas */}
         <Route path="/" element={<LoginPage />} />
-        <Route path="/salon" element={<SalonPage />} />
-        <Route path="/pupitres" element={<PupitrePage />} />
-        <Route path="/biblioteca/*" element={<BibliotecaPage />} />
-        <Route path="/pruebas" element={<PruebasPage />} />
 
       {/* ===================== */}
       {/* LOGIN */}
@@ -96,16 +92,14 @@ const AppRouter = () => {
       {/* FUTURAS RUTAS */}
       {/* ===================== */}
 
-      {/*
-      <Route
-        path="/salones"
-        element={
-          <PrivateRoute>
-            <SalonPage />
-          </PrivateRoute>
-        }
-      />
-      */}
+      
+      
+      <Route path="/salon"        element={<PrivateRoute><SalonPage /></PrivateRoute>} />
+      <Route path="/pupitres"     element={<PrivateRoute><PupitrePage /></PrivateRoute>} />
+      <Route path="/biblioteca/*" element={<PrivateRoute><BibliotecaPage /></PrivateRoute>} />
+      <Route path="/pruebas"      element={<PrivateRoute><PruebasPage /></PrivateRoute>} />
+      
+      
 
       {/*
       <Route

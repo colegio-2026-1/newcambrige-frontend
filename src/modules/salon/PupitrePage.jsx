@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { useAuth } from "../../api/useAuth";
 import axiosClient from "../../api/axiosClient";
 
 import {
@@ -27,7 +27,7 @@ export default function PupitrePage() {
   const [modal, setModal] = useState(false);
 
   const [mensajeConfirmacion, setMensajeConfirmacion] = useState("");
-
+  const { user, logout } = useAuth();
   const [loading, setLoading] = useState(true);
 
   const [rows, setRows] = useState([]);
@@ -453,7 +453,7 @@ export default function PupitrePage() {
             ]}
             selectedMenu={"Inicio"}
             setSelectedMenu={() => {}}
-            user="Nombre usuario"
+            user={{ nombre: user?.nombre || "Usuario", rol: user?.rol || "" }}
             logout={() =>
               console.log("logout")
             }

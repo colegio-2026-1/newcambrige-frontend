@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Home, BookOpen } from "lucide-react";
+import { useAuth } from "../../api/useAuth";
 
 import {
   getLibrosRequest,
@@ -50,7 +51,7 @@ export default function BibliotecaPage() {
   // ── Maps auxiliares ──────────────────────────────────────────────────────
   const salonesMap  = Object.fromEntries(salones.map((s) => [s.id_salon, s]));
   const periodosMap = Object.fromEntries(periodos.map((p) => [p.id_periodo, p]));
-
+  const { user, logout } = useAuth();
   // ── Sidebar ──────────────────────────────────────────────────────────────
   const menuItems = [
     { label: "Inicio",     icon: <Home />,     path: "/biblioteca/inicio" },
@@ -445,7 +446,7 @@ export default function BibliotecaPage() {
           <Sidebar
             menuItems={menuItems}
             selectedMenu={selectedMenu}
-            user="Nombre usuario"
+            user={{ nombre: user?.nombre || "Usuario", rol: user?.rol || "" }}
             logout={() => console.log("logout")}
           />
         }

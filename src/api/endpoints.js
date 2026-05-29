@@ -16,11 +16,10 @@ export const deleteLibroRequest = (id) =>
 export const getPrestamosRequest = () =>
   axiosClient.get(`/api/salones/prestamos`);
 
-// Crear el préstamo (el backend pondrá el libro en disponible = false)
+
 export const asignarLibroRequest = (data) =>
   axiosClient.post(`/api/salones/prestamos`, data);
 
-// Registrar devolución (el backend pondrá el libro en disponible = true)
 export const devolverLibroRequest = (id, data) =>
   axiosClient.put(`/api/salones/prestamos/${id}/devolver`, data);
 
