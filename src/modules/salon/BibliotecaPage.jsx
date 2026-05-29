@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { Home, BookOpen } from "lucide-react";
 
 import {
@@ -10,7 +10,6 @@ import {
   deleteLibroRequest,
   allsalonesRequest,
   allaniosacademicosRequest,
-  // === NUEVOS ENDPOINTS CONECTADOS A TU FASTAPI ===
   asignarLibroRequest,
   devolverLibroRequest,
 } from "../../api/endpoints";
@@ -18,7 +17,6 @@ import {
 import Header from "../../components/layout/Header";
 import ModuleLayout from "../../components/layout/ModuleLayout";
 import Sidebar from "../../components/layout/Sidebar";
-
 import SearchBar from "../../components/shared/SearchBar";
 import DataTable from "../../components/shared/DataTable";
 import ActionButtons from "../../components/shared/ActionButtons";
@@ -26,168 +24,125 @@ import Modal from "../../components/shared/Modal";
 
 export default function BibliotecaPage() {
   const location = useLocation();
-  const navigate = useNavigate();
 
-  // =========================
-  // STATES
-  // =========================
-  const [pestanaActiva, setPestanaActiva] = useState("inicio");
-  const [selectedMenu, setSelectedMenu] = useState("Inicio");
+  // ── UI ──────────────────────────────────────────────────────────────────
+  const [pestanaActiva, setPestanaActiva]       = useState("inicio");
+  const [selectedMenu, setSelectedMenu]         = useState("Inicio");
   const [filaSeleccionada, setFilaSeleccionada] = useState(null);
 
-  // Estados comunes para el manejo del modal dinámico
-  const [modal, setModal] = useState(false);
-  const [modalTipo, setModalTipo] = useState("agregar"); // 'agregar', 'editar', 'asignar', 'devolver'
-  const [formValues, setFormValues] = useState({});
+  // ── Modal ────────────────────────────────────────────────────────────────
+  const [modal, setModal]                 = useState(false);
+  const [modalTipo, setModalTipo]         = useState("agregar");
+  const [formValues, setFormValues]       = useState({});
+  // Guardamos el ID del préstamo activo de forma segura para la devolución
+  const [prestamoIdActivo, setPrestamoIdActivo] = useState(null);
 
-  const [loading, setLoading] = useState(true);
-  const [libros, setLibros] = useState([]);
-  const [librosFiltered, setLibrosFiltered] = useState([]);
-  const [prestamos, setPrestamos] = useState([]);
+  // ── Datos ────────────────────────────────────────────────────────────────
+  const [loading, setLoading]                     = useState(true);
+  const [error, setError]                         = useState(null);
+  const [libros, setLibros]                       = useState([]);
+  const [librosFiltered, setLibrosFiltered]       = useState([]);
+  const [prestamos, setPrestamos]                 = useState([]);
   const [prestamosFiltered, setPrestamosFiltered] = useState([]);
-  const [salones, setSalones] = useState([]);
-  const [periodos, setPeriodos] = useState([]);
-  const [error, setError] = useState(null);
+  const [salones, setSalones]                     = useState([]);
+  const [periodos, setPeriodos]                   = useState([]);
 
-  // =========================
-  // MAPS
-  // =========================
-  const salonesMap = {};
-  salones.forEach((s) => {
-    salonesMap[s.id_salon] = s;
-  });
+  // ── Maps auxiliares ──────────────────────────────────────────────────────
+  const salonesMap  = Object.fromEntries(salones.map((s) => [s.id_salon, s]));
+  const periodosMap = Object.fromEntries(periodos.map((p) => [p.id_periodo, p]));
 
-  const periodosMap = {};
-  periodos.forEach((p) => {
-    periodosMap[p.id_periodo] = p;
-  });
-
-  // =========================
-  // SIDEBAR
-  // =========================
+  // ── Sidebar ──────────────────────────────────────────────────────────────
   const menuItems = [
-    {
-      label: "Inicio",
-      icon: <Home />,
-      path: "/biblioteca/inicio",
-    },
-    {
-      label: "Inventario",
-      icon: <BookOpen />,
-      path: "/biblioteca/inventario",
-    },
+    { label: "Inicio",     icon: <Home />,     path: "/biblioteca/inicio" },
+    { label: "Inventario", icon: <BookOpen />, path: "/biblioteca/inventario" },
   ];
 
-  // =========================
-  // SINCRONIZAR RUTA
-  // =========================
+  // ── Sync ruta → pestaña ──────────────────────────────────────────────────
   useEffect(() => {
-    const pathname = location.pathname;
-
-    if (pathname.includes("inventario")) {
+    if (location.pathname.includes("inventario")) {
       setPestanaActiva("libros");
       setSelectedMenu("Inventario");
     } else {
       setPestanaActiva("inicio");
       setSelectedMenu("Inicio");
     }
-
     setFilaSeleccionada(null);
   }, [location.pathname]);
 
-  // =========================
-  // CARGAR DATOS
-  // =========================
-  const cargarTodo = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      await Promise.all([
-        cargarPrestamos(),
-        cargarLibros(),
-        cargarSalones(),
-        cargarPeriodos(),
-      ]);
-    } catch (err) {
-      console.error(err);
-      setError("Error al comunicar con el servidor.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // ── Carga inicial ────────────────────────────────────────────────────────
   useEffect(() => {
+    const cargarTodo = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        await Promise.all([
+          cargarPrestamos(),
+          cargarLibros(),
+          cargarSalones(),
+          cargarPeriodos(),
+        ]);
+      } catch (err) {
+        console.error(err);
+        setError("Error al comunicar con el servidor.");
+      } finally {
+        setLoading(false);
+      }
+    };
     cargarTodo();
   }, []);
 
-  // =========================
-  // CARGAR PRÉSTAMOS
-  // =========================
+  // ── Cargar préstamos ─────────────────────────────────────────────────────
   const cargarPrestamos = async () => {
     try {
-      const response = await getPrestamosRequest();
-      console.log("Datos reales que llegan del backend:", response.data);
-
-      const prestamosFormateados = Array.isArray(response.data)
-        ? response.data.map((p) => {
-            // Evaluamos el string que viene de la columna character varying(20)
-            // Si el backend te manda directamente "Prestado" o "Devuelto", lo dejamos pasar limpio.
-            // Si te manda "true"/"false" o "Activo"/"Devuelto", lo estandarizamos aquí:
-            let estadoVisual = "Prestado";
-            
-            if (p.estado === "Devuelto" || p.estado === "true" || p.estado === true) {
-              estadoVisual = "Devuelto";
-            } else if (p.estado === "Prestado" || p.estado === "false" || p.estado === false) {
-              estadoVisual = "Prestado";
-            }
-
-            return {
-              id_prestamo: p.id_prestamo,
-              // Si tu backend ya hace el Join con estudiante y libro, estos campos vendrán así:
-              codigo: p.codigo || p.estudiante?.codigo || "",
-              nombre: p.nombre || p.estudiante?.nombre || "",
-              grado: p.grado || p.estudiante?.grado || "",
-              grupo: p.grupo || p.estudiante?.grupo || "",
-              titulo_libro: p.libro || p.inventario_libro?.nombre || "", 
-              fecha_prestamo: p.fecha_prestamo || "",
-              fecha_entrega: p.fecha_devolucion || "", 
-              estado: estadoVisual, // Asignamos el estado corregido
-              observacion: p.observacion || "",
-            };
-          })
+      const { data } = await getPrestamosRequest();
+      console.log("RAW BACKEND:", JSON.stringify(data?.[0], null, 2));
+      const formateados = Array.isArray(data)
+        ? data.map((p) => ({
+            id:             p.id_prestamo,
+            id_prestamo:    p.id_prestamo,
+            codigo:         p.codigo  ?? "",
+            nombre:         p.nombre  ?? "",
+            grado:          p.grado   ?? "",
+            grupo:          p.grupo   ?? "",
+            titulo_libro:   p.libro   ?? "",          // backend devuelve "libro"
+            fecha_prestamo: p.fecha_prestamo    ?? "",
+            fecha_entrega:  p.fecha_devolucion  ?? "", // fecha pactada de devolución
+            // Normalizamos el estado a string legible
+            estado:
+              p.estado === "Devuelto" || p.estado === true || p.estado === "true"
+                ? "Devuelto"
+                : "Prestado",
+          }))
         : [];
-
-      setPrestamos(prestamosFormateados);
-      setPrestamosFiltered(prestamosFormateados);
-    } catch (error) {
-      console.error("ERROR PRESTAMOS:", error);
+      setPrestamos(formateados);
+      setPrestamosFiltered(formateados);
+    } catch (err) {
+      console.error("ERROR PRESTAMOS:", err);
       setPrestamos([]);
       setPrestamosFiltered([]);
     }
   };
 
-  // =========================
-  // CARGAR LIBROS
-  // =========================
+  // ── Cargar libros ────────────────────────────────────────────────────────
   const cargarLibros = async () => {
     try {
-      const response = await getLibrosRequest();
-
-      const librosFormateados = Array.isArray(response.data)
-        ? response.data.map((l) => ({
-            id: l.id_libro,
-            nombre: l.nombre || "",
-            autor: l.autor || "",
-            edicion: l.edicion || "",
-            disponible: l.disponible ? "Disponible" : "Prestado",
-            estado_fisico: l.estado_fisico || "Excelente",
-          }))
+      const { data } = await getLibrosRequest();
+      const formateados = Array.isArray(data)
+        ? data
+            .filter((l) => !l.nombre?.includes("(Eliminado del Inventario)"))
+            .map((l) => ({
+              id:           l.id_libro,
+              nombre:       l.nombre       ?? "",
+              autor:        l.autor        ?? "",
+              edicion:      l.edicion      ?? "",
+              disponible:   l.disponible ? "Disponible" : "Prestado",
+              estado_fisico: l.estado_fisico ?? "Excelente",
+            }))
         : [];
-
-      setLibros(librosFormateados);
-      setLibrosFiltered(librosFormateados);
-    } catch (error) {
-      console.error("ERROR LIBROS:", error);
+      setLibros(formateados);
+      setLibrosFiltered(formateados);
+    } catch (err) {
+      console.error("ERROR LIBROS:", err);
       setLibros([]);
       setLibrosFiltered([]);
     }
@@ -195,42 +150,38 @@ export default function BibliotecaPage() {
 
   const cargarSalones = async () => {
     try {
-      const response = await allsalonesRequest();
-      setSalones(response.data || []);
-    } catch (error) {
-      console.error("Error cargando salones:", error);
+      const { data } = await allsalonesRequest();
+      setSalones(data ?? []);
+    } catch (err) {
+      console.error("Error cargando salones:", err);
     }
   };
 
   const cargarPeriodos = async () => {
     try {
-      const response = await allaniosacademicosRequest();
-      setPeriodos(response.data || []);
-    } catch (error) {
-      console.error("Error cargando periodos:", error);
+      const { data } = await allaniosacademicosRequest();
+      setPeriodos(data ?? []);
+    } catch (err) {
+      console.error("Error cargando periodos:", err);
     }
   };
 
-  // =========================
-  // ACCIONES / MODALES DEL MOCKUP
-  // =========================
+  // ── Abrir modales ────────────────────────────────────────────────────────
   const abrirModalAsignar = () => {
     setModalTipo("asignar");
     setFormValues({
-      codigo: "",
-      nombre: "",
-      grado: "",
-      grupo: "",
-      titulo_libro: "",
-      edicion: "",
-      fecha_entrega: "",
+      codigo:         "",
+      nombre:         "",
+      titulo_libro:   "",
+      fecha_entrega:  "",
       estado_del_libro: "Excelente",
-      observacion: "",
+      observacion:    "",
     });
     setModal(true);
   };
 
   const abrirModalDevolver = () => {
+    console.log("FILA COMPLETA:", JSON.stringify(filaSeleccionada, null, 2));
     if (!filaSeleccionada) {
       alert("Por favor, selecciona un registro de préstamo en la tabla primero.");
       return;
@@ -240,338 +191,330 @@ export default function BibliotecaPage() {
       return;
     }
 
+    const id = filaSeleccionada.id_prestamo ?? filaSeleccionada.id;
+    if (!id) {
+      alert("Error interno: La fila seleccionada no contiene un ID válido.");
+      return;
+    }
+
+    setPrestamoIdActivo(id);
     setModalTipo("devolver");
     setFormValues({
-      id_prestamo: filaSeleccionada.id_prestamo,
-      titulo_libro: filaSeleccionada.titulo_libro,
-      edicion: "",
-      fecha_entrega: filaSeleccionada.fecha_entrega,
-      fecha_devolucion: new Date().toISOString().split("T")[0], // Fecha actual por defecto
-      estado_de_entrega: filaSeleccionada.estado_fisico || "Excelente",
+      titulo_libro:         filaSeleccionada.titulo_libro,
+      fecha_entrega:        filaSeleccionada.fecha_entrega,
+      fecha_devolucion:     new Date().toISOString().split("T")[0],
       estado_de_devolucion: "Excelente",
-      observacion: filaSeleccionada.observacion || "",
+      observacion:          "",
     });
     setModal(true);
   };
 
   const abrirModalAgregar = () => {
     setModalTipo("agregar");
-    setFormValues({});
+    setFormValues({
+      nombre:       "",
+      autor:        "",
+      edicion:      "",
+      disponible:   "Disponible",
+      estado_fisico: "Excelente",
+    });
     setModal(true);
   };
 
-  const abrirModalEditar = (fila) => {
-    if (!fila) {
-      alert("Debes seleccionar un libro");
-      return;
-    }
+  const abrirModalEditar = () => {
+    if (!filaSeleccionada) { alert("Debes seleccionar un libro."); return; }
     setModalTipo("editar");
-    setFormValues(fila);
+    setFormValues(filaSeleccionada);
     setModal(true);
   };
 
   const cerrarModal = () => {
     setModal(false);
     setFormValues({});
+    setPrestamoIdActivo(null);
   };
 
-  // =========================
-  // GUARDAR / PROCESAR (PROS)
-  // =========================
-const handleGuardarTodo = async () => {
+  // ── Guardar / procesar ───────────────────────────────────────────────────
+  const handleGuardarTodo = async () => {
     try {
       if (modalTipo === "agregar") {
         await createLibroRequest({
-          nombre: formValues.nombre,
-          autor: formValues.autor,
-          edicion: formValues.edicion,
-          disponible: formValues.disponible === "Disponible",
+          nombre:       formValues.nombre,
+          autor:        formValues.autor,
+          edicion:      formValues.edicion,
+          disponible:   formValues.disponible === "Disponible",
           estado_fisico: formValues.estado_fisico,
         });
+
       } else if (modalTipo === "editar") {
         await updateLibroRequest(formValues.id, {
-          nombre: formValues.nombre,
-          autor: formValues.autor,
-          edicion: formValues.edicion,
+          nombre:       formValues.nombre,
+          autor:        formValues.autor,
+          edicion:      formValues.edicion,
           estado_fisico: formValues.estado_fisico,
         });
+
       } else if (modalTipo === "asignar") {
-        // El backend intercepta "libro" y desactiva su disponibilidad automáticamente
+        if (!formValues.fecha_entrega) {
+        alert("Por favor ingresa la fecha de entrega.");
+        return;
+  }
         await asignarLibroRequest({
-          codigo: formValues.codigo ? parseInt(formValues.codigo, 10) : 0,
-          nombre: formValues.nombre,
-          grado: formValues.grado,
-          grupo: formValues.grupo,
-          libro: formValues.titulo_libro,
-          fecha_prestamo: new Date().toISOString().split('T')[0],
+          codigo:           parseInt(formValues.codigo, 10) || 0,
+          libro:            formValues.titulo_libro,
           fecha_devolucion: formValues.fecha_entrega,
-          estado: false,
-          observacion: formValues.observacion || "",
-          estado_fisico: formValues.estado_del_libro 
+          estado:           "Prestado",
+          estado_fisico:    formValues.estado_del_libro,
         });
 
       } else if (modalTipo === "devolver") {
-        // El backend marca el préstamo como devuelto y libera el libro automáticamente
-        await devolverLibroRequest(formValues.id_prestamo, {
-          fecha_devolucion: formValues.fecha_devolucion,
+        if (!prestamoIdActivo) {
+          alert("Error: No se encontró el ID del préstamo activo.");
+          return;
+        }
+        await devolverLibroRequest(prestamoIdActivo, {
+          fecha_devolucion:     formValues.fecha_devolucion,
           estado_de_devolucion: formValues.estado_de_devolucion,
-          observacion: formValues.observacion || ""
+          observacion:          formValues.observacion ?? "",
         });
       }
 
-      // Recarga completa y limpia del servidor para reflejar los cambios en ambas pestañas
       await cargarPrestamos();
       await cargarLibros();
       cerrarModal();
       setFilaSeleccionada(null);
-    } catch (error) {
-      console.error("Error procesando operación:", error);
-      alert("Ocurrió un problema guardando los cambios en el servidor.");
-    }
+    } catch (err) {
+      const mensaje =
+        err.response?.data?.detail ||
+        "Ocurrió un problema guardando los cambios en el servidor.";
+      alert(mensaje);
+}
   };
 
-const handleEliminarLibro = async () => {
-    if (!filaSeleccionada) {
-      alert("Por favor, selecciona un libro de la tabla primero.");
-      return;
-    }
-
+  // ── Eliminar libro ───────────────────────────────────────────────────────
+  const handleEliminarLibro = async () => {
+    if (!filaSeleccionada) { alert("Selecciona un libro primero."); return; }
     if (filaSeleccionada.disponible === "Prestado") {
       alert("No es posible eliminar un libro con préstamo activo.");
       return;
     }
+    if (!window.confirm(`¿Eliminar "${filaSeleccionada.nombre}" de ${filaSeleccionada.autor}? Esta acción no puede deshacerse.`)) return;
 
     try {
-      console.log("Enviando solicitud de eliminación para ID:", filaSeleccionada.id);
-      
-      // Ejecutamos la petición directamente
       await deleteLibroRequest(filaSeleccionada.id);
-      
-      console.log("Eliminación exitosa en el servidor");
-      
-      // Refrescar estados locales
       await cargarLibros();
       await cargarPrestamos();
-      
-      setFilaSeleccionada(null); 
-      alert("El libro ha sido eliminado del inventario.");
-    } catch (error) {
-      console.error("Error detectado en la petición Axios:", error);
-      alert("Ocurrió un error en el servidor al intentar eliminar el libro.");
+      setFilaSeleccionada(null);
+    } catch (err) {
+      console.error("Error eliminando libro:", err);
+      alert("Error en el servidor al intentar eliminar el libro.");
     }
   };
 
-  // =========================
-  // FILTRAR LOGIC
-  // =========================
-  const FiltrarPrestamos = (filtros) => {
-    let filtered = prestamos;
-    if (filtros.codigo) {
-      filtered = filtered.filter((r) => r.codigo?.toString().includes(filtros.codigo));
-    }
-    if (filtros.nombre) {
-      filtered = filtered.filter((r) => r.nombre?.toLowerCase().includes(filtros.nombre.toLowerCase()));
-    }
-    if (filtros.grado) {
-      filtered = filtered.filter((r) => r.grado?.toString() === filtros.grado.toString());
-    }
-    if (filtros.grupo) {
-      filtered = filtered.filter((r) => r.grupo?.toString() === filtros.grupo.toString());
-    }
+  // ── Filtros ──────────────────────────────────────────────────────────────
+  const filtrarPrestamos = (filtros) => {
+    let f = prestamos;
+    if (filtros.codigo) f = f.filter((r) => r.codigo?.toString().includes(filtros.codigo));
+    if (filtros.nombre) f = f.filter((r) => r.nombre?.toLowerCase().includes(filtros.nombre.toLowerCase()));
+    if (filtros.grado)  f = f.filter((r) => r.grado?.toString() === filtros.grado.toString());
+    if (filtros.grupo)  f = f.filter((r) => r.grupo?.toString() === filtros.grupo.toString());
     if (filtros.periodo) {
-      filtered = filtered.filter((r) => {
+      f = f.filter((r) => {
         const salon = Object.values(salonesMap).find(
           (s) => s.grado?.toString() === r.grado?.toString() && s.grupo?.toString() === r.grupo?.toString()
         );
-        const periodo = periodosMap[salon?.id_periodo];
-        return periodo?.nombre?.toString() === filtros.periodo.toString();
+        return periodosMap[salon?.id_periodo]?.nombre?.toString() === filtros.periodo.toString();
       });
     }
-    setPrestamosFiltered(filtered);
+    setPrestamosFiltered(f);
   };
 
-  const FiltrarLibros = (filtros) => {
-    let filtered = libros;
-    if (filtros.nombre) {
-      filtered = filtered.filter((l) => l.nombre?.toLowerCase().includes(filtros.nombre.toLowerCase()));
-    }
-    if (filtros.autor) {
-      filtered = filtered.filter((l) => l.autor?.toLowerCase().includes(filtros.autor.toLowerCase()));
-    }
-    if (filtros.edicion) {
-      filtered = filtered.filter((l) => l.edicion?.toString().includes(filtros.edicion));
-    }
-    setLibrosFiltered(filtered);
+  const filtrarLibros = (filtros) => {
+    let f = libros;
+    if (filtros.nombre)  f = f.filter((l) => l.nombre?.toLowerCase().includes(filtros.nombre.toLowerCase()));
+    if (filtros.autor)   f = f.filter((l) => l.autor?.toLowerCase().includes(filtros.autor.toLowerCase()));
+    if (filtros.edicion) f = f.filter((l) => l.edicion?.toString().includes(filtros.edicion));
+    setLibrosFiltered(f);
   };
 
-  // =========================
-  // COLUMNAS TABLAS
-  // =========================
+  // ── Columnas ─────────────────────────────────────────────────────────────
   const columnasInicio = [
-    { key: "codigo", label: "CÓDIGO" },
-    { key: "nombre", label: "NOMBRE COMPLETO" },
-    { key: "grado", label: "GRADO" },
-    { key: "grupo", label: "GRUPO" },
-    { key: "titulo_libro", label: "TÍTULO DEL LIBRO" },
+    { key: "codigo",        label: "CÓDIGO" },
+    { key: "nombre",        label: "NOMBRE COMPLETO" },
+    { key: "grado",         label: "GRADO" },
+    { key: "grupo",         label: "GRUPO" },
+    { key: "titulo_libro",  label: "TÍTULO DEL LIBRO" },
     { key: "fecha_entrega", label: "FECHA DE ENTREGA" },
     {
-      key: "estado",
-      label: "ESTADO",
-      render: (val) => {
-        let className = val === "Prestado" ? "badge--warning" : "badge--ok";
-        return <span className={className}>{val}</span>;
-      },
+      key: "estado", label: "ESTADO",
+      render: (val) => (
+        <span className={val === "Prestado" ? "badge--warning" : "badge--ok"}>{val}</span>
+      ),
     },
   ];
 
   const columnasLibros = [
-    { key: "id", label: "ID" },
-    { key: "nombre", label: "TÍTULO DEL LIBRO" },
-    { key: "autor", label: "AUTOR" },
+    { key: "id",      label: "ID" },
+    { key: "nombre",  label: "TÍTULO DEL LIBRO" },
+    { key: "autor",   label: "AUTOR" },
     { key: "edicion", label: "EDICIÓN" },
     {
-      key: "disponible",
-      label: "DISPONIBILIDAD",
+      key: "disponible", label: "DISPONIBILIDAD",
       render: (val) => (
         <span className={val === "Disponible" ? "badge--ok" : "badge--no"}>{val}</span>
       ),
     },
-    { key: "estado_fisico", label: "ESTADO FÍSICO" },
+    { 
+    key: "estado_fisico", 
+    label: "ESTADO FÍSICO",
+    render: (val) => {
+      const clase = val === "Excelente" ? "badge--ok" : val === "Regular" ? "badge--warning" : "badge--no";
+      return <span className={clase}>{val}</span>;
+    }
+    },
   ];
 
-  // =========================
-  // RENDERIZADO DE CAMPOS DINÁMICOS
-  // =========================
-  let camposModal = [];
-  let tituloModal = "";
+  // ── Campos del modal según tipo ──────────────────────────────────────────
+  const configModal = {
+    agregar: {
+      titulo: "AGREGAR LIBRO",
+      campos: [
+        { key: "nombre",       label: "Título del Libro", type: "text" },
+        { key: "autor",        label: "Autor",            type: "text" },
+        { key: "edicion",      label: "Edición",          type: "text" },
+        { key: "disponible",   label: "Disponibilidad",   type: "select", options: ["Disponible", "Prestado"] },
+        { key: "estado_fisico", label: "Estado Físico",   type: "select", options: ["Excelente", "Regular", "Malo"] },
+      ],
+    },
+    editar: {
+      titulo: "EDITAR LIBRO",
+      campos: [
+        { key: "nombre",       label: "Título del Libro", type: "text" },
+        { key: "autor",        label: "Autor",            type: "text" },
+        { key: "edicion",      label: "Edición",          type: "text" },
+        { key: "estado_fisico", label: "Estado Físico",   type: "select", options: ["Excelente", "Regular", "Malo"] },
+      ],
+    },
+    asignar: {
+      titulo: "ASIGNAR LIBRO",
+      campos: [
+        { key: "codigo",       label: "Código Estudiante", type: "text" },
+        { key: "nombre",       label: "Nombre Completo",   type: "text", disabled: true },
+        {
+          key: "titulo_libro",
+          label: "Título del Libro",
+          type: "select",
+          options: libros
+            .filter((l) => l.disponible === "Disponible")
+            .map((l) => ({ value: l.nombre, label: l.nombre })),
+        },
+        { key: "fecha_entrega",    label: "Fecha de Entrega", type: "date" },
+        { key: "estado_del_libro", label: "Estado del Libro", type: "select", options: ["Excelente", "Regular", "Malo"] },
+      ],
+},
+    devolver: {
+      titulo: "DEVOLVER LIBRO",
+      campos: [
+        { key: "titulo_libro",         label: "Título del Libro",      type: "text",   disabled: true },
+        { key: "fecha_entrega",        label: "Fecha de Entrega",      type: "text",   disabled: true },
+        { key: "fecha_devolucion",     label: "Fecha de Devolución",   type: "text" },
+        { key: "estado_de_devolucion", label: "Estado de Devolución",  type: "select", options: ["Excelente", "Regular", "Malo"] },
+        { key: "observacion",          label: "Observación",           type: "text" },
+      ],
+    },
+  };
 
-  if (modalTipo === "agregar" || modalTipo === "editar") {
-    tituloModal = modalTipo === "agregar" ? "AGREGAR LIBRO" : "EDITAR LIBRO";
-    camposModal = [
-      { key: "nombre", label: "Título del Libro", type: "text" },
-      { key: "autor", label: "Autor", type: "text" },
-      { key: "edicion", label: "Edición", type: "text" },
-      { key: "disponible", label: "Disponibilidad", type: "select", options: ["Disponible", "Prestado"] },
-      { key: "estado_fisico", label: "Estado Físico", type: "select", options: ["Excelente", "Regular", "Malo"] },
-    ];
-  } else if (modalTipo === "asignar") {
-    tituloModal = "ASIGNAR LIBRO";
-    camposModal = [
-      { key: "codigo", label: "Código Estudiante", type: "text" },
-      { key: "nombre", label: "Nombre Completo", type: "text" },
-      { key: "grado", label: "Grado", type: "text" },
-      { key: "grupo", label: "Grupo", type: "text" },
-      { key: "titulo_libro", label: "Título del Libro", type: "text" },
-      { key: "edicion", label: "Edición", type: "text" },
-      { key: "fecha_entrega", label: "Fecha de Entrega", type: "text" },
-      { key: "estado_del_libro", label: "Estado del Libro", type: "select", options: ["Excelente", "Regular", "Malo"] },
-      { key: "observacion", label: "Observación", type: "text" },
-    ];
-  } else if (modalTipo === "devolver") {
-    tituloModal = "DEVOLVER LIBRO";
-    camposModal = [
-      { key: "titulo_libro", label: "Título del Libro", type: "text", disabled: true },
-      { key: "edicion", label: "Edición", type: "text" },
-      { key: "fecha_entrega", label: "Fecha de Entrega", type: "text", disabled: true },
-      { key: "fecha_devolucion", label: "Fecha de Devolución", type: "text" },
-      { key: "estado_de_entrega", label: "Estado de Entrega", type: "text", disabled: true },
-      { key: "estado_de_devolucion", label: "Estado de Devolución", type: "select", options: ["Excelente", "Regular", "Malo"] },
-      { key: "observacion", label: "Observación", type: "text" },
-    ];
-  }
+  const { titulo: tituloModal, campos: camposModal } = configModal[modalTipo] ?? { titulo: "", campos: [] };
 
+  // ── Render ───────────────────────────────────────────────────────────────
   if (loading) return <div>Cargando biblioteca...</div>;
-  if (error) return <div>Error cargando datos: {error}</div>;
+  if (error)   return <div>Error: {error}</div>;
 
   return (
     <div>
-      <style>
-        {`
-          .badge--ok { display: inline-block; padding: 0.4rem 0.8rem; background: #D4EDDA; color: #155724; border-radius: 0.4rem; font-weight: 600; font-size: 0.9rem; }
-          .badge--warning { display: inline-block; padding: 0.4rem 0.8rem; background: #FFF3CD; color: #856404; border-radius: 0.4rem; font-weight: 600; font-size: 0.9rem; }
-          .badge--no { display: inline-block; padding: 0.4rem 0.8rem; background: #F8D7DA; color: #721C24; border-radius: 0.4rem; font-weight: 600; font-size: 0.9rem; }
-        `}
-      </style>
+      <style>{`
+        .badge--ok      { display:inline-block; padding:.4rem .8rem; background:#D4EDDA; color:#155724; border-radius:.4rem; font-weight:600; font-size:.9rem; }
+        .badge--warning { display:inline-block; padding:.4rem .8rem; background:#FFF3CD; color:#856404; border-radius:.4rem; font-weight:600; font-size:.9rem; }
+        .badge--no      { display:inline-block; padding:.4rem .8rem; background:#F8D7DA; color:#721C24; border-radius:.4rem; font-weight:600; font-size:.9rem; }
+      `}</style>
 
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
 
       <ModuleLayout
-        sidebar={<Sidebar menuItems={menuItems} selectedMenu={selectedMenu} user="Nombre usuario" logout={() => console.log("logout")} />}
+        sidebar={
+          <Sidebar
+            menuItems={menuItems}
+            selectedMenu={selectedMenu}
+            user="Nombre usuario"
+            logout={() => console.log("logout")}
+          />
+        }
         actions={
           <ActionButtons
             filaSeleccionada={filaSeleccionada}
             botones={
               pestanaActiva === "inicio"
                 ? [
-                    { label: "Asignar Libro", onClick: abrirModalAsignar, siempreActivo: true, variante: "primary" },
-                    { label: "Devolver Libro", onClick: abrirModalDevolver, variante: "secondary" },
+                    { label: "Asignar Libro",  onClick: abrirModalAsignar,  siempreActivo: true,       variante: "primary" },
+                    { label: "Devolver Libro", onClick: abrirModalDevolver, disabled: !filaSeleccionada, variante: "secondary" },
                   ]
                 : [
-                    { label: "Agregar Libro", onClick: abrirModalAgregar, siempreActivo: true, variante: "primary" },
-                    { label: "Editar Libro", onClick: () => abrirModalEditar(filaSeleccionada), variante: "secondary", disabled: !filaSeleccionada || filaSeleccionada.disponible === "Prestado" },
-                    // Cambia el botón de eliminar para que quede así:
-                    { 
-                      label: "Eliminar Libro", 
-                      onClick: handleEliminarLibro, 
-                      variante: "danger",
-                      disabled: !filaSeleccionada // Solo se deshabilita si no han hecho click en ninguna fila
-                    },
+                    { label: "Agregar Libro",  onClick: abrirModalAgregar,  siempreActivo: true,                                                      variante: "primary" },
+                    { label: "Editar Libro",   onClick: abrirModalEditar,   disabled: !filaSeleccionada || filaSeleccionada.disponible === "Prestado", variante: "secondary" },
+                    { label: "Eliminar Libro", onClick: handleEliminarLibro, disabled: !filaSeleccionada || filaSeleccionada.disponible === "Prestado", variante: "danger" },
                   ]
             }
           />
         }
       >
-        {/* ========================= VIEW: INICIO ========================= */}
+        {/* ── INICIO ── */}
         {pestanaActiva === "inicio" && (
           <div>
             <SearchBar
               loading={loading}
-              onSearch={FiltrarPrestamos}
+              onSearch={filtrarPrestamos}
               fields={[
                 { key: "codigo", label: "Código", type: "text", onInput: (e) => { e.target.value = e.target.value.replace(/\D/g, ""); } },
                 { key: "nombre", label: "Nombre", type: "text" },
-                { key: "grado", label: "Grado", type: "select", options: Array.from(new Set(Object.values(salonesMap).map((s) => s.grado).filter(Boolean))) },
-                { key: "grupo", label: "Grupo", type: "select", options: Array.from(new Set(Object.values(salonesMap).map((s) => s.grupo).filter(Boolean))) },
-                { key: "periodo", label: "Periodo", type: "select", options: Array.from(new Set(Object.values(periodosMap).map((p) => p.nombre).filter(Boolean))) },
+                { key: "grado",  label: "Grado",  type: "select", options: [...new Set(Object.values(salonesMap).map((s) => s.grado).filter(Boolean))] },
+                { key: "grupo",  label: "Grupo",  type: "select", options: [...new Set(Object.values(salonesMap).map((s) => s.grupo).filter(Boolean))] },
+                { key: "periodo", label: "Periodo", type: "select", options: [...new Set(Object.values(periodosMap).map((p) => p.nombre).filter(Boolean))] },
               ]}
             />
-            <div style={{ marginTop: "1rem", background: "#FFFFFF", borderRadius: "0.8rem", overflow: "hidden", border: "1px solid #D9D9D9" }}>
-              <DataTable columns={columnasInicio} rows={prestamosFiltered} emptyText="No hay préstamos" onRowClick={(f) => setFilaSeleccionada(f)} />
+            <div style={{ marginTop: "1rem", background: "#fff", borderRadius: ".8rem", overflow: "hidden", border: "1px solid #D9D9D9" }}>
+               {prestamosFiltered.length} préstamos
+              <DataTable columns={columnasInicio} rows={prestamosFiltered} emptyText="No hay préstamos" onRowClick={setFilaSeleccionada} />
+
             </div>
           </div>
         )}
 
-        {/* ========================= VIEW: INVENTARIO ========================= */}
+        {/* ── INVENTARIO ── */}
         {pestanaActiva === "libros" && (
           <div>
             <SearchBar
               loading={loading}
-              onSearch={FiltrarLibros}
+              onSearch={filtrarLibros}
               fields={[
-                { key: "nombre", label: "Título del Libro", type: "text" },
-                { key: "autor", label: "Autor", type: "text" },
-                { key: "edicion", label: "Edición", type: "text" },
+                { key: "nombre",  label: "Título del Libro", type: "text" },
+                { key: "autor",   label: "Autor",            type: "text" },
+                { key: "edicion", label: "Edición",          type: "text" },
               ]}
             />
-            <div style={{ marginTop: "1rem", background: "#FFFFFF", borderRadius: "0.8rem", overflow: "hidden", border: "1px solid #D9D9D9" }}>
-              <DataTable columns={columnasLibros} rows={librosFiltered} emptyText="No hay libros" onRowClick={(f) => setFilaSeleccionada(f)} />
+            <div style={{ marginTop: "1rem", background: "#fff", borderRadius: ".8rem", overflow: "hidden", border: "1px solid #D9D9D9" }}>
+              {librosFiltered.length} libros
+              <DataTable columns={columnasLibros} rows={librosFiltered} emptyText="No hay libros" onRowClick={setFilaSeleccionada} />
             </div>
           </div>
         )}
       </ModuleLayout>
 
-      {/* ========================= MODAL REUTILIZABLE ========================= */}
       <Modal
         title={tituloModal}
         isOpen={modal}
         fields={camposModal}
         values={formValues}
-        onChange={(key, val) =>
-          setFormValues((p) => ({
-            ...p,
-            [key]: val,
-          }))
-        }
+        onChange={(key, val) => setFormValues((prev) => ({ ...prev, [key]: val }))}
         onAccept={handleGuardarTodo}
         onCancel={cerrarModal}
       />
