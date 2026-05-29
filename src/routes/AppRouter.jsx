@@ -7,11 +7,13 @@ import {
 import LoginPage from "../modules/auth/LoginPage";
 
 import TesoreriaMatricula from "../modules/tesoreria/TesoreriaMatricula";
-import TesoreriaNotificaciones from "../modules/tesoreria/TesoreriaNotificaciones";
-import TesoreriaEstadistica from "../modules/tesoreria/TesoreriaEstadistica";
 import TesoreriaPension from "../modules/tesoreria/TesoreriaPension";
 import TesoreriaPapeleria from "../modules/tesoreria/TesoreriaPapeleria";
 import Tesoreria from "../modules/tesoreria/Tesoreria";
+import TesoreriaNotificaciones from "../modules/tesoreria/TesoreriaNotificaciones"
+
+import ParametrizacionPage from '../modules/parametrizacion/ParametrizacionPage';
+import UsuariosPage from '../modules/parametrizacion/UsuariosPage';
 
 import Home from "../modules/Home/HomePage";
 
@@ -115,30 +117,8 @@ const AppRouter = () => {
           }
         />
 }
-{
-        <Route 
-        path="/tesoreria/notificaciones" 
-        element={
-        <PrivateRoute>
-          <TesoreriaNotificaciones />
-          </PrivateRoute>} />
-      }
-      {
-        <Route 
-        path="/tesoreria/estadisticas" 
-        element={
-        <PrivateRoute>
-          <TesoreriaEstadistica />
-          </PrivateRoute>} />
-      }
-      {
-        <Route 
-        path="/tesoreria/pension" 
-        element={
-        <PrivateRoute>
-          <TesoreriaPension />
-          </PrivateRoute>} />
-      }
+
+    
       {
         <Route 
         path="/tesoreria/" 
@@ -155,6 +135,22 @@ const AppRouter = () => {
           <TesoreriaPapeleria />
           </PrivateRoute>} />
       }
+      <Route 
+        path="/parametrizacion" 
+        element={
+          <PrivateRoute>
+            <ParametrizacionPage />
+          </PrivateRoute>
+      } 
+      />
+      <Route 
+        path="/parametrizacion/usuarios" 
+        element={
+          <PrivateRoute>
+             <UsuariosPage />
+          </PrivateRoute>
+        } 
+        />
       
       <Route
         path="/test"
