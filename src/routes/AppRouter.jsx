@@ -13,6 +13,9 @@ import TesoreriaPension from "../modules/tesoreria/TesoreriaPension";
 import TesoreriaPapeleria from "../modules/tesoreria/TesoreriaPapeleria";
 import Tesoreria from "../modules/tesoreria/Tesoreria";
 
+import ParametrizacionPage from '../modules/parametrizacion/ParametrizacionPage';
+import UsuariosPage from '../modules/parametrizacion/UsuariosPage';
+
 import Home from "../modules/Home/HomePage";
 
 
@@ -155,6 +158,22 @@ const AppRouter = () => {
           <TesoreriaPapeleria />
           </PrivateRoute>} />
       }
+      <Route 
+        path="/parametrizacion" 
+        element={
+          <PrivateRoute>
+            <ParametrizacionPage />
+          </PrivateRoute>
+      } 
+      />
+      <Route 
+        path="/parametrizacion/usuarios" 
+        element={
+          <PrivateRoute>
+             <UsuariosPage />
+          </PrivateRoute>
+        } 
+        />
       
       <Route
         path="/test"
