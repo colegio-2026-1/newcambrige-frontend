@@ -14,6 +14,7 @@ import {
   asignarLibroRequest,
   devolverLibroRequest,
 } from "../../api/endpoints";
+import { allrolesuserRequest } from "../../api/endpoints";
 
 import Header from "../../components/layout/Header";
 import ModuleLayout from "../../components/layout/ModuleLayout";
@@ -25,7 +26,7 @@ import Modal from "../../components/shared/Modal";
 
 export default function BibliotecaPage() {
   const location = useLocation();
-
+  const { user, logout } = useAuth();
   // ── UI ──────────────────────────────────────────────────────────────────
   const [pestanaActiva, setPestanaActiva]       = useState("inicio");
   const [selectedMenu, setSelectedMenu]         = useState("Inicio");
@@ -35,6 +36,11 @@ export default function BibliotecaPage() {
   const [modal, setModal]                 = useState(false);
   const [modalTipo, setModalTipo]         = useState("agregar");
   const [formValues, setFormValues]       = useState({});
+  const userName = user?.nombre || "Usuario";
+  const [cargandoRol, setCargandoRol] = useState(true);
+  const idUser = user?.id_usuario;
+  const [roles, setRoles] = useState([]);
+  const rol = roles[0] || "Rol Desconocido";
   // Guardamos el ID del préstamo activo de forma segura para la devolución
   const [prestamoIdActivo, setPrestamoIdActivo] = useState(null);
 
@@ -51,7 +57,6 @@ export default function BibliotecaPage() {
   // ── Maps auxiliares ──────────────────────────────────────────────────────
   const salonesMap  = Object.fromEntries(salones.map((s) => [s.id_salon, s]));
   const periodosMap = Object.fromEntries(periodos.map((p) => [p.id_periodo, p]));
-  const { user, logout } = useAuth();
   // ── Sidebar ──────────────────────────────────────────────────────────────
   const menuItems = [
     { label: "Inicio",     icon: <Home />,     path: "/biblioteca/inicio" },
@@ -91,6 +96,27 @@ export default function BibliotecaPage() {
     };
     cargarTodo();
   }, []);
+
+  useEffect(() => {
+      const obtenerRoles = async () => {
+        if (!idUser) return;
+        
+        try {
+          setCargandoRol(true);
+          const response = await allrolesuserRequest(idUser);
+          
+          setRoles(response?.data || []); 
+        } catch (error) {
+          console.error("Error al obtener el rol:", error);
+          setRoles([]);
+        } finally {
+          setCargandoRol(false);
+        }
+      };
+      
+      obtenerRoles();
+    }, [idUser]);
+  
 
   // ── Cargar préstamos ─────────────────────────────────────────────────────
   const cargarPrestamos = async () => {
@@ -446,7 +472,7 @@ export default function BibliotecaPage() {
           <Sidebar
             menuItems={menuItems}
             selectedMenu={selectedMenu}
-            user={{ nombre: user?.nombre || "Usuario", rol: user?.rol || "" }}
+            user={{ nombre: userName, rol: rol }}
             logout={() => console.log("logout")}
           />
         }

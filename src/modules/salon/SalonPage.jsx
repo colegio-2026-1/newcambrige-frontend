@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Home } from "lucide-react";
 import { useAuth } from "../../api/useAuth";
-// import { allrolesuserRequest } from "../../api/endpoints";
+import { allrolesuserRequest } from "../../api/endpoints";
 
 import Header from "../../components/layout/header";
 import ModuleLayout from "../../components/layout/ModuleLayout";
@@ -15,10 +15,12 @@ import PruebasIcon    from "../../assets/Salon/pruebas.svg";
 export default function SalonPage() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const userName = user?.nombre || "Usuario";
+  const [cargandoRol, setCargandoRol] = useState(true);
 
-  // const idUser = user?.id_usuario;
-  // const [roles, setRoles] = useState([]);
-  // const rol = roles[0] || "Rol Desconocido";
+  const idUser = user?.id_usuario;
+  const [roles, setRoles] = useState([]);
+  const rol = roles[0] || "Rol Desconocido";
 
   const [selectedMenu, setSelectedMenu] = useState("Inicio");
 
@@ -32,18 +34,25 @@ export default function SalonPage() {
     { id: "pruebas",    label: "Pruebas",    path: "/pruebas",    icon: PruebasIcon    },
   ];
 
-  // useEffect(() => {
-  //   if (!idUser) return;
-  //   const cargar = async () => {
-  //     try {
-  //       const rolesRes = await allrolesuserRequest(idUser);
-  //       setRoles(rolesRes?.data || []);
-  //     } catch (err) {
-  //       console.error("Error cargando roles:", err);
-  //     }
-  //   };
-  //   cargar();
-  // }, [idUser]);
+  useEffect(() => {
+    const obtenerRoles = async () => {
+      if (!idUser) return;
+      
+      try {
+        setCargandoRol(true);
+        const response = await allrolesuserRequest(idUser);
+        
+        setRoles(response?.data || []); 
+      } catch (error) {
+        console.error("Error al obtener el rol:", error);
+        setRoles([]);
+      } finally {
+        setCargandoRol(false);
+      }
+    };
+    
+    obtenerRoles();
+  }, [idUser]);
 
   return (
     <div className="dashboard-container">
@@ -55,7 +64,7 @@ export default function SalonPage() {
             menuItems={menuItems}
             selectedMenu={selectedMenu}
             setSelectedMenu={setSelectedMenu}
-            user={{ nombre: user?.nombre || "Usuario", rol: user?.rol || "" }}
+            user={{ nombre: userName, rol: rol }}
             logout={logout}
           />
         }

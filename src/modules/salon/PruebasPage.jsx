@@ -17,14 +17,21 @@ import DataTable from "../../components/shared/DataTable";
 import ActionButtons from "../../components/shared/ActionButtons";
 import Modal from "../../components/shared/Modal";
 
+
 export default function PruebasPage() {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const userName = user?.nombre || "Usuario";
+  const [cargandoRol, setCargandoRol] = useState(true);
+  const idUser = user?.id_usuario;
+  const [roles, setRoles] = useState([]);
+  const rol = roles[0] || "Rol Desconocido";
 
   const [fila, setFila] = useState(null);
   const [modal, setModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState([]);
-  const { user, logout } = useAuth();
+  
   const [rowsFiltered, setRowsFiltered] = useState([]);
   const [salones, setSalones] = useState([]);
   const [periodos, setPeriodos] = useState([]);
@@ -276,6 +283,27 @@ export default function PruebasPage() {
     }
   };
 
+  useEffect(() => {
+      const obtenerRoles = async () => {
+        if (!idUser) return;
+        
+        try {
+          setCargandoRol(true);
+          const response = await allrolesuserRequest(idUser);
+          
+          setRoles(response?.data || []); 
+        } catch (error) {
+          console.error("Error al obtener el rol:", error);
+          setRoles([]);
+        } finally {
+          setCargandoRol(false);
+        }
+      };
+      
+      obtenerRoles();
+    }, [idUser]);
+
+
   // =========================
   // LOADING / ERROR
   // =========================
@@ -357,7 +385,7 @@ export default function PruebasPage() {
             ]}
             selectedMenu={"Inicio"}
             setSelectedMenu={() => {}}
-            user={{ nombre: user?.nombre || "Usuario", rol: user?.rol || "" }}
+            user={{ nombre: userName, rol: rol }}
             logout={() => console.log("logout")}
           />
         }

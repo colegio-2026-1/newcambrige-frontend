@@ -9,7 +9,7 @@ import {
   allsalonesRequest,
   allaniosacademicosRequest,
 } from "../../api/endpoints";
-
+import { allrolesuserRequest } from "../../api/endpoints";
 import Header from "../../components/layout/Header";
 import ModuleLayout from "../../components/layout/ModuleLayout";
 import Sidebar from "../../components/layout/Sidebar";
@@ -21,13 +21,17 @@ import Modal from "../../components/shared/Modal";
 
 export default function PupitrePage() {
   const navigate = useNavigate();
-
+  const { user, logout } = useAuth();
   const [fila, setFila] = useState(null);
-
+  const userName = user?.nombre || "Usuario";
+  const [cargandoRol, setCargandoRol] = useState(true);
+  const idUser = user?.id_usuario;
+  const [roles, setRoles] = useState([]);
+  const rol = roles[0] || "Rol Desconocido";
   const [modal, setModal] = useState(false);
 
   const [mensajeConfirmacion, setMensajeConfirmacion] = useState("");
-  const { user, logout } = useAuth();
+  
   const [loading, setLoading] = useState(true);
 
   const [rows, setRows] = useState([]);
@@ -115,6 +119,25 @@ export default function PupitrePage() {
     },
   ];
 
+  useEffect(() => {
+      const obtenerRoles = async () => {
+        if (!idUser) return;
+        
+        try {
+          setCargandoRol(true);
+          const response = await allrolesuserRequest(idUser);
+          
+          setRoles(response?.data || []); 
+        } catch (error) {
+          console.error("Error al obtener el rol:", error);
+          setRoles([]);
+        } finally {
+          setCargandoRol(false);
+        }
+      };
+      
+      obtenerRoles();
+    }, [idUser]);
   // =========================
   // CARGAR PUPITRES
   // =========================
@@ -453,7 +476,7 @@ export default function PupitrePage() {
             ]}
             selectedMenu={"Inicio"}
             setSelectedMenu={() => {}}
-            user={{ nombre: user?.nombre || "Usuario", rol: user?.rol || "" }}
+            user={{ nombre: userName, rol: rol }}
             logout={() =>
               console.log("logout")
             }
