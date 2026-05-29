@@ -42,7 +42,7 @@ axiosClient.interceptors.response.use(
         if (status === 401) {
             localStorage.removeItem("access_token");
             // Redirigir a login con query param para mostrar popup
-           // window.location.replace("/?expired=true");
+            window.location.replace("/?expired=true");
             return Promise.reject(error);
         }
 
