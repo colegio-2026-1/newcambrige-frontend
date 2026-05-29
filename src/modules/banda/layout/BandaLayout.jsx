@@ -6,33 +6,26 @@ import BandaSidebar from "./BandaSidebar";
 import "./BandaLayout.css";
 
 const BandaLayout = () => {
-
   return (
-
     <div className="banda-layout">
 
-      {/* SIDEBAR */}
-
+      {/* SIDEBAR PERSISTENTE */}
       <BandaSidebar />
 
       {/* CONTENIDO */}
-
       <div className="banda-layout__content">
 
         {/* HEADER */}
-
         <BandaHeader />
 
         {/* MAIN */}
-
         <main className="banda-layout__main">
-
-          <Outlet />
-
+          <div className="banda-layout__container">
+            <Outlet />
+          </div>
         </main>
 
       </div>
-
     </div>
   );
 };

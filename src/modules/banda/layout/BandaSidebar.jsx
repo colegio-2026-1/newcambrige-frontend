@@ -10,11 +10,13 @@ const BandaSidebar = () => {
 
     <aside className="banda-sidebar">
 
+      {/* CONTENIDO SUPERIOR */}
+
       <div className="banda-sidebar__top">
 
-        {/* TITULO */}
+        {/* BRAND */}
 
-        <div className="banda-sidebar__titlebox">
+        <div className="banda-sidebar__brand">
 
           <h2 className="banda-sidebar__title">
             Banda Escolar
@@ -26,7 +28,7 @@ const BandaSidebar = () => {
 
         </div>
 
-        {/* MENU */}
+        {/* NAVIGATION */}
 
         <nav className="banda-sidebar__nav">
 
@@ -68,7 +70,13 @@ const BandaSidebar = () => {
 
       </div>
 
-      <BandaUserCard />
+      {/* FOOTER USER */}
+
+      <div className="banda-sidebar__footer">
+
+        <BandaUserCard />
+
+      </div>
 
     </aside>
   );
