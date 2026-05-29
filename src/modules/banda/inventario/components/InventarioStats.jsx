@@ -1,258 +1,208 @@
-const cardStyle = (borderColor) => ({
-  flex: 1,
+import { useNavigate } from "react-router-dom";
 
-  minWidth: "220px",
+const panelStyle = {
+  width: "100%",
 
-  backgroundColor: "#FFFFFF",
+  position: "sticky",
 
-  borderRadius: "16px",
+  top: "24px",
 
-  padding: "22px",
+  background: "#F4F1EA",
 
-  borderTop: `5px solid ${borderColor}`,
+  border: "1px solid #DDD6C8",
 
-  boxShadow:
-    "0 4px 18px rgba(0,0,0,0.08)",
+  borderRadius: "18px",
+
+  padding: "20px",
 
   display: "flex",
 
   flexDirection: "column",
 
-  gap: "10px",
+  gap: "22px",
 
-  transition: "0.2s",
-});
+  boxSizing: "border-box",
+
+  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+};
 
 const titleStyle = {
-  fontSize: "13px",
+  margin: 0,
 
-  fontWeight: "600",
+  fontSize: "16px",
 
-  color: "#666",
+  fontWeight: "700",
 
-  letterSpacing: "0.5px",
+  color: "#222",
+
+  fontFamily: "var(--font-body)",
+};
+
+const buttonContainer = {
+  display: "flex",
+
+  flexDirection: "column",
+
+  gap: "12px",
+};
+
+const getButtonStyle = (active) => ({
+  height: "48px",
+
+  borderRadius: "10px",
+
+  border: "none",
+
+  cursor: "pointer",
+
+  fontWeight: "700",
+
+  fontSize: "14px",
+
+  transition: "all 0.2s ease",
+
+  background: active
+    ? "#1E3A5F"
+    : "#D8D2C4",
+
+  color: active
+    ? "#FFFFFF"
+    : "#222",
+});
+
+const statsContainer = {
+  display: "grid",
+
+  gridTemplateColumns: "1fr",
+
+  gap: "12px",
+};
+
+const statCard = {
+  background: "#E9E4D8",
+
+  borderRadius: "12px",
+
+  padding: "16px",
+
+  display: "flex",
+
+  flexDirection: "column",
+
+  gap: "8px",
+};
+
+const statLabel = {
+  fontSize: "12px",
+
+  fontWeight: "700",
+
+  color: "#555",
 
   textTransform: "uppercase",
 };
 
-const valueStyle = {
-  fontSize: "34px",
+const statValue = {
+  fontSize: "28px",
 
-  fontWeight: "700",
+  fontWeight: "800",
 
-  color: "#333",
-};
-
-const barContainer = {
-  width: "100%",
-
-  height: "8px",
-
-  borderRadius: "20px",
-
-  backgroundColor: "#ECECEC",
-
-  overflow: "hidden",
+  color: "#111",
 };
 
 const InventarioStats = ({
   instrumentos,
 }) => {
 
+  const navigate = useNavigate();
+
   const total =
     instrumentos.length;
 
   const disponibles =
-    instrumentos.reduce(
-      (acc, i) =>
-        acc +
-        Number(
-          i.disponible ??
-          i.cantidad_disponible ??
-          0
-        ),
-      0
-    );
-
-  const asignados =
-    instrumentos.reduce(
-      (acc, i) => {
-
-        const total =
-          Number(
-            i.total ??
-            i.cantidad_total ??
-            0
-          );
-
-        const disponibles =
-          Number(
-            i.disponible ??
-            i.cantidad_disponible ??
-            0
-          );
-
-        return (
-          acc +
-          (total - disponibles)
-        );
-      },
-      0
-    );
-
-  const mantenimiento =
     instrumentos.filter(
-      (i) =>
-        i.estado ===
-        "En mantenimiento"
+      (i) => i.disponible === true
     ).length;
 
-  const disponiblesPercent =
-    total > 0
-      ? (disponibles / total) * 100
-      : 0;
-
-  const asignadosPercent =
-    total > 0
-      ? (asignados / total) * 100
-      : 0;
-
-  const mantenimientoPercent =
-    total > 0
-      ? (mantenimiento / total) * 100
-      : 0;
+  const prestados =
+    instrumentos.filter(
+      (i) => i.disponible === false
+    ).length;
 
   return (
 
-    <div
-      style={{
-        display: "grid",
+    <aside style={panelStyle}>
 
-        gridTemplateColumns:
-          "repeat(4, 1fr)",
+      {/* NAVEGACION */}
 
-        gap: "18px",
+      <div style={buttonContainer}>
 
-        marginBottom: "26px",
-      }}
-    >
+        <button
+          style={getButtonStyle(false)}
+          onClick={() =>
+            navigate("/banda/prestamos")
+          }
+        >
+          Préstamos Banda
+        </button>
 
-      {/* TOTAL */}
+        <button
+          style={getButtonStyle(true)}
+        >
+          Inventario Banda
+        </button>
 
-      <div
-        style={cardStyle("#8E2A25")}
-      >
+      </div>
 
-        <div style={titleStyle}>
-          Total instrumentos
+      {/* TITULO */}
+
+      <h3 style={titleStyle}>
+        Estadísticas rápidas
+      </h3>
+
+      {/* STATS */}
+
+      <div style={statsContainer}>
+
+        <div style={statCard}>
+
+          <span style={statLabel}>
+            Total instrumentos
+          </span>
+
+          <span style={statValue}>
+            {total}
+          </span>
+
         </div>
 
-        <div style={valueStyle}>
-          {total}
+        <div style={statCard}>
+
+          <span style={statLabel}>
+            Disponibles
+          </span>
+
+          <span style={statValue}>
+            {disponibles}
+          </span>
+
         </div>
 
-        <div style={barContainer}>
+        <div style={statCard}>
 
-          <div
-            style={{
-              width: "100%",
-              height: "100%",
-              backgroundColor: "#8E2A25",
-            }}
-          />
+          <span style={statLabel}>
+            Prestados
+          </span>
+
+          <span style={statValue}>
+            {prestados}
+          </span>
 
         </div>
 
       </div>
 
-      {/* DISPONIBLES */}
-
-      <div
-        style={cardStyle("#15803D")}
-      >
-
-        <div style={titleStyle}>
-          Disponibles
-        </div>
-
-        <div style={valueStyle}>
-          {disponibles}
-        </div>
-
-        <div style={barContainer}>
-
-          <div
-            style={{
-              width:
-                `${disponiblesPercent}%`,
-              height: "100%",
-              backgroundColor: "#15803D",
-            }}
-          />
-
-        </div>
-
-      </div>
-
-      {/* ASIGNADOS */}
-
-      <div
-        style={cardStyle("#2E5FA7")}
-      >
-
-        <div style={titleStyle}>
-          Asignados
-        </div>
-
-        <div style={valueStyle}>
-          {asignados}
-        </div>
-
-        <div style={barContainer}>
-
-          <div
-            style={{
-              width:
-                `${asignadosPercent}%`,
-              height: "100%",
-              backgroundColor: "#2E5FA7",
-            }}
-          />
-
-        </div>
-
-      </div>
-
-      {/* MANTENIMIENTO */}
-
-      <div
-        style={cardStyle("#CA8A04")}
-      >
-
-        <div style={titleStyle}>
-          Mantenimiento
-        </div>
-
-        <div style={valueStyle}>
-          {mantenimiento}
-        </div>
-
-        <div style={barContainer}>
-
-          <div
-            style={{
-              width:
-                `${mantenimientoPercent}%`,
-              height: "100%",
-              backgroundColor: "#CA8A04",
-            }}
-          />
-
-        </div>
-
-      </div>
-
-    </div>
+    </aside>
   );
 };
 

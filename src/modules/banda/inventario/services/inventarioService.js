@@ -1,36 +1,60 @@
 import { bandaService }
 from "../../../../api/bandaService";
 
+// =========================================================
+// SERVICIO INVENTARIO
+// CENTRALIZA TODAS LAS PETICIONES DEL MODULO
+// =========================================================
+
 export const inventarioService = {
 
-  getInstrumentos:
-    () =>
-      bandaService.getInstrumentos(),
+  // =======================================================
+  // GET
+  // =======================================================
 
-  getCategorias:
-    () =>
-      bandaService.getCategorias(),
+  getInstrumentos: () =>
 
-  getUbicaciones:
-    () =>
-      bandaService.getUbicaciones(),
+    bandaService.getInstrumentos(),
 
-  crearInstrumento:
-    (data) =>
-      bandaService.crearInstrumento(
-        data
-      ),
+  getCategorias: () =>
 
-  editarInstrumento:
-    (id, data) =>
-      bandaService.editarInstrumento(
-        id,
-        data
-      ),
+    bandaService.getCategorias(),
 
-  eliminarInstrumento:
-    (id) =>
-      bandaService.eliminarInstrumento(
-        id
-      ),
+  getUbicaciones: () =>
+
+    bandaService.getUbicaciones(),
+
+  // =======================================================
+  // POST
+  // =======================================================
+
+  crearInstrumento: (data) =>
+
+    bandaService.crearInstrumento(
+      data
+    ),
+
+  // =======================================================
+  // PUT
+  // =======================================================
+
+  editarInstrumento: (
+    id,
+    data
+  ) =>
+
+    bandaService.editarInstrumento(
+      id,
+      data
+    ),
+
+  // =======================================================
+  // DELETE
+  // =======================================================
+
+  eliminarInstrumento: (id) =>
+
+    bandaService.eliminarInstrumento(
+      id
+    ),
 };

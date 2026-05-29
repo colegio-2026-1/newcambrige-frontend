@@ -1,27 +1,55 @@
-import { ESTADO_BADGE } from "../utils/inventarioConstants";
+const EstadoBadge = ({ disponible }) => {
 
-const EstadoBadge = ({ estado }) => {
-
-  const s =
-    ESTADO_BADGE[estado] ?? {
-      bg: "#F3F4F6",
-      color: "#6B7280",
-    };
+  const styles = disponible
+    ? {
+        bg: "#DCFCE7",
+        color: "#15803D",
+        text: "Disponible",
+      }
+    : {
+        bg: "#FEE2E2",
+        color: "#B91C1C",
+        text: "Prestado",
+      };
 
   return (
+
     <span
       style={{
-        padding: "3px 10px",
-        borderRadius: "12px",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+
+        minWidth: "120px",
+
+        padding: "8px 14px",
+
+        borderRadius: "999px",
+
         fontSize: "11px",
-        fontWeight: "600",
-        backgroundColor: s.bg,
-        color: s.color,
+
+        fontWeight: "800",
+
+        letterSpacing: "0.4px",
+
+        backgroundColor: styles.bg,
+
+        color: styles.color,
+
+        border:
+          "1px solid rgba(0,0,0,0.04)",
+
         whiteSpace: "nowrap",
+
+        textTransform: "uppercase",
+
+        fontFamily:
+          "var(--font-body)",
       }}
     >
-      {estado ?? "—"}
+      {styles.text}
     </span>
+
   );
 };
 

@@ -1,107 +1,189 @@
 export const COLORS = {
+
+  // =====================================================
+  // PALETA INSTITUCIONAL
+  // =====================================================
+
   primary: "#8E2A25",
-  secondary: "#2E5FA7",
-  background: "#F5F5F5",
+
+  secondary: "#1B3A5C",
+
+  background: "#F5F0E8",
+
   surface: "#FFFFFF",
+
   border: "#D6D3D1",
-  text: "#333333",
+
+  text: "#2B2B2B",
+
   muted: "#6B7280",
+
   success: "#15803D",
+
   warning: "#CA8A04",
-  danger: "#DC2626",
+
+  danger: "#B91C1C",
 };
+
+// =======================================================
+// SOMBRAS INSTITUCIONALES
+// =======================================================
+
+export const SHADOWS = {
+
+  hard:
+    "10px 10px 0px #8E2A25",
+
+  sm:
+    "0 2px 8px rgba(0,0,0,0.06)",
+
+  md:
+    "0 6px 18px rgba(0,0,0,0.10)",
+};
+
+// =======================================================
+// BOTONES
+// =======================================================
 
 export const btn = (
   bg,
   disabled = false
 ) => ({
-  padding: "10px 18px",
 
-  backgroundColor: disabled
-    ? "#D1D5DB"
-    : bg,
+  padding: "12px 18px",
+
+  backgroundColor:
+    disabled
+      ? "#D1D5DB"
+      : bg,
 
   color: "#FFFFFF",
 
   border: "none",
 
-  borderRadius: "10px",
+  borderRadius: "12px",
 
-  cursor: disabled
-    ? "not-allowed"
-    : "pointer",
+  cursor:
+    disabled
+      ? "not-allowed"
+      : "pointer",
 
-  fontWeight: "600",
+  fontWeight: "700",
 
   fontSize: "13px",
 
-  letterSpacing: "0.3px",
+  fontFamily: "Lato, sans-serif",
+
+  letterSpacing: "0.4px",
 
   transition: "all 0.2s ease",
 
   boxShadow:
-    "0 2px 6px rgba(0,0,0,0.08)",
+    disabled
+      ? "none"
+      : SHADOWS.sm,
 
-  opacity: disabled ? 0.7 : 1,
+  opacity:
+    disabled ? 0.7 : 1,
 
   whiteSpace: "nowrap",
 });
 
+// =======================================================
+// INPUTS
+// =======================================================
+
 export const inputStyle = (
   hasError = false
 ) => ({
+
   width: "100%",
 
-  padding: "10px 12px",
+  padding: "12px 14px",
 
   border: `1px solid ${
     hasError
       ? COLORS.danger
-      : "#D1D5DB"
+      : COLORS.border
   }`,
 
-  borderRadius: "10px",
+  borderRadius: "12px",
 
   fontSize: "13px",
+
+  fontFamily:
+    "Lato, sans-serif",
 
   outline: "none",
 
-  backgroundColor: "#FFFFFF",
+  backgroundColor:
+    "#FFFFFF",
 
-  transition: "all 0.2s ease",
+  transition:
+    "all 0.2s ease",
 
-  boxSizing: "border-box",
+  boxSizing:
+    "border-box",
+
+  color:
+    COLORS.text,
 });
 
+// =======================================================
+// INPUT READONLY
+// =======================================================
+
 export const readonlyInput = {
+
   width: "100%",
 
-  padding: "10px 12px",
+  padding: "12px 14px",
 
-  border: "1px solid #E5E7EB",
+  border:
+    "1px solid #E5E7EB",
 
-  borderRadius: "10px",
+  borderRadius: "12px",
 
   fontSize: "13px",
 
-  backgroundColor: "#F3F4F6",
+  fontFamily:
+    "Lato, sans-serif",
 
-  color: "#6B7280",
+  backgroundColor:
+    "#EFEAE2",
 
-  boxSizing: "border-box",
+  color:
+    COLORS.muted,
+
+  boxSizing:
+    "border-box",
 };
 
+// =======================================================
+// MENSAJES ERROR
+// =======================================================
+
 export const errorMsg = {
-  color: COLORS.danger,
+
+  color:
+    COLORS.danger,
 
   fontSize: "11px",
 
-  marginTop: "4px",
+  marginTop: "5px",
 
-  fontWeight: "500",
+  fontWeight: "600",
+
+  fontFamily:
+    "Lato, sans-serif",
 };
 
+// =======================================================
+// MODAL OVERLAY
+// =======================================================
+
 export const modalOverlay = {
+
   position: "fixed",
 
   inset: 0,
@@ -109,23 +191,32 @@ export const modalOverlay = {
   backgroundColor:
     "rgba(15,23,42,0.45)",
 
-  backdropFilter: "blur(4px)",
+  backdropFilter:
+    "blur(4px)",
 
   display: "flex",
 
-  justifyContent: "center",
+  justifyContent:
+    "center",
 
-  alignItems: "center",
+  alignItems:
+    "center",
 
   zIndex: 9999,
 
   padding: "20px",
 };
 
-export const modalBox = {
-  backgroundColor: "#FFFFFF",
+// =======================================================
+// MODAL BOX
+// =======================================================
 
-  borderRadius: "18px",
+export const modalBox = {
+
+  backgroundColor:
+    COLORS.surface,
+
+  borderRadius: "22px",
 
   width: "100%",
 
@@ -136,9 +227,10 @@ export const modalBox = {
   position: "relative",
 
   boxShadow:
-    "0 20px 40px rgba(0,0,0,0.18)",
+    SHADOWS.hard,
 
-  border: "1px solid #E5E7EB",
+  border:
+    `1px solid ${COLORS.border}`,
 
   animation:
     "fadeIn 0.2s ease-out",
@@ -148,28 +240,76 @@ export const modalBox = {
   overflowY: "auto",
 };
 
+// =======================================================
+// CARD INSTITUCIONAL
+// =======================================================
+
 export const sectionCard = {
-  backgroundColor: "#FFFFFF",
 
-  borderRadius: "16px",
+  backgroundColor:
+    COLORS.surface,
 
-  border: "1px solid #E5E7EB",
+  borderRadius: "20px",
+
+  border:
+    `1px solid ${COLORS.border}`,
 
   boxShadow:
-    "0 4px 14px rgba(0,0,0,0.04)",
+    SHADOWS.hard,
 
-  padding: "22px",
+  padding: "24px",
 };
 
-export const tableContainer = {
-  backgroundColor: "#FFFFFF",
+// =======================================================
+// CONTENEDOR TABLA
+// =======================================================
 
-  borderRadius: "16px",
+export const tableContainer = {
+
+  backgroundColor:
+    COLORS.surface,
+
+  borderRadius: "20px",
 
   overflow: "hidden",
 
-  border: "1px solid #E5E7EB",
+  border:
+    `1px solid ${COLORS.border}`,
 
   boxShadow:
-    "0 4px 12px rgba(0,0,0,0.04)",
+    SHADOWS.hard,
+};
+
+// =======================================================
+// TITULOS
+// =======================================================
+
+export const titleStyle = {
+
+  fontFamily:
+    "Cinzel, serif",
+
+  color:
+    COLORS.primary,
+
+  fontWeight: "700",
+
+  letterSpacing: "1px",
+};
+
+// =======================================================
+// SUBTITULOS
+// =======================================================
+
+export const subtitleStyle = {
+
+  fontFamily:
+    "Lato, sans-serif",
+
+  color:
+    COLORS.muted,
+
+  fontSize: "14px",
+
+  fontWeight: "500",
 };

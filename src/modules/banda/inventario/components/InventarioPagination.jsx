@@ -2,6 +2,48 @@ import {
   btn,
 } from "../styles/inventarioStyles";
 
+const baseBtn = (
+  active = false
+) => ({
+  minWidth: "42px",
+  height: "42px",
+  borderRadius: "12px",
+  border: active
+    ? "1px solid var(--color-primary)"
+    : "1px solid rgba(214,211,209,0.9)",
+  background: active
+    ? "var(--color-primary)"
+    : "#FFFFFF",
+  color: active
+    ? "#FFFFFF"
+    : "#444",
+  fontWeight: active ? "700" : "600",
+  cursor: "pointer",
+  transition: "all .2s ease",
+  fontSize: "13px",
+  boxShadow:
+    active
+      ? "0 8px 18px rgba(142,42,37,0.18)"
+      : "none",
+});
+
+const navBtn = (
+  disabled = false
+) => ({
+  ...btn(
+    "var(--color-primary)",
+    disabled
+  ),
+
+  minWidth: "42px",
+
+  height: "42px",
+
+  borderRadius: "12px",
+
+  fontWeight: "700",
+});
+
 const InventarioPagination = ({
   paginaActual,
   totalPaginas,
@@ -12,20 +54,20 @@ const InventarioPagination = ({
     return null;
 
   return (
+
     <div
       style={{
         display: "flex",
-        justifyContent:
-          "center",
+        justifyContent: "center",
         alignItems: "center",
-        gap: "8px",
-        marginTop: "20px",
+        flexWrap: "wrap",
+        gap: "10px",
+        marginTop: "28px",
       }}
     >
 
       <button
-        style={btn(
-          "#8E2A25",
+        style={navBtn(
           paginaActual === 1
         )}
         disabled={
@@ -39,17 +81,14 @@ const InventarioPagination = ({
       </button>
 
       <button
-        style={btn(
-          "#8E2A25",
+        style={navBtn(
           paginaActual === 1
         )}
         disabled={
           paginaActual === 1
         }
         onClick={() =>
-          setPagina(
-            (p) => p - 1
-          )
+          setPagina((p) => p - 1)
         }
       >
         ‹
@@ -57,47 +96,27 @@ const InventarioPagination = ({
 
       {Array.from(
         {
-          length:
-            totalPaginas,
+          length: totalPaginas,
         },
         (_, i) => i + 1
       ).map((p) => (
+
         <button
           key={p}
           onClick={() =>
             setPagina(p)
           }
-          style={{
-            padding:
-              "6px 12px",
-            borderRadius: "4px",
-            fontSize: "13px",
-            border:
-              p === paginaActual
-                ? "2px solid #8E2A25"
-                : "1px solid #ccc",
-            backgroundColor:
-              p === paginaActual
-                ? "#8E2A25"
-                : "#fff",
-            color:
-              p === paginaActual
-                ? "#fff"
-                : "#333",
-            cursor: "pointer",
-            fontWeight:
-              p === paginaActual
-                ? "700"
-                : "400",
-          }}
+          style={baseBtn(
+            p === paginaActual
+          )}
         >
           {p}
         </button>
+
       ))}
 
       <button
-        style={btn(
-          "#8E2A25",
+        style={navBtn(
           paginaActual ===
             totalPaginas
         )}
@@ -106,17 +125,14 @@ const InventarioPagination = ({
           totalPaginas
         }
         onClick={() =>
-          setPagina(
-            (p) => p + 1
-          )
+          setPagina((p) => p + 1)
         }
       >
         ›
       </button>
 
       <button
-        style={btn(
-          "#8E2A25",
+        style={navBtn(
           paginaActual ===
             totalPaginas
         )}
@@ -125,13 +141,12 @@ const InventarioPagination = ({
           totalPaginas
         }
         onClick={() =>
-          setPagina(
-            totalPaginas
-          )
+          setPagina(totalPaginas)
         }
       >
         »
       </button>
+
     </div>
   );
 };

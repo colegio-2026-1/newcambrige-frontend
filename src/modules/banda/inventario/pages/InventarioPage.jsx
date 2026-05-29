@@ -1,504 +1,228 @@
+import "./InventarioPage.css";
+
 import useInventario from "../hooks/useInventario";
 
 import Toast from "../components/Toast";
-
 import InventarioFiltros from "../components/InventarioFiltros";
-
 import InventarioTable from "../components/InventarioTable";
+import InventarioPagination from "../components/InventarioPagination";
+import InventarioStats from "../components/InventarioStats";
 
 import AgregarInstrumentoModal from "../components/modals/AgregarInstrumentoModal";
-
 import EditarInstrumentoModal from "../components/modals/EditarInstrumentoModal";
-
 import EliminarInstrumentoModal from "../components/modals/EliminarInstrumentoModal";
-
 import ErrorEliminarModal from "../components/modals/ErrorEliminarModal";
-
 import AdvertenciaModal from "../components/modals/AdvertenciaModal";
-
-import InventarioPagination from "../components/InventarioPagination";
-
-import InventarioStats from "../components/InventarioStats";
 
 const InventarioPage = () => {
 
-  const inventario =
-    useInventario();
+  const inventario = useInventario();
+
+  // =====================================================
+  // LOADING
+  // =====================================================
 
   if (inventario.loading) {
 
     return (
-      <p
-        style={{
-          padding: "20px",
-        }}
-      >
+
+      <div className="inventario-loading">
         Cargando inventario...
-      </p>
+      </div>
+
     );
   }
 
+  // =====================================================
+  // RENDER
+  // =====================================================
+
   return (
 
-    <div
-      style={{
-        position: "relative",
-        display: "flex",
-        gap: "24px",
-        alignItems: "flex-start",
-      }}
-    >
+    <div className="inventario-page">
 
-      <Toast
-        message={inventario.toast}
-      />
+      {/* TOAST GLOBAL */}
 
-      {/* ================================================= */}
-      {/* COLUMNA IZQUIERDA */}
-      {/* ================================================= */}
+      <Toast message={inventario.toast} />
 
-      <div
-        style={{
-          flex: 1,
-          minWidth: 0,
-        }}
-      >
+      <div className="inventario-grid">
 
-        <InventarioFiltros
+        {/* ====================================== */}
+        {/* CONTENIDO CENTRAL */}
+        {/* ====================================== */}
 
-          filtroNombre={
-            inventario.filtroNombre
-          }
+        <section className="inventario-main">
 
-          setFiltroNombre={
-            inventario.setFiltroNombre
-          }
+          {/* 
+            FUTURO:
+            Aqui conviviran:
+            - Inventario instrumentos
+            - Estudiantes banda
+          */}
 
-          filtroCategoria={
-            inventario.filtroCategoria
-          }
-
-          setFiltroCategoria={
-            inventario.setFiltroCategoria
-          }
-
-          categorias={
-            inventario.categorias
-          }
-
-          handleBuscar={
-            inventario.handleBuscar
-          }
-
-          handleLimpiar={
-            inventario.handleLimpiar
-          }
-
-          abrirAgregar={
-            inventario.abrirAgregar
-          }
-
-        />
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "14px",
-          }}
-        >
-
-          <h2
-            style={{
-              margin: 0,
-              fontSize: "20px",
-              color: "#333333",
-              fontWeight: "700",
-            }}
-          >
-            Inventario Banda
-          </h2>
-
-          <p
-            style={{
-              fontSize: "13px",
-              color: "#666",
-              margin: 0,
-            }}
-          >
-
-            <strong>
-              {inventario.filtrados.length}
-            </strong>
-
-            {" "}instrumento
-            {inventario.filtrados.length !== 1
-              ? "s"
-              : ""
+          <InventarioFiltros
+            filtroNombre={inventario.filtroNombre}
+            setFiltroNombre={
+              inventario.setFiltroNombre
             }
-
-          </p>
-
-        </div>
-
-        {/* TABLA */}
-
-        <div
-          style={{
-            backgroundColor: "#E9E9E7",
-            borderRadius: "18px",
-            padding: "18px",
-            border: "1px solid #D6D3D1",
-            overflowX: "auto",
-            minHeight: "520px",
-          }}
-        >
-
-          <InventarioTable
-
-            paginados={
-              inventario.paginados
+            filtroCategoria={
+              inventario.filtroCategoria
             }
-
-            abrirEditar={
-              inventario.abrirEditar
+            setFiltroCategoria={
+              inventario.setFiltroCategoria
             }
-
-            abrirEliminar={
-              inventario.abrirEliminar
+            categorias={inventario.categorias}
+            handleBuscar={
+              inventario.handleBuscar
             }
-
-          />
-
-        </div>
-
-        <InventarioPagination
-
-          paginaActual={
-            inventario.paginaActual
-          }
-
-          totalPaginas={
-            inventario.totalPaginas
-          }
-
-          setPagina={
-            inventario.setPagina
-          }
-
-        />
-
-      </div>
-
-      {/* ================================================= */}
-      {/* SIDEBAR DERECHA */}
-      {/* ================================================= */}
-
-      <div
-        style={{
-          width: "320px",
-          flexShrink: 0,
-          display: "flex",
-          flexDirection: "column",
-          gap: "20px",
-        }}
-      >
-
-        {/* ESTADISTICAS */}
-
-        <div
-          style={{
-            backgroundColor: "#FFFFFF",
-            borderRadius: "20px",
-            padding: "20px",
-            boxShadow:
-              "0 4px 14px rgba(0,0,0,0.08)",
-            border:
-              "1px solid #ECECEC",
-          }}
-        >
-
-          <h3
-            style={{
-              marginTop: 0,
-              marginBottom: "18px",
-              color: "#333333",
-              fontSize: "18px",
-            }}
-          >
-            Estadísticas rápidas
-          </h3>
-
-          <InventarioStats
-            instrumentos={
-              inventario.instrumentos
+            handleLimpiar={
+              inventario.handleLimpiar
+            }
+            abrirAgregar={
+              inventario.abrirAgregar
             }
           />
 
-          {/* GRAFICO VISUAL */}
+          {/* TABLA */}
 
-          <div
-            style={{
-              marginTop: "20px",
-            }}
-          >
+          <div className="inventario-table-card">
 
-            <p
-              style={{
-                fontSize: "13px",
-                fontWeight: "600",
-                color: "#555",
-                marginBottom: "10px",
-              }}
-            >
-              Estado general
-            </p>
-
-            <div
-              style={{
-                display: "flex",
-                height: "14px",
-                borderRadius: "999px",
-                overflow: "hidden",
-                backgroundColor: "#E5E7EB",
-              }}
-            >
-
-              <div
-                style={{
-                  width: "65%",
-                  backgroundColor: "#15803D",
-                }}
-              />
-
-              <div
-                style={{
-                  width: "20%",
-                  backgroundColor: "#CA8A04",
-                }}
-              />
-
-              <div
-                style={{
-                  width: "15%",
-                  backgroundColor: "#6B7280",
-                }}
-              />
-
-            </div>
-
-            <div
-              style={{
-                marginTop: "12px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "6px",
-                fontSize: "12px",
-                color: "#555",
-              }}
-            >
-
-              <span>
-                🟢 Disponibles
-              </span>
-
-              <span>
-                🟡 Mantenimiento
-              </span>
-
-              <span>
-                ⚫ Inactivos
-              </span>
-
-            </div>
+            <InventarioTable
+              paginados={inventario.paginados}
+              abrirEditar={
+                inventario.abrirEditar
+              }
+              abrirEliminar={
+                inventario.abrirEliminar
+              }
+            />
 
           </div>
 
-        </div>
+          {/* PAGINACION */}
 
-        {/* ACCIONES */}
+          <InventarioPagination
+            paginaActual={inventario.pagina}
+            totalPaginas={
+              inventario.totalPaginas
+            }
+            setPagina={inventario.setPagina}
+          />
 
-        <div
-          style={{
-            backgroundColor: "#FFFFFF",
-            borderRadius: "20px",
-            padding: "20px",
-            boxShadow:
-              "0 4px 14px rgba(0,0,0,0.08)",
-            border:
-              "1px solid #ECECEC",
-            display: "flex",
-            flexDirection: "column",
-            gap: "14px",
-          }}
-        >
+        </section>
 
-          <h3
-            style={{
-              margin: 0,
-              color: "#333333",
-              fontSize: "18px",
-            }}
-          >
-            Acciones rápidas
-          </h3>
+        {/* ====================================== */}
+        {/* PANEL DERECHO */}
+        {/* ====================================== */}
 
-          <button
-            style={{
-              backgroundColor: "#DCD4BE",
-              color: "#333333",
-              border: "none",
-              borderRadius: "12px",
-              padding: "14px",
-              fontWeight: "700",
-              cursor: "pointer",
-              fontSize: "14px",
-            }}
-          >
-            Asignar Instrumento
-          </button>
+        <aside className="inventario-sidebar">
 
-          <button
-            style={{
-              backgroundColor: "#2E5FA7",
-              color: "#FFFFFF",
-              border: "none",
-              borderRadius: "12px",
-              padding: "14px",
-              fontWeight: "700",
-              cursor: "pointer",
-              fontSize: "14px",
-            }}
-          >
-            Devolver Instrumento
-          </button>
+          <div className="inventario-sidebar-card">
 
-        </div>
+            <h3 className="sidebar-title">
+              Panel Banda
+            </h3>
+
+            {/* 
+              FUTURO:
+              Los botones laterales navegaran a:
+              - estudiantes banda
+              - devoluciones
+              - inventario
+            */}
+
+            <InventarioStats
+              instrumentos={
+                inventario.instrumentos
+              }
+            />
+
+          </div>
+
+        </aside>
 
       </div>
 
-      {/* ================================================= */}
+      {/* ====================================== */}
       {/* MODALES */}
-      {/* ================================================= */}
+      {/* ====================================== */}
+
+      {/* AGREGAR */}
 
       <AgregarInstrumentoModal
-
-        open={
-          inventario.modalAgregar
-        }
-
+        open={inventario.modalAgregar}
         onClose={() =>
           inventario.setModalAgregar(false)
         }
-
-        onSave={
-          inventario.handleAgregar
-        }
-
+        onSave={inventario.handleAgregar}
         form={inventario.form}
-
-        setForm={
-          inventario.setForm
-        }
-
-        errores={
-          inventario.errores
-        }
-
-        categorias={
-          inventario.categorias
-        }
-
-        ubicaciones={
-          inventario.ubicaciones
-        }
-
+        setForm={inventario.setForm}
+        errores={inventario.errores}
+        categorias={inventario.categorias}
+        ubicaciones={inventario.ubicaciones}
       />
 
+      {/* EDITAR */}
+
       <EditarInstrumentoModal
-
-        open={
-          inventario.modalEditar
-        }
-
+        open={inventario.modalEditar}
         onClose={() =>
           inventario.setModalEditar(false)
         }
-
-        onSave={
-          inventario.handleEditar
-        }
-
+        onSave={inventario.handleEditar}
         form={inventario.form}
-
-        setForm={
-          inventario.setForm
-        }
-
-        errores={
-          inventario.errores
-        }
-
-        categorias={
-          inventario.categorias
-        }
-
-        ubicaciones={
-          inventario.ubicaciones
-        }
-
+        setForm={inventario.setForm}
+        errores={inventario.errores}
+        categorias={inventario.categorias}
+        ubicaciones={inventario.ubicaciones}
       />
 
+      {/* ELIMINAR */}
+
       <EliminarInstrumentoModal
-
-        open={
-          inventario.modalEliminar
-        }
-
+        open={inventario.modalEliminar}
         onClose={() =>
           inventario.setModalEliminar(false)
         }
-
         onConfirm={
           inventario.handleEliminar
         }
-
         instrumento={
           inventario.seleccionado
         }
-
       />
 
-      <ErrorEliminarModal
+      {/* ERROR ELIMINAR */}
 
+      <ErrorEliminarModal
         open={
           inventario.modalErrorEliminar
         }
-
         onClose={() =>
-          inventario.setModalErrorEliminar(false)
+          inventario.setModalErrorEliminar(
+            false
+          )
         }
-
       />
 
-      <AdvertenciaModal
+      {/* ADVERTENCIA */}
 
+      <AdvertenciaModal
         open={
           inventario.modalAdvertencia
         }
-
         onClose={() =>
-          inventario.setModalAdvertencia(false)
+          inventario.setModalAdvertencia(
+            false
+          )
         }
-
         onConfirm={
           inventario.ejecutarEdicion
         }
-
       />
 
     </div>
+
   );
 };
 

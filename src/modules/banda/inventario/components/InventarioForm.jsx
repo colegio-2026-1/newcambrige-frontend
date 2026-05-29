@@ -1,110 +1,73 @@
 import {
-  ESTADOS_INSTRUMENTO,
-} from "../utils/inventarioConstants";
-
-import {
   inputStyle,
-  readonlyInput,
   errorMsg,
 } from "../styles/inventarioStyles";
 
-const InventarioForm = ({
-  esEdicion,
+const fieldWrapper = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "8px",
+};
 
+const labelStyle = {
+  fontSize: "11px",
+  fontWeight: "800",
+  letterSpacing: "0.7px",
+  textTransform: "uppercase",
+  color: "var(--color-primary)",
+  fontFamily: "var(--font-body)",
+};
+
+const formGrid = {
+  display: "grid",
+  gridTemplateColumns:
+    "repeat(auto-fit, minmax(260px, 1fr))",
+  gap: "22px",
+};
+
+const customInput = (hasError) => ({
+  ...inputStyle(hasError),
+
+  height: "50px",
+
+  borderRadius: "14px",
+
+  border: hasError
+    ? "1px solid #DC2626"
+    : "1px solid rgba(214,211,209,0.9)",
+
+  background: "#FFFFFF",
+
+  boxShadow:
+    "inset 0 1px 2px rgba(0,0,0,0.03)",
+
+  fontSize: "14px",
+
+  transition: "all .2s ease",
+});
+
+const InventarioForm = ({
   form,
   setForm,
-
   errores,
-
   categorias,
   ubicaciones,
 }) => {
 
   return (
 
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gap: "16px",
-      }}
-    >
-
-      {/* CODIGO */}
-
-      <div>
-
-        <label
-          style={{
-            fontSize: "13px",
-            fontWeight: "600",
-            display: "block",
-            marginBottom: "4px",
-          }}
-        >
-          Código del instrumento
-        </label>
-
-        {esEdicion ? (
-
-          <input
-            style={readonlyInput}
-            value={form.codigo}
-            readOnly
-          />
-
-        ) : (
-
-          <>
-
-            <input
-              style={inputStyle(
-                !!errores.codigo
-              )}
-              value={form.codigo}
-              placeholder="Ej: 1, 25, 100"
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  codigo:
-                    e.target.value
-                      .replace(/\D/g, "")
-                      .slice(0, 6),
-                })
-              }
-            />
-
-            {errores.codigo && (
-
-              <p style={errorMsg}>
-                {errores.codigo}
-              </p>
-
-            )}
-
-          </>
-
-        )}
-
-      </div>
+    <div style={formGrid}>
 
       {/* NOMBRE */}
 
-      <div>
+      <div style={fieldWrapper}>
 
-        <label
-          style={{
-            fontSize: "13px",
-            fontWeight: "600",
-            display: "block",
-            marginBottom: "4px",
-          }}
-        >
+        <label style={labelStyle}>
           Nombre del instrumento
         </label>
 
         <input
-          style={inputStyle(
+          style={customInput(
             !!errores.nombre
           )}
           value={form.nombre}
@@ -118,32 +81,23 @@ const InventarioForm = ({
         />
 
         {errores.nombre && (
-
           <p style={errorMsg}>
             {errores.nombre}
           </p>
-
         )}
 
       </div>
 
       {/* CATEGORIA */}
 
-      <div>
+      <div style={fieldWrapper}>
 
-        <label
-          style={{
-            fontSize: "13px",
-            fontWeight: "600",
-            display: "block",
-            marginBottom: "4px",
-          }}
-        >
-          Tipo / Categoría
+        <label style={labelStyle}>
+          Categoría
         </label>
 
         <select
-          style={inputStyle(
+          style={customInput(
             !!errores.id_categoria
           )}
           value={form.id_categoria}
@@ -174,74 +128,23 @@ const InventarioForm = ({
         </select>
 
         {errores.id_categoria && (
-
           <p style={errorMsg}>
             {errores.id_categoria}
           </p>
-
-        )}
-
-      </div>
-
-      {/* CANTIDAD */}
-
-      <div>
-
-        <label
-          style={{
-            fontSize: "13px",
-            fontWeight: "600",
-            display: "block",
-            marginBottom: "4px",
-          }}
-        >
-          Cantidad total
-        </label>
-
-        <input
-          type="number"
-          min="1"
-          style={inputStyle(
-            !!errores.cantidad_total
-          )}
-          value={form.cantidad_total}
-          placeholder="Ej: 5"
-          onChange={(e) =>
-            setForm({
-              ...form,
-              cantidad_total:
-                e.target.value,
-            })
-          }
-        />
-
-        {errores.cantidad_total && (
-
-          <p style={errorMsg}>
-            {errores.cantidad_total}
-          </p>
-
         )}
 
       </div>
 
       {/* UBICACION */}
 
-      <div>
+      <div style={fieldWrapper}>
 
-        <label
-          style={{
-            fontSize: "13px",
-            fontWeight: "600",
-            display: "block",
-            marginBottom: "4px",
-          }}
-        >
+        <label style={labelStyle}>
           Ubicación
         </label>
 
         <select
-          style={inputStyle()}
+          style={customInput()}
           value={form.id_ubicacion}
           onChange={(e) =>
             setForm({
@@ -271,48 +174,40 @@ const InventarioForm = ({
 
       </div>
 
-      {/* ESTADO */}
+      {/* DISPONIBILIDAD */}
 
-      <div>
+      <div style={fieldWrapper}>
 
-        <label
-          style={{
-            fontSize: "13px",
-            fontWeight: "600",
-            display: "block",
-            marginBottom: "4px",
-          }}
-        >
-          Estado
+        <label style={labelStyle}>
+          Disponibilidad
         </label>
 
         <select
-          style={inputStyle()}
-          value={form.estado}
+          style={customInput()}
+          value={String(form.disponible)}
           onChange={(e) =>
             setForm({
               ...form,
-              estado: e.target.value,
+              disponible:
+                e.target.value === "true",
             })
           }
         >
 
-          {ESTADOS_INSTRUMENTO.map((e) => (
+          <option value="true">
+            Disponible
+          </option>
 
-            <option
-              key={e}
-              value={e}
-            >
-              {e}
-            </option>
-
-          ))}
+          <option value="false">
+            Prestado
+          </option>
 
         </select>
 
       </div>
 
     </div>
+
   );
 };
 

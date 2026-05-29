@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+
+import { useEffect, useMemo, useState } from "react";
 
 import { inventarioService } from "../services/inventarioService";
 
@@ -10,36 +11,84 @@ import {
 
 const useInventario = () => {
 
-  const [instrumentos, setInstrumentos] = useState([]);
-  const [categorias, setCategorias] = useState([]);
-  const [ubicaciones, setUbicaciones] = useState([]);
+  // =========================================================
+  // DATA
+  // =========================================================
 
-  const [loading, setLoading] = useState(true);
+  const [instrumentos, setInstrumentos] =
+    useState([]);
 
-  // filtros
-  const [filtroCodigo, setFiltroCodigo] = useState("");
-  const [filtroNombre, setFiltroNombre] = useState("");
-  const [filtroCategoria, setFiltroCategoria] = useState("");
+  const [categorias, setCategorias] =
+    useState([]);
 
-  // paginacion
-  const [pagina, setPagina] = useState(1);
+  const [ubicaciones, setUbicaciones] =
+    useState([]);
 
-  // modales
-  const [modalAgregar, setModalAgregar] = useState(false);
-  const [modalEditar, setModalEditar] = useState(false);
-  const [modalEliminar, setModalEliminar] = useState(false);
-  const [modalErrorEliminar, setModalErrorEliminar] = useState(false);
-  const [modalAdvertencia, setModalAdvertencia] = useState(false);
+  const [loading, setLoading] =
+    useState(true);
 
-  // seleccionado
-  const [seleccionado, setSeleccionado] = useState(null);
+  // =========================================================
+  // FILTROS
+  // =========================================================
 
-  // form
-  const [form, setForm] = useState(FORM_VACIO);
-  const [errores, setErrores] = useState(ERRORES_VACIO);
+  const [filtroNombre, setFiltroNombre] =
+    useState("");
 
-  // toast
-  const [toast, setToast] = useState(null);
+  const [filtroCategoria, setFiltroCategoria] =
+    useState("");
+
+  // =========================================================
+  // PAGINACION
+  // =========================================================
+
+  const [pagina, setPagina] =
+    useState(1);
+
+  // =========================================================
+  // MODALES
+  // =========================================================
+
+  const [modalAgregar, setModalAgregar] =
+    useState(false);
+
+  const [modalEditar, setModalEditar] =
+    useState(false);
+
+  const [modalEliminar, setModalEliminar] =
+    useState(false);
+
+  const [modalErrorEliminar, setModalErrorEliminar] =
+    useState(false);
+
+  const [modalAdvertencia, setModalAdvertencia] =
+  useState(false);
+
+  // =========================================================
+  // SELECCIONADO
+  // =========================================================
+
+  const [seleccionado, setSeleccionado] =
+    useState(null);
+
+  // =========================================================
+  // FORMULARIO
+  // =========================================================
+
+  const [form, setForm] =
+    useState(FORM_VACIO);
+
+  const [errores, setErrores] =
+    useState(ERRORES_VACIO);
+
+  // =========================================================
+  // TOAST
+  // =========================================================
+
+  const [toast, setToast] =
+    useState(null);
+
+  const [pendienteEdicion, setPendienteEdicion] =
+  useState(null);
 
   // =========================================================
   // CARGAR DATOS
@@ -60,7 +109,9 @@ const useInventario = () => {
       ]);
 
       setInstrumentos(instRes.data);
+
       setCategorias(catRes.data);
+
       setUbicaciones(ubiRes.data);
 
     } catch (error) {
@@ -99,10 +150,10 @@ const useInventario = () => {
   };
 
   // =========================================================
-  // VALIDAR FORM
+  // VALIDAR FORMULARIO
   // =========================================================
 
-  const validarForm = (esEdicion = false) => {
+  const validarForm = () => {
 
     const nuevoErrores = {
       ...ERRORES_VACIO,
@@ -110,49 +161,14 @@ const useInventario = () => {
 
     let valido = true;
 
-    // codigo
-
-    if (!esEdicion && !form.codigo.trim()) {
-
-      nuevoErrores.codigo =
-        "El código del instrumento es obligatorio.";
-
-      valido = false;
-    }
-
-    else if (
-      !esEdicion &&
-      !/^\d{1,6}$/.test(form.codigo.trim())
-    ) {
-
-      nuevoErrores.codigo =
-        "El código debe ser un número entero de 1 a 6 dígitos.";
-
-      valido = false;
-    }
-
-    else if (!esEdicion) {
-
-      const existe = instrumentos.some(
-        (i) =>
-          String(i.codigo) === form.codigo.trim()
-      );
-
-      if (existe) {
-
-        nuevoErrores.codigo =
-          "El código del instrumento ya se encuentra registrado.";
-
-        valido = false;
-      }
-    }
-
-    // nombre
+    // =====================================================
+    // NOMBRE
+    // =====================================================
 
     if (!form.nombre.trim()) {
 
       nuevoErrores.nombre =
-        "El nombre del instrumento es obligatorio.";
+        "El nombre es obligatorio.";
 
       valido = false;
     }
@@ -168,49 +184,14 @@ const useInventario = () => {
       valido = false;
     }
 
-    else {
-
-      const idActual =
-        esEdicion
-          ? seleccionado?.id_instrumento
-          : null;
-
-      const duplicado = instrumentos.some(
-        (i) =>
-          i.nombre.toLowerCase() ===
-            form.nombre.trim().toLowerCase() &&
-          i.id_instrumento !== idActual
-      );
-
-      if (duplicado) {
-
-        nuevoErrores.nombre =
-          "Ya existe un instrumento con este nombre.";
-
-        valido = false;
-      }
-    }
-
-    // categoria
+    // =====================================================
+    // CATEGORIA
+    // =====================================================
 
     if (!form.id_categoria) {
 
       nuevoErrores.id_categoria =
-        "Debe seleccionar un tipo de instrumento.";
-
-      valido = false;
-    }
-
-    // cantidad
-
-    if (
-      !form.cantidad_total ||
-      isNaN(form.cantidad_total) ||
-      parseInt(form.cantidad_total) < 1
-    ) {
-
-      nuevoErrores.cantidad_total =
-        "La cantidad total debe ser un número entero mayor a 0.";
+        "Debe seleccionar una categoría.";
 
       valido = false;
     }
@@ -221,33 +202,29 @@ const useInventario = () => {
   };
 
   // =========================================================
-  // CRUD
+  // CREAR
   // =========================================================
 
   const handleAgregar = async () => {
 
-    if (!validarForm(false)) return;
+    if (!validarForm()) return;
 
     try {
 
       await inventarioService.crearInstrumento({
-
-        codigo: form.codigo.trim(),
 
         nombre: form.nombre.trim(),
 
         id_categoria:
           parseInt(form.id_categoria),
 
-        cantidad_total:
-          parseInt(form.cantidad_total),
-
         id_ubicacion:
           form.id_ubicacion
             ? parseInt(form.id_ubicacion)
             : null,
 
-        estado: form.estado,
+        disponible:
+          form.disponible,
       });
 
       setModalAgregar(false);
@@ -261,7 +238,7 @@ const useInventario = () => {
       cargarDatos();
 
       mostrarToast(
-        "Los cambios han sido guardados correctamente."
+        "Instrumento agregado correctamente."
       );
 
     } catch (error) {
@@ -273,81 +250,78 @@ const useInventario = () => {
     }
   };
 
+  // =========================================================
+  // EDITAR
+  // =========================================================
+
   const ejecutarEdicion = async () => {
 
-    try {
+  try {
 
-      await inventarioService.editarInstrumento(
-        seleccionado.id_instrumento,
-        {
+    await inventarioService.editarInstrumento(
+      seleccionado.id_instrumento,
+      {
+        nombre: form.nombre.trim(),
 
-          nombre: form.nombre.trim(),
+        id_categoria:
+          parseInt(form.id_categoria),
 
-          id_categoria:
-            parseInt(form.id_categoria),
+        id_ubicacion:
+          form.id_ubicacion
+            ? parseInt(form.id_ubicacion)
+            : null,
 
-          cantidad_total:
-            parseInt(form.cantidad_total),
+        disponible:
+          form.disponible,
+      }
+    );
 
-          id_ubicacion:
-            form.id_ubicacion
-              ? parseInt(form.id_ubicacion)
-              : null,
+    setModalEditar(false);
 
-          estado: form.estado,
-        }
-      );
+    setModalAdvertencia(false);
 
-      setModalEditar(false);
+    setErrores(ERRORES_VACIO);
 
-      setModalAdvertencia(false);
+    cargarDatos();
 
-      setErrores(ERRORES_VACIO);
+    mostrarToast(
+      "Instrumento actualizado correctamente."
+    );
 
-      cargarDatos();
+  } catch (error) {
 
-      mostrarToast(
-        "Los cambios han sido guardados correctamente."
-      );
+    console.error(
+      "Error editando instrumento:",
+      error
+    );
+  }
+};
 
-    } catch (error) {
+const handleEditar = async () => {
 
-      console.error(
-        "Error editando instrumento:",
-        error
-      );
-    }
-  };
+  if (!validarForm()) return;
 
-  const handleEditar = async () => {
+  // Si el instrumento pasa de disponible a no disponible
+  // mostramos advertencia
 
-    if (!validarForm(true)) return;
+  if (
+    seleccionado?.disponible === true &&
+    form.disponible === false
+  ) {
 
-    const estadoAnterior =
-      seleccionado?.estado;
+    setPendienteEdicion(form);
 
-    const tieneAsignaciones =
-      (seleccionado?.asignados ?? 0) > 0;
+    setModalAdvertencia(true);
 
-    const cambiaANoDisponible =
-      [
-        "Inactivo",
-        "En mantenimiento"
-      ].includes(form.estado);
+    return;
+  }
 
-    if (
-      tieneAsignaciones &&
-      cambiaANoDisponible &&
-      estadoAnterior === "Activo"
-    ) {
+  ejecutarEdicion();
+};
 
-      setModalAdvertencia(true);
-
-      return;
-    }
-
-    await ejecutarEdicion();
-  };
+  // =========================================================
+  // ELIMINAR
+  // =========================================================
 
   const handleEliminar = async () => {
 
@@ -366,6 +340,11 @@ const useInventario = () => {
       );
 
     } catch (error) {
+
+      console.error(
+        "Error eliminando instrumento:",
+        error
+      );
 
       if (error.response?.status === 400) {
 
@@ -395,23 +374,17 @@ const useInventario = () => {
 
     setForm({
 
-      codigo: inst.codigo ?? "",
-
-      nombre: inst.nombre ?? "",
+      nombre:
+        inst.nombre ?? "",
 
       id_categoria:
         inst.id_categoria ?? "",
 
-      cantidad_total:
-        inst.cantidad_total ??
-        inst.total ??
-        "",
-
       id_ubicacion:
         inst.id_ubicacion ?? "",
 
-      estado:
-        inst.estado ?? "Activo",
+      disponible:
+        inst.disponible ?? true,
     });
 
     setErrores(ERRORES_VACIO);
@@ -430,28 +403,31 @@ const useInventario = () => {
   // FILTROS
   // =========================================================
 
-  const filtrados = instrumentos.filter((i) => {
+  const filtrados =
+    instrumentos.filter((i) => {
 
-    const matchCodigo =
-      !filtroCodigo ||
-      String(i.codigo ?? "").includes(filtroCodigo);
+      const matchNombre =
+        !filtroNombre ||
+        i.nombre
+          .toLowerCase()
+          .includes(
+            filtroNombre.toLowerCase()
+          );
 
-    const matchNombre =
-      !filtroNombre ||
-      i.nombre.toLowerCase().includes(
-        filtroNombre.toLowerCase()
+      const matchCategoria =
+        !filtroCategoria ||
+        String(i.id_categoria) ===
+          filtroCategoria;
+
+      return (
+        matchNombre &&
+        matchCategoria
       );
+    });
 
-    const matchCategoria =
-      !filtroCategoria ||
-      String(i.id_categoria) === filtroCategoria;
-
-    return (
-      matchCodigo &&
-      matchNombre &&
-      matchCategoria
-    );
-  });
+  // =========================================================
+  // PAGINACION
+  // =========================================================
 
   const totalPaginas = Math.max(
     1,
@@ -470,6 +446,10 @@ const useInventario = () => {
     paginaActual * POR_PAGINA
   );
 
+  // =========================================================
+  // BUSCAR
+  // =========================================================
+
   const handleBuscar = () => {
 
     setPagina(1);
@@ -477,29 +457,64 @@ const useInventario = () => {
 
   const handleLimpiar = () => {
 
-    setFiltroCodigo("");
     setFiltroNombre("");
+
     setFiltroCategoria("");
+
     setPagina(1);
   };
 
+  // =========================================================
+  // ESTADISTICAS
+  // =========================================================
+
+  const estadisticas = useMemo(() => {
+
+    const total =
+      instrumentos.length;
+
+    const disponibles =
+      instrumentos.filter(
+        (i) => i.disponible === true
+      ).length;
+
+    const ocupados =
+      instrumentos.filter(
+        (i) => i.disponible === false
+      ).length;
+
+    return {
+
+      total,
+      disponibles,
+      ocupados,
+    };
+
+  }, [instrumentos]);
+
+  // =========================================================
+  // RETURN
+  // =========================================================
+
   return {
 
+    // DATA
     loading,
-
     instrumentos,
     categorias,
     ubicaciones,
+    modalAdvertencia,
+    setModalAdvertencia,
+    ejecutarEdicion,
 
-    filtroCodigo,
-    setFiltroCodigo,
-
+    // FILTROS
     filtroNombre,
     setFiltroNombre,
 
     filtroCategoria,
     setFiltroCategoria,
 
+    // PAGINACION
     pagina,
     setPagina,
 
@@ -509,6 +524,7 @@ const useInventario = () => {
     filtrados,
     paginados,
 
+    // MODALES
     modalAgregar,
     setModalAgregar,
 
@@ -521,18 +537,22 @@ const useInventario = () => {
     modalErrorEliminar,
     setModalErrorEliminar,
 
-    modalAdvertencia,
-    setModalAdvertencia,
-
+    // SELECCION
     seleccionado,
 
+    // FORM
     form,
     setForm,
 
     errores,
 
+    // TOAST
     toast,
 
+    // STATS
+    estadisticas,
+
+    // ACTIONS
     abrirAgregar,
     abrirEditar,
     abrirEliminar,
@@ -540,8 +560,6 @@ const useInventario = () => {
     handleAgregar,
     handleEditar,
     handleEliminar,
-
-    ejecutarEdicion,
 
     handleBuscar,
     handleLimpiar,

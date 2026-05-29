@@ -1,40 +1,50 @@
-export const ESTADOS_INSTRUMENTO = [
-  "Activo",
-  "Inactivo",
-  "En mantenimiento",
-];
+// ======================================================
+// INVENTARIO CONSTANTS
+// FRONT LIMPIO ADAPTADO AL BACKEND REAL
+// ======================================================
+
+// ------------------------------------------------------
+// PAGINACION
+// ------------------------------------------------------
 
 export const POR_PAGINA = 10;
 
+// ------------------------------------------------------
+// FORMULARIO VACIO
+// SOLO CAMPOS EXISTENTES EN BACKEND
+// ------------------------------------------------------
+
 export const FORM_VACIO = {
-  codigo: "",
   nombre: "",
   id_categoria: "",
-  cantidad_total: "",
   id_ubicacion: "",
-  estado: "Activo",
+  disponible: true,
 };
+
+// ------------------------------------------------------
+// ERRORES DEL FORMULARIO
+// ------------------------------------------------------
 
 export const ERRORES_VACIO = {
-  codigo: "",
   nombre: "",
   id_categoria: "",
-  cantidad_total: "",
 };
 
-export const ESTADO_BADGE = {
-  "Activo": {
+// ------------------------------------------------------
+// BADGES DISPONIBILIDAD
+// EL BACKEND SOLO MANEJA TRUE/FALSE
+// ------------------------------------------------------
+
+export const DISPONIBILIDAD_BADGE = {
+  true: {
     bg: "#DCFCE7",
     color: "#15803D",
+    text: "Disponible",
   },
 
-  "Inactivo": {
-    bg: "#F3F4F6",
-    color: "#6B7280",
-  },
-
-  "En mantenimiento": {
-    bg: "#FEF9C3",
-    color: "#CA8A04",
+  false: {
+    bg: "#FEE2E2",
+    color: "#B91C1C",
+    text: "Prestado",
   },
 };

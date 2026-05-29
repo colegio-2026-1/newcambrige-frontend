@@ -1,23 +1,33 @@
-import { btn } from "../styles/inventarioStyles";
+import "./InventarioFiltros.css";
+
+import {
+  btn,
+  COLORS,
+} from "../styles/inventarioStyles";
+
+const fieldContainer = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "8px",
+  minWidth: 0,
+};
 
 const labelStyle = {
-  fontSize: "12px",
-
-  fontWeight: "600",
-
-  color: "#555",
-
-  marginBottom: "6px",
-
-  letterSpacing: "0.3px",
+  fontSize: "11px",
+  fontWeight: "800",
+  letterSpacing: "0.6px",
+  textTransform: "uppercase",
+  color: "var(--color-primary)",
+  fontFamily: "var(--font-body)",
 };
 
 const inputStyle = {
-  height: "42px",
+  height: "46px",
 
-  border: "1px solid #D6D6D6",
+  border:
+    "1px solid rgba(214,211,209,0.9)",
 
-  borderRadius: "10px",
+  borderRadius: "12px",
 
   padding: "0 14px",
 
@@ -27,21 +37,13 @@ const inputStyle = {
 
   backgroundColor: "#FFFFFF",
 
-  color: "#333",
+  color: "#444",
 
   width: "100%",
 
   boxSizing: "border-box",
-};
 
-const fieldContainer = {
-  display: "flex",
-
-  flexDirection: "column",
-
-  minWidth: "220px",
-
-  flex: 1,
+  fontFamily: "var(--font-body)",
 };
 
 const InventarioFiltros = ({
@@ -63,19 +65,17 @@ const InventarioFiltros = ({
 
     <div
       style={{
-        backgroundColor: "#FFFFFF",
+        background: "#d8d2c3",
 
-        borderRadius: "18px",
+        borderRadius: "20px",
 
-        padding: "24px",
-
-        marginBottom: "24px",
-
-        boxShadow:
-          "0 4px 18px rgba(0,0,0,0.08)",
+        padding: "22px",
 
         border:
-          "1px solid #ECECEC",
+          "1px solid rgba(0,0,0,0.08)",
+
+        boxShadow:
+          "0 8px 24px rgba(0,0,0,0.05)",
       }}
     >
 
@@ -91,6 +91,10 @@ const InventarioFiltros = ({
           alignItems: "center",
 
           marginBottom: "22px",
+
+          gap: "20px",
+
+          flexWrap: "wrap",
         }}
       >
 
@@ -100,14 +104,18 @@ const InventarioFiltros = ({
             style={{
               margin: 0,
 
-              color: "#333",
+              fontSize: "28px",
 
-              fontSize: "22px",
+              fontWeight: "800",
 
-              fontWeight: "700",
+              color:
+                "var(--color-primary)",
+
+              fontFamily:
+                "var(--font-display)",
             }}
           >
-            Inventario Banda
+            Sistema de Inventario
           </h2>
 
           <p
@@ -115,29 +123,28 @@ const InventarioFiltros = ({
               margin:
                 "6px 0 0 0",
 
-              color: "#777",
+              color: "#666",
 
-              fontSize: "13px",
+              fontSize: "14px",
             }}
           >
-            Gestión y administración
-            de instrumentos musicales
+            Gestión institucional de instrumentos musicales
           </p>
 
         </div>
 
         <button
           style={{
-            ...btn("#8E2A25"),
+            ...btn(COLORS.primary),
 
-            height: "42px",
+            height: "46px",
 
-            borderRadius: "10px",
+            borderRadius: "12px",
 
             padding:
               "0 20px",
 
-            fontSize: "13px",
+            fontWeight: "700",
           }}
           onClick={abrirAgregar}
         >
@@ -150,13 +157,31 @@ const InventarioFiltros = ({
 
       <div
         style={{
-          display: "flex",
+          display: "grid",
 
-          gap: "16px",
+          gridTemplateColumns:
+            "120px 1.5fr 120px 120px 120px auto",
 
-          alignItems: "flex-end",
+          gap: "14px",
+
+          alignItems: "end",
         }}
       >
+
+        {/* CODIGO */}
+
+        <div style={fieldContainer}>
+
+          <label style={labelStyle}>
+            Código
+          </label>
+
+          <input
+            style={inputStyle}
+            placeholder="Código"
+          />
+
+        </div>
 
         {/* NOMBRE */}
 
@@ -168,27 +193,51 @@ const InventarioFiltros = ({
 
           <input
             style={inputStyle}
-            placeholder="Buscar instrumento..."
+            placeholder="Nombre"
             value={filtroNombre}
             onChange={(e) =>
               setFiltroNombre(
                 e.target.value
               )
             }
-            onKeyDown={(e) =>
-              e.key === "Enter" &&
-              handleBuscar()
-            }
           />
 
         </div>
 
-        {/* CATEGORIA */}
+        {/* GRADO */}
 
         <div style={fieldContainer}>
 
           <label style={labelStyle}>
-            Categoría
+            Grado
+          </label>
+
+          <select style={inputStyle}>
+            <option>Grado</option>
+          </select>
+
+        </div>
+
+        {/* GRUPO */}
+
+        <div style={fieldContainer}>
+
+          <label style={labelStyle}>
+            Grupo
+          </label>
+
+          <select style={inputStyle}>
+            <option>Grupo</option>
+          </select>
+
+        </div>
+
+        {/* AÑO */}
+
+        <div style={fieldContainer}>
+
+          <label style={labelStyle}>
+            Año
           </label>
 
           <select
@@ -202,7 +251,7 @@ const InventarioFiltros = ({
           >
 
             <option value="">
-              Todas
+              Año
             </option>
 
             {categorias.map((c) => (
@@ -220,60 +269,27 @@ const InventarioFiltros = ({
 
         </div>
 
-        {/* BOTONES */}
+        {/* BOTON */}
 
-        <div
+        <button
           style={{
-            display: "flex",
+            ...btn(COLORS.primary),
 
-            gap: "10px",
+            height: "46px",
 
-            marginBottom: "1px",
+            borderRadius: "12px",
+
+            fontWeight: "700",
           }}
+          onClick={handleBuscar}
         >
-
-          <button
-            style={{
-              ...btn("#2E5FA7"),
-
-              height: "42px",
-
-              borderRadius: "10px",
-
-              padding:
-                "0 20px",
-            }}
-            onClick={handleBuscar}
-          >
-            Buscar
-          </button>
-
-          {(filtroNombre ||
-            filtroCategoria) && (
-
-            <button
-              style={{
-                ...btn("#6B7280"),
-
-                height: "42px",
-
-                borderRadius: "10px",
-
-                padding:
-                  "0 18px",
-              }}
-              onClick={handleLimpiar}
-            >
-              Limpiar
-            </button>
-
-          )}
-
-        </div>
+          Buscar
+        </button>
 
       </div>
 
     </div>
+
   );
 };
 

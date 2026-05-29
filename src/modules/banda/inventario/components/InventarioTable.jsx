@@ -1,60 +1,84 @@
 import EstadoBadge from "./EstadoBadge";
 
-const actionBtn = (bg) => ({
-  border: "none",
+const tableContainer = {
+  width: "100%",
 
-  backgroundColor: bg,
+  overflowX: "auto",
 
-  color: "#fff",
+  background: "#F8F7F3",
 
-  padding: "7px 14px",
+  border: "1px solid #D8D2C4",
 
-  borderRadius: "8px",
+  borderRadius: "14px",
 
-  fontSize: "12px",
+  overflow: "hidden",
+};
 
-  fontWeight: "600",
+const tableStyle = {
+  width: "100%",
 
-  cursor: "pointer",
+  borderCollapse: "collapse",
 
-  transition: "0.2s",
-});
+  minWidth: "900px",
+
+  fontFamily: "var(--font-body)",
+};
 
 const thStyle = {
+  background: "#D9D1BD",
+
+  color: "#1E1E1E",
+
+  fontSize: "13px",
+
+  fontWeight: "700",
+
   padding: "16px 14px",
 
   textAlign: "left",
 
-  fontSize: "12px",
+  borderBottom: "1px solid #CFC6B2",
 
-  fontWeight: "700",
-
-  color: "#666",
-
-  letterSpacing: "0.5px",
+  whiteSpace: "nowrap",
 
   textTransform: "uppercase",
 
-  borderBottom:
-    "1px solid #E5E7EB",
-
-  backgroundColor: "#F8F8F8",
-
-  whiteSpace: "nowrap",
+  letterSpacing: "0.4px",
 };
 
 const tdStyle = {
-  padding: "16px 14px",
+  padding: "14px",
 
   fontSize: "13px",
 
   color: "#333",
 
-  borderBottom:
-    "1px solid #F1F1F1",
+  borderBottom: "1px solid #E5DED0",
 
   verticalAlign: "middle",
 };
+
+const actionBtn = (bg) => ({
+  border: "none",
+
+  background: bg,
+
+  color: "#FFFFFF",
+
+  padding: "8px 14px",
+
+  borderRadius: "8px",
+
+  fontSize: "12px",
+
+  fontWeight: "700",
+
+  cursor: "pointer",
+
+  transition: "0.2s ease",
+
+  fontFamily: "var(--font-body)",
+});
 
 const InventarioTable = ({
   paginados,
@@ -64,47 +88,21 @@ const InventarioTable = ({
 
   return (
 
-    <div
-      style={{
-        backgroundColor: "#FFFFFF",
+    <div style={tableContainer}>
 
-        borderRadius: "18px",
-
-        overflow: "hidden",
-
-        boxShadow:
-          "0 4px 18px rgba(0,0,0,0.08)",
-
-        border:
-          "1px solid #ECECEC",
-      }}
-    >
-
-      <table
-        style={{
-          width: "100%",
-
-          borderCollapse:
-            "collapse",
-
-          fontFamily:
-            "sans-serif",
-        }}
-      >
+      <table style={tableStyle}>
 
         <thead>
 
           <tr>
 
             {[
-              "Código",
-              "Nombre",
-              "Tipo / Categoría",
-              "Total",
-              "Disponible",
-              "Asignados",
-              "Estado",
-              "Acciones",
+              "ID",
+              "NOMBRE",
+              "CATEGORÍA",
+              "UBICACIÓN",
+              "DISPONIBILIDAD",
+              "ACCIONES",
             ].map((h) => (
 
               <th
@@ -127,21 +125,18 @@ const InventarioTable = ({
             <tr>
 
               <td
-                colSpan={8}
+                colSpan={6}
                 style={{
-                  padding:
-                    "50px 20px",
+                  ...tdStyle,
 
-                  textAlign:
-                    "center",
+                  textAlign: "center",
 
-                  color: "#999",
+                  padding: "40px",
 
-                  fontSize: "14px",
+                  color: "#777",
                 }}
               >
-                No se encontraron
-                instrumentos.
+                No se encontraron instrumentos.
               </td>
 
             </tr>
@@ -149,241 +144,95 @@ const InventarioTable = ({
           ) : (
 
             paginados.map(
-              (inst, idx) => {
+              (inst, idx) => (
 
-                const disponible =
-                  inst.disponible ??
-                  inst.cantidad_disponible ??
-                  0;
+                <tr
+                  key={inst.id_instrumento}
+                  style={{
+                    background:
+                      idx % 2 === 0
+                        ? "#F8F7F3"
+                        : "#F3F0E8",
+                  }}
+                >
 
-                const total =
-                  inst.total ??
-                  inst.cantidad_total ??
-                  0;
+                  {/* ID */}
 
-                const asignados =
-                  inst.asignados ??
-                  (total -
-                    disponible) ??
-                  0;
+                  <td style={tdStyle}>
 
-                return (
+                    <strong>
+                      #{inst.id_instrumento}
+                    </strong>
 
-                  <tr
-                    key={
-                      inst.id_instrumento
-                    }
-                    style={{
-                      backgroundColor:
-                        idx % 2 === 0
-                          ? "#FFFFFF"
-                          : "#FAFAFA",
+                  </td>
 
-                      transition:
-                        "0.2s",
-                    }}
-                  >
+                  {/* NOMBRE */}
 
-                    {/* CODIGO */}
+                  <td style={tdStyle}>
+                    {inst.nombre}
+                  </td>
 
-                    <td style={tdStyle}>
+                  {/* CATEGORIA */}
 
-                      <span
-                        style={{
-                          fontWeight:
-                            "700",
+                  <td style={tdStyle}>
+                    {inst.categoria_nombre ?? "—"}
+                  </td>
 
-                          color:
-                            "#8E2A25",
-                        }}
-                      >
-                        #
-                        {inst.codigo ??
-                          inst.id_instrumento}
-                      </span>
+                  {/* UBICACION */}
 
-                    </td>
+                  <td style={tdStyle}>
+                    {inst.ubicacion_nombre ?? "—"}
+                  </td>
 
-                    {/* NOMBRE */}
+                  {/* DISPONIBILIDAD */}
 
-                    <td style={tdStyle}>
+                  <td style={tdStyle}>
 
-                      <div
-                        style={{
-                          fontWeight:
-                            "600",
+                    <EstadoBadge
+                      disponible={inst.disponible}
+                    />
 
-                          color:
-                            "#333",
-                        }}
-                      >
-                        {inst.nombre}
-                      </div>
+                  </td>
 
-                    </td>
+                  {/* ACCIONES */}
 
-                    {/* CATEGORIA */}
+                  <td style={tdStyle}>
 
-                    <td style={tdStyle}>
-                      {inst.categoria_nombre ??
-                        "—"}
-                    </td>
-
-                    {/* TOTAL */}
-
-                    <td
+                    <div
                       style={{
-                        ...tdStyle,
+                        display: "flex",
 
-                        textAlign:
-                          "center",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontWeight:
-                            "700",
-                        }}
-                      >
-                        {total}
-                      </span>
-                    </td>
+                        gap: "8px",
 
-                    {/* DISPONIBLES */}
-
-                    <td
-                      style={{
-                        ...tdStyle,
-
-                        textAlign:
-                          "center",
+                        flexWrap: "wrap",
                       }}
                     >
 
-                      <span
-                        style={{
-                          fontWeight:
-                            "700",
-
-                          color:
-                            disponible >
-                            0
-                              ? "#15803D"
-                              : "#DC2626",
-                        }}
-                      >
-                        {disponible}
-                      </span>
-
-                      {disponible ===
-                        0 && (
-
-                        <div
-                          style={{
-                            marginTop:
-                              "4px",
-
-                            fontSize:
-                              "10px",
-
-                            color:
-                              "#DC2626",
-
-                            fontWeight:
-                              "600",
-                          }}
-                        >
-                          Sin stock
-                        </div>
-
-                      )}
-
-                    </td>
-
-                    {/* ASIGNADOS */}
-
-                    <td
-                      style={{
-                        ...tdStyle,
-
-                        textAlign:
-                          "center",
-                      }}
-                    >
-
-                      <span
-                        style={{
-                          fontWeight:
-                            "700",
-
-                          color:
-                            "#2E5FA7",
-                        }}
-                      >
-                        {asignados}
-                      </span>
-
-                    </td>
-
-                    {/* ESTADO */}
-
-                    <td style={tdStyle}>
-
-                      <EstadoBadge
-                        estado={
-                          inst.estado
+                      <button
+                        style={actionBtn("#2E5FA7")}
+                        onClick={() =>
+                          abrirEditar(inst)
                         }
-                      />
-
-                    </td>
-
-                    {/* ACCIONES */}
-
-                    <td style={tdStyle}>
-
-                      <div
-                        style={{
-                          display:
-                            "flex",
-
-                          gap: "8px",
-                        }}
                       >
+                        Editar
+                      </button>
 
-                        <button
-                          style={actionBtn(
-                            "#2E5FA7"
-                          )}
-                          onClick={() =>
-                            abrirEditar(
-                              inst
-                            )
-                          }
-                        >
-                          Editar
-                        </button>
+                      <button
+                        style={actionBtn("#8E2A25")}
+                        onClick={() =>
+                          abrirEliminar(inst)
+                        }
+                      >
+                        Eliminar
+                      </button>
 
-                        <button
-                          style={actionBtn(
-                            "#8E2A25"
-                          )}
-                          onClick={() =>
-                            abrirEliminar(
-                              inst
-                            )
-                          }
-                        >
-                          Eliminar
-                        </button>
+                    </div>
 
-                      </div>
+                  </td>
 
-                    </td>
+                </tr>
 
-                  </tr>
-
-                );
-              }
+              )
             )
 
           )}
