@@ -1,37 +1,21 @@
-// ======================================================
-// PAGINACION
-// ======================================================
-
 export const POR_PAGINA = 10;
 
-// ======================================================
-// FORMULARIO VACIO
-// ADAPTADO AL BACKEND REAL
-// ======================================================
-
 export const FORM_VACIO = {
-
   id_instrumento: "",
-
   id_estudiante: "",
-
-  fecha_prestamo:
-    new Date()
-      .toISOString()
-      .split("T")[0],
-
   observacion: "",
+  // Eliminamos fecha_prestamo: el Backend usa la del servidor
 };
 
-// ======================================================
-// ERRORES
-// ======================================================
+// NUEVO: Para el formulario de devoluciones (Requerimiento BR22)
+export const FORM_DEVOLUCION_VACIO = {
+  estado_al_devolver: "Bueno", // Bueno o Malo
+  observaciones: "",
+};
 
 export const ERRORES_VACIO = {
-
   id_instrumento: "",
-
   id_estudiante: "",
-
-  fecha_prestamo: "",
+  estado_al_devolver: "",
+  observaciones: "",
 };
