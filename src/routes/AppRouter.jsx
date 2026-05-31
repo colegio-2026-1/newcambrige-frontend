@@ -1,175 +1,111 @@
-import {
-  Routes,
-  Route,
-  Navigate
-} from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
+// AUTH & CORE
 import LoginPage from "../modules/auth/LoginPage";
+import Home from "../modules/Home/HomePage";
+import Dashboard from "../modules/dashboard/DashboardPage";
 
+// TESORERIA
+import Tesoreria from "../modules/tesoreria/Tesoreria";
 import TesoreriaMatricula from "../modules/tesoreria/TesoreriaMatricula";
 import TesoreriaNotificaciones from "../modules/tesoreria/TesoreriaNotificaciones";
 import TesoreriaEstadistica from "../modules/tesoreria/TesoreriaEstadistica";
 import TesoreriaPension from "../modules/tesoreria/TesoreriaPension";
 import TesoreriaPapeleria from "../modules/tesoreria/TesoreriaPapeleria";
-import Tesoreria from "../modules/tesoreria/Tesoreria";
 
-import Home from "../modules/Home/HomePage";
-
-
-import TestPage from "../modules/test/testPage";
-
-// BANDA
+// BANDA (Estructura actualizada)
 import BandaLayout from "../modules/banda/layout/BandaLayout";
 import BandaHomePage from "../modules/banda/BandaHomePage";
-
-// INVENTARIO
 import InventarioPage from "../modules/banda/inventario/pages/InventarioPage";
-
 import PrestamosPage from "../modules/banda/prestamos/pages/PrestamosPage";
 
-// ==============================
-// RUTA PRIVADA
-// ==============================
+// TEST
+import TestPage from "../modules/test/testPage";
 
-const PrivateRoute = ({
-  children
-}) => {
-
-  const token =
-    localStorage.getItem(
-      "access_token"
-    );
-
-  // si no hay token
+// ==========================================
+// COMPONENTE DE PROTECCIÓN DE RUTAS
+// ==========================================
+const PrivateRoute = ({ children }) => {
+  const token = localStorage.getItem("access_token");
   if (!token) {
-
-    return (
-      <Navigate
-        to="/"
-        replace
-      />
-    );
+    return <Navigate to="/" replace />;
   }
-
   return children;
 };
 
-// ==============================
-// ROUTER
-// ==============================
-
+// ==========================================
+// ENRUTADOR PRINCIPAL
+// ==========================================
 const AppRouter = () => {
-
   return (
-
     <Routes>
+      {/* PUBLIC ROUTES */}
+      <Route path="/" element={<LoginPage />} />
+      <Route path="/test" element={<TestPage />} />
 
-      {/* ===================== */}
-      {/* LOGIN */}
-      {/* ===================== */}
-
-      <Route
-        path="/"
-        element={<LoginPage />}
-      />
-
-      {/* ===================== */}
-      {/* HOME */}
-      {/* ===================== */}
-
+      {/* PRIVATE ROUTES (Requieren Login) */}
       <Route
         path="/home"
         element={
-
           <PrivateRoute>
-
             <Home />
-
-          </PrivateRoute>
-
-        }
-      />
-
-      {/* ===================== */}
-      {/* FUTURAS RUTAS */}
-      {/* ===================== */}
-
-      {/*
-      <Route
-        path="/salones"
-        element={
-          <PrivateRoute>
-            <SalonPage />
           </PrivateRoute>
         }
       />
-      */}
 
-      {/*
-      <Route
-        path="/estudiantes"
-        element={
-          <PrivateRoute>
-            <EstudiantesPage />
-          </PrivateRoute>
-        }
-      />
-      */}
-      
-  {      <Route
-          path="/tesoreria/matricula"
+      {/* MODULO TESORERIA */}
+      <Route path="/tesoreria">
+        <Route
+          index
+          element={
+            <PrivateRoute>
+              <Tesoreria />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="matricula"
           element={
             <PrivateRoute>
               <TesoreriaMatricula />
             </PrivateRoute>
           }
         />
-}
-{
-        <Route 
-        path="/tesoreria/notificaciones" 
-        element={
-        <PrivateRoute>
-          <TesoreriaNotificaciones />
-          </PrivateRoute>} />
-      }
-      {
-        <Route 
-        path="/tesoreria/estadisticas" 
-        element={
-        <PrivateRoute>
-          <TesoreriaEstadistica />
-          </PrivateRoute>} />
-      }
-      {
-        <Route 
-        path="/tesoreria/pension" 
-        element={
-        <PrivateRoute>
-          <TesoreriaPension />
-          </PrivateRoute>} />
-      }
-      {
-        <Route 
-        path="/tesoreria/" 
-        element={
-        <PrivateRoute>
-          <Tesoreria />
-          </PrivateRoute>} />
-      }
-      {
-        <Route 
-        path="/tesoreria/papeleria" 
-        element={
-        <PrivateRoute>
-          <TesoreriaPapeleria />
-          </PrivateRoute>} />
-      }
-      
-      {/* ====================== */}
-      {/* MODULO BANDA */}
-      {/* ====================== */}
+        <Route
+          path="notificaciones"
+          element={
+            <PrivateRoute>
+              <TesoreriaNotificaciones />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="estadisticas"
+          element={
+            <PrivateRoute>
+              <TesoreriaEstadistica />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="pension"
+          element={
+            <PrivateRoute>
+              <TesoreriaPension />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="papeleria"
+          element={
+            <PrivateRoute>
+              <TesoreriaPapeleria />
+            </PrivateRoute>
+          }
+        />
+      </Route>
 
+      {/* MODULO BANDA (Rutas Anidadas) */}
       <Route
         path="/banda"
         element={
@@ -178,44 +114,23 @@ const AppRouter = () => {
           </PrivateRoute>
         }
       >
-
-        <Route
-          index
-          element={<BandaHomePage />}
-        />
-
-        <Route
-          path="inventario"
-          element={<InventarioPage />}
-        />
-        <Route
-  path="prestamos"
-  element={<PrestamosPage />}
-/>
-
+        <Route index element={<BandaHomePage />} />
+        <Route path="inventario" element={<InventarioPage />} />
+        <Route path="prestamos" element={<PrestamosPage />} />
       </Route>
 
+      {/* DASHBOARD GENERAL */}
       <Route
-        path="/test"
+        path="/dashboard"
         element={
-          <TestPage />
+          <PrivateRoute>
+            <Dashboard />
+          </PrivateRoute>
         }
       />
 
-      {/* ===================== */}
-      {/* CATCH ALL */}
-      {/* ===================== */}
-
-      <Route
-        path="*"
-        element={
-          <Navigate
-            to="/"
-            replace
-          />
-        }
-      />
-
+      {/* CATCH ALL - Redirige a login si la ruta no existe */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };
