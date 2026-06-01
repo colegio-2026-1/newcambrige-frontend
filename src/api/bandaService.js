@@ -20,8 +20,13 @@ export const bandaService = {
   // Préstamos
   getPrestamos: () => axiosClient.get(BANDA.prestamos),
   crearPrestamo: (data) => axiosClient.post(BANDA.prestamos, data),
-  devolverInstrumento: (id) => axiosClient.put(BANDA.devolverPrestamo(id)),
+  devolverInstrumento: (id, data) => axiosClient.put(BANDA.devolverPrestamo(id), data),
 
+// ✅ CAMBIAR ESTO PARA USAR EL ENDPOINT GLOBAL
+  getAuditoria: () => axiosClient.get(BANDA.auditoria),
+
+  getEstadisticas: () => axiosClient.get(BANDA.estadisticas),
+  
   // Estadísticas
   getEstadisticas: () => axiosClient.get(BANDA.estadisticas),
 };

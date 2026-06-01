@@ -18,6 +18,7 @@ const BANDA = {
   prestamoById: (id) => `/api/banda/prestamos/${id}`,
   devolverPrestamo: (id) => `/api/banda/prestamos/${id}/devolver`,
   estadisticas: "/api/banda/estadisticas",
+  auditoria: "/api/banda/auditoria",
 };
 
 export const endpoints = {

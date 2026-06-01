@@ -3,7 +3,10 @@ import { Routes, Route, Navigate } from "react-router-dom";
 // AUTH & CORE
 import LoginPage from "../modules/auth/LoginPage";
 import Home from "../modules/Home/HomePage";
-import Dashboard from "../modules/dashboard/DashboardPage";
+
+// ⚠️ COMENTADO TEMPORALMENTE: El archivo DashboardPage no existe en la carpeta modules/dashboard
+// Al comentar esta línea, evitamos el error de "Failed to resolve import"
+// import Dashboard from "../modules/dashboard/DashboardPage"; 
 
 // TESORERIA
 import Tesoreria from "../modules/tesoreria/Tesoreria";
@@ -14,11 +17,10 @@ import TesoreriaPension from "../modules/tesoreria/TesoreriaPension";
 import TesoreriaPapeleria from "../modules/tesoreria/TesoreriaPapeleria";
 
 // BANDA (Estructura actualizada)
-import BandaLayout from "../modules/banda/layout/BandaLayout";
 import BandaHomePage from "../modules/banda/BandaHomePage";
 import InventarioPage from "../modules/banda/inventario/pages/InventarioPage";
 import PrestamosPage from "../modules/banda/prestamos/pages/PrestamosPage";
-
+import AuditoriaBandaPage from "../modules/banda/inventario/pages/AuditoriaBandaPage";
 // TEST
 import TestPage from "../modules/test/testPage";
 
@@ -110,16 +112,16 @@ const AppRouter = () => {
         path="/banda"
         element={
           <PrivateRoute>
-            <BandaLayout />
+            <BandaHomePage />
           </PrivateRoute>
         }
-      >
-        <Route index element={<BandaHomePage />} />
-        <Route path="inventario" element={<InventarioPage />} />
-        <Route path="prestamos" element={<PrestamosPage />} />
-      </Route>
+      />
+      <Route path="/banda/inventario" element={<PrivateRoute><InventarioPage /></PrivateRoute>} />
+<Route path="/banda/prestamos" element={<PrivateRoute><PrestamosPage /></PrivateRoute>} />
+<Route path="/banda/auditoria" element={<PrivateRoute><AuditoriaBandaPage /></PrivateRoute>} />
 
-      {/* DASHBOARD GENERAL */}
+      {/* ⚠️ RUTA COMENTADA TEMPORALMENTE: Depende del componente Dashboard que no existe */}
+      {/* 
       <Route
         path="/dashboard"
         element={
@@ -127,7 +129,8 @@ const AppRouter = () => {
             <Dashboard />
           </PrivateRoute>
         }
-      />
+      /> 
+      */}
 
       {/* CATCH ALL - Redirige a login si la ruta no existe */}
       <Route path="*" element={<Navigate to="/" replace />} />
