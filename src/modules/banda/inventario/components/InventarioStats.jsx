@@ -1,209 +1,93 @@
-import { useNavigate } from "react-router-dom";
+import React, { useMemo } from "react";
 
+const InventarioStats = ({ instrumentos = [] }) => {
+  // Cálculo de métricas basado en el nuevo modelo de datos (Fase 4)
+  const stats = useMemo(() => {
+    const total = instrumentos.reduce((acc, i) => acc + (i.cantidad_total || 0), 0);
+    const disponibles = instrumentos.reduce((acc, i) => acc + (i.cantidad_disponible || 0), 0);
+    const ocupados = total - disponibles;
+
+    return { total, disponibles, ocupados };
+  }, [instrumentos]);
+
+  return (
+    <aside style={panelStyle}>
+      <h3 style={titleStyle}>RESUMEN DE INVENTARIO</h3>
+      
+      <div style={statsContainer}>
+        <div style={statCard}>
+          <span style={statLabel}>Total Unidades</span>
+          <span style={statValue}>{stats.total}</span>
+        </div>
+
+        <div style={statCard}>
+          <span style={statLabel}>Disponibles</span>
+          <span style={{ ...statValue, color: "var(--color-success)" }}>
+            {stats.disponibles}
+          </span>
+        </div>
+
+        <div style={statCard}>
+          <span style={statLabel}>En Préstamo</span>
+          <span style={{ ...statValue, color: "var(--color-primary)" }}>
+            {stats.ocupados}
+          </span>
+        </div>
+      </div>
+    </aside>
+  );
+};
+
+// ESTILOS USANDO VARIABLES GLOBALES DEL EQUIPO
 const panelStyle = {
   width: "100%",
-
-  position: "sticky",
-
-  top: "24px",
-
-  background: "#F4F1EA",
-
-  border: "1px solid #DDD6C8",
-
-  borderRadius: "18px",
-
-  padding: "20px",
-
+  background: "var(--color-white)",
+  border: "1.5px solid var(--color-border-light)",
+  borderRadius: "var(--radius-lg)",
+  padding: "var(--space-5)",
   display: "flex",
-
   flexDirection: "column",
-
-  gap: "22px",
-
-  boxSizing: "border-box",
-
-  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+  gap: "var(--space-4)",
+  boxShadow: "var(--shadow-sm)",
 };
 
 const titleStyle = {
   margin: 0,
-
-  fontSize: "16px",
-
-  fontWeight: "700",
-
-  color: "#222",
-
-  fontFamily: "var(--font-body)",
+  fontSize: "var(--text-xs)",
+  fontWeight: "var(--font-bold)",
+  color: "var(--color-secondary)",
+  fontFamily: "var(--font-display)",
+  letterSpacing: "var(--letter-wide)",
+  borderBottom: "1px solid var(--color-border-light)",
+  paddingBottom: "var(--space-2)",
 };
-
-const buttonContainer = {
-  display: "flex",
-
-  flexDirection: "column",
-
-  gap: "12px",
-};
-
-const getButtonStyle = (active) => ({
-  height: "48px",
-
-  borderRadius: "10px",
-
-  border: "none",
-
-  cursor: "pointer",
-
-  fontWeight: "700",
-
-  fontSize: "14px",
-
-  transition: "all 0.2s ease",
-
-  background: active
-    ? "#1E3A5F"
-    : "#D8D2C4",
-
-  color: active
-    ? "#FFFFFF"
-    : "#222",
-});
 
 const statsContainer = {
-  display: "grid",
-
-  gridTemplateColumns: "1fr",
-
-  gap: "12px",
+  display: "flex",
+  flexDirection: "column",
+  gap: "var(--space-3)",
 };
 
 const statCard = {
-  background: "#E9E4D8",
-
-  borderRadius: "12px",
-
-  padding: "16px",
-
+  background: "var(--color-bg)",
+  borderRadius: "var(--radius-md)",
+  padding: "var(--space-4)",
   display: "flex",
-
   flexDirection: "column",
-
-  gap: "8px",
+  gap: "var(--space-1)",
 };
 
 const statLabel = {
-  fontSize: "12px",
-
-  fontWeight: "700",
-
-  color: "#555",
-
+  fontSize: "10px",
+  fontWeight: "var(--font-bold)",
+  color: "var(--color-text-muted)",
   textTransform: "uppercase",
 };
 
 const statValue = {
-  fontSize: "28px",
-
+  fontSize: "var(--text-xl)",
   fontWeight: "800",
-
-  color: "#111",
-};
-
-const InventarioStats = ({
-  instrumentos,
-}) => {
-
-  const navigate = useNavigate();
-
-  const total =
-    instrumentos.length;
-
-  const disponibles =
-    instrumentos.filter(
-      (i) => i.disponible === true
-    ).length;
-
-  const prestados =
-    instrumentos.filter(
-      (i) => i.disponible === false
-    ).length;
-
-  return (
-
-    <aside style={panelStyle}>
-
-      {/* NAVEGACION */}
-
-      <div style={buttonContainer}>
-
-        <button
-          style={getButtonStyle(false)}
-          onClick={() =>
-            navigate("/banda/prestamos")
-          }
-        >
-          Préstamos Banda
-        </button>
-
-        <button
-          style={getButtonStyle(true)}
-        >
-          Inventario Banda
-        </button>
-
-      </div>
-
-      {/* TITULO */}
-
-      <h3 style={titleStyle}>
-        Estadísticas rápidas
-      </h3>
-
-      {/* STATS */}
-
-      <div style={statsContainer}>
-
-        <div style={statCard}>
-
-          <span style={statLabel}>
-            Total instrumentos
-          </span>
-
-          <span style={statValue}>
-            {total}
-          </span>
-
-        </div>
-
-        <div style={statCard}>
-
-          <span style={statLabel}>
-            Disponibles
-          </span>
-
-          <span style={statValue}>
-            {disponibles}
-          </span>
-
-        </div>
-
-        <div style={statCard}>
-
-          <span style={statLabel}>
-            Prestados
-          </span>
-
-          <span style={statValue}>
-            {prestados}
-          </span>
-
-        </div>
-
-      </div>
-
-    </aside>
-  );
+  color: "var(--color-text)",
 };
 
 export default InventarioStats;

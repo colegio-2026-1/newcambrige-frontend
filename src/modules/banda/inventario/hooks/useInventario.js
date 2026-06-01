@@ -1,48 +1,57 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { inventarioService } from "../services/inventarioService";
-import {
-  FORM_VACIO,
-  ERRORES_VACIO,
-  POR_PAGINA,
-} from "../utils/inventarioConstants";
+import { FORM_VACIO, ERRORES_VACIO, POR_PAGINA } from "../utils/inventarioConstants";
 
 const useInventario = () => {
-  // =========================================================
-  // DATA
-  // =========================================================
   const [instrumentos, setInstrumentos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [ubicaciones, setUbicaciones] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [seleccionado, setSeleccionado] = useState(null);
 
-  // =========================================================
-  // FILTROS Y PAGINACION
-  // =========================================================
+  // Filtros
   const [filtroNombre, setFiltroNombre] = useState("");
   const [filtroCategoria, setFiltroCategoria] = useState("");
   const [pagina, setPagina] = useState(1);
 
-  // =========================================================
-  // MODALES Y SELECCION
-  // =========================================================
+  // Modales
   const [modalAgregar, setModalAgregar] = useState(false);
   const [modalEditar, setModalEditar] = useState(false);
   const [modalEliminar, setModalEliminar] = useState(false);
   const [modalErrorEliminar, setModalErrorEliminar] = useState(false);
   const [modalAdvertencia, setModalAdvertencia] = useState(false);
-  const [seleccionado, setSeleccionado] = useState(null);
 
-  // =========================================================
-  // FORMULARIO Y TOAST
-  // =========================================================
   const [form, setForm] = useState(FORM_VACIO);
   const [errores, setErrores] = useState(ERRORES_VACIO);
   const [toast, setToast] = useState(null);
 
   // =========================================================
+  // HELPER: MOSTRAR MENSAJES
+  // =========================================================
+  const mostrarToast = (mensaje) => {
+    setToast(mensaje);
+    setTimeout(() => setToast(null), 4000);
+  };
+
+  // ✅ NUEVO HELPER: TRADUCTOR DE ERRORES DE FASTAPI
+  const extraerErrorBackend = (e, mensajePorDefecto) => {
+    if (e.response?.data?.detail) {
+      const detail = e.response.data.detail;
+      // Si es un error 422 (Array de validación de Pydantic)
+      if (Array.isArray(detail)) {
+        const campo = detail[0].loc[detail[0].loc.length - 1];
+        return `Error en el campo '${campo}': ${detail[0].msg}`;
+      }
+      // Si es un error normal (String)
+      return detail;
+    }
+    return mensajePorDefecto;
+  };
+
+  // =========================================================
   // CARGAR DATOS
   // =========================================================
-  const cargarDatos = async () => {
+  const cargarDatos = useCallback(async () => {
     try {
       const [instRes, catRes, ubiRes] = await Promise.all([
         inventarioService.getInstrumentos(),
@@ -57,19 +66,12 @@ const useInventario = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    cargarDatos();
   }, []);
 
-  const mostrarToast = (mensaje) => {
-    setToast(mensaje);
-    setTimeout(() => setToast(null), 3500);
-  };
+  useEffect(() => { cargarDatos(); }, [cargarDatos]);
 
   // =========================================================
-  // VALIDACIÓN EN TIEMPO REAL (BR253)
+  // VALIDACIONES EN TIEMPO REAL
   // =========================================================
   const validaciones = useMemo(() => {
     const codigoVal = parseInt(form.codigo);
@@ -84,62 +86,69 @@ const useInventario = () => {
       (i) => i.nombre.toLowerCase() === nombreVal?.toLowerCase() && i.id_instrumento !== seleccionado?.id_instrumento
     );
 
+    const todoValido = (!isNaN(codigoVal) && codigoVal > 0 && codigoUnico) &&
+                       (nombreVal?.length >= 3 && nombreUnico) &&
+                       (!!form.id_categoria && cantidadVal >= 1);
+
     return {
       codigo: !isNaN(codigoVal) && codigoVal > 0 && codigoUnico,
-      nombre: nombreVal?.length >= 3 && nombreVal?.length <= 100 && nombreUnico,
-      datos: !!form.id_categoria && !isNaN(cantidadVal) && cantidadVal >= 1,
-      todoValido: false // Se calcula abajo
+      nombre: nombreVal?.length >= 3 && nombreUnico,
+      datos: !!form.id_categoria && cantidadVal >= 1,
+      todoValido
     };
   }, [form, instrumentos, seleccionado]);
 
-  // BR254: El botón se habilita solo si todoValido es true
-  validaciones.todoValido = validaciones.codigo && validaciones.nombre && validaciones.datos;
-
   // =========================================================
-  // ACCIONES (CREAR, EDITAR, ELIMINAR)
+  // HANDLERS (CREAR, EDITAR, ELIMINAR)
   // =========================================================
   const handleAgregar = async () => {
     if (!validaciones.todoValido) return;
+    
     try {
-      await inventarioService.crearInstrumento({
+      const payload = {
         codigo: parseInt(form.codigo),
         nombre: form.nombre.trim(),
         id_categoria: parseInt(form.id_categoria),
         id_ubicacion: form.id_ubicacion ? parseInt(form.id_ubicacion) : null,
         cantidad_total: parseInt(form.cantidad_total),
-        estado: form.estado,
-      });
+        estado: form.estado
+      };
+
+      await inventarioService.crearInstrumento(payload);
       setModalAgregar(false);
       cargarDatos();
       mostrarToast("Instrumento agregado correctamente.");
-    } catch (error) {
-      console.error("Error creando:", error);
-      mostrarToast(error.response?.data?.detail || "Error al crear");
+    } catch (e) { 
+      console.error("Error 422 Payload:", e.response?.data);
+      // ✅ USAMOS EL TRADUCTOR PARA EVITAR EL PANTALLAZO BLANCO
+      mostrarToast(extraerErrorBackend(e, "Error al crear el instrumento."));
     }
   };
 
   const ejecutarEdicion = async () => {
     try {
-      await inventarioService.editarInstrumento(seleccionado.id_instrumento, {
+      const payload = {
         nombre: form.nombre.trim(),
         id_categoria: parseInt(form.id_categoria),
         id_ubicacion: form.id_ubicacion ? parseInt(form.id_ubicacion) : null,
         cantidad_total: parseInt(form.cantidad_total),
-        estado: form.estado,
-      });
+        estado: form.estado
+      };
+
+      await inventarioService.editarInstrumento(seleccionado.id_instrumento, payload);
       setModalEditar(false);
       setModalAdvertencia(false);
       cargarDatos();
-      mostrarToast("Instrumento actualizado correctamente.");
-    } catch (error) {
-      console.error("Error editando:", error);
-      mostrarToast(error.response?.data?.detail || "Error al editar");
+      mostrarToast("Instrumento actualizado.");
+    } catch (e) { 
+      console.error(e);
+      mostrarToast(extraerErrorBackend(e, "Error al actualizar."));
     }
   };
 
   const handleEditar = async () => {
     if (!validaciones.todoValido) return;
-    // BR354: Advertencia si cambia de Activo a otro estado teniendo préstamos
+    
     if (seleccionado?.estado === "Activo" && form.estado !== "Activo" && seleccionado?.cantidad_disponible < seleccionado?.cantidad_total) {
       setModalAdvertencia(true);
       return;
@@ -151,112 +160,44 @@ const useInventario = () => {
     try {
       await inventarioService.eliminarInstrumento(seleccionado.id_instrumento);
       setModalEliminar(false);
+      setSeleccionado(null);
       cargarDatos();
-      mostrarToast("Instrumento eliminado correctamente.");
-    } catch (error) {
+      mostrarToast("Instrumento eliminado.");
+    } catch (e) {
       setModalEliminar(false);
-      setModalErrorEliminar(true); // Muestra el modal de "No es posible eliminar con préstamos activos"
+      setModalErrorEliminar(true);
     }
   };
 
   // =========================================================
-  // MANEJO DE MODALES
+  // FILTRADO Y PAGINACIÓN
   // =========================================================
-  const abrirAgregar = () => {
-    setSeleccionado(null);
-    setForm(FORM_VACIO);
-    setModalAgregar(true);
-  };
-
-  const abrirEditar = (inst) => {
-    setSeleccionado(inst);
-    setForm({
-      codigo: inst.codigo,
-      nombre: inst.nombre,
-      id_categoria: inst.id_categoria,
-      id_ubicacion: inst.id_ubicacion || "",
-      cantidad_total: inst.cantidad_total,
-      estado: inst.estado,
+  const filtrados = useMemo(() => {
+    return instrumentos.filter((i) => {
+      const matchNombre = !filtroNombre || i.nombre.toLowerCase().includes(filtroNombre.toLowerCase());
+      const matchCat = !filtroCategoria || i.categoria_nombre === filtroCategoria;
+      return matchNombre && matchCat;
     });
-    setModalEditar(true);
-  };
+  }, [instrumentos, filtroNombre, filtroCategoria]);
 
-  const abrirEliminar = (inst) => {
-    setSeleccionado(inst);
-    setModalEliminar(true);
-  };
-
-  // =========================================================
-  // FILTROS Y PAGINACION (LÓGICA)
-  // =========================================================
-  const filtrados = instrumentos.filter((i) => {
-    const matchNombre = !filtroNombre || i.nombre.toLowerCase().includes(filtroNombre.toLowerCase());
-    const matchCategoria = !filtroCategoria || String(i.id_categoria) === filtroCategoria;
-    return matchNombre && matchCategoria;
-  });
+  const paginados = useMemo(() => {
+    return filtrados.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
+  }, [filtrados, pagina]);
 
   const totalPaginas = Math.max(1, Math.ceil(filtrados.length / POR_PAGINA));
-  const paginados = filtrados.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
 
-  const handleBuscar = () => setPagina(1);
-  const handleLimpiar = () => {
-    setFiltroNombre("");
-    setFiltroCategoria("");
-    setPagina(1);
-  };
-
-  // =========================================================
-  // ESTADISTICAS (BR333, BR334)
-  // =========================================================
-  const estadisticas = useMemo(() => {
-    const total = instrumentos.reduce((acc, i) => acc + i.cantidad_total, 0);
-    const disponibles = instrumentos.reduce((acc, i) => acc + i.cantidad_disponible, 0);
-    return { total, disponibles, ocupados: total - disponibles };
-  }, [instrumentos]);
-
-  // =========================================================
-  // RETURN
-  // =========================================================
   return {
-    loading,
-    instrumentos,
-    categorias,
-    ubicaciones,
-    modalAdvertencia,
-    setModalAdvertencia,
-    ejecutarEdicion,
-    filtroNombre,
-    setFiltroNombre,
-    filtroCategoria,
-    setFiltroCategoria,
-    pagina,
-    setPagina,
-    totalPaginas,
-    paginados,
-    modalAgregar,
-    setModalAgregar,
-    modalEditar,
-    setModalEditar,
-    modalEliminar,
-    setModalEliminar,
-    modalErrorEliminar,
-    setModalErrorEliminar,
-    seleccionado,
-    setSeleccionado,
-    form,
-    setForm,
-    errores,
-    toast,
-    estadisticas,
-    validaciones, // <--- EXPORTADO PARA EL PANEL
-    abrirAgregar,
-    abrirEditar,
-    abrirEliminar,
-    handleAgregar,
-    handleEditar,
-    handleEliminar,
-    handleBuscar,
-    handleLimpiar,
+    loading, instrumentos, categorias, ubicaciones, seleccionado, setSeleccionado,
+    filtroNombre, setFiltroNombre, filtroCategoria, setFiltroCategoria,
+    pagina, setPagina, totalPaginas, paginados,
+    modalAgregar, setModalAgregar, modalEditar, setModalEditar, modalEliminar, setModalEliminar,
+    modalErrorEliminar, setModalErrorEliminar, modalAdvertencia, setModalAdvertencia,
+    form, setForm, errores, toast, validaciones, ejecutarEdicion,
+    abrirAgregar: () => { setForm(FORM_VACIO); setModalAgregar(true); },
+    abrirEditar: (inst) => { setForm(inst); setModalEditar(true); },
+    abrirEliminar: () => setModalEliminar(true),
+    handleAgregar, handleEditar, handleEliminar, handleBuscar: () => setPagina(1),
+    handleLimpiar: () => { setFiltroNombre(""); setFiltroCategoria(""); setPagina(1); }
   };
 };
 

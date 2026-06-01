@@ -1,20 +1,23 @@
+import React from 'react';
 import "./InventarioPage.css";
 import useInventario from "../hooks/useInventario";
-import useAuthStore from "../../../../stores/useAuthStore";
+import { useAuth } from "../../../../api/useAuth";
 
-// Componentes de Layout del Equipo
+// COMPONENTES GLOBALES DEL EQUIPO
 import ModuleLayout from "../../../../components/layout/ModuleLayout";
 import Sidebar from "../../../../components/layout/Sidebar";
+import Header from "../../../../components/layout/Header";
+import DataTable from "../../../../components/shared/DataTable";
+import SearchBar from "../../../../components/shared/searchBar";
 import ActionButtons from "../../../../components/shared/ActionButtons";
 
-// Componentes del Módulo
+// COMPONENTES DEL MÓDULO
 import Toast from "../components/Toast";
-import InventarioFiltros from "../components/InventarioFiltros";
-import InventarioTable from "../components/InventarioTable";
-import InventarioPagination from "../components/InventarioPagination";
 import InventarioStats from "../components/InventarioStats";
+import EstadoBadge from "../components/EstadoBadge";
+import InventarioPagination from "../components/InventarioPagination";
 
-// Modales
+// MODALES REFACTORIZADOS
 import AgregarInstrumentoModal from "../components/modals/AgregarInstrumentoModal";
 import EditarInstrumentoModal from "../components/modals/EditarInstrumentoModal";
 import EliminarInstrumentoModal from "../components/modals/EliminarInstrumentoModal";
@@ -23,121 +26,120 @@ import AdvertenciaModal from "../components/modals/AdvertenciaModal";
 
 const InventarioPage = () => {
   const inventario = useInventario();
-  const { user } = useAuthStore(); // <--- Obtener el usuario real logueado
+  const { user, loading: authLoading } = useAuth();
 
-  if (inventario.loading) return <div className="inventario-loading">Cargando...</div>;
+  if (authLoading || inventario.loading) return <div className="inventario-loading">Cargando...</div>;
+
+  // --- LÓGICA DE MENÚ DINÁMICO ---
+  const menuBanda = [
+    { label: "Inicio", path: "/banda" },
+    { label: "Inventario Banda", path: "/banda/inventario" },
+    { label: "Asignaciones", path: "/banda/prestamos" },
+  ];
+
+  if (user?.roles?.includes("admin") || user?.rol === "admin") {
+    menuBanda.push({ label: "Auditoría", path: "/banda/auditoria" });
+  }
+
+  // --- CONFIGURACIÓN DE COLUMNAS ---
+  const columnas = [
+    { key: "codigo", label: "CÓDIGO" },
+    { key: "nombre", label: "NOMBRE" },
+    { key: "categoria_nombre", label: "GRADO" },
+    { key: "ubicacion_nombre", label: "GRUPO" },
+    { 
+      key: "cantidad_disponible", 
+      label: "STOCK (T/D)",
+      render: (val, row) => (
+        <span>
+          {row.cantidad_total} / <b style={{ color: val > 0 ? "var(--color-success)" : "var(--color-danger)" }}>{val}</b>
+        </span>
+      )
+    },
+    { 
+      key: "estado", 
+      label: "ESTADO",
+      render: (val, row) => <EstadoBadge estado={val} disponible={row.cantidad_disponible > 0} />
+    },
+  ];
+
+  const camposBusqueda = [
+    { key: "codigo", label: "Código", type: "text" },
+    { key: "nombre", label: "Nombre", type: "text" },
+    { key: "grado", label: "Grado", type: "text" },
+    { key: "grupo", label: "Grupo", type: "text" },
+    { key: "anio", label: "Año", type: "text" },
+  ];
 
   return (
-    <div className="inventario-page">
-      <Toast message={inventario.toast} />
+    <div className='banda-module-container'>
+      <Header title="INVENTARIO DE INSTRUMENTOS - BANDA" />
+      
+      <div className="inventario-page">
+        <Toast message={inventario.toast} />
 
-      <ModuleLayout
-        sidebar={
-          <Sidebar
-            moduloActual="Inventario Banda"
-            modulos={[
-              { label: "Inicio", path: "/home" },
-              { label: "Préstamos", path: "/banda/prestamos" },
-              { label: "Inventario", path: "/banda/inventario" },
-            ]}
-            usuario={{ nombre: "Titular Banda", rol: "Titular" }}
-          />
-        }
-        actions={
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <ActionButtons
-              filaSeleccionada={inventario.seleccionado}
-              botones={[
-                { 
-                  label: "Agregar Item", 
-                  onClick: inventario.abrirAgregar, 
-                  siempreActivo: true, 
-                  variante: "primary" 
-                },
-                { 
-                  label: "Editar Item", 
-                  onClick: () => inventario.abrirEditar(inventario.seleccionado), 
-                  variante: "secondary" 
-                },
-                { 
-                  label: "Eliminar Item", 
-                  onClick: () => inventario.abrirEliminar(inventario.seleccionado), 
-                  variante: "danger" 
-                },
-              ]}
+        <ModuleLayout
+          sidebar={
+            <Sidebar
+              moduloActual="Inventario Banda"
+              menuItems={menuBanda}
+              user={user}
             />
-            <InventarioStats instrumentos={inventario.instrumentos} />
-          </div>
-        }
-      >
-        {/* CONTENIDO PRINCIPAL */}
-        <InventarioFiltros
-          filtroNombre={inventario.filtroNombre}
-          setFiltroNombre={inventario.setFiltroNombre}
-          filtroCategoria={inventario.filtroCategoria}
-          setFiltroCategoria={inventario.setFiltroCategoria}
-          categorias={inventario.categorias}
-          handleBuscar={inventario.handleBuscar}
-          handleLimpiar={inventario.handleLimpiar}
-        />
-
-        <div className="inventario-table-card">
-          <InventarioTable
-            paginados={inventario.paginados}
-            onRowClick={inventario.setSeleccionado} // Para que ActionButtons sepa qué fila hay
-            seleccionado={inventario.seleccionado}
+          }
+        >
+          {/* 1. BUSCADOR SUPERIOR (De lado a lado) */}
+          <SearchBar 
+            fields={camposBusqueda} 
+            onSearch={(filtros) => {
+              inventario.setFiltroNombre(filtros.nombre);
+              inventario.handleBuscar();
+            }} 
           />
-        </div>
 
-        <InventarioPagination
-          paginaActual={inventario.pagina}
-          totalPaginas={inventario.totalPaginas}
-          setPagina={inventario.setPagina}
-        />
-      </ModuleLayout>
+          {/* 2. CONTENEDOR DIVIDIDO (Alineado con la imagen guía) */}
+          <div className="banda-split-container">
+            
+            {/* IZQUIERDA: TABLA */}
+            <div className="banda-table-section">
+              <div className="inventario-table-card">
+                <DataTable 
+                  columns={columnas} 
+                  rows={inventario.paginados} 
+                  onRowClick={inventario.setSeleccionado}
+                  emptyText="No hay instrumentos registrados"
+                />
+              </div>
 
-      {/* MODALES CON VALIDACIONES PASADAS */}
-      <AgregarInstrumentoModal
-        open={inventario.modalAgregar}
-        onClose={() => inventario.setModalAgregar(false)}
-        onSave={inventario.handleAgregar}
-        form={inventario.form}
-        setForm={inventario.setForm}
-        errores={inventario.errores}
-        categorias={inventario.categorias}
-        ubicaciones={inventario.ubicaciones}
-        validaciones={inventario.validaciones} // <--- IMPORTANTE
-      />
+              <InventarioPagination
+                paginaActual={inventario.pagina}
+                totalPaginas={inventario.totalPaginas}
+                setPagina={inventario.setPagina}
+              />
+            </div>
 
-      <EditarInstrumentoModal
-        open={inventario.modalEditar}
-        onClose={() => inventario.setModalEditar(false)}
-        onSave={inventario.handleEditar}
-        form={inventario.form}
-        setForm={inventario.setForm}
-        errores={inventario.errores}
-        categorias={inventario.categorias}
-        ubicaciones={inventario.ubicaciones}
-        validaciones={inventario.validaciones} // <--- IMPORTANTE
-      />
+            {/* DERECHA: ACCIONES Y STATS */}
+            <div className="banda-actions-section">
+              <ActionButtons
+                filaSeleccionada={inventario.seleccionado}
+                botones={[
+                  { label: "Agregar instrumento", onClick: inventario.abrirAgregar, siempreActivo: true, variante: "primary" },
+                  { label: "Editar instrumento", onClick: () => inventario.abrirEditar(inventario.seleccionado), variante: "secondary" },
+                  { label: "Eliminar instrumento", onClick: () => inventario.abrirEliminar(), variante: "danger" },
+                ]}
+              />
+              <InventarioStats instrumentos={inventario.instrumentos} />
+            </div>
 
-      <EliminarInstrumentoModal
-        open={inventario.modalEliminar}
-        onClose={() => inventario.setModalEliminar(false)}
-        onConfirm={inventario.handleEliminar}
-        instrumento={inventario.seleccionado}
-      />
+          </div>
+        </ModuleLayout>
 
-      <ErrorEliminarModal
-        open={inventario.modalErrorEliminar}
-        onClose={() => inventario.setModalErrorEliminar(false)}
-      />
-
-      <AdvertenciaModal
-        open={inventario.modalAdvertencia}
-        onClose={() => inventario.setModalAdvertencia(false)}
-        onConfirm={inventario.ejecutarEdicion}
-      />
+        {/* MODALES */}
+        <AgregarInstrumentoModal open={inventario.modalAgregar} onClose={() => inventario.setModalAgregar(false)} onSave={inventario.handleAgregar} form={inventario.form} setForm={inventario.setForm} errores={inventario.errores} categorias={inventario.categorias} ubicaciones={inventario.ubicaciones} validaciones={inventario.validaciones} />
+        <EditarInstrumentoModal open={inventario.modalEditar} onClose={() => inventario.setModalEditar(false)} onSave={inventario.handleEditar} form={inventario.form} setForm={inventario.setForm} errores={inventario.errores} categorias={inventario.categorias} ubicaciones={inventario.ubicaciones} validaciones={inventario.validaciones} />
+        <EliminarInstrumentoModal open={inventario.modalEliminar} onClose={() => inventario.setModalEliminar(false)} onConfirm={inventario.handleEliminar} instrumento={inventario.seleccionado} />
+        <ErrorEliminarModal open={inventario.modalErrorEliminar} onClose={() => inventario.setModalErrorEliminar(false)} />
+        <AdvertenciaModal open={inventario.modalAdvertencia} onClose={() => inventario.setModalAdvertencia(false)} onConfirm={inventario.ejecutarEdicion} />
+      </div>
     </div>
   );
 };

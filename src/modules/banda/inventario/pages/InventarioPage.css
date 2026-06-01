@@ -1,57 +1,132 @@
-.validation-panel {
-  background: var(--color-white);
-  border: 1.5px solid var(--color-border-light);
-  border-radius: var(--radius-lg);
-  padding: var(--space-5);
-  text-align: left;
-  box-shadow: var(--shadow-md);
-  width: 260px;
+/* Contenedor principal */
+.banda-module-container {
+    width: 100%;
+    height: 100vh; /* Corregido el 100%vh */
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-white);
 }
 
-.validation-title {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-family: var(--font-display);
-  font-size: var(--text-sm);
-  color: var(--color-secondary);
-  margin-bottom: var(--space-4);
-  border-bottom: 1px solid var(--color-border-light);
-  padding-bottom: var(--space-2);
+.banda-module-container .module-layout {
+    display: flex;
+    flex: 1;
+    width: 100%;
 }
 
-.validation-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+.banda-module-container .module-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 40px;
+    background-color: #FFF;
 }
 
-.validation-item {
-  display: flex;
-  gap: var(--space-3);
-  transition: var(--transition-base);
+/* --- FASE 1: BUSCADOR HORIZONTAL --- */
+.banda-module-container .searchbar-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    width: 100%;
+    padding: 20px;
+    background-color: #F9F9F9;
+    border: 1px solid #EEE;
+    border-radius: 10px;
+    box-sizing: border-box;
+    margin-bottom: 20px;
 }
 
-.validation-label {
-  display: block;
-  font-size: var(--text-sm);
-  font-weight: var(--font-bold);
-  color: var(--color-text);
+.banda-module-container .searchbar-field {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
 }
 
-.validation-desc {
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
-  line-height: 1.2;
+.banda-module-container .searchbar-label {
+    font-size: 13px;
+    color: #333;
+    font-weight: bold;
+    white-space: nowrap;
 }
 
-.validation-footer {
-  margin-top: var(--space-5);
-  font-size: 10px;
-  color: var(--color-primary);
-  font-style: italic;
-  line-height: 1.3;
+.banda-module-container .searchbar-input {
+    background-color: #E9E9E7;
+    border: 1px solid #CCC;
+    border-radius: 8px;
+    height: 34px;
+    width: 100%;
 }
 
-.is-invalid .validation-label { color: var(--color-danger); }
-.is-valid .validation-label { color: var(--color-success); }
+.banda-module-container .searchbar-btn {
+    background-color: #335C8E;
+    color: white;
+    border-radius: 8px;
+    height: 34px;
+    padding: 0 30px;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+/* --- FASE 2: CONTENEDOR DIVIDIDO (NUEVO) --- */
+.banda-split-container {
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+    align-items: flex-start; /* Evita que la columna derecha se estire */
+    width: 100%;
+}
+
+.banda-table-section {
+    flex: 1; /* La tabla toma todo el espacio sobrante */
+    min-width: 0; /* Evita desbordamientos en flexbox */
+}
+
+.banda-actions-section {
+    width: 280px; /* Ancho fijo para los botones y estadísticas */
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* --- FASE 3: TABLA ALINEADA --- */
+.banda-module-container .datatable-wrapper {
+    border: 0.5px solid #DDD;
+    margin-top: 0;
+}
+
+.banda-module-container .datatable-sidetitle {
+    display: none;
+}
+
+.banda-module-container .datatable th {
+    background-color: #FFF;
+    border: 0.5px solid #EEE;
+    color: #333;
+    font-weight: bold;
+    text-align: center;
+}
+
+.banda-module-container .datatable td {
+    border: 0.5px solid #EEE;
+    padding: 12px;
+}
+
+/* --- FASE 4: BOTONES DE ACCIÓN --- */
+.banda-module-container .action-buttons {
+    display: flex;
+    flex-direction: column; /* Apilados uno sobre otro */
+    gap: 12px;
+    padding: 0;
+    background: transparent;
+}
+
+.banda-module-container .action-btn {
+    border-radius: 50px; /* Estilo píldora */
+    height: 45px;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}

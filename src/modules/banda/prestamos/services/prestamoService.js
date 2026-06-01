@@ -33,9 +33,10 @@ export const prestamoService = {
   // PUT
   // ====================================================
 
-  devolverInstrumento: (id) =>
+  devolverInstrumento: (id, data) =>
 
     bandaService.devolverInstrumento(
-      id
+      id,
+      data
     ),
 };
