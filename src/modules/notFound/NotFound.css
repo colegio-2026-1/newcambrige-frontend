@@ -1,0 +1,172 @@
+/* ============================================
+   NotFound.css
+   src/pages/NotFound/NotFound.css
+   ============================================ */
+
+@font-face {
+  font-family: 'Staatliches';
+  src: url('../../assets/fonts/Staatliches-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Bentham';
+  src: url('../../assets/fonts/Bentham-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* ── ROOT ── */
+.notfound-root {
+  width: 100%;
+  min-height: 100vh;
+  background: #f4f4f4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── NÚMERO GIGANTE DE FONDO ── */
+.notfound-bg-number {
+  position: absolute;
+  font-family: 'Staatliches', sans-serif;
+  font-size: clamp(200px, 35vw, 480px);
+  font-weight: 400;
+  color: rgba(142, 42, 37, 0.07);
+  letter-spacing: -10px;
+  user-select: none;
+  pointer-events: none;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  animation: floatBg 6s ease-in-out infinite;
+}
+
+@keyframes floatBg {
+  0%, 100% { transform: translate(-50%, -50%); }
+  50%       { transform: translate(-50%, -53%); }
+}
+
+/* ── CONTENIDO ── */
+.notfound-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 40px 24px;
+  animation: fadeUp 0.6s ease both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── BADGE ── */
+.notfound-badge {
+  font-family: 'Bentham', serif;
+  font-size: 14px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #8E2A25;
+  background: rgba(142, 42, 37, 0.08);
+  border: 1px solid rgba(142, 42, 37, 0.2);
+  border-radius: 100px;
+  padding: 6px 20px;
+  margin-bottom: 28px;
+  animation: fadeUp 0.6s ease 0.1s both;
+}
+
+/* ── TÍTULO ── */
+.notfound-title {
+  font-family: 'Staatliches', sans-serif;
+  font-size: clamp(60px, 10vw, 110px);
+  font-weight: 400;
+  letter-spacing: 3px;
+  color: #2a0a0a;
+  line-height: 0.95;
+  margin: 0 0 28px;
+  text-transform: uppercase;
+  animation: fadeUp 0.6s ease 0.2s both;
+}
+
+/* ── DIVISOR ── */
+.notfound-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+  animation: fadeUp 0.6s ease 0.3s both;
+}
+
+.notfound-divider span:not(.notfound-diamond) {
+  width: 60px;
+  height: 1px;
+  background: #8E2A25;
+  opacity: 0.4;
+}
+
+.notfound-diamond {
+  font-size: 10px;
+  color: #8E2A25;
+}
+
+/* ── SUBTÍTULO ── */
+.notfound-subtitle {
+  font-family: 'Bentham', serif;
+  font-size: 18px;
+  font-weight: normal;
+  color: #666;
+  line-height: 1.7;
+  max-width: 360px;
+  margin-bottom: 44px;
+  animation: fadeUp 0.6s ease 0.4s both;
+}
+
+/* ── BOTÓN ── */
+.notfound-btn {
+  font-family: 'Bentham', serif;
+  font-size: 18px;
+  font-weight: normal;
+  color: #fff;
+  background: #8E2A25;
+  border: none;
+  border-radius: 100px;
+  padding: 14px 44px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  box-shadow: 0 8px 24px rgba(142, 42, 37, 0.3);
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  animation: fadeUp 0.6s ease 0.5s both;
+}
+
+.notfound-btn:hover {
+  background: #7a2320;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(142, 42, 37, 0.4);
+}
+
+.notfound-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(142, 42, 37, 0.3);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .notfound-title {
+    font-size: 56px;
+  }
+
+  .notfound-subtitle {
+    font-size: 16px;
+  }
+}

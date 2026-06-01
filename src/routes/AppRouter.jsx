@@ -15,10 +15,13 @@ import TesoreriaNotificaciones from "../modules/tesoreria/TesoreriaNotificacione
 import ParametrizacionPage from '../modules/parametrizacion/ParametrizacionPage';
 import UsuariosPage from '../modules/parametrizacion/UsuariosPage';
 
+import NotFound from "../modules/notFound/notFound";
+
 import Home from "../modules/Home/HomePage";
 
 
 import TestPage from "../modules/test/testPage";
+
 // ==============================
 // RUTA PRIVADA
 // ==============================
@@ -135,6 +138,22 @@ const AppRouter = () => {
           <TesoreriaPapeleria />
           </PrivateRoute>} />
       }
+      {
+        <Route 
+        path="/tesoreria/pension" 
+        element={
+        <PrivateRoute>
+          <TesoreriaPension />
+          </PrivateRoute>} />
+      }
+      {
+        <Route 
+        path="/tesoreria/notificaciones" 
+        element={
+        <PrivateRoute>
+          <TesoreriaNotificaciones />
+          </PrivateRoute>} />
+      }
       <Route 
         path="/parametrizacion" 
         element={
@@ -166,10 +185,7 @@ const AppRouter = () => {
       <Route
         path="*"
         element={
-          <Navigate
-            to="/"
-            replace
-          />
+          <NotFound />
         }
       />
 

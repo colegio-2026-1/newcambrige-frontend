@@ -1,169 +1,67 @@
-/* =========================
-   SIDEBAR
-========================= */
+/* ============================================
+   Sidebar.css
+   src/components/layout/Sidebar.css
+   ============================================ */
 
-.sidebar {
-    width: 300px;
-    min-width: 300px;
-    max-width: 300px;
-
-    background: #efefef;
-
-    display: flex;
-    flex-direction: column;
-    height: 100%;               
-
-    border-right: 1px solid #ddd;
+@font-face {
+  font-family: 'Bentham';
+  src: url('../../assets/fonts/Bentham-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
 }
 
-/* =========================
-   MENU
-========================= */
+@font-face {
+  font-family: 'Staatliches';
+  src: url('../../assets/fonts/Staatliches-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
 
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 300px;
+  min-width: 300px;
+  max-width: 300px;
+  background: #efefef;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-right: 1px solid #ddd;
+}
+
+/* ── MENÚ ── */
 .sidebar-menu {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .menu-item {
-    border: none;
-    background: transparent;
-
-    padding: 24px 30px;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    text-align: center;
-
-    font-size: 1.8rem;
-    color: #6b2020;
-
-    cursor: pointer;
-
-    transition: 0.2s;
-
-    font-family: "HeyGotcha", serif;
-
-    font-weight: normal;
+  border: none;
+  background: transparent;
+  padding: 24px 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-family: 'Bentham', serif;
+  font-size: 30px;
+  font-weight: normal;
+  color: #6b2020;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
 .menu-item:hover {
-    background: #dddddd;
+  background: #dddddd;
 }
 
 .menu-item.active {
-    background: white;
-
-    color: #8e2a25;
-
-    box-shadow: inset 4px 0 0 #8e2a25;
+  background: white;
+  color: #8e2a25;
+  box-shadow: inset 4px 0 0 #8e2a25;
 }
 
-/* =========================
-   USER 
-========================= */
-
-.sidebar-user {
-    margin-top: auto;          
-    padding: 35px 20px;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
-    gap: 10px;
-
-    color: #5a1b1b;
-
-    font-family: "HeyGotcha", serif;
-
-    border-top: none !important;
-    box-shadow: none !important;
-}
-
-.sidebar-user svg {
-    color: #7d1616;
-}
-
-.titular-label {
-    font-size: 1.5rem;
-    letter-spacing: 2px;
-    font-weight: bold;
-}
-
-.sidebar-user h3 {
-    font-size: 1.1rem;
-    text-align: center;
-    letter-spacing: 1px;
-    font-weight: normal;
-}
-
-.sidebar-user p {
-    font-size: 0.9rem;
-    text-align: center;
-    color: #666;
-    word-break: break-word;
-}
-
-/* =========================
-   BOTON LOGOUT
-========================= */
-
-.logout-button {
-    margin-top: 10px;
-
-    width: 40px;
-    height: 40px;
-
-    border-radius: 10px;
-
-    border: none;
-
-    color: white;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    cursor: pointer;
-
-    transition:
-        box-shadow 0.2s ease,
-        transform 0.2s ease;
-}
-
-.logout-button:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    transform: translateY(-2px);
-}
-
-/* =========================
-   RESPONSIVE
-========================= */
-
-@media (max-width: 900px) {
-    .sidebar {
-        width: 240px;
-        min-width: 240px;
-        max-width: 240px;
-    }
-
-    .menu-item {
-        font-size: 1.4rem;
-    }
-}
-
-@media (max-width: 700px) {
-    .sidebar {
-        width: 100%;
-        min-width: 100%;
-        max-width: 100%;
-        height: auto;           
-    }
-}
-
+/* ── ICONOS DE MENÚ ── */
 .menu-icon {
   display: inline-flex;
   align-items: center;
@@ -181,12 +79,96 @@
   height: 40px;
 }
 
+/* ── USUARIO ── */
+.sidebar-user {
+  margin-top: auto;
+  padding: 35px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: #5a1b1b;
+}
+
 .sidebar-user svg {
   width: 100px;
   height: 100px;
+  color: #7d1616;
+}
+
+.sidebar-user h3 {
+  font-family: 'Bentham', serif;
+  font-size: 30px;
+  font-weight: normal;
+  text-align: center;
+  letter-spacing: 1px;
+  color: #6b2020;
+  margin: 0;
+}
+
+.titular-label {
+  font-family: 'Staatliches', sans-serif;
+  font-size: 30px;
+  font-weight: 400;
+  text-align: center;
+  letter-spacing: 2px;
+  color: #6b2020;
+  display: block;
+  margin-top: 5px;
+}
+
+.sidebar-user p {
+  font-size: 0.9rem;
+  text-align: center;
+  color: #666;
+  word-break: break-word;
+}
+
+/* ── LOGOUT ── */
+.logout-button {
+  margin-top: 10px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.logout-button:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transform: translateY(-2px);
 }
 
 .logout-button svg {
   width: 30px;
   height: 30px;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .sidebar {
+    width: 240px;
+    min-width: 240px;
+    max-width: 240px;
+  }
+
+  .menu-item {
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 700px) {
+  .sidebar {
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+    height: auto;
+  }
 }

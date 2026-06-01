@@ -1,37 +1,44 @@
 /* ============================================
    ActionButtons.css
-   Ubicación: src/components/shared/ActionButtons.css
+   src/components/shared/ActionButtons.css
    ============================================ */
 
+@font-face {
+  font-family: 'Bentham';
+  src: url('../../assets/fonts/Bentham-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* ── CONTENEDOR ── */
 .action-buttons {
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: var(--space-3);
-
   padding: var(--space-4) var(--space-3);
+  min-width: 180px;
 }
 
 /* ── BOTÓN BASE ── */
-
 .action-btn {
-  height: 40px;
-  padding: 0 var(--space-5);
-
+  height: auto;
+  padding: 10px var(--space-4);
   border: none;
   border-radius: var(--radius-full);
-
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
-  font-weight: var(--font-bold);
+  font-family: 'Bentham', serif;
+  font-size: 22px;
+  font-weight: normal;
+  line-height: 1.2;
   letter-spacing: var(--letter-wide);
-
+  text-align: center;
+  white-space: normal;
+  word-wrap: break-word;
   cursor: pointer;
-  white-space: nowrap;
-
-  transition: background  var(--transition-fast),
-              transform   var(--transition-fast),
-              opacity     var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
 }
 
 .action-btn:active:not(.action-btn--disabled) {
@@ -39,7 +46,6 @@
 }
 
 /* ── VARIANTES ── */
-
 .action-btn--primary {
   background: var(--color-secondary);
   color: var(--color-text-white);
@@ -50,12 +56,12 @@
 }
 
 .action-btn--secondary {
-  background: #6B7280;
+  background: #ffc107;
   color: var(--color-text-white);
 }
 
 .action-btn--secondary:hover:not(.action-btn--disabled) {
-  background: #4B5563;
+  background: #e0a800;
 }
 
 .action-btn--danger {
@@ -68,7 +74,6 @@
 }
 
 /* ── DESACTIVADO ── */
-
 .action-btn--disabled {
   opacity: 0.45;
   cursor: not-allowed;

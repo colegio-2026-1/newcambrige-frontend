@@ -15,6 +15,7 @@ import Modal from "../../components/shared/Modal";
 
 
 const TesoreriaMatricula = () => {
+  const [selectedMenu, setSelectedMenu] = useState("Matricula");
   const [estudiantes, setEstudiantes] = useState([]);
   const [estudiantesFiltrados, setEstudiantesFiltrados] = useState([]);
   const [salones, setSalones] = useState([]);
@@ -39,7 +40,10 @@ const TesoreriaMatricula = () => {
   });
   //para el sidebar
   const modulos = [
-    { label: "Inicio", icon: <Home />, path: "/Tesoreria" }
+    { label: "Inicio", icon: <Home />, path: "/Tesoreria" },
+    { label: "Matricula", path: "/Tesoreria/Matricula", roles: ["secretaria", "admin", "tesoreria"] },
+    { label: "Pension", path: "/Tesoreria/Pension", roles: ["secretaria", "admin", "tesoreria"] },
+    { label: "Papeleria", path: "/Tesoreria/Papeleria", roles: ["secretaria", "admin", "tesoreria"] },
   ];
   //maps para acceso rápido a datos relacionados
   const salonesMap = {};
@@ -167,6 +171,7 @@ const TesoreriaMatricula = () => {
             if (!modulo.roles || !Array.isArray(modulo.roles) || modulo.roles.length === 0) return true;
             return roles.some(rol => modulo.roles.includes(rol));
           })}
+          selectedMenu={selectedMenu}
           user={{ nombre: userName, rol: rol }}
           onLogout={logout}
         />}
@@ -186,7 +191,7 @@ const TesoreriaMatricula = () => {
         }
       >
         {cargandoRol || cargandoPeriodos ? (
-          <div className="text-gray-400 italic text-center">
+          <div className="status-message status-message--loading">
             Cargando Modulo Matricula...
           </div>
         ) : (
@@ -259,8 +264,8 @@ const TesoreriaMatricula = () => {
                     render: (_, val) => {
                       const idEst = val.id_estudiante;
                       return (
-                        <span className={matriculasMap[idEst]?.estado ? "badge--ok" : "badge--no"}>
-                          {matriculasMap[idEst]?.estado ? "Pagado" : "Pendiente"}
+                        <span className={matriculasMap[idEst]?.estado == 'activa' ? "badge--ok" : "badge--no"}>
+                          {matriculasMap[idEst]?.estado  == 'activa' ? "Pagado" : matriculasMap[idEst]?.estado !== 'activa' && matriculasMap[idEst]?.estado !== undefined ? matriculasMap[idEst]?.estado : "Pendiente"}
                         </span>)
                     }
                   },
@@ -269,7 +274,7 @@ const TesoreriaMatricula = () => {
                     render: (_, val) => {
                       const idEst = val.id_estudiante;
                       return (
-                        <span>{matriculasMap[idEst]?.created_at ? new Date(matriculasMap[idEst].created_at).toLocaleDateString() : "---"}</span>
+                        <span>{matriculasMap[idEst]?.estado == 'activa' ? new Date(matriculasMap[idEst].created_at).toLocaleDateString() : "---"}</span>
                       )
                     }
                   }
@@ -279,7 +284,7 @@ const TesoreriaMatricula = () => {
               />
             </div>
           ) : (
-            <div className="text-gray-400 italic text-center">
+            <div className="status-message status-message--empty">
               Tu usuario no tiene permisos para acceder a este módulo.
             </div>))}
       </ModuleLayout>

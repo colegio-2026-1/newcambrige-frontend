@@ -45,9 +45,10 @@ const TesoreriaNotificaciones = () => {
   }, [idUser]);
 
   // MENU ITEMS CON ICONOS
-  const menuItems = [
-    { label: "Inicio", icon: <Home />, path: '/Tesoreria' },
-    { label: "Notificaciones" },
+  const modulos = [
+    { label: "Inicio", icon: <Home />, path: "/home" },
+    { label: "Tesoreria", path: "/tesoreria/", roles: ["secretaria", "admin", "tesoreria"] },
+    { label: "Notificaciones", path: "/tesoreria/notificaciones", roles: ["secretaria", "admin", "tesoreria"] },
   ];
 
   return (
@@ -57,27 +58,31 @@ const TesoreriaNotificaciones = () => {
       <ModuleLayout
         sidebar={
           <Sidebar
-            menuItems={menuItems}
+             menuItems={modulos.filter(modulo => {
+              if (!modulo) return false;
+              if (!modulo.roles || !Array.isArray(modulo.roles) || modulo.roles.length === 0) return true;
+              return roles.some(rol => modulo.roles.includes(rol));
+            })}
             selectedMenu={selectedMenu}
             setSelectedMenu={setSelectedMenu}
             user={{ nombre: userName, rol: rol }}
-
+            selectedMenu={selectedMenu}
             logout={logout}
           />
         }
       >
         {cargandoRol ? (
-          <div className="text-vinotinto font-serif text-xl italic animate-pulse">
+          <div className="status-message status-message--loading">
             Verificando credenciales institucionales...
           </div>
         ) : (roles.some(rol => rolespermitidos.includes(rol)) ? (
-          <div className="cards-grid">
+          <div className="status-message">
             <h1>
               Notificaciones-Proximamente
             </h1>
           </div>
         ) : (
-          <div className="text-gray-400 italic text-center">
+          <div className="status-message status-message--empty">
             Tu usuario no tiene permisos para acceder a este módulo.
           </div>
         ))

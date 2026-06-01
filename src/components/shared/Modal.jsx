@@ -78,7 +78,7 @@ return (
 
         {/* CERRAR */}
         <button className="modal-close" onClick={onCancel} aria-label="Cerrar">
-            ✕
+         &times;
         </button>
 
         {/* TÍTULO */}
@@ -115,7 +115,7 @@ return (
                 />
             ) : field.type == "label" ? (
 
-                <div>
+                <div className="modal-label">
                     {field.label}
                 </div>
 
