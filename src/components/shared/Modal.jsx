@@ -78,7 +78,7 @@ return (
 
         {/* CERRAR */}
         <button className="modal-close" onClick={onCancel} aria-label="Cerrar">
-         &times;
+        ✕
         </button>
 
         {/* TÍTULO */}
