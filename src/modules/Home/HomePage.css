@@ -16,7 +16,7 @@
 .cards-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(130px, 331px));
-    gap: 50px 40px;
+    gap: 80px 80px;
     justify-content: center;
     align-content: center;
     width: 100%;
