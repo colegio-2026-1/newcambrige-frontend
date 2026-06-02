@@ -143,7 +143,7 @@ export default function LoginPage() {
                             <input
                                 className={styles["input-field"]}
                                 type="text"
-                                placeholder="Usuario"
+                                placeholder="Documento"
                                 value={usuario}
                                 onChange={(e) => setUsuario(e.target.value)}
                                 autoComplete="username"

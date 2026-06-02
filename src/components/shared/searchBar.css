@@ -1,136 +1,182 @@
 /* ============================================
-SearchBar.css
-Ubicación: src/components/shared/SearchBar.css
+   SearchBar.css
+   src/components/shared/SearchBar.css
    ============================================ */
 
+@font-face {
+  font-family: 'Bentham';
+  src: url('../../assets/fonts/Bentham-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* ── WRAPPER ── */
 .searchbar-wrapper {
-    width: 100%;
-
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    gap: var(--space-3) var(--space-5);
-
-    padding: var(--space-4) var(--space-6);
-
-    background: var(--color-white);
-
-    border-bottom: var(--border-width) solid var(--color-border-light);
-
-    box-shadow: var(--shadow-sm);
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  padding: var(--space-4) var(--space-6);
+  background: var(--color-white);
+  border-bottom: var(--border-width) solid var(--color-border-light);
+  box-shadow: var(--shadow-sm);
+  box-sizing: border-box;
 }
 
-/* ── CAMPO (label + input apilados) ── */
-
+/* ── FIELD ── */
 .searchbar-field {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: var(--space-2);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
+/* ── LABEL ── */
 .searchbar-label {
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    color: var(--color-text);
-    white-space: nowrap;
+  font-family: 'Bentham', serif;
+  font-size: 22px;
+  font-weight: normal;
+  color: var(--color-text);
+  white-space: nowrap;
 }
 
-/* ── INPUTS Y SELECTS ── */
-
+/* ── INPUT ── */
 .searchbar-input {
-    height: 32px;
-    min-width: 130px;
+  height: 42px;
+  width: 100px;
+  max-width: 100%;
+  min-width: 60px;
+  padding: 0 10px;
+  background: var(--color-input-bg);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: 'Bentham', serif;
+  font-size: 22px;
+  color: var(--color-text);
+  outline: none;
+  box-sizing: border-box;
+  flex-shrink: 1;
+}
 
-    padding: 0 var(--space-2);
-
-    background: var(--color-input-bg);
-
-    border: var(--border-width) solid var(--color-border);
-    border-radius: var(--radius-sm);
-
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    color: var(--color-text);
-
-    outline: none;
-    transition: border-color var(--transition-fast),
-        box-shadow   var(--transition-fast);
+.searchbar-field:nth-child(2) .searchbar-input {
+  width: 200px;
 }
 
 .searchbar-input:focus {
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 2px rgba(142, 42, 37, 0.15);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(142, 42, 37, 0.15);
 }
 
+.searchbar-input::-webkit-outer-spin-button,
+.searchbar-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.searchbar-input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* ── SELECT ── */
 .searchbar-select {
-    cursor: pointer;
-    min-width: 110px;
-
-    appearance: none;
-    -webkit-appearance: none;
-
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%238E2A25' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-
-    padding-right: var(--space-6);
+  cursor: pointer;
+  min-width: 130px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%238E2A25' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: var(--space-6);
 }
 
-/* ── BOTÓN BUSCAR ── */
-
+/* ── BOTÓN ── */
 .searchbar-btn {
-    height: 36px;
-    padding: 0 var(--space-6);
-
-    background: var(--color-secondary);
-    color: var(--color-text-white);
-
-    border: none;
-    border-radius: var(--radius-full);
-
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    font-weight: var(--font-bold);
-    letter-spacing: var(--letter-wide);
-
-    cursor: pointer;
-
-    transition: background var(--transition-fast),
-    transform   var(--transition-fast);
-
-    margin-left: auto;
+  height: 42px;
+  padding: 0 24px;
+  background: var(--color-secondary);
+  color: var(--color-text-white);
+  border: none;
+  border-radius: var(--radius-full);
+  font-family: 'Bentham', serif;
+  font-size: 22px;
+  font-weight: normal;
+  cursor: pointer;
+  margin-left: var(--space-2);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .searchbar-btn:hover {
-    background: var(--color-secondary-dark);
+  background: var(--color-secondary-dark);
 }
 
 .searchbar-btn:active {
-    transform: scale(0.97);
+  transform: scale(0.97);
 }
 
 .searchbar-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-/* ── RESPONSIVE ── */
+/* ── LAPTOP PEQUEÑA (769px - 1399px) ── */
+@media (min-width: 769px) and (max-width: 1399px) {
+  .searchbar-wrapper {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
 
+  .searchbar-field {
+    flex: 0 0 auto;
+    width: auto;
+  }
+
+  .searchbar-btn {
+    flex: 0 0 auto;
+    margin-left: 0;
+    align-self: flex-end;
+  }
+}
+
+/* ── DESKTOP (≥1400px) ── */
+@media (min-width: 1400px) {
+  .searchbar-wrapper {
+    flex-wrap: nowrap;
+    overflow-x: visible;
+  }
+
+  .searchbar-btn {
+    margin-left: auto;
+  }
+}
+
+/* ── MÓVIL (≤768px) ── */
 @media (max-width: 768px) {
+  .searchbar-wrapper {
+    padding: var(--space-3) var(--space-4);
+  }
+
   .searchbar-field {
     flex-direction: column;
     align-items: flex-start;
-}
+    width: 100%;
+  }
 
-.searchbar-input {
+  .searchbar-input {
     width: 100%;
     min-width: unset;
-}
+  }
 
-.searchbar-btn {
+  .searchbar-btn {
     width: 100%;
     margin-left: 0;
-}
+  }
 }

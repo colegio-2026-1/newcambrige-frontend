@@ -82,11 +82,17 @@ export default function DataTable({
     <div className="datatable-wrapper">
       <div className="datatable-main-content" style={{ display: "flex", flexDirection: "column", width: "100%", overflow: "hidden" }}>
       {/* TABLA */}
-      <div className="datatable-scroll">
-        <table className="datatable">
+      {rows.length === 0 ? (
 
-          <thead>
-            <tr>
+        <div className="datatable-empty datatable-empty--main">
+          {emptyText}
+        </div>
+      )
+      :(
+        <div className="datatable-scroll">
+          <table className="datatable">
+            <thead>
+              <tr>
               <th className="datatable-th-check"></th>
               {columns.map((col) => (
                 <th key={col.key}>{col.label}</th>
@@ -95,17 +101,8 @@ export default function DataTable({
           </thead>
 
           <tbody>
-            {rows.length === 0 ? (
-              <tr>
-                <td
-                  className="datatable-empty"
-                  colSpan={columns.length + 1}
-                >
-                  {emptyText}
-                </td>
-              </tr>
-            ) : (
-              filasMapeadas.map((row, i) => {
+
+              {filasMapeadas.map((row, i) => {
                 const seleccionada = filaSeleccionada === row;
                 return (
                   <tr
@@ -129,40 +126,37 @@ export default function DataTable({
                   </tr>
                 );
               })
-            )}
+            }
           </tbody>
 
         </table>
       </div>
+      )
+    }
 
     {tienePaginacion && totalPaginas > 1 && (
-          <div className="datatable-pagination">
-            <span className="pagination-info">
-              Página <strong>{paginaActual}</strong> de <strong>{totalPaginas}</strong> ({rows.length} registros en total)
-            </span>
-            
-            <div className="pagination-buttons">
-              <button
-                type="button"
-                className="pagination-btn"
-                disabled={paginaActual === 1}
-                onClick={() => setPaginaActual(prev => Math.max(prev - 1, 1))}
-              >
-                Anterior
-              </button>
-              
-              <button
-                type="button"
-                className="pagination-btn"
-                disabled={paginaActual === totalPaginas}
-                onClick={() => setPaginaActual(prev => Math.min(prev + 1, totalPaginas))}
-              >
-                Siguiente
-              </button>
-            </div>
-          </div>
-        )}
-
+    <div className="datatable-pagination">
+      <div className="pagination-buttons">
+        <button
+          type="button"
+          className="pagination-btn-circular"
+          disabled={paginaActual === 1}
+          onClick={() => setPaginaActual(prev => Math.max(prev - 1, 1))}
+        >
+          ‹
+        </button>
+      
+        <button
+          type="button"
+          className="pagination-btn-circular"
+          disabled={paginaActual === totalPaginas}
+          onClick={() => setPaginaActual(prev => Math.min(prev + 1, totalPaginas))}
+        >
+          ›
+        </button>
+      </div>
+    </div>
+    )}
       </div>
     </div>
   );
