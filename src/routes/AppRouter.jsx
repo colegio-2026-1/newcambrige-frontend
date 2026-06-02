@@ -5,12 +5,9 @@ import {
 } from "react-router-dom";
 
 import LoginPage from "../modules/auth/LoginPage";
+import ProtectedRoute from "./ProtectedRoute"
 
-import TesoreriaMatricula from "../modules/tesoreria/TesoreriaMatricula";
-import TesoreriaPension from "../modules/tesoreria/TesoreriaPension";
-import TesoreriaPapeleria from "../modules/tesoreria/TesoreriaPapeleria";
-import Tesoreria from "../modules/tesoreria/Tesoreria";
-import TesoreriaNotificaciones from "../modules/tesoreria/TesoreriaNotificaciones"
+import TesoreriaRouter from "./TesoreriaRouter";
 
 import ParametrizacionPage from '../modules/parametrizacion/ParametrizacionPage';
 import UsuariosPage from '../modules/parametrizacion/UsuariosPage';
@@ -22,32 +19,7 @@ import Home from "../modules/Home/HomePage";
 
 import TestPage from "../modules/test/testPage";
 
-// ==============================
-// RUTA PRIVADA
-// ==============================
 
-const PrivateRoute = ({
-  children
-}) => {
-
-  const token =
-    localStorage.getItem(
-      "access_token"
-    );
-
-  // si no hay token
-  if (!token) {
-
-    return (
-      <Navigate
-        to="/"
-        replace
-      />
-    );
-  }
-
-  return children;
-};
 
 // ==============================
 // ROUTER
@@ -76,11 +48,11 @@ const AppRouter = () => {
         path="/home"
         element={
 
-          <PrivateRoute>
+          <ProtectedRoute>
 
             <Home />
 
-          </PrivateRoute>
+          </ProtectedRoute>
 
         }
       />
@@ -110,64 +82,25 @@ const AppRouter = () => {
         }
       />
       */}
-      
-  {      <Route
-          path="/tesoreria/matricula"
-          element={
-            <PrivateRoute>
-              <TesoreriaMatricula />
-            </PrivateRoute>
-          }
-        />
-}
-
     
-      {
-        <Route 
-        path="/tesoreria/" 
-        element={
-        <PrivateRoute>
-          <Tesoreria />
-          </PrivateRoute>} />
-      }
-      {
-        <Route 
-        path="/tesoreria/papeleria" 
-        element={
-        <PrivateRoute>
-          <TesoreriaPapeleria />
-          </PrivateRoute>} />
-      }
-      {
-        <Route 
-        path="/tesoreria/pension" 
-        element={
-        <PrivateRoute>
-          <TesoreriaPension />
-          </PrivateRoute>} />
-      }
-      {
-        <Route 
-        path="/tesoreria/notificaciones" 
-        element={
-        <PrivateRoute>
-          <TesoreriaNotificaciones />
-          </PrivateRoute>} />
-      }
+        {TesoreriaRouter()}  
+     
+      
+ 
       <Route 
         path="/parametrizacion" 
         element={
-          <PrivateRoute>
+          <ProtectedRoute>
             <ParametrizacionPage />
-          </PrivateRoute>
+          </ProtectedRoute>
       } 
       />
       <Route 
         path="/parametrizacion/usuarios" 
         element={
-          <PrivateRoute>
+          <ProtectedRoute>
              <UsuariosPage />
-          </PrivateRoute>
+          </ProtectedRoute>
         } 
         />
       

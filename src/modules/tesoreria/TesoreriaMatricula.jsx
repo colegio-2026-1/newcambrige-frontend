@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { allestudiantesbyperiodoRequest, allsalonesbyperiodoRequest, allmatriculasbyperiodoRequest, allrolesuserRequest, crearMatriculaRequest, allaniosacademicosRequest } from '../../api/endpoints';
+import { allrolesuserRequest, allaniosacademicosRequest } from '../../api/endpoints';
+import { allestudiantesbyperiodoRequest, allsalonesbyperiodoRequest, allmatriculasbyperiodoRequest, crearMatriculaRequest} from '../../api/endpointsTesoreria';
 
 import { Home } from "lucide-react";
 import { useAuth } from "../../api/useAuth";

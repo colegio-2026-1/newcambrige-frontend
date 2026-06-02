@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import {
-  allestudiantesbyperiodoRequest, allsalonesbyperiodoRequest, allmatriculasbyperiodoRequest,
-  allrolesuserRequest, allaniosacademicosRequest,
-  alldetallematriculabyperiodoRequest, alltipoconceptoRequest, crearDetalleRequest
-} from '../../api/endpoints';
+import { allrolesuserRequest, allaniosacademicosRequest } from '../../api/endpoints';
+import { allestudiantesbyperiodoRequest, allsalonesbyperiodoRequest, allmatriculasbyperiodoRequest,
+  alldetallematriculabyperiodoRequest, alltipoconceptoRequest, crearDetalleRequest } from '../../api/endpointsTesoreria';
 
 import { Home } from "lucide-react";
 import { useAuth } from "../../api/useAuth";
