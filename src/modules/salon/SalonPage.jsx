@@ -25,13 +25,13 @@ export default function SalonPage() {
   const [selectedMenu, setSelectedMenu] = useState("Inicio");
 
   const menuItems = [
-    { label: "Home", icon: <Home />, path: "/home" },
+    { label: "Inicio", icon: <Home />, path: "/home" },
   ];
 
   const modulos = [
-    { id: "pupitres",   label: "Pupitres",   path: "/pupitres",   icon: PupitresIcon   },
-    { id: "biblioteca", label: "Biblioteca", path: "/biblioteca", icon: BibliotecaIcon },
-    { id: "pruebas",    label: "Pruebas",    path: "/pruebas",    icon: PruebasIcon    },
+    { id: "pupitres",   label: "Pupitres",   path: "/salon/pupitre",   icon: PupitresIcon   },
+    { id: "biblioteca", label: "Biblioteca", path: "/salon/biblioteca", icon: BibliotecaIcon },
+    { id: "pruebas",    label: "Pruebas",    path: "/salon/pruebas",    icon: PruebasIcon    },
   ];
 
   useEffect(() => {
