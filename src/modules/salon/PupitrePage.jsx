@@ -7,9 +7,9 @@ import {
   getPupitresRequest,
   updatePupitreRequest,
   allsalonesRequest,
-  allaniosacademicosRequest,
-} from "../../api/endpoints";
-import { allrolesuserRequest } from "../../api/endpoints";
+} from "../../api/endpointsSalon";
+
+import { allrolesuserRequest, allaniosacademicosRequest} from "../../api/endpoints";
 import Header from "../../components/layout/Header";
 import ModuleLayout from "../../components/layout/ModuleLayout";
 import Sidebar from "../../components/layout/Sidebar";

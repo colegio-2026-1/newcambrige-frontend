@@ -65,11 +65,6 @@ const AppRouter = () => {
 
       
       
-      <Route path="/salon"        element={<PrivateRoute><SalonPage /></PrivateRoute>} />
-      <Route path="/pupitres"     element={<PrivateRoute><PupitrePage /></PrivateRoute>} />
-      <Route path="/biblioteca/*" element={<PrivateRoute><BibliotecaPage /></PrivateRoute>} />
-      <Route path="/pruebas"      element={<PrivateRoute><PruebasPage /></PrivateRoute>} />
-      
       
 
       {/*

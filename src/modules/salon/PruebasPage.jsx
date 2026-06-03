@@ -5,8 +5,8 @@ import {
   getPruebasRequest,
   updateEstadoPruebaRequest,
   allsalonesRequest,
-  allaniosacademicosRequest,
-} from "../../api/endpoints";
+} from "../../api/endpointsSalon";
+import { allrolesuserRequest, allaniosacademicosRequest} from "../../api/endpoints";
 
 import Header from "../../components/layout/Header";
 import ModuleLayout from "../../components/layout/ModuleLayout";
