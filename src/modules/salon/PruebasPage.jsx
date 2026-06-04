@@ -253,6 +253,7 @@ export default function PruebasPage() {
             rows={rowsFiltered}
             emptyText="No hay datos disponibles"
             onRowClick={handleRowClick}
+            pageSize={10}
           />
         </div>
       </ModuleLayout>

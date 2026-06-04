@@ -521,6 +521,7 @@ export default function BibliotecaPage() {
                 rows={prestamosFiltered}
                 emptyText="No hay préstamos"
                 onRowClick={setFilaSeleccionada}
+                pageSize={10}
               />
             </div>
           </div>
@@ -544,6 +545,7 @@ export default function BibliotecaPage() {
                 rows={librosFiltered}
                 emptyText="No hay libros"
                 onRowClick={setFilaSeleccionada}
+                pageSize={10}
               />
             </div>
           </div>

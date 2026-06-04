@@ -261,6 +261,7 @@ export default function PupitrePage() {
             rows={rowsFiltered}
             emptyText="No hay datos disponibles"
             onRowClick={handleRowClick}
+            pageSize={10}
           />
         </div>
       </ModuleLayout>
