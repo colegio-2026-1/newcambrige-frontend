@@ -1,7 +1,17 @@
 import axiosClient from "./axiosClient";
 import { endpoints } from "./endpoints";
 
-const { BANDA } = endpoints;
+const BANDA_URLS = {
+  categorias: "/api/banda/categorias",
+  ubicaciones: "/api/banda/ubicaciones",
+  instrumentos: "/api/banda/instrumentos",
+  instrumentoById: (id) => `/api/banda/instrumentos/${id}`,
+  instrumentosDisponibles: "/api/banda/instrumentos/disponibles",
+  prestamos: "/api/banda/prestamos",
+  devolverPrestamo: (id) => `/api/banda/prestamos/${id}/devolver`,
+  estadisticas: "/api/banda/estadisticas",
+  auditoria: "/api/banda/auditoria",
+};
 
 export const bandaService = {
   // Categorías
@@ -25,8 +35,6 @@ export const bandaService = {
 // ✅ CAMBIAR ESTO PARA USAR EL ENDPOINT GLOBAL
   getAuditoria: () => axiosClient.get(BANDA.auditoria),
 
-  getEstadisticas: () => axiosClient.get(BANDA.estadisticas),
-  
   // Estadísticas
   getEstadisticas: () => axiosClient.get(BANDA.estadisticas),
 };

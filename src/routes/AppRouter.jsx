@@ -13,7 +13,19 @@ import NotFound from "../modules/notFound/notFound";
 
 import Home from "../modules/Home/HomePage";
 
+// ⚠️ COMENTADO TEMPORALMENTE: El archivo DashboardPage no existe en la carpeta modules/dashboard
+// Al comentar esta línea, evitamos el error de "Failed to resolve import"
+// import Dashboard from "../modules/dashboard/DashboardPage"; 
 
+// TESORERIA
+import Tesoreria from "../modules/tesoreria/Tesoreria";
+import TesoreriaMatricula from "../modules/tesoreria/TesoreriaMatricula";
+import TesoreriaNotificaciones from "../modules/tesoreria/TesoreriaNotificaciones";
+import TesoreriaEstadistica from "../modules/tesoreria/TesoreriaEstadistica";
+import TesoreriaPension from "../modules/tesoreria/TesoreriaPension";
+import TesoreriaPapeleria from "../modules/tesoreria/TesoreriaPapeleria";
+
+// TEST
 import TestPage from "../modules/test/testPage";
 
 
@@ -42,65 +54,66 @@ const AppRouter = () => {
         }
       />
 
-      {/* ===================== */}
-      {/* FUTURAS RUTAS */}
-      {/* ===================== */}
-
-      {/*
-      <Route
-        path="/salones"
-        element={
-          <PrivateRoute>
-            <SalonPage />
-          </PrivateRoute>
-        }
-      />
-      */}
-
-      {/*
-      <Route
-        path="/estudiantes"
-        element={
-          <PrivateRoute>
-            <EstudiantesPage />
-          </PrivateRoute>
-        }
-      />
-      */}
-    
-        {TesoreriaRouter()}  
-     
-      
- 
-      <Route 
-        path="/parametrizacion" 
-        element={
-          <ProtectedRoute>
-            <ParametrizacionPage />
-          </ProtectedRoute>
-      } 
-      />
-      <Route 
-        path="/parametrizacion/usuarios" 
-        element={
-          <ProtectedRoute>
-             <UsuariosPage />
-          </ProtectedRoute>
-        } 
+      {/* MODULO TESORERIA */}
+      <Route path="/tesoreria">
+        <Route
+          index
+          element={
+            <PrivateRoute>
+              <Tesoreria />
+            </PrivateRoute>
+          }
         />
-      
+        <Route
+          path="matricula"
+          element={
+            <PrivateRoute>
+              <TesoreriaMatricula />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="notificaciones"
+          element={
+            <PrivateRoute>
+              <TesoreriaNotificaciones />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="estadisticas"
+          element={
+            <PrivateRoute>
+              <TesoreriaEstadistica />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="pension"
+          element={
+            <PrivateRoute>
+              <TesoreriaPension />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="papeleria"
+          element={
+            <PrivateRoute>
+              <TesoreriaPapeleria />
+            </PrivateRoute>
+          }
+        />
+      </Route>
+      {/* MODULO BANDA */}
       <Route
-        path="/banda"
+        path="/banda/*"
         element={
           <PrivateRoute>
-            <BandaHomePage />
+            <BandaRouter />
           </PrivateRoute>
         }
       />
-      <Route path="/banda/inventario" element={<PrivateRoute><InventarioPage /></PrivateRoute>} />
-<Route path="/banda/prestamos" element={<PrivateRoute><PrestamosPage /></PrivateRoute>} />
-<Route path="/banda/auditoria" element={<PrivateRoute><AuditoriaBandaPage /></PrivateRoute>} />
-
       {/* ⚠️ RUTA COMENTADA TEMPORALMENTE: Depende del componente Dashboard que no existe */}
       {/* 
       <Route
