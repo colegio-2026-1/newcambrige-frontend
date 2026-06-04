@@ -2,24 +2,46 @@
    DASHBOARD — NEW CAMBRIDGE SCHOOL
    ================================================ */
 
+/* ── CONTENEDOR PRINCIPAL ── */
 .dashboard-container {
   display: flex;
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
+  background: var(--color-bg);
 }
 
+/* ── BODY: sidebar + main ── */
+.dash-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── MAIN ── */
+.dash-main {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+.dash-main::-webkit-scrollbar       { width: 6px; }
+.dash-main::-webkit-scrollbar-track { background: transparent; }
+.dash-main::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+/* ── WRAPPER INTERIOR ── */
 .dash-wrapper {
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
   padding: var(--space-6);
-  background: var(--color-bg);
-  min-height: 100%;
-  overflow-y: auto;
 }
 
-/* ── FILTRO PERÍODO ───────────────────────────────────────────── */
+/* ── FILTRO PERÍODO ── */
 .dash-filter-bar {
   display: flex;
   align-items: center;
@@ -29,6 +51,7 @@
   border-radius: var(--radius-md);
   padding: var(--space-3) var(--space-5);
   box-shadow: var(--shadow-sm);
+  flex-wrap: wrap;
 }
 
 .dash-filter-label {
@@ -70,7 +93,7 @@
   text-transform: uppercase;
 }
 
-/* ── KPI GRID ─────────────────────────────────────────────────── */
+/* ── KPI GRID ── */
 .dash-kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -125,7 +148,7 @@
   100% { background-position: -200% 0; }
 }
 
-/* ── FILAS DE GRÁFICAS ─────────────────────────────────────────── */
+/* ── FILAS DE GRÁFICAS ── */
 .dash-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -133,7 +156,7 @@
 }
 @media (max-width: 900px) { .dash-row { grid-template-columns: 1fr; } }
 
-/* ── CARD GRÁFICA ─────────────────────────────────────────────── */
+/* ── CARD GRÁFICA ── */
 .dash-card {
   background: var(--color-white);
   border-radius: var(--radius-md);
@@ -169,7 +192,7 @@
   letter-spacing: var(--letter-wide);
 }
 
-/* ── SWITCH ────────────────────────────────────────────────────── */
+/* ── SWITCH ── */
 .dash-switch {
   display: flex;
   border: var(--border-width) solid var(--color-border-light);
@@ -198,7 +221,7 @@
   color: var(--color-primary);
 }
 
-/* ── TOOLTIP ──────────────────────────────────────────────────── */
+/* ── TOOLTIP ── */
 .dash-tooltip {
   background: var(--color-white);
   border: var(--border-width) solid var(--color-border-light);
@@ -214,7 +237,7 @@
   margin-bottom: var(--space-1);
 }
 
-/* ── PAGOS LIST ───────────────────────────────────────────────── */
+/* ── PAGOS LIST ── */
 .dash-pagos-list {
   list-style: none;
   margin: 0;
@@ -230,16 +253,16 @@
   padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-sm);
   background: var(--color-bg);
-  border-left: 3px solid var(--color-warning);
+  border-left: 3px solid var(--color-warning, #A06000);
   transition: background var(--transition-fast);
 }
-.dash-pagos-item:hover { background: var(--color-warning-bg); }
+.dash-pagos-item:hover { background: #fff8ee; }
 
 .dash-pagos-num {
   font-family: var(--font-display);
   font-size: var(--text-sm);
   font-weight: var(--font-bold);
-  color: var(--color-warning);
+  color: var(--color-warning, #A06000);
   min-width: 18px;
   text-align: center;
 }
@@ -269,15 +292,15 @@
   font-weight: var(--font-bold);
   text-transform: uppercase;
   letter-spacing: var(--letter-wide);
-  color: var(--color-warning);
-  background: var(--color-warning-bg);
-  border: 1px solid var(--color-warning);
+  color: var(--color-warning, #A06000);
+  background: #fff3dc;
+  border: 1px solid var(--color-warning, #A06000);
   border-radius: var(--radius-full);
   padding: 2px 8px;
   white-space: nowrap;
 }
 
-/* ── EMPTY STATE ──────────────────────────────────────────────── */
+/* ── EMPTY STATE ── */
 .dash-empty {
   font-family: var(--font-body);
   font-size: var(--text-sm);
