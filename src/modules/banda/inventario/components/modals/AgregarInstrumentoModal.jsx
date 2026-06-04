@@ -1,56 +1,49 @@
-import ModalBase from "../../../../../components/shared/ModalBase";
-import InventarioForm from "../InventarioForm";
-import ValidationPanel from "../ValidationPanel";
-import { btn } from "../../styles/inventarioStyles";
+import React from 'react';
+import Modal from "../../../../../components/shared/Modal"; // ✅ USAMOS EL MODAL GLOBAL DEL EQUIPO
 
 const AgregarInstrumentoModal = ({
-  open, onClose, onSave, form, setForm, errores, categorias, ubicaciones, validaciones
+  open, onClose, onSave, form, setForm, categorias, ubicaciones, validaciones
 }) => {
 
-    const esValido = validaciones?.todoValido || false; 
+  // 1. Adaptamos los datos al formato { value, label } que exige el Modal.jsx global
+  const opcionesCategorias = categorias?.map(c => ({ value: c.id_categoria, label: c.nombre })) || [];
+  const opcionesUbicaciones = ubicaciones?.map(u => ({ value: u.id_ubicacion, label: u.nombre })) || [];
 
-  const footer = (
-    <>
-      <button
-        style={{ 
-          ...btn("#16A34A"), 
-          opacity: validaciones.todoValido ? 1 : 0.5, 
-          cursor: validaciones.todoValido ? "pointer" : "not-allowed" 
-        }}
-        onClick={onSave}
-        disabled={!validaciones.todoValido}
-      >
-        Guardar Instrumento
-      </button>
-      <button style={btn("#6B7280")} onClick={onClose}>
-        Cancelar
-      </button>
-    </>
-  );
+  // 2. Definimos los campos exactamente como en la imagen guía
+  const camposFormulario = [
+    { key: 'codigo', label: 'Código', type: 'text' },
+    { key: 'nombre', label: 'Nombre', type: 'text' },
+    { key: 'id_categoria', label: 'Categoría', type: 'select', options: opcionesCategorias },
+    { key: 'cantidad_total', label: 'Cantidad Total', type: 'text' },
+    { key: 'id_ubicacion', label: 'Ubicación', type: 'select', options: opcionesUbicaciones },
+    { key: 'estado', label: 'Estado Inicial', type: 'select', options: ['Activo', 'Inactivo', 'En mantenimiento'] },
+  ];
+
+  // 3. Manejador de cambios que actualiza tu estado 'form' intacto
+  const handleChange = (key, value) => {
+    setForm(prev => ({ ...prev, [key]: value }));
+  };
+
+  // 4. Interceptamos el guardado para mantener la validación lógica
+  const handleAccept = () => {
+    if (validaciones?.todoValido) {
+      onSave();
+    } else {
+      // Como ya no tenemos el panel visual, usamos una alerta nativa para avisar al usuario
+      alert("Por favor, verifique los datos:\n- El código y nombre deben ser únicos.\n- La cantidad debe ser mayor a 0.\n- Seleccione una categoría.");
+    }
+  };
 
   return (
-    <ModalBase
-      open={open}
-      onClose={onClose}
-      title="AGREGAR NUEVO INSTRUMENTO"
-      width="850px"
-      footer={footer}
-    >
-      <div style={{ display: "flex", gap: "30px", alignItems: "flex-start" }}>
-        <div style={{ flex: 1 }}>
-          <InventarioForm
-            form={form}
-            setForm={setForm}
-            errores={errores}
-            categorias={categorias}
-            ubicaciones={ubicaciones}
-          />
-        </div>
-        <div style={{ width: "260px" }}>
-          <ValidationPanel validaciones={validaciones || {}} />
-        </div>
-      </div>
-    </ModalBase>
+    <Modal
+      title="AGREGAR INSTRUMENTO"
+      isOpen={open}
+      values={form}
+      onChange={handleChange}
+      onAccept={handleAccept}
+      onCancel={onClose}
+      fields={camposFormulario}
+    />
   );
 };
 

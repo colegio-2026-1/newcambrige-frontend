@@ -34,7 +34,7 @@ const InventarioPage = () => {
   const menuBanda = [
     { label: "Inicio", path: "/banda" },
     { label: "Inventario Banda", path: "/banda/inventario" },
-    { label: "Asignaciones", path: "/banda/prestamos" },
+    { label: "Préstamos", path: "/banda/prestamos" },
   ];
 
   if (user?.roles?.includes("admin") || user?.rol === "admin") {
@@ -63,16 +63,8 @@ const InventarioPage = () => {
     },
   ];
 
-  const camposBusqueda = [
-    { key: "codigo", label: "Código", type: "text" },
-    { key: "nombre", label: "Nombre", type: "text" },
-    { key: "grado", label: "Grado", type: "text" },
-    { key: "grupo", label: "Grupo", type: "text" },
-    { key: "anio", label: "Año", type: "text" },
-  ];
-
   return (
-    <div className='banda-module-container'>
+    <div className='banda-module-container banda-custom-sidebar'> {/* ✅ Clase maestra para el CSS */}
       <Header title="INVENTARIO DE INSTRUMENTOS - BANDA" />
       
       <div className="inventario-page">
@@ -80,57 +72,53 @@ const InventarioPage = () => {
 
         <ModuleLayout
           sidebar={
-            <Sidebar
-              moduloActual="Inventario Banda"
-              menuItems={menuBanda}
-              user={user}
-            />
+            <Sidebar moduloActual="Inventario" menuItems={menuBanda} user={user} />
+          }
+          actions={
+            <>
+              <ActionButtons
+                filaSeleccionada={inventario.seleccionado}
+                botones={[
+                  { label: "Agregar Instrumento", onClick: inventario.abrirAgregar, siempreActivo: true, variante: "primary" },
+                  { label: "Editar Instrumento", onClick: () => inventario.abrirEditar(inventario.seleccionado), variante: "secondary" },
+                  { label: "Eliminar Instrumento", onClick: () => inventario.abrirEliminar(), variante: "danger" },
+                ]}
+              />
+              <InventarioStats instrumentos={inventario.instrumentos} />
+            </>
           }
         >
-          {/* 1. BUSCADOR SUPERIOR (De lado a lado) */}
+          {/* ✅ El SearchBar es el primer hijo del contenido central */}
           <SearchBar 
-            fields={camposBusqueda} 
+            fields={[
+              { key: "codigo", label: "Código", type: "text" },
+              { key: "nombre", label: "Nombre", type: "text" },
+              { key: "grado", label: "Grado", type: "text" },
+              { key: "grupo", label: "Grupo", type: "text" },
+            ]} 
             onSearch={(filtros) => {
               inventario.setFiltroNombre(filtros.nombre);
               inventario.handleBuscar();
             }} 
           />
 
-          {/* 2. CONTENEDOR DIVIDIDO (Alineado con la imagen guía) */}
-          <div className="banda-split-container">
-            
-            {/* IZQUIERDA: TABLA */}
-            <div className="banda-table-section">
-              <div className="inventario-table-card">
-                <DataTable 
-                  columns={columnas} 
-                  rows={inventario.paginados} 
-                  onRowClick={inventario.setSeleccionado}
-                  emptyText="No hay instrumentos registrados"
-                />
-              </div>
-
-              <InventarioPagination
-                paginaActual={inventario.pagina}
-                totalPaginas={inventario.totalPaginas}
-                setPagina={inventario.setPagina}
+           {/* 2. SECCIÓN DE TABLA (Hijo directo para el Grid) */}
+          <div className="inventario-table-section">
+            <div className="inventario-table-card">
+              <DataTable 
+                columns={columnas} 
+                rows={inventario.paginados} 
+                onRowClick={inventario.setSeleccionado}
+                emptyText="No hay instrumentos registrados"
               />
             </div>
-
-            {/* DERECHA: ACCIONES Y STATS */}
-            <div className="banda-actions-section">
-              <ActionButtons
-                filaSeleccionada={inventario.seleccionado}
-                botones={[
-                  { label: "Agregar instrumento", onClick: inventario.abrirAgregar, siempreActivo: true, variante: "primary" },
-                  { label: "Editar instrumento", onClick: () => inventario.abrirEditar(inventario.seleccionado), variante: "secondary" },
-                  { label: "Eliminar instrumento", onClick: () => inventario.abrirEliminar(), variante: "danger" },
-                ]}
-              />
-              <InventarioStats instrumentos={inventario.instrumentos} />
             </div>
 
-          </div>
+          <InventarioPagination
+            paginaActual={inventario.pagina}
+            totalPaginas={inventario.totalPaginas}
+            setPagina={inventario.setPagina}
+          />
         </ModuleLayout>
 
         {/* MODALES */}

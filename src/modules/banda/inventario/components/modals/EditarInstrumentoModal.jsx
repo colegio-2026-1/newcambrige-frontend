@@ -1,110 +1,44 @@
-import InventarioForm from "../InventarioForm";
-
-import {
-  modalOverlay,
-  modalBox,
-  btn,
-} from "../../styles/inventarioStyles";
+import React from 'react';
+import Modal from "../../../../../components/shared/Modal"; // ✅ USAMOS EL MODAL GLOBAL DEL EQUIPO
 
 const EditarInstrumentoModal = ({
-  open,
-  onClose,
-  onSave,
-
-  form,
-  setForm,
-
-  errores,
-
-  categorias,
-  ubicaciones,
+  open, onClose, onSave, form, setForm, categorias, ubicaciones, validaciones
 }) => {
 
-  if (!open) return null;
+  const opcionesCategorias = categorias?.map(c => ({ value: c.id_categoria, label: c.nombre })) || [];
+  const opcionesUbicaciones = ubicaciones?.map(u => ({ value: u.id_ubicacion, label: u.nombre })) || [];
+
+  const camposFormulario = [
+    { key: 'codigo', label: 'Código', type: 'text' }, // El hook ya ignora cambios en el código al editar
+    { key: 'nombre', label: 'Nombre', type: 'text' },
+    { key: 'id_categoria', label: 'Categoría', type: 'select', options: opcionesCategorias },
+    { key: 'cantidad_total', label: 'Cantidad Total', type: 'text' },
+    { key: 'id_ubicacion', label: 'Ubicación', type: 'select', options: opcionesUbicaciones },
+    { key: 'estado', label: 'Estado', type: 'select', options: ['Activo', 'Inactivo', 'En mantenimiento'] },
+  ];
+
+  const handleChange = (key, value) => {
+    setForm(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleAccept = () => {
+    if (validaciones?.todoValido) {
+      onSave();
+    } else {
+      alert("Por favor, verifique los datos:\n- El nombre debe ser único.\n- La cantidad debe ser mayor a 0.");
+    }
+  };
 
   return (
-
-    <div style={modalOverlay}>
-
-      <div style={modalBox}>
-
-        <button
-  onClick={onClose}
-  style={{
-    position: "absolute",
-    top: "18px",
-    right: "18px",
-
-    width: "36px",
-    height: "36px",
-
-    borderRadius: "50%",
-
-    border: "none",
-
-    backgroundColor: "#F3F4F6",
-
-    cursor: "pointer",
-
-    fontSize: "16px",
-
-    color: "#6B7280",
-
-    transition: "0.2s",
-  }}
->
-  ✕
-</button>
-
-        <h2
-          style={{
-  textAlign: "center",
-  color: "#111827",
-  marginBottom: "24px",
-  fontSize: "22px",
-  fontWeight: "700",
-}}
-        >
-          EDITAR INSTRUMENTO
-        </h2>
-
-        <InventarioForm
-          esEdicion={true}
-          form={form}
-          setForm={setForm}
-          errores={errores}
-          categorias={categorias}
-          ubicaciones={ubicaciones}
-        />
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: "16px",
-            marginTop: "34px",
-          }}
-        >
-
-          <button
-            style={btn("#2E5FA7")}
-            onClick={onSave}
-          >
-            Guardar cambios
-          </button>
-
-          <button
-            style={btn("#6B7280")}
-            onClick={onClose}
-          >
-            Cancelar
-          </button>
-
-        </div>
-
-      </div>
-
-    </div>
+    <Modal
+      title="EDITAR INSTRUMENTO"
+      isOpen={open}
+      values={form}
+      onChange={handleChange}
+      onAccept={handleAccept}
+      onCancel={onClose}
+      fields={camposFormulario}
+    />
   );
 };
 
