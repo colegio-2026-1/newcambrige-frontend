@@ -21,16 +21,13 @@
   flex: 1;
   min-width: 0;
   background: #f4f4f4;
-  border-radius: 18px;
-  margin: 20px;
-  padding: 24px;
+  border-radius: 8px;
+  margin-top: 12px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
   overflow-x: hidden;
   max-width: 100%;
   align-items: center;
-  justify-content: flex-start; /* ← cambia center por flex-start */
 }
 
 /* Botones de acción a la derecha */

@@ -2,13 +2,13 @@ import axiosClient from "./axiosClient";
 
 // Obtener todos los usuarios
 export const obtenerUsuariosRequest = async () => {
-  return await axiosClient.get("/api/usuarios");
+  return await axiosClient.get("/api/usuarios/");
 };
 
 // Crear un nuevo usuario
 export const crearUsuarioRequest = async (usuarioData) => {
   // usuarioData debe tener: { nombre: "...", password: "...", roles: [...] }
-  return await axiosClient.post("/api/usuarios", usuarioData);
+  return await axiosClient.post("/api/usuarios/", usuarioData);
 };
 
 // Actualizar datos básicos (nombre, password, estado)

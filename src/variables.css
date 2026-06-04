@@ -4,6 +4,27 @@ Importar en main.jsx o index.css:
 @import './styles/variables.css';
    ============================================ */
 
+@font-face {
+  font-family: 'Bentham';
+  src: url('../../assets/fonts/Bentham-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Staatliches';
+  src: url('../../assets/fonts/Staatliches-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'HeyGotcha';
+  src: url('../../assets/fonts/HeyGotchaRegular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 :root {
 
   /* ── COLORES PRIMARIOS ── */
@@ -37,9 +58,10 @@ Importar en main.jsx o index.css:
 --color-info:           #1B3A5C;
 --color-info-bg:        #E0EAF4;
 
-  /* ── TIPOGRAFÍA ── */
---font-display:         'Cinzel', serif;          /* títulos / headers */
---font-body:            'Lato', sans-serif;        /* texto general */
+
+  --font-display: 'Staatliches', cursive;   /* para títulos llamativos */
+  --font-body:    'Bentham', serif;          /* para texto general */
+  --font-hand:    'HeyGotcha', serif;      /* texto general */
 
 --text-xs:    11px;
 --text-sm:    13px;
