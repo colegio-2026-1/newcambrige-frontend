@@ -1,58 +1,46 @@
-// src/routes/AppRouter.jsx
-// ⚠️  Rama: feature/jhon-dashboard
-// ⚠️  ProtectedRoute desactivado temporalmente — reactivar al integrar con develop
-import { Routes, Route, Navigate } from "react-router-dom";
+/**
+ * AppRouter — rutas del módulo Dashboard.
+ * Solo contiene las rutas que le corresponden a este módulo.
+ * main.jsx NO se toca.
+ */
+import { Routes, Route } from "react-router-dom";
 
-import LoginPage      from "../modules/auth/LoginPage.tsx";
-import Home          from "../modules/Home/HomePage";
-import DashboardPage from "../modules/dashboard/DashboardPage";
+import LoginPage      from "../modules/auth/LoginPage";
+import ProtectedRoute from "./ProtectedRoute";
+import HomePage       from "../modules/Home/HomePage";
+import DashboardPage  from "../modules/dashboard/DashboardPage";
+import NotFound       from "../modules/notFound/notFound";
 
-// TODO: reactivar cuando el backend esté activo
-const ProtectedRoute = ({ children }) => children;
+const AppRouter = () => (
+  <Routes>
 
-// ==============================
-// ROUTER
-// ==============================
-const AppRouter = () => {
-  return (
-    <Routes>
+    {/* LOGIN */}
+    <Route path="/" element={<LoginPage />} />
 
-      {/* ===================== */}
-      {/* LOGIN                 */}
-      {/* ===================== */}
-      <Route path="/" element={<LoginPage />} />
+    {/* HOME */}
+    <Route
+      path="/home"
+      element={
+        <ProtectedRoute>
+          <HomePage />
+        </ProtectedRoute>
+      }
+    />
 
-      {/* ===================== */}
-      {/* HOME                  */}
-      {/* ===================== */}
-      <Route
-        path="/home"
-        element={
-          <ProtectedRoute>
-            <Home />
-          </ProtectedRoute>
-        }
-      />
+    {/* DASHBOARD */}
+    <Route
+      path="/dashboard"
+      element={
+        <ProtectedRoute>
+          <DashboardPage />
+        </ProtectedRoute>
+      }
+    />
 
-      {/* ===================== */}
-      {/* DASHBOARD             */}
-      {/* ===================== */}
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <DashboardPage />
-          </ProtectedRoute>
-        }
-      />
+    {/* CATCH ALL */}
+    <Route path="*" element={<NotFound />} />
 
-      {/* ===================== */}
-      {/* CATCH ALL             */}
-      {/* ===================== */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-
-    </Routes>
-  );
-};
+  </Routes>
+);
 
 export default AppRouter;
