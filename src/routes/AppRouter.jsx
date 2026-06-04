@@ -1,13 +1,14 @@
 // src/routes/AppRouter.jsx
 // ⚠️  Rama: feature/jhon-dashboard
-// ⚠️  Solo contiene las rutas necesarias para el módulo Dashboard.
-// ⚠️  Al integrar con develop, se fusionan las rutas del equipo.
+// ⚠️  ProtectedRoute desactivado temporalmente — reactivar al integrar con develop
 import { Routes, Route, Navigate } from "react-router-dom";
-import ProtectedRoute from "./ProtectedRoute";
 
 import LoginPage      from "../modules/auth/LoginPage.tsx";
 import Home          from "../modules/Home/HomePage";
 import DashboardPage from "../modules/dashboard/DashboardPage";
+
+// TODO: reactivar cuando el backend esté activo
+const ProtectedRoute = ({ children }) => children;
 
 // ==============================
 // ROUTER
