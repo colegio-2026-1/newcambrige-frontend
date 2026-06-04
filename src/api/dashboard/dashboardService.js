@@ -1,34 +1,34 @@
 // src/api/dashboard/dashboardService.js
-// Servicios exclusivos del módulo Dashboard
+// Endpoints exclusivos del módulo Dashboard
 import dashboardClient from "./dashboardClient";
 
-// ── PERÍODO ACADÉMICO (filtro global del dashboard) ────────────────────
+// ── PERÍODO ACADÉMICO ───────────────────────────────────────────
 export const getPeriodos = () =>
-    dashboardClient.get("/api/paz-salvo/periodos");
+  dashboardClient.get("/api/paz-salvo/periodos");
 
-// ── ESTUDIANTES ────────────────────────────────────────────────────────
+// ── ESTUDIANTES ─────────────────────────────────────────────
 export const getEstudiantesPorPeriodo = (idPeriodo) =>
-    dashboardClient.get(`/api/estudiantes/periodo/${idPeriodo}`);
+  dashboardClient.get(`/api/estudiantes/periodo/${idPeriodo}`);
 
-// ── PAZ Y SALVO ────────────────────────────────────────────────────────
+// ── PAZ Y SALVO ───────────────────────────────────────────
 export const getPendientesPazSalvo = () =>
-    dashboardClient.get("/api/paz-salvo/pendientes");
+  dashboardClient.get("/api/paz-salvo/pendientes");
 
-// ── TESORERÍA ──────────────────────────────────────────────────────────
+// ── TESORERÍA ───────────────────────────────────────────────
 export const getPagosPendientes = () =>
-    dashboardClient.get("/api/tesoreria/pagos-pendientes");
+  dashboardClient.get("/api/tesoreria/pagos-pendientes");
 
-// ── BANDA ──────────────────────────────────────────────────────────────
+// ── BANDA ─────────────────────────────────────────────────────
 export const getEstadisticasBanda = () =>
-    dashboardClient.get("/api/banda/estadisticas");
+  dashboardClient.get("/api/banda/estadisticas");
 
 export const getPrestamosActivosBanda = () =>
-    dashboardClient.get("/api/banda/prestamos/activos");
+  dashboardClient.get("/api/banda/prestamos/activos");
 
-// ── UNIFORMES ──────────────────────────────────────────────────────────
+// ── UNIFORMES ────────────────────────────────────────────────
 export const getPrestamosActivosUniformes = () =>
-    dashboardClient.get("/api/uniformes/prestamos/activos");
+  dashboardClient.get("/api/uniformes/prestamos/activos");
 
-// ── SALONES ────────────────────────────────────────────────────────────
+// ── SALONES ──────────────────────────────────────────────────
 export const getSalonesPorPeriodo = (idPeriodo) =>
-    dashboardClient.get(`/api/salones/periodo/${idPeriodo}`);
+  dashboardClient.get(`/api/salones/periodo/${idPeriodo}`);

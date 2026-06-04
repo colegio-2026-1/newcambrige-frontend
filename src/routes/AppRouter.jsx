@@ -1,126 +1,54 @@
-import {
-  Routes,
-  Route,
-  Navigate
-} from "react-router-dom";
+// src/routes/AppRouter.jsx
+// ⚠️  Este archivo es el AppRouter de la rama feature/jhon-dashboard
+// ⚠️  Solo contiene las rutas necesarias para el módulo Dashboard.
+// ⚠️  Al momento de integrar, se fusionan las rutas del equipo.
+import { Routes, Route, Navigate } from "react-router-dom";
+import ProtectedRoute from "./ProtectedRoute";
 
-import LoginPage from "../modules/auth/LoginPage";
-import ProtectedRoute from "./ProtectedRoute"
-
-import TesoreriaRouter from "./TesoreriaRouter";
-
-import ParametrizacionPage from '../modules/parametrizacion/ParametrizacionPage';
-import UsuariosPage from '../modules/parametrizacion/UsuariosPage';
-
-import NotFound from "../modules/notFound/notFound";
-
-import Home from "../modules/Home/HomePage";
-
-
-import TestPage from "../modules/test/testPage";
-
-
+import LoginPage      from "../modules/auth/LoginPage";
+import Home          from "../modules/Home/HomePage";
+import DashboardPage from "../modules/dashboard/DashboardPage";
 
 // ==============================
 // ROUTER
 // ==============================
-
 const AppRouter = () => {
-
   return (
-
     <Routes>
 
       {/* ===================== */}
-      {/* LOGIN */}
+      {/* LOGIN                 */}
       {/* ===================== */}
-
-      <Route
-        path="/"
-        element={<LoginPage />}
-      />
+      <Route path="/" element={<LoginPage />} />
 
       {/* ===================== */}
-      {/* HOME */}
+      {/* HOME                  */}
       {/* ===================== */}
-
       <Route
         path="/home"
         element={
-
           <ProtectedRoute>
-
             <Home />
-
           </ProtectedRoute>
-
         }
       />
 
       {/* ===================== */}
-      {/* FUTURAS RUTAS */}
+      {/* DASHBOARD             */}
       {/* ===================== */}
-
-      {/*
       <Route
-        path="/salones"
-        element={
-          <PrivateRoute>
-            <SalonPage />
-          </PrivateRoute>
-        }
-      />
-      */}
-
-      {/*
-      <Route
-        path="/estudiantes"
-        element={
-          <PrivateRoute>
-            <EstudiantesPage />
-          </PrivateRoute>
-        }
-      />
-      */}
-    
-        {TesoreriaRouter()}  
-     
-      
- 
-      <Route 
-        path="/parametrizacion" 
+        path="/dashboard"
         element={
           <ProtectedRoute>
-            <ParametrizacionPage />
+            <DashboardPage />
           </ProtectedRoute>
-      } 
-      />
-      <Route 
-        path="/parametrizacion/usuarios" 
-        element={
-          <ProtectedRoute>
-             <UsuariosPage />
-          </ProtectedRoute>
-        } 
-        />
-      
-      <Route
-        path="/test"
-        element={
-          <TestPage />
         }
       />
 
       {/* ===================== */}
-      {/* CATCH ALL */}
+      {/* CATCH ALL             */}
       {/* ===================== */}
-
-      <Route
-        path="*"
-        element={
-          <NotFound />
-        }
-      />
+      <Route path="*" element={<Navigate to="/" replace />} />
 
     </Routes>
   );
