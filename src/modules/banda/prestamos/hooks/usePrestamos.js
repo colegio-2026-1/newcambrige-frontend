@@ -9,19 +9,18 @@ const usePrestamos = () => {
   const [estudiantes, setEstudiantes] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Selecciones para DataTable
   const [estudianteSeleccionado, setEstudianteSeleccionado] = useState(null);
   const [prestamoSeleccionado, setPrestamoSeleccionado] = useState(null);
 
   const [filtroNombre, setFiltroNombre] = useState("");
-  const [pagina, setPagina] = useState(1);
+  const [paginaEstudiantes, setPaginaEstudiantes] = useState(1);
+
   const [modalAgregar, setModalAgregar] = useState(false);
   const [modalDevolver, setModalDevolver] = useState(false);
 
   const [form, setForm] = useState(FORM_VACIO);
   const [formDevolucion, setFormDevolucion] = useState(FORM_DEVOLUCION_VACIO);
   const [toast, setToast] = useState(null);
-
   const [errores, setErrores] = useState({});
 
   const cargarDatos = useCallback(async () => {
@@ -40,10 +39,18 @@ const usePrestamos = () => {
 
   useEffect(() => { cargarDatos(); }, [cargarDatos]);
 
+  // --- LÓGICA ESTUDIANTES (Única tabla) ---
   const estudiantesFiltrados = useMemo(() => {
     return estudiantes.filter(e => e.nombre?.toLowerCase().includes(filtroNombre.toLowerCase()));
   }, [estudiantes, filtroNombre]);
 
+  const estudiantesPaginados = useMemo(() => {
+    return estudiantesFiltrados.slice((paginaEstudiantes - 1) * POR_PAGINA, paginaEstudiantes * POR_PAGINA);
+  }, [estudiantesFiltrados, paginaEstudiantes]);
+
+  const totalPaginasEstudiantes = Math.max(1, Math.ceil(estudiantesFiltrados.length / POR_PAGINA));
+
+  // --- HANDLERS ---
   const handleAgregar = async () => {
     try {
       await prestamoService.crearPrestamo(form);
@@ -59,38 +66,47 @@ const usePrestamos = () => {
       setErrores({ observaciones: "La descripción del daño es obligatoria." });
       return;
     }
-
     try {
       if (!prestamoSeleccionado) return;
-
       await prestamoService.devolverInstrumento(prestamoSeleccionado.id_prestamo, formDevolucion);
       setModalDevolver(false);
       setPrestamoSeleccionado(null);
       setEstudianteSeleccionado(null);
-      setFormDevolucion(FORM_DEVOLUCION_VACIO); // Resetear formulario
+      setFormDevolucion(FORM_DEVOLUCION_VACIO);
       setErrores({});
-      
       await cargarDatos();
       setToast("Instrumento devuelto correctamente.");
     } catch (e) { 
       console.error(e);
       setToast("Error al procesar la devolución.");
-      await cargarDatos(); // Refrescar datos para evitar inconsistencias
+      await cargarDatos();
     }
   };
 
+  const estadisticas = useMemo(() => {
+    return { activos: prestamos.filter((p) => p.estado_entrega === "prestado").length };
+  }, [prestamos]);
 
   return {
     prestamos, instrumentos, estudiantes, loading,
     estudianteSeleccionado, setEstudianteSeleccionado,
     prestamoSeleccionado, setPrestamoSeleccionado,
-    filtroNombre, setFiltroNombre, estudiantesFiltrados,
+    filtroNombre, setFiltroNombre, 
+    estudiantesPaginados, totalPaginasEstudiantes, paginaEstudiantes, setPaginaEstudiantes,
     modalAgregar, setModalAgregar, modalDevolver, setModalDevolver,
     form, setForm, formDevolucion, setFormDevolucion, toast,
-    handleAgregar, handleDevolver, errores, setErrores,
-    abrirModalDevolver: (p) => { setPrestamoSeleccionado(p);setFormDevolucion(FORM_DEVOLUCION_VACIO);
-      setErrores({});
-      setModalDevolver(true); }
+    handleAgregar, handleDevolver, errores, setErrores, estadisticas,
+    
+    // ✅ LÓGICA INTELIGENTE: Busca el préstamo activo del estudiante seleccionado
+    abrirModalDevolver: (estudiante) => { 
+      const prestamoActivo = prestamos.find(p => p.id_estudiante === estudiante.id_estudiante && p.estado_entrega === "prestado");
+      if (prestamoActivo) {
+        setPrestamoSeleccionado(prestamoActivo);
+        setFormDevolucion(FORM_DEVOLUCION_VACIO);
+        setErrores({});
+        setModalDevolver(true); 
+      }
+    }
   };
 };
 
