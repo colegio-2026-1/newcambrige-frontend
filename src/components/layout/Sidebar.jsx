@@ -61,7 +61,7 @@ export default function Sidebar({
       </nav>
       <div className="sidebar-user">
         <UserCircle2  />
-        <span className="titular-label">{user.rol ?? "Rol no asignado"}</span>
+        <span className="titular-label">{user?.rol ?? "Rol no asignado"}</span>
         <h3>{user?.nombre ?? "Nombre usuario"}</h3>
         <button type="button" className="logout-button" onClick={handleLogout}>
           <LogOut />

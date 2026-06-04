@@ -1,20 +1,20 @@
-
-
+import TesoreriaDetalleComponent from './TesoreriaDetallecomponent'
+import { Home } from "lucide-react";
 
 
 const TesoreriaPapeleria = () => {
+  const tipo= "papeleria";
+  const selectedMenu = "Papeleria";
+  const modulos = [
+    { label: "Inicio", icon: <Home />, path: "/Tesoreria" },
+    { label: "Matricula", path: "/Tesoreria/Matricula", roles: ["secretaria", "admin", "tesoreria"] },
+    { label: "Pension", path: "/Tesoreria/Pension", roles: ["secretaria", "admin", "tesoreria"] },
+    { label: "Papeleria", path: "/Tesoreria/Papeleria", roles: ["secretaria", "admin", "tesoreria"] },
+  ];
   return (
 
-    <div className="flex flex-col h-screen w-full bg-white overflow-hidden font-sans">
-  
- 
-
-  
-  <div className="flex flex-1 overflow-hidden">
-   
-   
-    <h1>Papeleria</h1>
-    </div>
+    <div>
+        <TesoreriaDetalleComponent tiporecibed={tipo} modulosRecibed={modulos} selectedMenu={selectedMenu} />
     </div>
   );
 };

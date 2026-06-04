@@ -1,7 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { allrolesuserRequest, allaniosacademicosRequest } from '../../api/endpoints';
-import { allestudiantesbyperiodoRequest, allsalonesbyperiodoRequest, allmatriculasbyperiodoRequest, crearMatriculaRequest} from '../../api/endpointsTesoreria';
+import { allestudiantesbyperiodoRequest, allsalonesbyperiodoRequest, allmatriculasbyperiodoRequest,
+  alldetallematriculabyperiodoRequest, alltipoconceptoRequest, crearDetalleRequest } from '../../api/endpointsTesoreria';
 
 import { Home } from "lucide-react";
 import { useAuth } from "../../api/useAuth";
@@ -14,14 +14,15 @@ import ActionButtons from "../../components/shared/ActionButtons";
 import Modal from "../../components/shared/Modal";
 
 
-
-const TesoreriaMatricula = () => {
-  const [selectedMenu, setSelectedMenu] = useState("Matricula");
+const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }) => {
+  const [selectedModule, setSelectedModule] = useState(selectedMenu);
   const [estudiantes, setEstudiantes] = useState([]);
   const [estudiantesFiltrados, setEstudiantesFiltrados] = useState([]);
+  const [estudiantesMatriculados, setEstudiantesMatriculados] = useState([]);
   const [salones, setSalones] = useState([]);
   const [matriculas, setMatriculas] = useState([]);
   const [periodos, setPeriodos] = useState([]);
+  const [detalles, Setdetalles] = useState([]);
   const rolespermitidos = ["secretaria", "admin", "tesoreria"]
   const { user, logout } = useAuth();
   const userName = user?.nombre || "Usuario";
@@ -31,7 +32,11 @@ const TesoreriaMatricula = () => {
   const rol = roles[0] || "Rol Desconocido";
   const [fila, setFila] = useState(null);
   const [modal, setModal] = useState(false);
+  const [modalVer, setModalVer] = useState(false);
   const [cargandoPeriodos, setCargandoPeriodos] = useState(true);
+  const [cargandotipo, setCargandoTipo] = useState(true);
+  const [tipo, setTipo] = useState([]);
+  const [mesesSeleccionados, setMesesSeleccionados] = useState({});
   const [filtros, setFiltros] = useState({
     documento: "",
     nombre: "",
@@ -39,12 +44,13 @@ const TesoreriaMatricula = () => {
     Grupo: "",
     Periodo: ""
   });
+  const meses = [
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre"
+  ];
   //para el sidebar
-  const modulos = [
+  const modulos = modulosRecibed || [
     { label: "Inicio", icon: <Home />, path: "/Tesoreria" },
-    { label: "Matricula", path: "/Tesoreria/Matricula", roles: ["secretaria", "admin", "tesoreria"] },
-    { label: "Pension", path: "/Tesoreria/Pension", roles: ["secretaria", "admin", "tesoreria"] },
-    { label: "Papeleria", path: "/Tesoreria/Papeleria", roles: ["secretaria", "admin", "tesoreria"] },
   ];
   //maps para acceso rápido a datos relacionados
   const salonesMap = {};
@@ -59,24 +65,29 @@ const TesoreriaMatricula = () => {
   periodos.forEach(p => {
     periodoMapname[p.nombre] = p;
   });
-
-  //creación de matrícula
-  const crearMatricula = async () => {
+  const tipoMap = {};
+  tipo.forEach(t => {
+    tipoMap[t.nombre] = t
+  });
+  //crear detalle
+  const crearDetalle = async () => {
     if (!fila || !fila.id_estudiante) {
       console.error("No hay ningún estudiante seleccionado.");
       return;
     }
     try {
-      await crearMatriculaRequest(
-        Number(fila.id_estudiante),
-        Number(salonesMap[fila.id_salon]?.id_periodo)
+      await crearDetalleRequest(
+        Number(matriculasMap[fila.id_estudiante]?.id_matricula),
+        Number(tipoMap[tiporecibed]?.id_tipo),
+        mesesSeleccionados[fila.id_estudiante]?.toLowerCase()
       );
-      cargarMatriculas(salonesMap[fila.id_salon]?.id_periodo);
+      cargarDetalles(periodoMapname[filtros.Periodo]?.id_periodo, tipoMap[tiporecibed]?.id_tipo);
       setFila(null);
     } catch (error) {
-      console.error("Error al crear la matrícula:", error);
+      console.error(`Error al crear el detalle ${tiporecibed}:`, error);
     }
   };
+
 
   //carga de datos iniciales
   useEffect(() => {
@@ -100,7 +111,6 @@ const TesoreriaMatricula = () => {
     try {
       const res = await allestudiantesbyperiodoRequest(id_periodo);
       setEstudiantes(res.data);
-      setEstudiantesFiltrados(res.data);
     } catch (error) {
       console.error("Error cargando estudiantes:", error);
     }
@@ -124,6 +134,15 @@ const TesoreriaMatricula = () => {
     }
   };
 
+  const cargarDetalles = async (id_periodo, id_tipo) => {
+    try {
+      const res = await alldetallematriculabyperiodoRequest(id_periodo, id_tipo);
+      Setdetalles(res.data);
+    } catch (error) {
+      console.error("Error cargando detalle matrículas:", error);
+    }
+  }
+
   const cargarPeriodos = async () => {
     try {
       const res = await allaniosacademicosRequest();
@@ -135,67 +154,102 @@ const TesoreriaMatricula = () => {
     }
   };
 
+  const cargarTipos = async () => {
+    try {
+      const res = await alltipoconceptoRequest();
+      setTipo(res.data);
+      setCargandoTipo(false);
+    } catch (error) {
+      console.error("Error cargando periodos:", error);
+    }
+  };
+
   useEffect(() => {
     cargarPeriodos();
+    cargarTipos();
   }, []);
+
 
   useEffect(() => {
     const idPeriodoActual = periodoMapname[filtros.Periodo]?.id_periodo;
-    if (idPeriodoActual) {
+    const tipoexiste = (tipoMap[tiporecibed] && !cargandotipo) ? true : false;
+    if (idPeriodoActual && tipoexiste) {
+      const id_tipo = tipoMap[tiporecibed]?.id_tipo;
       cargarEstudiantes(idPeriodoActual);
       cargarSalones(idPeriodoActual);
       cargarMatriculas(idPeriodoActual);
+      cargarDetalles(idPeriodoActual, id_tipo);
     }
+  }, [filtros.Periodo, tipo]);
 
-  }, [filtros.Periodo]);
+  useEffect(() => {
+    const Matriculados = estudiantes.filter(e => matriculasMap[e.id_estudiante]).filter(e => matriculasMap[e.id_estudiante]?.estado == 'activa');
+    setEstudiantesMatriculados(Matriculados);
+    setEstudiantesFiltrados(Matriculados);
+    Matriculados.forEach(estudiante => {
+      mesesSeleccionados[estudiante.id_estudiante] = "Enero";
+    });
+  }, [estudiantes, matriculas]);
 
-
-  //funcion para filtrar estudiantes según criterios de búsqueda
   const FiltrarEstudiantes = (filtros) => {
-    setEstudiantesFiltrados(estudiantes.filter(e => {
+    setEstudiantesFiltrados(estudiantesMatriculados.filter(e => {
       const cumpleDocumento = e.documento.toString().includes(filtros.documento);
       const cumpleNombre = e.nombre.toLowerCase().includes(filtros.nombre.toLowerCase());
-      const cumpleGrado = filtros.Grado ? (salonesMap[e.id_salon]?.grado).toString() === filtros.Grado : true;
+      const cumpleGrado = filtros.Grado ? ((salonesMap[e.id_salon]?.grado).toString() === filtros.Grado) : true;
       const cumpleGrupo = filtros.Grupo ? (salonesMap[e.id_salon]?.grupo).toString() === filtros.Grupo : true;
-
       return cumpleDocumento && cumpleNombre && cumpleGrado && cumpleGrupo;
     }));
   };
 
   return (
+
     <div >
+
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
       <ModuleLayout
-        sidebar={<Sidebar
-          menuItems={modulos.filter(modulo => {
-            if (!modulo) return false;
-            if (!modulo.roles || !Array.isArray(modulo.roles) || modulo.roles.length === 0) return true;
-            return roles.some(rol => modulo.roles.includes(rol));
-          })}
-          selectedMenu={selectedMenu}
-          user={{ nombre: userName, rol: rol }}
-          onLogout={logout}
-        />}
+        sidebar={
+          <Sidebar
+            menuItems={modulos.filter(modulo => {
+              if (!modulo) return false;
+              if (!modulo.roles || !Array.isArray(modulo.roles)
+                || modulo.roles.length === 0) return true;
+              return roles.some(rol => modulo.roles.includes(rol));
+            })}
+            user={{ nombre: userName, rol: rol }}
+            selectedMenu={selectedModule}
+            onLogout={logout}
+          />}
         actions={
           <ActionButtons
             filaSeleccionada={fila}
-            botones={roles.some(rol => rolespermitidos.includes(rol)) ? [
+            botones={(roles.some(rol => rolespermitidos.includes(rol))
+              && tipoMap[tiporecibed] && !cargandotipo) ? [
               {
                 label: "Validar Pago",
                 onClick: () => { setModal(true); },
                 siempreActivo: false, variante: "primary",
-                disabled: matriculasMap[fila?.id_estudiante] || !periodoMapname[filtros.Periodo]?.activo ||
-                  (fila && salonesMap[fila.id_salon]?.id_periodo !== periodoMapname[filtros.Periodo]?.id_periodo)
+                disabled: (Object.values(detalles).filter(d => d.id_matricula == matriculasMap[fila?.id_estudiante]?.id_matricula).some(d => d.mes == mesesSeleccionados[fila?.id_estudiante].toLowerCase()))
+                  || ((Object.values(detalles).filter(d => d.id_matricula == matriculasMap[fila?.id_estudiante]?.id_matricula).some(d => d.mes == meses[meses.indexOf(mesesSeleccionados[fila?.id_estudiante]) - 1]?.toLowerCase())
+                    || mesesSeleccionados[fila?.id_estudiante] == 'Enero') ? false : true)
+                  || (!periodoMapname[filtros.Periodo]?.activo && !roles.includes("admin"))
+                  || (salonesMap[fila?.id_salon]?.id_periodo !== periodoMapname[filtros?.Periodo]?.id_periodo)
               },
+              {
+                label: "Ver",
+                onClick: () => { setModalVer(true); },
+                siempreActivo: false, variante: "secondary",
+                disabled: (salonesMap[fila?.id_salon]?.id_periodo !== periodoMapname[filtros?.Periodo]?.id_periodo)
+              }
             ] : []}
           />
         }
       >
-        {cargandoRol || cargandoPeriodos ? (
+
+        {cargandoRol || cargandoPeriodos || cargandotipo ? (
           <div className="status-message status-message--loading">
-            Cargando Modulo Matricula...
+            Cargando Modulo {tiporecibed}...
           </div>
-        ) : (
+        ) : (tipoMap[tiporecibed] && !cargandotipo ? (
           roles.some(rol => rolespermitidos.includes(rol)) ? (
             <div>
               <SearchBar
@@ -216,7 +270,8 @@ const TesoreriaMatricula = () => {
                   },
                   {
                     key: "Periodo", label: "Periodo", type: "select",
-                    options: Array.from(new Set(Object.values(periodos).map(s => s.nombre).filter(Boolean)))
+                    options: Array.from(new Set(Object.values(periodos)
+                      .map(s => s.nombre).filter(Boolean)))
                   },
                 ]}
                 initialValues={{ Periodo: periodos[0]?.nombre }}
@@ -240,7 +295,7 @@ const TesoreriaMatricula = () => {
               />
 
               <DataTable
-                key={`${matriculas}`}
+                key={`${detalles}`}
                 pageSize={10}
                 columns={[
                   { key: "documento", label: "Documento" },
@@ -254,51 +309,96 @@ const TesoreriaMatricula = () => {
                   {
                     key: "grupo", label: "Grupo",
                     render: (_, val) => {
-
                       return (
                         <span>{salonesMap[val.id_salon]?.grupo}</span>)
                     }
                   },
-
+                  {
+                    key: "mes", label: "Mes",
+                    render: (_, val) => {
+                      const idEst = val.id_estudiante;
+                      const mesActual = mesesSeleccionados[idEst] || "Enero";
+                      return (
+                        <select
+                          name="meses"
+                          id={`meses-${idEst}`}
+                          value={mesActual}
+                          className="form-select"
+                          onChange={(e) => {
+                            const nuevoMes = e.target.value;
+                            setMesesSeleccionados(prev => ({
+                              ...prev, [idEst]: nuevoMes
+                            }));
+                          }}
+                        >
+                          {meses.map((mes, index) => (
+                            <option key={index} value={mes}>
+                              {mes}
+                            </option>
+                          ))}
+                        </select>
+                      );
+                    }
+                  },
                   {
                     key: "pago", label: "Pago",
                     render: (_, val) => {
                       const idEst = val.id_estudiante;
+                      const estadodetalle = Array.from(new Set(Object.values(detalles)
+                        .filter(d => d.id_matricula == matriculasMap[idEst]?.id_matricula)
+                        .filter(d => d.mes == mesesSeleccionados[idEst].toLowerCase())
+                        .map(d => d.estado).filter(Boolean)))
                       return (
-                        <span className={matriculasMap[idEst]?.estado == 'activa' ? "badge--ok" : "badge--no"}>
-                          {matriculasMap[idEst]?.estado  == 'activa' ? "Pagado" : matriculasMap[idEst]?.estado !== 'activa' && matriculasMap[idEst]?.estado !== undefined ? matriculasMap[idEst]?.estado : "Pendiente"}
-                        </span>)
+                        <span className={estadodetalle.length > 0 ? "badge--ok" : "badge--no"}>
+                          {estadodetalle.length > 0 ? "Pagado" : "Pendiente"}
+                        </span>);
                     }
                   },
                   {
                     key: "fecha_pago", label: "Fecha de Pago",
                     render: (_, val) => {
                       const idEst = val.id_estudiante;
+                      const estadodetalle = Array.from(new Set(Object.values(detalles)
+                        .filter(d => d.id_matricula == matriculasMap[idEst]?.id_matricula)
+                        .filter(d => d.mes == mesesSeleccionados[idEst].toLowerCase())
+                        .map(d => d.created_at).filter(Boolean)));
+
                       return (
-                        <span>{matriculasMap[idEst]?.estado == 'activa' ? new Date(matriculasMap[idEst].created_at).toLocaleDateString() : "---"}</span>
-                      )
+                        <span>{estadodetalle.length > 0 ? new Date(estadodetalle).toLocaleDateString() : "---"}</span>
+                      );
                     }
                   }
                 ]}
                 rows={estudiantesFiltrados}
-                onRowClick={(f) => setFila(f)}
+                onRowClick={(f) => { setFila(f); }}
               />
             </div>
           ) : (
             <div className="status-message status-message--empty">
               Tu usuario no tiene permisos para acceder a este módulo.
-            </div>))}
+            </div>)) : (
+          <div className="status-message">
+            Error tipo detalle {tiporecibed} no existe
+          </div>
+        ))}
       </ModuleLayout>
-
       <Modal
-        title={`¿Confirmas que el estudiante ${fila?.nombre || ""} ha realizado el pago de la matrícula?`}
+        title={`¿Confirmas que el estudiante ${fila?.nombre || ""} ha realizado el pago del mes de ${mesesSeleccionados[fila?.id_estudiante] || ""}?`}
         isOpen={modal}
-        onAccept={() => { crearMatricula(); setModal(false); }}
+        onAccept={() => { setModal(false); crearDetalle() }}
         onCancel={() => setModal(false)}
       />
+      <Modal
+        title={tiporecibed}
+        fields={[{ key: "nombre", type: "label", label: `Nombre: ${fila?.nombre}` },
+        { key: "documento", type: "label", label: `Documento: ${fila?.documento}` },
+        { key: "card", type: "card", values: meses, validatevalues: (Object.values(detalles).filter(d => d.id_matricula == matriculasMap[fila?.id_estudiante]?.id_matricula).map(d => d.mes)) }]
+        }
+        isOpen={modalVer}
+        onAccept={() => { setModalVer(false); }}
+        onCancel={() => setModalVer(false)}
+      />
     </div>
-
   );
 };
-
-export default TesoreriaMatricula;
+export default TesoreriaDetalleComponent;

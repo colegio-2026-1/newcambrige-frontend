@@ -84,7 +84,7 @@ const HomePage = () => {
         }
       >
        {cargandoRol ? (
-  <div className="text-vinotinto font-serif text-xl italic animate-pulse">
+  <div className="status-message status-message--loading">
     Verificando credenciales institucionales...
   </div>
 ) : (
@@ -108,7 +108,7 @@ const HomePage = () => {
      </div>   
    ) }
    { !cargandoRol && cards.filter(item => item && Array.isArray(item.roles) && roles.some(rol => item.roles.includes(rol))).length === 0 && (
-        <div className="text-gray-400 italic text-center">
+        <div className="status-message status-message--empty">
           Tu usuario no tiene módulos asignados.
         </div>
       )}

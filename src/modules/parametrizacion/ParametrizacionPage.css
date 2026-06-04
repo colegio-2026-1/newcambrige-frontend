@@ -1,0 +1,86 @@
+/* ==================== LAYOUT PRINCIPAL (PARAMETRIZACIÓN) ==================== */
+.param-page-content {
+  width: 100%;
+  height: 100%;
+  padding: var(--space-8);
+  background-color: #F8F5F2;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* ==================== CONTENEDOR DE LA GRILLA ==================== */
+.param-grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 40px;
+  max-width: 1100px;
+  width: 100%;
+  margin-top: var(--space-6);
+}
+
+/* ==================== TARJETAS (BOTONES 3D) ==================== */
+.param-card {
+  background-color: var(--color-white);
+  border-radius: 16px;
+  padding: var(--space-3) var(--space-5);
+  display: flex;
+  flex-direction: row; 
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-4);
+  cursor: pointer;
+  border: 1px solid var(--color-border-light);
+  box-shadow: 5px 5px 0px #8E2A25; 
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  width: 100%;
+  height: 75px;
+}
+
+.param-card:hover {
+  transform: translate(3px, 3px); 
+  box-shadow: 2px 2px 0px #8E2A25; 
+}
+
+/* ==================== CONTENIDO DE LA TARJETA ==================== */
+.param-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0; 
+}
+
+.param-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.param-title {
+  color: var(--color-text);
+  font-family: var(--font-display); 
+  font-size: 20px;
+  font-weight: 600; 
+  text-align: center;
+  flex: 1; 
+  line-height: 1.2;
+  margin: 0;
+  padding-right: 32px;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 1024px) {
+  .param-grid-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+  }
+}
+
+@media (max-width: 600px) {
+  .param-grid-container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}

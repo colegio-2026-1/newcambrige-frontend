@@ -78,7 +78,7 @@ return (
 
         {/* CERRAR */}
         <button className="modal-close" onClick={onCancel} aria-label="Cerrar">
-            ✕
+        ✕
         </button>
 
         {/* TÍTULO */}
@@ -88,7 +88,7 @@ return (
         <div className="modal-fields">
             {fields.map((field) => (
             <div key={field.key} className="modal-field">
-                <label className="modal-label">{field.label}</label>
+                <label className="modal-label">{(field.type == "label" || field.type ==" card")? "" : field.label }</label>
 
                 {field.type === "select" ? (
                 <select
@@ -113,6 +113,20 @@ return (
                     value={values[field.key] ?? ""}
                     onChange={(e) => onChange?.(field.key, e.target.value)}
                 />
+            ) : field.type == "label" ? (
+
+                <div className="modal-label">
+                    {field.label}
+                </div>
+
+            ) : field.type == "card" ? (
+                <div className="cards-container">
+                    {field.values.map( (m) =>
+                        <span key={m} 
+                        className={`cards-item ${field.validatevalues?.includes(m.toLowerCase()) ? 'is-paid' : ''}`}>
+                            {m}</span>
+                    )}        
+                </div>
             ) : (
                 <input
                     type="text"
