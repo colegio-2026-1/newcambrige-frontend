@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../api/useAuth";
 import { Home } from "lucide-react";
 import {
@@ -12,53 +11,50 @@ import { allrolesuserRequest, allaniosacademicosRequest } from "../../api/endpoi
 import PupitresIcon   from "../../assets/Salon/pupitres.svg";
 import BibliotecaIcon from "../../assets/Salon/biblioteca.svg";
 
-import Header from "../../components/layout/Header";
-import ModuleLayout from "../../components/layout/ModuleLayout";
-import Sidebar from "../../components/layout/Sidebar";
-import SearchBar from "../../components/shared/SearchBar";
-import DataTable from "../../components/shared/DataTable";
+import Header        from "../../components/layout/Header";
+import ModuleLayout  from "../../components/layout/ModuleLayout";
+import Sidebar       from "../../components/layout/Sidebar";
+import SearchBar     from "../../components/shared/SearchBar";
+import DataTable     from "../../components/shared/DataTable";
 import ActionButtons from "../../components/shared/ActionButtons";
-import Modal from "../../components/shared/Modal";
+import Modal         from "../../components/shared/Modal";
 
 export default function PruebasPage() {
-  const navigate = useNavigate();
   const { user, logout } = useAuth();
+
+  // ── Auth ──────────────────────────────────────────────────────────────────
   const userName = user?.nombre || "Usuario";
+  const idUser   = user?.id_usuario;
+  const [roles, setRoles]             = useState([]);
   const [cargandoRol, setCargandoRol] = useState(true);
-  const idUser = user?.id_usuario;
-  const [roles, setRoles] = useState([]);
   const rol = roles[0] || "Rol Desconocido";
 
-  const [fila, setFila] = useState(null);
+  // ── UI ────────────────────────────────────────────────────────────────────
+  const [fila, setFila]   = useState(null);
   const [modal, setModal] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [rows, setRows] = useState([]);
-  const [rowsFiltered, setRowsFiltered] = useState([]);
-  const [salones, setSalones] = useState([]);
-  const [periodos, setPeriodos] = useState([]);
-  const [error, setError] = useState(null);
 
-  // =========================
-  // SIDEBAR
-  // =========================
+  // ── Datos ─────────────────────────────────────────────────────────────────
+  const [loading, setLoading]           = useState(true);
+  const [error, setError]               = useState(null);
+  const [rows, setRows]                 = useState([]);
+  const [rowsFiltered, setRowsFiltered] = useState([]);
+  const [salones, setSalones]           = useState([]);
+  const [periodos, setPeriodos]         = useState([]);
+
+  // ── Maps auxiliares ───────────────────────────────────────────────────────
+  const salonesMap  = {};
+  salones.forEach((s)  => { salonesMap[s.id_salon]    = s; });
+  const periodosMap = {};
+  periodos.forEach((p) => { periodosMap[p.id_periodo] = p; });
+
+  // ── Sidebar ───────────────────────────────────────────────────────────────
   const menuItems = [
     { label: "Inicio",     icon: <Home size={18} />, path: "/salon" },
     { label: "Biblioteca", icon: BibliotecaIcon,      path: "/salon/biblioteca/inicio" },
     { label: "Pupitres",   icon: PupitresIcon,        path: "/salon/pupitre" },
   ];
 
-  // =========================
-  // MAPS RELACIONALES
-  // =========================
-  const salonesMap = {};
-  salones.forEach((s) => { salonesMap[s.id_salon] = s; });
-
-  const periodosMap = {};
-  periodos.forEach((p) => { periodosMap[p.id_periodo] = p; });
-
-  // =========================
-  // COLUMNAS
-  // =========================
+  // ── Columnas ──────────────────────────────────────────────────────────────
   const columns = [
     { key: "codigo", label: "CÓDIGO" },
     { key: "nombre", label: "NOMBRE COMPLETO" },
@@ -85,9 +81,7 @@ export default function PruebasPage() {
     },
   ];
 
-  // =========================
-  // ROLES
-  // =========================
+  // ── Carga de roles ────────────────────────────────────────────────────────
   useEffect(() => {
     const obtenerRoles = async () => {
       if (!idUser) return;
@@ -105,9 +99,7 @@ export default function PruebasPage() {
     obtenerRoles();
   }, [idUser]);
 
-  // =========================
-  // CARGAR DATOS
-  // =========================
+  // ── Carga de datos ────────────────────────────────────────────────────────
   const cargarPruebas = async () => {
     try {
       const response = await getPruebasRequest();
@@ -152,9 +144,7 @@ export default function PruebasPage() {
     cargarTodo();
   }, []);
 
-  // =========================
-  // FILTRAR
-  // =========================
+  // ── Filtros ───────────────────────────────────────────────────────────────
   const FiltrarEstudiantes = (filtros) => {
     let filtered = rows;
     if (filtros.documento) filtered = filtered.filter((r) => r.codigo?.toString().includes(filtros.documento));
@@ -163,7 +153,7 @@ export default function PruebasPage() {
     if (filtros.Grupo)     filtered = filtered.filter((r) => (salonesMap[r.id_salon]?.grupo || r.grupo)?.toString() === filtros.Grupo.toString());
     if (filtros.Periodo) {
       filtered = filtered.filter((r) => {
-        const salon = salonesMap[r.id_salon];
+        const salon   = salonesMap[r.id_salon];
         const periodo = periodosMap[salon?.id_periodo];
         return periodo?.nombre?.toString() === filtros.Periodo.toString();
       });
@@ -171,12 +161,8 @@ export default function PruebasPage() {
     setRowsFiltered(filtered);
   };
 
-  // =========================
-  // ACCIONES
-  // =========================
-  const handleRowClick = (f) => {
-    setFila(f);
-  };
+  // ── Acciones ──────────────────────────────────────────────────────────────
+  const handleRowClick = (f) => setFila(f);
 
   const handleValidarPago = () => {
     if (!fila) { alert("Debes seleccionar una fila"); return; }
@@ -190,11 +176,11 @@ export default function PruebasPage() {
       const nuevoEstado = "visto";
       const fechaActual = new Date().toISOString().split("T")[0];
       await updateEstadoPruebaRequest(fila.id_prueba, nuevoEstado);
-      const rowsActualizados = rows.map((r) =>
+      const actualizados = rows.map((r) =>
         r.id_prueba === fila.id_prueba ? { ...r, estado: nuevoEstado, fecha_pago: fechaActual } : r
       );
-      setRows(rowsActualizados);
-      setRowsFiltered(rowsActualizados);
+      setRows(actualizados);
+      setRowsFiltered(actualizados);
       setFila(null);
       setModal(false);
     } catch (error) {
@@ -203,24 +189,16 @@ export default function PruebasPage() {
     }
   };
 
-  // =========================
-  // LOADING / ERROR
-  // =========================
+  // ── Loading / Error ───────────────────────────────────────────────────────
   if (loading) return <div>Cargando pruebas...</div>;
   if (error)   return <div>Error cargando datos: {error}</div>;
 
-  // =========================
-  // RENDER
-  // =========================
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div>
       <style>{`
         .badge--ok      { display:inline-block; padding:.4rem .8rem; background:#D4EDDA; color:#155724; border-radius:.4rem; font-weight:600; font-size:.9rem; }
         .badge--warning { display:inline-block; padding:.4rem .8rem; background:#FFF3CD; color:#856404; border-radius:.4rem; font-weight:600; font-size:.9rem; }
-        .modal-field .modal-input  { display:none !important; }
-        .modal-fields              { display:flex !important; justify-content:center !important; align-items:center !important; }
-        .modal-field               { display:flex !important; justify-content:center !important; width:100% !important; }
-        .modal-field .modal-label  { display:block !important; width:100% !important; text-align:center !important; margin:0 !important; }
       `}</style>
 
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
@@ -236,58 +214,54 @@ export default function PruebasPage() {
           />
         }
         actions={
-          <div style={{ width:"100%", display:"flex", justifyContent:"flex-end", gap:"0.5rem", paddingRight:"1rem", marginTop:"0.4rem", paddingTop:"0.4rem" }}>
-            <ActionButtons
-              filaSeleccionada={fila}
-              botones={[
-                { label: "Validar Pago", onClick: handleValidarPago, disabled: !fila || fila?.estado === "visto", variante: "primary" },
-              ]}
-            />
-          </div>
+          <ActionButtons
+            filaSeleccionada={fila}
+            botones={[
+              {
+                label: "Validar Pago",
+                onClick: handleValidarPago,
+                disabled: !fila || fila?.estado === "visto",
+                variante: "primary",
+              },
+            ]}
+          />
         }
       >
-        <SearchBar
-          loading={loading}
-          fields={[
-            { key: "documento", label: "Código",  type: "number", maxLength: 10 },
-            { key: "nombre",    label: "Nombre",  type: "text" },
-            { key: "Grado",     label: "Grado",   type: "select", options: Array.from(new Set(Object.values(salonesMap).map((s) => s.grado).filter(Boolean))) },
-            { key: "Grupo",     label: "Grupo",   type: "select", options: Array.from(new Set(Object.values(salonesMap).map((s) => s.grupo).filter(Boolean))) },
-            { key: "Periodo",   label: "Periodo", type: "select", options: Array.from(new Set(Object.values(periodosMap).map((p) => p.nombre).filter(Boolean))) },
-          ]}
-          onSearch={(f) => { FiltrarEstudiantes(f); console.log(f); }}
-        />
+        <div>
+          <SearchBar
+            fields={[
+              { key: "documento", label: "Código",  type: "number", maxLength: 10 },
+              { key: "nombre",    label: "Nombre",  type: "text" },
+              {
+                key: "Grado", label: "Grado", type: "select",
+                options: Array.from(new Set(Object.values(salonesMap).map((s) => s.grado).filter(Boolean))),
+              },
+              {
+                key: "Grupo", label: "Grupo", type: "select",
+                options: Array.from(new Set(Object.values(salonesMap).map((s) => s.grupo).filter(Boolean))),
+              },
+              {
+                key: "Periodo", label: "Periodo", type: "select",
+                options: Array.from(new Set(Object.values(periodosMap).map((p) => p.nombre).filter(Boolean))),
+              },
+            ]}
+            onSearch={(f) => FiltrarEstudiantes(f)}
+          />
 
-        <div style={{ marginTop:"1rem", background:"#FFFFFF", borderRadius:"0.8rem", overflow:"hidden", border:"1px solid #D9D9D9" }}>
-          <div style={{ padding:"0.5rem 1rem", background:"#f5f5f5", borderBottom:"1px solid #D9D9D9", fontSize:"0.9rem", fontWeight:"600" }}>
-            {rowsFiltered.length} estudiantes
-          </div>
-          <DataTable columns={columns} rows={rowsFiltered} emptyText="No hay datos disponibles" onRowClick={handleRowClick} />
+          <DataTable
+            columns={columns}
+            rows={rowsFiltered}
+            emptyText="No hay datos disponibles"
+            onRowClick={handleRowClick}
+          />
         </div>
       </ModuleLayout>
 
       <Modal
-        title="CONFIRMACIÓN"
+        title={`¿CONFIRMAS QUE EL ESTUDIANTE ${fila?.nombre ? fila.nombre.toUpperCase() : "[NOMBRE]"} HA CUMPLIDO CON EL PAGO DE LA PRUEBA?`}
         isOpen={modal}
-        values={{}}
-        onChange={() => {}}
         onAccept={handleConfirmarPago}
         onCancel={() => { setModal(false); setFila(null); }}
-        fields={[
-          {
-            key: "mensaje_alerta",
-            label: (
-              <div style={{ display:"block", textAlign:"center", padding:"1.5rem 0", fontSize:"1.15rem", fontWeight:"bold", color:"#000000", textTransform:"uppercase", lineHeight:"1.6", fontFamily:"inherit", width:"100%", marginBottom:"2rem" }}>
-                ¿CONFIRMAS QUE EL ESTUDIANTE{" "}
-                <span style={{ color:"#1976D2", fontWeight:"bold" }}>
-                  {fila?.nombre ? fila.nombre.toUpperCase() : "[NOMBRE]"}
-                </span>
-                , HA CUMPLIDO CON EL PAGO DE LA PRUEBA?
-              </div>
-            ),
-            type: "text",
-          },
-        ]}
       />
     </div>
   );

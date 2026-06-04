@@ -490,12 +490,12 @@ export default function BibliotecaPage() {
               pestanaActiva === "prestamos"
                 ? [
                     { label: "Asignar Libro",  onClick: abrirModalAsignar,  siempreActivo: true,         variante: "primary" },
-                    { label: "Devolver Libro", onClick: abrirModalDevolver, disabled: !filaSeleccionada, variante: "secondary" },
+                    { label: "Devolver Libro", onClick: abrirModalDevolver, disabled: !filaSeleccionada, variante: "primary" },
                   ]
                 : [
                     { label: "Agregar Libro",  onClick: abrirModalAgregar,   siempreActivo: true,                                                       variante: "primary" },
-                    { label: "Editar Libro",   onClick: abrirModalEditar,    disabled: !filaSeleccionada || filaSeleccionada.disponible === "Prestado",  variante: "secondary" },
-                    { label: "Eliminar Libro", onClick: handleEliminarLibro, disabled: !filaSeleccionada || filaSeleccionada.disponible === "Prestado",  variante: "danger" },
+                    { label: "Editar Libro",   onClick: abrirModalEditar,    disabled: !filaSeleccionada || filaSeleccionada.disponible === "Prestado",  variante: "primary" },
+                    { label: "Eliminar Libro", onClick: handleEliminarLibro, disabled: !filaSeleccionada || filaSeleccionada.disponible === "Prestado",  variante: "primary" },
                   ]
             }
           />
@@ -516,7 +516,6 @@ export default function BibliotecaPage() {
               ]}
             />
             <div style={{ marginTop: "1rem", background: "#fff", borderRadius: ".8rem", overflow: "hidden", border: "1px solid #D9D9D9" }}>
-              {prestamosFiltered.length} préstamos
               <DataTable
                 columns={columnasInicio}
                 rows={prestamosFiltered}
@@ -540,7 +539,6 @@ export default function BibliotecaPage() {
               ]}
             />
             <div style={{ marginTop: "1rem", background: "#fff", borderRadius: ".8rem", overflow: "hidden", border: "1px solid #D9D9D9" }}>
-              {librosFiltered.length} libros
               <DataTable
                 columns={columnasLibros}
                 rows={librosFiltered}
