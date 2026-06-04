@@ -1,11 +1,11 @@
 // src/routes/AppRouter.jsx
-// ⚠️  Este archivo es el AppRouter de la rama feature/jhon-dashboard
+// ⚠️  Rama: feature/jhon-dashboard
 // ⚠️  Solo contiene las rutas necesarias para el módulo Dashboard.
-// ⚠️  Al momento de integrar, se fusionan las rutas del equipo.
+// ⚠️  Al integrar con develop, se fusionan las rutas del equipo.
 import { Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 
-import LoginPage      from "../modules/auth/LoginPage";
+import LoginPage      from "../modules/auth/LoginPage.tsx";
 import Home          from "../modules/Home/HomePage";
 import DashboardPage from "../modules/dashboard/DashboardPage";
 
