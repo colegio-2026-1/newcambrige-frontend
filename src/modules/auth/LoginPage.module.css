@@ -1,13 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&display=swap');
+/* ============================================
+   Login.css
+   src/pages/Login/Login.css
+   ============================================ */
 
 @font-face {
-  font-family: 'HeyGotcha';
-  src: url('../../assets/fonts/HeyGotchaRegular.ttf') format('truetype');
+  font-family: 'Bentham';
+  src: url('../../assets/fonts/Bentham-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 
-/* RESET */
+@font-face {
+  font-family: 'Staatliches';
+  src: url('../../assets/fonts/Staatliches-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* ── RESET ── */
 *,
 *::before,
 *::after {
@@ -16,7 +26,7 @@
   padding: 0;
 }
 
-/* ROOT */
+/* ── ROOT ── */
 .login-root {
   --red: #8E2A25;
   --blue: #2E5FA7;
@@ -28,10 +38,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Lato', sans-serif;
-
+  font-family: 'Bentham', serif;
   padding: 20px;
-
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -45,23 +53,21 @@
   background: rgba(0, 0, 0, 0.25);
 }
 
-/* TARJETA */
+/* ── TARJETA ── */
 .login-card {
   position: relative;
   z-index: 1;
   background: var(--white);
   border-radius: 26px;
-
   padding: 70px 40px 80px;
   width: 100%;
   max-width: 520px;
-
   box-shadow: 0 30px 75px rgba(0, 0, 0, 0.35);
 }
 
-/* TÍTULO */
+/* ── TÍTULO ── */
 .login-title {
-  font-family: 'HeyGotcha', cursive;
+  font-family: 'Staatliches', cursive;  /* mantenemos Staatliches solo en el título */
   font-size: 2rem;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -71,7 +77,7 @@
   margin-bottom: 50px;
 }
 
-/* INPUT GROUP */
+/* ── INPUT GROUP ── */
 .input-group {
   display: flex;
   align-items: center;
@@ -88,7 +94,7 @@
   box-shadow: 0 0 0 5px rgba(46, 95, 167, 0.15);
 }
 
-/* ICONO */
+/* ── ICONO ── */
 .input-icon {
   width: 58px;
   height: 58px;
@@ -105,30 +111,34 @@
   fill: var(--blue);
 }
 
-/* INPUT */
+/* ── INPUT ── */
 .input-field {
   flex: 1;
   border: none;
   outline: none;
   padding: 18px;
   background: transparent;
-  font-size: 1.1rem;
+  font-family: 'Bentham', serif;
+  font-size: 22px;
+  font-weight: normal;
   color: var(--dark);
 }
 
 .input-field::placeholder {
   color: #888;
+  font-family: 'Bentham', serif;
 }
 
-/* ERROR */
+/* ── ERROR ── */
 .login-error {
-  font-size: 0.95rem;
+  font-family: 'Bentham', serif;
+  font-size: 20px;
   color: var(--red);
   text-align: center;
   margin-bottom: 14px;
 }
 
-/* BOTÓN */
+/* ── BOTÓN ── */
 .login-btn {
   margin-top: 30px;
   width: 100%;
@@ -137,8 +147,9 @@
   border-radius: 8px;
   background: var(--red);
   color: var(--white);
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-family: 'Bentham', serif;
+  font-size: 22px;
+  font-weight: normal;
   letter-spacing: 0.06em;
   cursor: pointer;
   box-shadow: 0 6px 18px rgba(142, 42, 37, 0.4);
@@ -160,7 +171,7 @@
   cursor: not-allowed;
 }
 
-/* SPINNER */
+/* ── SPINNER ── */
 .btn-spinner {
   display: inline-block;
   width: 18px;
@@ -174,17 +185,11 @@
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
+/* ── RESPONSIVE ── */
 
-/* ========================= */
-/* RESPONSIVE */
-/* ========================= */
-
-/* Tablets */
 @media (max-width: 768px) {
   .login-card {
     padding: 50px 40px 60px;
@@ -202,11 +207,14 @@
   }
 
   .input-field {
-    font-size: 1rem;
+    font-size: 18px;
+  }
+
+  .login-btn {
+    font-size: 18px;
   }
 }
 
-/* Móviles */
 @media (max-width: 480px) {
   .login-root {
     padding: 15px;
@@ -239,16 +247,15 @@
 
   .input-field {
     padding: 14px;
-    font-size: 0.95rem;
+    font-size: 16px;
   }
 
   .login-btn {
     padding: 14px;
-    font-size: 1rem;
+    font-size: 16px;
   }
 }
 
-/* Móviles pequeños */
 @media (max-width: 360px) {
   .login-card {
     padding: 30px 18px 40px;
@@ -259,122 +266,81 @@
   }
 }
 
-
-/* ========================= */
-/* POPUP OVERLAY */
-/* ========================= */
-
+/* ── POPUP OVERLAY ── */
 .popup-overlay {
   position: fixed;
   top: 0;
   left: 0;
-
   width: 100%;
   height: 100%;
-
   background: rgba(0, 0, 0, 0.55);
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   z-index: 9999;
-
   backdrop-filter: blur(3px);
 }
 
-/* ========================= */
-/* POPUP CARD */
-/* ========================= */
-
+/* ── POPUP CARD ── */
 .popup-card {
   width: 420px;
   max-width: 90%;
-
   background: #ffffff;
-
   border-radius: 18px;
-
   overflow: hidden;
-
   animation: popupShow 0.25s ease;
 }
 
-/* ========================= */
-/* HEADER */
-/* ========================= */
-
+/* ── POPUP HEADER ── */
 .popup-header {
   background: #8E2A25;
-
   color: white;
-
   padding: 18px 24px;
-
-  font-size: 18px;
-  font-weight: 700;
+  font-family: 'Bentham', serif;
+  font-size: 22px;
+  font-weight: normal;
 }
 
-/* ========================= */
-/* BODY */
-/* ========================= */
-
+/* ── POPUP BODY ── */
 .popup-body {
   padding: 28px 24px;
-
+  font-family: 'Bentham', serif;
+  font-size: 20px;
+  font-weight: normal;
   color: #333;
-
-  font-size: 16px;
   line-height: 1.5;
 }
 
-/* ========================= */
-/* FOOTER */
-/* ========================= */
-
+/* ── POPUP FOOTER ── */
 .popup-footer {
   padding: 0 24px 24px;
-
   display: flex;
   justify-content: flex-end;
 }
 
-/* ========================= */
-/* BUTTON */
-/* ========================= */
-
+/* ── POPUP BUTTON ── */
 .popup-btn {
   border: none;
-
   background: #8E2A25;
   color: white;
-
   padding: 10px 18px;
-
   border-radius: 10px;
-
-  font-weight: 600;
-
+  font-family: 'Bentham', serif;
+  font-size: 20px;
+  font-weight: normal;
   cursor: pointer;
-
-  transition: 0.2s;
+  transition: opacity 0.2s;
 }
 
 .popup-btn:hover {
   opacity: 0.9;
 }
 
-/* ========================= */
-/* ANIMATION */
-/* ========================= */
-
 @keyframes popupShow {
-
   from {
     transform: scale(0.9);
     opacity: 0;
   }
-
   to {
     transform: scale(1);
     opacity: 1;

@@ -19,6 +19,7 @@ import Sidebar from "../../components/layout/Sidebar";
 
 const Tesoreria = () => {
   const navigate = useNavigate();
+  const selectedMenu = "Tesoreria";
   //para las tarjetas del dashboard
   const cards = [
     { title: 'Matrícula', icon: MatriculaLogo, path: "/tesoreria/matricula", roles: ["secretaria", "admin", "tesoreria"] },
@@ -28,6 +29,7 @@ const Tesoreria = () => {
   //para el sidebar
   const modulos = [
     { label: "Inicio", icon: <Home />, path: "/home" },
+    { label: "Tesoreria", path: "/tesoreria/", roles: ["secretaria", "admin", "tesoreria"] },
     { label: "Notificaciones", path: "/tesoreria/notificaciones", roles: ["secretaria", "admin", "tesoreria"] },
   ];
   //variables de autenticación y roles
@@ -70,39 +72,44 @@ const Tesoreria = () => {
               if (!modulo.roles || !Array.isArray(modulo.roles) || modulo.roles.length === 0) return true;
               return roles.some(rol => modulo.roles.includes(rol));
             })}
+            selectedMenu={selectedMenu}
             user={{ nombre: userName, rol: rol }}
             logout={logout}
           />
         }
       >{cargandoRol ? (
-        <div className="text-vinotinto font-serif text-xl italic animate-pulse">
+        <div className="status-message status-message--loading">
           Verificando credenciales institucionales...
         </div>
       ) : (
 
-        <div className="cards-grid">
-          {cards
-            .filter(card =>
-              card &&
-              Array.isArray(card.roles) &&
-              card.roles.length > 0 &&
-              roles.some(rol => card.roles.includes(rol))
-            )
-            .map((card) => (
-              <div className="dashboard-card" key={card.title} onClick={() => navigate(card?.path)}>
-                <h2>{card.title}</h2>
-                <div className="card-icon">
-                  <img src={card.icon} alt={card.title} />
-                </div>
-              </div>
-            ))}
+       <div className="cards-grid">
+    {cards
+      .filter(card =>
+        card &&
+        Array.isArray(card.roles) &&
+        card.roles.length > 0 &&
+        roles.some(rol => card.roles.includes(rol))
+      )
+      .map((card) => (
+        <div 
+          className="dashboard-card" 
+          key={card.title} 
+          onClick={() => navigate(card?.path)}
+        >
+          <h2>{card.title}</h2>
+          <div className="card-icon">
+            <img src={card.icon} alt={card.title} />
+          </div>
         </div>
+      ))}
+  </div>
       )}
         {!cargandoRol
           && cards.filter(item => item && Array.isArray(item.roles)
             && roles.some(rol => item.roles.includes(rol))).length === 0
           && (
-            <div className="text-gray-400 italic text-center">
+            <div className="status-message status-message--empty">
               Tu usuario no tiene módulos asignados.
             </div>
           )}

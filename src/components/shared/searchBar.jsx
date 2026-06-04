@@ -90,9 +90,14 @@ return (
             type={field.type === "number" ? "number" : "text"}
             className="searchbar-input"
             value={values[field.key]}
-            onChange={(e) => handleChange(field.key, e.target.value)}
+            onChange={(e) => { 
+                const valor = e.target.value;
+                if (field.maxLength && valor.length > field.maxLength) {
+                    return; 
+                };
+                handleChange(field.key, e.target.value); 
+                }}
             onKeyDown={handleKeyDown}
-            maxLength={field.maxLength}
             />
         )}
 

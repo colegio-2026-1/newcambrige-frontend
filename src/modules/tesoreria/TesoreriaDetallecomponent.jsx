@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import {
-  allestudiantesbyperiodoRequest, allsalonesbyperiodoRequest, allmatriculasbyperiodoRequest,
-  allrolesuserRequest, allaniosacademicosRequest,
-  alldetallematriculabyperiodoRequest, alltipoconceptoRequest, crearDetalleRequest
-} from '../../api/endpoints';
+import { allrolesuserRequest, allaniosacademicosRequest } from '../../api/endpoints';
+import { allestudiantesbyperiodoRequest, allsalonesbyperiodoRequest, allmatriculasbyperiodoRequest,
+  alldetallematriculabyperiodoRequest, alltipoconceptoRequest, crearDetalleRequest } from '../../api/endpointsTesoreria';
 
 import { Home } from "lucide-react";
 import { useAuth } from "../../api/useAuth";
@@ -16,7 +14,8 @@ import ActionButtons from "../../components/shared/ActionButtons";
 import Modal from "../../components/shared/Modal";
 
 
-const TesoreriaDetalleComponent = ({ tiporecibed }) => {
+const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }) => {
+  const [selectedModule, setSelectedModule] = useState(selectedMenu);
   const [estudiantes, setEstudiantes] = useState([]);
   const [estudiantesFiltrados, setEstudiantesFiltrados] = useState([]);
   const [estudiantesMatriculados, setEstudiantesMatriculados] = useState([]);
@@ -50,9 +49,8 @@ const TesoreriaDetalleComponent = ({ tiporecibed }) => {
     "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre"
   ];
   //para el sidebar
-  const modulos = [
+  const modulos = modulosRecibed || [
     { label: "Inicio", icon: <Home />, path: "/Tesoreria" },
-
   ];
   //maps para acceso rápido a datos relacionados
   const salonesMap = {};
@@ -185,7 +183,7 @@ const TesoreriaDetalleComponent = ({ tiporecibed }) => {
   }, [filtros.Periodo, tipo]);
 
   useEffect(() => {
-    const Matriculados = estudiantes.filter(e => matriculasMap[e.id_estudiante]);
+    const Matriculados = estudiantes.filter(e => matriculasMap[e.id_estudiante]).filter(e => matriculasMap[e.id_estudiante]?.estado == 'activa');
     setEstudiantesMatriculados(Matriculados);
     setEstudiantesFiltrados(Matriculados);
     Matriculados.forEach(estudiante => {
@@ -218,6 +216,7 @@ const TesoreriaDetalleComponent = ({ tiporecibed }) => {
               return roles.some(rol => modulo.roles.includes(rol));
             })}
             user={{ nombre: userName, rol: rol }}
+            selectedMenu={selectedModule}
             onLogout={logout}
           />}
         actions={
@@ -247,7 +246,7 @@ const TesoreriaDetalleComponent = ({ tiporecibed }) => {
       >
 
         {cargandoRol || cargandoPeriodos || cargandotipo ? (
-          <div className="text-gray-400 italic text-center">
+          <div className="status-message status-message--loading">
             Cargando Modulo {tiporecibed}...
           </div>
         ) : (tipoMap[tiporecibed] && !cargandotipo ? (
@@ -375,10 +374,10 @@ const TesoreriaDetalleComponent = ({ tiporecibed }) => {
               />
             </div>
           ) : (
-            <div className="text-gray-400 italic text-center">
+            <div className="status-message status-message--empty">
               Tu usuario no tiene permisos para acceder a este módulo.
             </div>)) : (
-          <div className="text-gray-400 italic text-center">
+          <div className="status-message">
             Error tipo detalle {tiporecibed} no existe
           </div>
         ))}
