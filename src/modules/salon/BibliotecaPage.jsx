@@ -285,7 +285,7 @@ export default function BibliotecaPage() {
           return;
         }
         await asignarLibroRequest({
-          codigo:           parseInt(formValues.codigo, 10) || 0,
+          codigo:           formValues.codigo.trim(),
           libro:            formValues.titulo_libro,
           fecha_devolucion: formValues.fecha_entrega,
           estado:           "Prestado",
