@@ -53,7 +53,7 @@ const ParametrizacionPage = () => {
     { title: "Instrumentos", icon: null, path: "/parametrizacion/instrumentos" },
     { title: "Objetos", icon: null, path: "/parametrizacion/objetos" },
     { title: "Asignar titulares", icon: null, path: "/parametrizacion/titulares" },
-    { title: "Robot", icon: null, path: "/parametrizacion/robot" },
+    { title: "Robot", icon: null, path: "/parametrizacion/importacion" },
   ];
 
   // ==========================================

@@ -11,6 +11,7 @@ import TesoreriaRouter from "./TesoreriaRouter";
 
 import ParametrizacionPage from '../modules/parametrizacion/ParametrizacionPage';
 import UsuariosPage from '../modules/parametrizacion/UsuariosPage';
+import ImportacionPage from '../modules/importacion/ImportacionPage';
 
 import NotFound from "../modules/notFound/notFound";
 
@@ -100,6 +101,15 @@ const AppRouter = () => {
         element={
           <ProtectedRoute>
              <UsuariosPage />
+          </ProtectedRoute>
+        } 
+        />
+      
+      <Route 
+        path="/parametrizacion/importacion" 
+        element={
+          <ProtectedRoute>
+             <ImportacionPage />
           </ProtectedRoute>
         } 
         />
