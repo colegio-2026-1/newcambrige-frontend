@@ -3,6 +3,19 @@ VARIABLES GLOBALES — NEW CAMBRIDGE SCHOOL
 Importar en main.jsx o index.css:
 @import './styles/variables.css';
    ============================================ */
+@font-face {
+  font-family: 'Bentham';
+  src: url('../assets/fonts/Bentham-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Staatliches';
+  src: url('../assets/fonts/Staatliches-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}   
 
 @font-face {
   font-family: 'Bentham';
@@ -33,14 +46,14 @@ Importar en main.jsx o index.css:
 --color-primary-light:  #B03530;   /* estados activos */
 
   /* ── COLORES SECUNDARIOS ── */
---color-secondary:      #1B3A5C;   /* azul oscuro — botones Aceptar */
---color-secondary-dark: #122840;   /* hover botón */
+--color-secondary:      #3F5D93;   /* azul oscuro — botones Aceptar */
+--color-secondary-dark: #395572;   /* hover botón */
 
   /* ── NEUTROS ── */
 --color-white:          #FFFFFF;
---color-bg:             #F5F0E8;   /* fondo general crema */
---color-input-bg:       #EDE8DC;   /* fondo de inputs */
---color-border:         #8E2A25;   /* borde inputs (rojo tenue) */
+--color-bg:             #FFFFFF;   /* fondo general crema */
+--color-input-bg:       #E9E9E7;   /* fondo de inputs */
+--color-border:         #C0C0C0;   /* borde inputs (rojo tenue) */
 --color-border-light:   #C9B99A;   /* borde suave */
 
   /* ── TEXTO ── */
@@ -49,9 +62,9 @@ Importar en main.jsx o index.css:
 --color-text-white:     #FFFFFF;
 
   /* ── ESTADOS ── */
---color-success:        #2E7D4F;
+--color-success:        #44D231;
 --color-success-bg:     #DFF2E9;
---color-warning:        #A06000;
+--color-warning:        #FFFF00;
 --color-warning-bg:     #FFF3CD;
 --color-danger:         #8E2A25;
 --color-danger-bg:      #FDECEA;
