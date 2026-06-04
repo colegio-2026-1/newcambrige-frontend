@@ -51,4 +51,3 @@ coverage/
 *.bak
 *.swp
 *~
-package-lock.json

@@ -3,6 +3,10 @@
    src/pages/Login/Login.css
    ============================================ */
 
+
+
+/* ── RESET ── */
+
 @font-face {
   font-family: 'Bentham';
   src: url('../../assets/fonts/Bentham-Regular.ttf') format('truetype');
@@ -17,7 +21,14 @@
   font-style: normal;
 }
 
-/* ── RESET ── */
+@font-face {
+  font-family: 'HeyGotcha';
+  src: url('../../assets/fonts/HeyGotchaRegular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
 *,
 *::before,
 *::after {
@@ -67,7 +78,7 @@
 
 /* ── TÍTULO ── */
 .login-title {
-  font-family: 'Staatliches', cursive;  /* mantenemos Staatliches solo en el título */
+  font-family: 'Staatliches', cursive;  
   font-size: 2rem;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -118,15 +129,16 @@
   outline: none;
   padding: 18px;
   background: transparent;
-  font-family: 'Bentham', serif;
+  font-family: 'HeyGotcha', serif;
   font-size: 22px;
   font-weight: normal;
   color: var(--dark);
+  letter-spacing: 0.1em;
 }
 
 .input-field::placeholder {
   color: #888;
-  font-family: 'Bentham', serif;
+  font-family: 'HeyGotcha', serif;
 }
 
 /* ── ERROR ── */
@@ -147,7 +159,7 @@
   border-radius: 8px;
   background: var(--red);
   color: var(--white);
-  font-family: 'Bentham', serif;
+  font-family: 'HeyGotcha', serif;
   font-size: 22px;
   font-weight: normal;
   letter-spacing: 0.06em;
