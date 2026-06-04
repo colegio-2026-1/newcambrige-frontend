@@ -22,354 +22,51 @@ button, input, select {
   background-color: var(--color-white); 
 }
 
-/* ==================== TOOLBAR ==================== */
-.toolbar {
-  display: flex;
-  align-items: center;
-  padding: var(--space-4) var(--space-6);
-  border-bottom: 2px solid var(--color-bg);
-  box-shadow: 0 4px 6px -4px rgba(0,0,0,0.1); 
-  gap: var(--space-6);
-}
-
-.search-group {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.search-group label {
-  font-family: var(--font-display);
-  color: var(--color-text);
-  font-size: var(--text-base);
-}
-
-.search-input-wrapper {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.search-input-wrapper input {
-  background-color: var(--color-input-bg);
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: var(--space-2) var(--space-3);
-  width: 250px;
-  outline: none;
-}
-
-.icon-btn {
-  background-color: #4A6B9C; 
-  color: white;
-  border: none;
-  border-radius: 50%; 
-  width: 35px;
-  height: 35px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
-}
-
-.btn-primary {
-  background-color: #4A6B9C; 
-  color: white;
-  border: none;
-  border-radius: 20px;
-  padding: var(--space-2) var(--space-6);
-  font-family: var(--font-body);
-  font-size: var(--text-base);
-  cursor: pointer;
-  box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
-}
-
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  border-radius: 20px;
-  padding: var(--space-2) var(--space-6);
-  font-family: var(--font-body);
-  cursor: pointer;
-  box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
-}
-
 /* ==================== ÁREA PRINCIPAL ==================== */
 .main-area {
   flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start; 
-  padding-top: 50px;
+  padding: 20px 30px;
 }
 
-.empty-state p {
-  color: var(--color-text-muted);
-  font-family: var(--font-display);
-  font-size: var(--text-md);
-  margin: 0;
-}
-
-/* ==================== MODAL ==================== */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.4);
+.empty-state {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  height: 200px;
+  color: #666;
+  font-size: 18px;
 }
 
-.modal-content {
-  background-color: var(--color-white);
-  border-radius: var(--radius-md);
-  width: 600px;
-  box-shadow: var(--shadow-md);
-  overflow: hidden;
-}
-
-.modal-header {
-  background-color: #D0E1FF; 
-  padding: 24px 20px; 
+.table-layout-wrapper {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-}
-
-.modal-header h3 {
-  font-family: 'Staatliches', sans-serif !important;
-  font-size: 32px !important; 
-  letter-spacing: 2px;
-  color: #333333;
-  margin: 0;
-  line-height: 1;
-  text-align: center;
-}
-
-.modal-close {
-  background: none;
-  border: none;
-  font-size: 24px;
-  font-weight: bold;
-  cursor: pointer;
-  color: var(--color-text);
-  position: absolute;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.modal-body {
-  padding: var(--space-6);
-}
-
-.modal-inputs-row {
-  display: flex;
-  gap: var(--space-4);
-  margin-bottom: var(--space-6);
-}
-
-.input-group {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  flex: 1;
-}
-
-.input-group label {
-  font-family: var(--font-display);
-  font-size: var(--text-sm);
-  white-space: nowrap;
-}
-
-.input-group input {
-  background-color: var(--color-input-bg);
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: var(--space-2);
+  align-items: flex-end; 
+  gap: var(--space-5);
   width: 100%;
-  outline: none;
 }
 
-/* ==================== SECCIÓN DE ROLES ==================== */
-.roles-section {
-  text-align: center;
-}
-
-.roles-section h4 {
-  font-family: 'Staatliches', sans-serif !important;
-  font-size: 22px !important; 
-  letter-spacing: 1px;
-  color: #333333;
-  text-align: center;
-  margin-bottom: var(--space-3);
-}
-
-.roles-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 15px; 
-}
-
-.rol-btn {
-  flex: 0 0 calc(33.333% - 15px); 
-  min-width: 120px;
-  background-color: var(--color-white);
-  border: 1px solid #AAB6C7; 
-  padding: var(--space-2);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-display);
-  color: var(--color-text);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.rol-btn.active {
-  background-color: #DDE6F4; 
-  border-color: #4A6B9C; 
-  font-weight: bold;
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: center;
-  gap: var(--space-4);
-  padding: var(--space-4);
-}
-
-/* ==================== TABLA Y BOTÓN EDITAR ==================== */
-.table-container {
-  width: 100%;
+.table-main-section {
+  flex: 1; 
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
-  margin-top: var(--space-4);
 }
 
-.table-actions {
-  display: flex;
-  justify-content: flex-end;
-  width: 100%;
+.datatable-fixed-container {
+  min-height: 370px; 
 }
 
-.btn-editar {
-  background-color: #4A6B9C;
-  color: white;
-  border: none;
-  border-radius: 20px;
-  padding: var(--space-2) var(--space-8);
-  font-family: var(--font-body);
-  font-size: var(--text-base);
-  cursor: pointer;
-  box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
-  transition: opacity 0.2s;
-}
-
-.btn-editar:disabled {
-  background-color: #AAB6C7;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
-.btn-danger {
-  background-color: #8E2A25; 
-  color: white;
-  border: none;
-  border-radius: 20px;
-  padding: var(--space-2) var(--space-6);
-  font-family: var(--font-body);
-  cursor: pointer;
-  box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
-}
-
-/* ==================== TOGGLE SWITCH (ESTADO) ==================== */
-.toggle-group {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  margin-left: auto; 
-}
-
-.toggle-group label {
-  font-family: var(--font-display);
-  font-size: var(--text-sm);
-}
-
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 44px;
-  height: 24px;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-color: #ccc;
-  transition: .4s;
-  border-radius: 24px;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: .4s;
-  border-radius: 50%;
-}
-
-input:checked + .slider {
-  background-color: #4A6B9C;
-}
-
-input:checked + .slider:before {
-  transform: translateX(20px);
-}
-
-/* ==================== FOOTER DE TABLA Y PAGINACIÓN ==================== */
-.table-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: var(--space-4);
-  width: 100%;
-}
-
-.footer-left, .footer-right {
-  flex: 1;
-}
-
-.footer-right {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.footer-center {
-  flex: 1;
+.pagination-center {
   display: flex;
   justify-content: center;
   gap: var(--space-3);
+  margin-top: var(--space-9);
 }
 
+.side-actions {
+  margin-bottom: 45px; 
+  margin-top: 380px;
+}
+
+/* ==================== BOTONES CIRCULARES (PAGINACIÓN) ==================== */
 .btn-circle {
   width: 32px;
   height: 32px;
@@ -396,105 +93,158 @@ input:checked + .slider:before {
   box-shadow: none;
 }
 
-/* ==================== BARRA DE HERRAMIENTAS COMPACTA ==================== */
-.toolbar-custom {
+/* ==================== MODAL ==================== */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: var(--color-white);
+  border-radius: var(--radius-md);
+  width: 600px;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.modal-header {
+  background-color: #D0E1FF; 
+  padding: 24px 20px; 
+  display: flex; justify-content: center; align-items: center;
+  position: relative;
+}
+
+.modal-header h3 {
+  font-family: 'Staatliches', sans-serif !important;
+  font-size: 32px !important; 
+  letter-spacing: 2px;
+  color: #333333;
+  margin: 0;
+  line-height: 1;
+}
+
+.modal-close {
+  background: none; border: none; font-size: 24px; font-weight: bold;
+  cursor: pointer; color: var(--color-text); position: absolute; right: 20px;
+}
+
+.modal-body { padding: var(--space-6); }
+
+.modal-inputs-row {
+  display: flex; gap: var(--space-4); margin-bottom: var(--space-6);
+}
+
+.input-group {
+  display: flex; align-items: center; gap: var(--space-2); flex: 1;
+}
+
+.input-group label {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.input-group input {
+  background-color: #EBEBEB;
+  border: 1px solid #CCCCCC;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 18px;
+  width: 100%;
+  outline: none;
+  box-sizing: border-box;
+}
+
+/* ==================== TOGGLE SWITCH ==================== */
+.toggle-group {
+  display: flex; align-items: center; gap: var(--space-3); margin-left: auto; 
+}
+
+.toggle-group label {
+  font-family: var(--font-display); font-size: var(--text-sm);
+}
+
+.switch {
+  position: relative; display: inline-block; width: 44px; height: 24px;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc; transition: .4s; border-radius: 24px;
+}
+.slider:before {
+  position: absolute; content: ""; height: 18px; width: 18px;
+  left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%;
+}
+input:checked + .slider { background-color: #4A6B9C; }
+input:checked + .slider:before { transform: translateX(20px); }
+
+/* ==================== SECCIÓN DE ROLES ==================== */
+.roles-section { text-align: center; }
+.roles-section h4 {
+  font-family: 'Staatliches', sans-serif !important;
+  font-size: 22px !important; letter-spacing: 1px; color: #333333; margin-bottom: var(--space-3);
+}
+
+.roles-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
+
+.rol-btn {
+  flex: 0 0 calc(33.333% - 15px); min-width: 120px; background-color: var(--color-white);
+  border: 1px solid #AAB6C7; padding: var(--space-2); border-radius: var(--radius-sm);
+  font-family: var(--font-display); font-size: 18px; color: var(--color-text); cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.rol-btn.active { background-color: #DDE6F4; border-color: #4A6B9C; font-weight: bold; }
+
+.modal-footer { display: flex; justify-content: center; gap: var(--space-4); padding: var(--space-4); }
+
+.btn-primary { background-color: #4A6B9C; color: white; border: none; border-radius: 20px; padding: 8px 30px; font-size: 18px; cursor: pointer; box-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+.btn-secondary { background-color: #6C757D; color: white; border: none; border-radius: 20px; padding: 8px 30px; font-size: 18px; cursor: pointer; box-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+
+/* ==================== TOOLBAR SUPERIOR (OVERRIDE PARA JUNTAR BOTONES) ==================== */
+.usuarios-toolbar-container {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-4) var(--space-6);
   background: var(--color-white);
+  padding: var(--space-4) var(--space-6);
   border-bottom: var(--border-width) solid var(--color-border-light);
   box-shadow: var(--shadow-sm);
+  gap: 15px; /* Espacio entre el botón Buscar y Crear */
 }
 
-.toolbar-custom label {
-  font-family: var(--font-body);
-  font-size: var(--text-base);
-  color: var(--color-text);
+/* Le quitamos el fondo y bordes al SearchBar para que se funda en nuestro contenedor */
+.usuarios-toolbar-container .searchbar-wrapper {
+  width: auto;
+  padding: 0;
+  border: none;
+  box-shadow: none;
 }
 
-.input-compacto {
-  height: 32px;
-  width: 200px;
-  background: var(--color-input-bg);
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  padding: 0 10px;
-  font-family: var(--font-body);
-  outline: none;
+/* Le quitamos el margen automático que lo empujaba a la derecha */
+.usuarios-toolbar-container .searchbar-btn {
+  margin-left: 10px !important; 
 }
 
-.btn-search-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background-color: #4A6B9C;
+/* Estilo para nuestro botón Crear que estará al lado */
+.btn-crear-top {
+  height: 42px;
+  padding: 0 30px;
+  background: #264A7F;
   color: white;
   border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border-radius: 25px;
+  font-family: 'Bentham', serif;
+  font-size: 22px;
   cursor: pointer;
-  box-shadow: 2px 2px 4px rgba(0,0,0,0.25);
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
   transition: transform 0.1s;
 }
 
-.btn-search-icon:active {
+.btn-crear-top:active {
   transform: scale(0.95);
-}
-
-/* ==================== ESTRUCTURA DE LA TABLA ==================== */
-.table-layout-wrapper {
-  display: flex;
-  align-items: flex-end; 
-  gap: var(--space-5);
-  width: 100%;
-}
-
-.table-main-section {
-  flex: 1; 
-  display: flex;
-  flex-direction: column;
-}
-
-.datatable-fixed-container {
-  min-height: 370px; 
-}
-
-.pagination-center {
-  display: flex;
-  justify-content: center;
-  gap: var(--space-3);
-  margin-top: var(--space-4);
-}
-
-.side-actions {
-  margin-bottom: 45px; 
-}
-
-/* ==================== ESTILOS GLOBALES DE INPUTS Y LABELS ==================== */
-.toolbar-custom label,
-.input-group label {
-  font-size: 20px !important; 
-  font-weight: 500;
-  color: #333333;
-}
-
-.input-compacto,
-.input-group input {
-  background-color: #EBEBEB !important; 
-  border: 1px solid #CCCCCC !important; 
-  border-radius: 6px !important;
-  font-size: 18px !important; 
-  padding: 4px 12px !important;
-  color: #333333;
-}
-
-.input-compacto {
-  height: 38px !important; 
-}
-
-.input-group input {
-  height: 42px !important;
-  width: 100%;
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react"; 
+import { ChevronLeft, ChevronRight } from "lucide-react"; 
 import "./UsuariosPage.css";
 
 // ==========================================
@@ -9,6 +9,8 @@ import Header from "../../components/layout/header";
 import Sidebar from "../../components/layout/Sidebar";
 import ModuleLayout from "../../components/layout/ModuleLayout";
 import DataTable from "../../components/shared/DataTable";
+import SearchBar from "../../components/shared/SearchBar";
+import ActionButtons from "../../components/shared/ActionButtons";
 
 import { useAuth } from "../../api/useAuth";
 import { 
@@ -45,6 +47,7 @@ const rolesDisponibles = Object.keys(mapaRolesFrontendABackend);
 const CrearUsuarioModal = ({ isOpen, onClose, alTerminar }) => {
   if (!isOpen) return null;
 
+  const [documento, setDocumento] = useState("");
   const [nombreUsuario, setNombreUsuario] = useState("");
   const [password, setPassword] = useState("");
   const [rolesSeleccionados, setRolesSeleccionados] = useState([]);
@@ -57,23 +60,24 @@ const CrearUsuarioModal = ({ isOpen, onClose, alTerminar }) => {
   };
 
   const handleCrear = async () => {
-    if (!nombreUsuario || !password) return alert("Llena usuario y contraseña");
+    if (!documento || !nombreUsuario || !password) return alert("Llena documento, usuario y contraseña");
 
     try {
       setCargando(true);
       const rolesParaBackend = rolesSeleccionados.map(r => mapaRolesFrontendABackend[r]);
       
       await crearUsuarioRequest({
+        documento: documento,
         nombre: nombreUsuario,
         password: password,
         roles: rolesParaBackend
       });
       
-      setNombreUsuario(""); setPassword(""); setRolesSeleccionados([]);
+      setDocumento(""); setNombreUsuario(""); setPassword(""); setRolesSeleccionados([]);
       alTerminar(); 
       onClose();
     } catch (error) {
-      alert(error.response?.data?.detail || "Error al crear.");
+      alert(error.response?.data?.detail || "Error al crear el usuario.");
     } finally {
       setCargando(false);
     }
@@ -87,16 +91,26 @@ const CrearUsuarioModal = ({ isOpen, onClose, alTerminar }) => {
           <button className="modal-close" onClick={onClose} disabled={cargando}>×</button>
         </div>
         <div className="modal-body">
+          {/* FILA 1: Usuario y Documento */}
           <div className="modal-inputs-row">
             <div className="input-group">
               <label>Usuario</label>
-              <input type="text" value={nombreUsuario} onChange={(e) => setNombreUsuario(e.target.value)} />
+              <input type="text" value={nombreUsuario} onChange={(e) => setNombreUsuario(e.target.value)} placeholder="Nombre completo" />
             </div>
             <div className="input-group">
+              <label>Documento</label>
+              <input type="text" value={documento} onChange={(e) => setDocumento(e.target.value)} placeholder="Ej: 1005..." />
+            </div>
+          </div>
+          
+          {/* FILA 2: Contraseña */}
+          <div className="modal-inputs-row">
+            <div className="input-group" style={{ flex: 0.5 }}>
               <label>Contraseña</label>
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
             </div>
           </div>
+
           <div className="roles-section">
             <h4>ROLES</h4>
             <div className="roles-grid">
@@ -123,6 +137,7 @@ const CrearUsuarioModal = ({ isOpen, onClose, alTerminar }) => {
 const EditarUsuarioModal = ({ isOpen, onClose, usuario, alTerminar }) => {
   if (!isOpen || !usuario) return null;
 
+  const [documento, setDocumento] = useState("");
   const [nombreUsuario, setNombreUsuario] = useState("");
   const [password, setPassword] = useState(""); 
   const [estado, setEstado] = useState(true);
@@ -131,6 +146,7 @@ const EditarUsuarioModal = ({ isOpen, onClose, usuario, alTerminar }) => {
 
   useEffect(() => {
     if (usuario) {
+      setDocumento(usuario.documento || "");
       setNombreUsuario(usuario.nombre);
       setEstado(usuario.estado ?? true);
       setPassword(""); 
@@ -148,7 +164,7 @@ const EditarUsuarioModal = ({ isOpen, onClose, usuario, alTerminar }) => {
   const handleActualizar = async () => {
     try {
       setCargando(true);
-      const payloadBasico = { nombre: nombreUsuario, estado: estado };
+      const payloadBasico = { documento: documento, nombre: nombreUsuario, estado: estado };
       if (password) payloadBasico.password = password; 
       
       await actualizarUsuarioRequest(usuario.id_usuario, payloadBasico);
@@ -173,16 +189,24 @@ const EditarUsuarioModal = ({ isOpen, onClose, usuario, alTerminar }) => {
           <button className="modal-close" onClick={onClose} disabled={cargando}>×</button>
         </div>
         <div className="modal-body">
+          {/* FILA 1: Usuario y Documento */}
           <div className="modal-inputs-row">
             <div className="input-group">
               <label>Usuario</label>
               <input type="text" value={nombreUsuario} onChange={(e) => setNombreUsuario(e.target.value)} />
             </div>
             <div className="input-group">
-              <label>Contraseña</label>
-              <input type="password" placeholder="Nueva contraseña..." value={password} onChange={(e) => setPassword(e.target.value)} />
+              <label>Documento</label>
+              <input type="text" value={documento} onChange={(e) => setDocumento(e.target.value)} />
             </div>
-            
+          </div>
+          
+          {/* FILA 2: Contraseña y Estado */}
+          <div className="modal-inputs-row">
+            <div className="input-group">
+              <label>Contraseña</label>
+              <input type="password" placeholder="Nueva contraseña (opcional)..." value={password} onChange={(e) => setPassword(e.target.value)} />
+            </div>
             <div className="toggle-group">
               <label>{estado ? "Activo" : "Inactivo"}</label>
               <label className="switch">
@@ -220,6 +244,8 @@ const UsuariosPage = () => {
   
   const [usuarios, setUsuarios] = useState([]);
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null);
+  
+  // Estado para el buscador
   const [filtroBusqueda, setFiltroBusqueda] = useState("");
   
   const [isModalCrearOpen, setIsModalCrearOpen] = useState(false);
@@ -250,20 +276,23 @@ const UsuariosPage = () => {
   ];
 
   const columnasTabla = [
-    { key: "id_usuario", label: "Código" },
-    { key: "nombre", label: "Usuario" },
+    { key: "nombre", label: "USUARIO" },
+    { key: "documento", label: "DOCUMENTO", render: (val) => val || "—" },
     { 
       key: "estado", 
-      label: "Estado", 
-      render: (val) => <span className={val ? 'badge--ok' : 'badge--no'}>{val ? 'Activo' : 'Inactivo'}</span>
+      label: "ESTADO", 
+      render: (val) => <span style={{ color: val ? "#008000" : "#D00000", fontWeight: "bold" }}>{val ? 'Activo' : 'Inactivo'}</span>
     },
-    { key: "rolesStr", label: "Roles" }
+    { key: "rolesStr", label: "ROLES" }
   ];
 
-  const usuariosFiltrados = usuarios.filter(u => 
-    u.nombre.toLowerCase().includes(filtroBusqueda.toLowerCase()) || 
-    u.id_usuario.toString().includes(filtroBusqueda)
-  );
+  // Filtramos utilizando el valor capturado por el SearchBar
+  const usuariosFiltrados = usuarios.filter(u => {
+    const termino = filtroBusqueda.toLowerCase();
+    const doc = (u.documento || "").toLowerCase();
+    const nom = (u.nombre || "").toLowerCase();
+    return doc.includes(termino) || nom.includes(termino);
+  });
 
   const filasProcesadas = usuariosFiltrados.map(u => ({
     ...u,
@@ -274,7 +303,7 @@ const UsuariosPage = () => {
   const startIndex = (paginaActual - 1) * itemsPorPagina;
   const filasPaginadas = filasProcesadas.slice(startIndex, startIndex + itemsPorPagina);
 
-  return (
+return (
     <div className="dashboard-container">
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
       <ModuleLayout
@@ -282,33 +311,25 @@ const UsuariosPage = () => {
       >
         <div className="usuarios-page-content">
           
-          {/* BARRA SUPERIOR COMPACTA */}
-          <div className="toolbar-custom">
-            <label>Usuario</label>
-            <input 
-              type="text" 
-              className="input-compacto"
-              value={filtroBusqueda}
-              onChange={(e) => setFiltroBusqueda(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') setPaginaActual(1); }}
+          {/* BARRA DE BÚSQUEDA Y BOTÓN CREAR AGRUPADOS */}
+          <div className="usuarios-toolbar-container">
+            <SearchBar
+              fields={[
+                { key: 'busqueda', label: 'Buscar usuario:', type: 'text' }
+              ]}
+              onSearch={(filtros) => {
+                setFiltroBusqueda(filtros.busqueda || "");
+                setPaginaActual(1);
+              }}
             />
-            <button 
-              className="btn-search-icon" 
-              onClick={() => setPaginaActual(1)}
-            >
-              <Search size={16} />
-            </button>
             
-            <button 
-              className="btn-editar" 
-              style={{ padding: '0 24px', height: '32px' }} 
-              onClick={() => setIsModalCrearOpen(true)}
-            >
+            {/* BOTÓN CREAR al lado del de buscar */}
+            <button className="btn-crear-top" onClick={() => setIsModalCrearOpen(true)}>
               Crear
             </button>
           </div>
 
-          <div className="main-area" style={{ paddingTop: '20px' }}>
+          <div className="main-area">
             {usuarios.length === 0 ? (
               <div className="empty-state">
                 <p>Aún no hay usuarios registrados en el sistema</p>
@@ -324,10 +345,11 @@ const UsuariosPage = () => {
                       rows={filasPaginadas} 
                       onRowClick={(fila) => setUsuarioSeleccionado(fila)}
                       emptyText="No se encontraron usuarios con esa búsqueda"
+                      filaActiva={usuarioSeleccionado}
+                      idKey="id_usuario"
                     />
                   </div>
                   
-                  {/* Paginación centrada abajo de la tabla */}
                   <div className="pagination-center">
                     <button 
                       className="btn-circle"
@@ -346,15 +368,19 @@ const UsuariosPage = () => {
                   </div>
                 </div>
 
-                {/* LADO DERECHO: Botón Editar */}
+                {/* LADO DERECHO: ActionButtons (Solo Editar en color amarillo) */}
                 <div className="side-actions">
-                  <button 
-                    className="btn-editar" 
-                    disabled={!usuarioSeleccionado}
-                    onClick={() => setIsModalEditarOpen(true)}
-                  >
-                    Editar
-                  </button>
+                  <ActionButtons
+                    filaSeleccionada={usuarioSeleccionado}
+                    botones={[
+                      { 
+                        label: "Editar", 
+                        onClick: () => setIsModalEditarOpen(true), 
+                        siempreActivo: false, 
+                        variante: "primary" 
+                      }
+                    ]}
+                  />
                 </div>
 
               </div>
