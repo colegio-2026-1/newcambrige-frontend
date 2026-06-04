@@ -8,7 +8,8 @@ import LoginPage from "../modules/auth/LoginPage";
 import ProtectedRoute from "./ProtectedRoute"
 
 import TesoreriaRouter from "./TesoreriaRouter";
-import SalonRouter from "./SalonRouter"
+import SalonRouter from "./SalonRouter";
+import UniformeRouter from "./UniformeRouter";
 
 import ParametrizacionPage from '../modules/parametrizacion/ParametrizacionPage';
 import UsuariosPage from '../modules/parametrizacion/UsuariosPage';
@@ -81,6 +82,7 @@ const AppRouter = () => {
     
         {TesoreriaRouter()}  
         {SalonRouter()} 
+        {UniformeRouter()} 
       
  
       <Route 
