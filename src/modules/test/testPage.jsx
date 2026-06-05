@@ -1,8 +1,3 @@
-// por favor, revisa esta pagina de prueba, aqui se detalla como debe ser la base de tu moduloPage, como se llaman los componentes y como funciona cada uno
-// esto se hacer para reutilizacion y estandarizacion de codigo, si tu moduloPage no usa los componentes establecidos y no sigue la estructura aqui establecida
-// será devuelto para correcion
-
-
 import { useState } from "react";
 import { Home } from "lucide-react";
 
@@ -15,6 +10,7 @@ import SearchBar from "../../components/shared/searchBar";
 import DataTable from "../../components/shared/DataTable";
 import ActionButtons from "../../components/shared/ActionButtons";
 import Modal from "../../components/shared/Modal";
+import Alert from "../../components/shared/Alert";
 import { useAuth } from "../../api/useAuth";
 
 const libros = [
@@ -27,21 +23,27 @@ export default function TestPage() {
   const { user, logout } = useAuth();
 
   const [selectedMenu, setSelectedMenu] = useState("Inventario Libros");
-  const [fila, setFila] = useState(null);
-  const [modal, setModal] = useState(false);
-  const [formValues, setFormValues] = useState({});
+  const [fila, setFila]                 = useState(null);
+  const [modal, setModal]               = useState(false);
+  const [formValues, setFormValues]     = useState({});
+  const [alert, setAlert]               = useState({ isOpen: false, type: "", title: "", message: "" });
 
   const menuItems = [
     { label: "Inicio", icon: <Home /> },
     { label: "Ejemplo de boton", icon: EjemploIcon },
   ];
 
+  const showAlert = (type, message, title = "") =>
+    setAlert({ isOpen: true, type, message, title });
+
+  const closeAlert = () =>
+    setAlert((prev) => ({ ...prev, isOpen: false }));
+
   return (
     <div className="dashboard-container">
-      {/* HEADER */}
+
       <Header title="ESTO ES UNA PRUEBA BBCITA" />
 
-      {/* Layout base con sidebar, actions y contenido central */}
       <ModuleLayout
         sidebar={
           <Sidebar
@@ -56,50 +58,35 @@ export default function TestPage() {
           <ActionButtons
             filaSeleccionada={fila}
             botones={[
-              {
-                label: "Agregar Libro",
-                onClick: () => {
-                  setFormValues({});
-                  setModal(true);
-                },
-                siempreActivo: true,
-                variante: "primary",
-              },
-              {
-                label: "Editar Libro",
-                onClick: (f) => {
-                  setFormValues(f);
-                  setModal(true);
-                },
-                variante: "secondary",
-              },
-              {
-                label: "Eliminar Libro",
-                onClick: (f) => console.log("eliminar", f),
-                variante: "danger",
-              },
+              { label: "Agregar Libro",  onClick: () => { setFormValues({}); setModal(true); }, siempreActivo: true, variante: "primary" },
+              { label: "Editar Libro",   onClick: (f) => { setFormValues(f); setModal(true); },                     variante: "secondary" },
+              { label: "Eliminar Libro", onClick: (f) => console.log("eliminar", f),                               variante: "danger" },
             ]}
           />
         }
       >
-        {/* Contenido principal: SearchBar + DataTable */}
         <SearchBar
           fields={[
-            { key: "documento", label: "Código", type: "text" },
-            { key: "nombre", label: "Título del Libro", type: "text" },
-            { key: "edicion", label: "Edición", type: "text" },
+            { key: "documento", label: "Código",          type: "text" },
+            { key: "nombre",    label: "Título del Libro", type: "text" },
+            { key: "edicion",   label: "Edición",         type: "text" },
           ]}
           onSearch={(f) => console.log(f)}
         />
 
+        <div style={{ display: "flex", gap: "10px", padding: "10px" }}>
+          <button onClick={() => showAlert("success", "Libro asignado correctamente.")}>Probar éxito</button>
+          <button onClick={() => showAlert("error",   "No se pudo guardar.", "Error")}>Probar error</button>
+          <button onClick={() => showAlert("warning", "El estudiante ya tiene préstamo.", "Atención")}>Probar advertencia</button>
+          <button onClick={() => showAlert("info",    "Solo se muestran libros disponibles.", "Información")}>Probar info</button>
+        </div>
+
         <DataTable
           columns={[
             { key: "id_libro", label: "ID" },
-            { key: "nombre", label: "Título del Libro" },
-            { key: "autor", label: "Autor" },
-            {
-              key: "disponible",
-              label: "Disponibilidad",
+            { key: "nombre",   label: "Título del Libro" },
+            { key: "autor",    label: "Autor" },
+            { key: "disponible", label: "Disponibilidad",
               render: (val) => (
                 <span className={val ? "badge--ok" : "badge--no"}>
                   {val ? "Disponible" : "No disponible"}
@@ -112,20 +99,20 @@ export default function TestPage() {
         />
       </ModuleLayout>
 
-      {/* Modal */}
+      {/* Modal — solo cuando está abierto */}
       {modal && (
         <Modal
           title={formValues.id_libro ? "Editar Libro" : "Agregar Libro"}
           onClose={() => setModal(false)}
-          onSave={(data) => {
-            console.log("Guardar", data);
-            setModal(false);
-          }}
+          onSave={(data) => { console.log("Guardar", data); setModal(false); }}
         >
-          {/* Aquí dentro podrías poner un formulario con los campos (solo es un ejemplo bro recuerda) */}
           <div>Formulario para {formValues.id_libro ? "editar" : "nuevo"} libro</div>
         </Modal>
       )}
+
+      {/* Alert — siempre montado, se muestra/oculta con isOpen */}
+      <Alert {...alert} onClose={closeAlert} />
+
     </div>
   );
 }
