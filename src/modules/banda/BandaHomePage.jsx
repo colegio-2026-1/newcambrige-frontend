@@ -15,7 +15,7 @@ const BandaHomePage = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
 
-  if (loading || !user) return <div className="loading">Cargando...</div>;
+  if (loading || !user) return <div className="status-message status-message--loading">Cargando...</div>;
 
   const menuBanda = [
     { label: "Inicio", path: "/banda" },
@@ -28,7 +28,7 @@ const BandaHomePage = () => {
   }
 
   return (
-    <div className="dashboard-container banda-custom-sidebar">{/* Clase personalizada para el sidebar de Banda */}
+    <div className="dashboard-container banda-custom-sidebar">
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
       
       <ModuleLayout
@@ -40,39 +40,42 @@ const BandaHomePage = () => {
           />
         }
       >
-        {/* 
-          ESTE ES EL CONTENEDOR MAESTRO DE CENTRADO:
-          Ocupa todo el espacio disponible y centra su contenido 
-        */}
+        {/* Contenedor de centrado absoluto */}
         <div style={centerWrapperStyle}>
           
-          <div 
-            className="dashboard-card" 
-            onClick={() => navigate("/banda/prestamos")} 
-            style={{ cursor: 'pointer', margin: 0 }} // Quitamos el margin auto para que flex controle el centro
-          >
-            <h2>Banda</h2>
-            <div className="card-icon">
-              <img src={bandaIcon} alt="Banda" />
+          {/* ✅ Envoltura para forzar el tamaño correcto de la tarjeta (331px es el estándar de tu grid) */}
+          <div style={{ width: '100%', maxWidth: '331px' }}>
+            <div 
+              className="dashboard-card" 
+              onClick={() => navigate("/banda/prestamos")} 
+              style={{ cursor: 'pointer' }}
+            >
+              <h2>Banda</h2>
+              <div className="card-icon">
+                <img src={bandaIcon} alt="Banda" />
+              </div>
             </div>
           </div>
+
         </div>
       </ModuleLayout>
     </div>
   );
 };
+
 // =====================================================
-// ESTILO DE CENTRADO ABSOLUTO (Centro del Centro)
+// ESTILOS DE POSICIONAMIENTO (LOCALES)
 // =====================================================
 
 const centerWrapperStyle = {
   display: 'flex',
-  justifyContent: 'center', // Centrado horizontal
-  alignItems: 'center',     // Centrado vertical
+  justifyContent: 'center', 
+  alignItems: 'center',     
   width: '100%',
-  height: '100%',           // Ocupa el 100% del alto del contenido blanco
-  minHeight: 'calc(100vh - 160px)', // Ajuste para que se vea centrado respecto a la pantalla
-  boxSizing: 'border-box'
+  height: '100%',           
+  minHeight: 'calc(100vh - 200px)', 
+  boxSizing: 'border-box',
+  padding: '20px'
 };
 
 export default BandaHomePage;
