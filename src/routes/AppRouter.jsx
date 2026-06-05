@@ -1,6 +1,6 @@
 /**
- * AppRouter — rutas del módulo Dashboard.
- * Solo contiene las rutas que le corresponden a este módulo.
+ * AppRouter — módulo Dashboard.
+ * Sigue el patrón del equipo: importa sub-routers y los invoca como funciones.
  * main.jsx NO se toca.
  */
 import { Routes, Route } from "react-router-dom";
@@ -8,13 +8,14 @@ import { Routes, Route } from "react-router-dom";
 import LoginPage      from "../modules/auth/LoginPage";
 import ProtectedRoute from "./ProtectedRoute";
 import HomePage       from "../modules/Home/HomePage";
-import DashboardPage  from "../modules/dashboard/DashboardPage";
 import NotFound       from "../modules/notFound/notFound";
+
+import DashboardRouter from "./DashboardRouter";
 
 const AppRouter = () => (
   <Routes>
 
-    {/* LOGIN */}
+    {/* PÚBLICA */}
     <Route path="/" element={<LoginPage />} />
 
     {/* HOME */}
@@ -27,15 +28,8 @@ const AppRouter = () => (
       }
     />
 
-    {/* DASHBOARD */}
-    <Route
-      path="/dashboard"
-      element={
-        <ProtectedRoute>
-          <DashboardPage />
-        </ProtectedRoute>
-      }
-    />
+    {/* DASHBOARD — sub-router del módulo */}
+    {DashboardRouter()}
 
     {/* CATCH ALL */}
     <Route path="*" element={<NotFound />} />
