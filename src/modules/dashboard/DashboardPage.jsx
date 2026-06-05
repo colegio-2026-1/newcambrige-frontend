@@ -1,10 +1,8 @@
 /**
- * DashboardPage — módulo Dashboard, New Cambridge School.
- * - Usa useAuth() para obtener el usuario y sus roles reales.
- * - Llama a dashboardService.js con los endpoints reales del backend.
- * - Filtra KPIs y gráficas según el rol del usuario autenticado.
- * - Usa ModuleLayout y Sidebar del equipo.
- * - main.jsx NO se toca.
+ * DashboardPage — New Cambridge School.
+ * Los roles se obtienen desde el backend con getRolesUsuario(id_usuario)
+ * porque /api/auth/me no los incluye en su response.
+ * El dashboard se adapta automáticamente según los roles del usuario.
  */
 import { useEffect, useState } from "react";
 import { Home, LayoutDashboard } from "lucide-react";
@@ -13,13 +11,13 @@ import {
   PieChart, Pie, Cell, Legend, CartesianGrid,
 } from "recharts";
 
-import Header        from "../../components/layout/header";
-import ModuleLayout  from "../../components/layout/ModuleLayout";
-import Sidebar       from "../../components/layout/Sidebar";
-import { useAuth }   from "../../api/useAuth";
+import Header       from "../../components/layout/header";
+import ModuleLayout from "../../components/layout/ModuleLayout";
+import Sidebar      from "../../components/layout/Sidebar";
+import { useAuth }  from "../../api/useAuth";
 
-// ✅ Nombres exactos exportados por dashboardService.js
 import {
+  getRolesUsuario,
   getPeriodos,
   getEstudiantesPorPeriodo,
   getPendientesPazSalvo,
@@ -31,7 +29,7 @@ import {
 
 import "./DashboardPage.css";
 
-// ── Paleta institucional ──────────────────────────────────────────
+// ── Paleta institucional ───────────────────────────────────────────
 const C_RED   = "#8E2A25";
 const C_BLUE  = "#1B3A5C";
 const C_GREEN = "#2E7D4F";
@@ -39,7 +37,7 @@ const C_WARN  = "#A06000";
 const DONUT_COLORS = [C_GREEN, C_RED];
 const BAR_COLORS   = [C_RED, C_BLUE, C_GREEN, C_WARN];
 
-// ── Permisos por rol ─────────────────────────────────────────────
+// ── Permisos por rol ───────────────────────────────────────────────
 const PERMISOS = {
   admin:      { kpiEstudiantes: true,  kpiPaz: true,  kpiPendientes: true,  kpiPagos: true,  grafPaz: true,  grafPrestamos: true,  grafSalones: true,  grafPagos: true  },
   secretaria: { kpiEstudiantes: true,  kpiPaz: true,  kpiPendientes: true,  kpiPagos: false, grafPaz: true,  grafPrestamos: false, grafSalones: true,  grafPagos: false },
@@ -50,11 +48,22 @@ const PERMISOS = {
   titular:    { kpiEstudiantes: true,  kpiPaz: false, kpiPendientes: false, kpiPagos: false, grafPaz: false, grafPrestamos: false, grafSalones: true,  grafPagos: false },
 };
 
+// Combina permisos de TODOS los roles que tiene el usuario (OR lógico)
+// Si tiene banda + secretaria, ve todo lo de banda Y todo lo de secretaria
 const getPermisos = (roles = []) => {
-  for (const r of roles) {
-    if (PERMISOS[r]) return PERMISOS[r];
+  if (roles.length === 0) return PERMISOS.admin; // fallback mientras carga
+  const base = {
+    kpiEstudiantes: false, kpiPaz: false, kpiPendientes: false, kpiPagos: false,
+    grafPaz: false, grafPrestamos: false, grafSalones: false, grafPagos: false,
+  };
+  for (const rol of roles) {
+    const p = PERMISOS[rol];
+    if (!p) continue;
+    for (const key of Object.keys(base)) {
+      if (p[key]) base[key] = true;
+    }
   }
-  return PERMISOS.admin;
+  return base;
 };
 
 // ── Subcomponentes ───────────────────────────────────────────────
@@ -102,15 +111,14 @@ const ChartSwitch = ({ options, value, onChange }) => (
 export default function DashboardPage() {
   const { user } = useAuth();
 
-  const roles = user?.roles?.map((r) => r.nombre ?? r) ?? [];
-  const can   = getPermisos(roles);
-
   const menuItems = [
     { label: "Inicio",    path: "/home",      icon: <Home size={18} /> },
     { label: "Dashboard", path: "/dashboard", icon: <LayoutDashboard size={18} /> },
   ];
 
-  // ── Estado ────────────────────────────────────────────────────
+  // ── Estado ─────────────────────────────────────────────────────
+  const [roles,            setRoles]            = useState([]);
+  const [rolesLoaded,      setRolesLoaded]      = useState(false);
   const [selectedMenu,     setSelectedMenu]     = useState("Dashboard");
   const [periodos,         setPeriodos]         = useState([]);
   const [periodoId,        setPeriodoId]        = useState("");
@@ -130,8 +138,29 @@ export default function DashboardPage() {
   const [pagosData,        setPagosData]        = useState([]);
   const [pazChart,         setPazChart]         = useState("donut");
 
-  // ── Cargar períodos al montar ────────────────────────────────
+  // ── PASO 1: Obtener roles reales del backend al montar ──────────────
+  // /api/auth/me NO devuelve roles, los pedimos por aparte.
   useEffect(() => {
+    if (!user?.id_usuario) return;
+    getRolesUsuario(user.id_usuario)
+      .then((res) => {
+        // El backend devuelve array de strings: ["admin", "secretaria"]
+        setRoles(res.data ?? []);
+      })
+      .catch(() => {
+        // Si falla (p.ej. rol sin permisos), usamos array vacío
+        // getPermisos([]) hace fallback a admin para que no quede en blanco
+        setRoles([]);
+      })
+      .finally(() => setRolesLoaded(true));
+  }, [user?.id_usuario]);
+
+  // Permisos calculados en base a los roles reales
+  const can = getPermisos(roles);
+
+  // ── PASO 2: Cargar períodos (solo cuando roles ya están listos) ──────
+  useEffect(() => {
+    if (!rolesLoaded) return;
     getPeriodos()
       .then((res) => {
         const data = res.data ?? [];
@@ -139,11 +168,11 @@ export default function DashboardPage() {
         if (data.length > 0) setPeriodoId(String(data[0].id_periodo));
       })
       .catch(() => setError("No se pudieron cargar los períodos."));
-  }, []);
+  }, [rolesLoaded]);
 
-  // ── Cargar datos cuando cambia el período ────────────────────
+  // ── PASO 3: Cargar datos del dashboard según rol + período ─────────
   useEffect(() => {
-    if (!periodoId) return;
+    if (!periodoId || !rolesLoaded) return;
     const id = Number(periodoId);
     setLoading(true);
     setError(null);
@@ -178,15 +207,12 @@ export default function DashboardPage() {
       );
     }
 
-    // ✅ getMatriculasPorPeriodo — reemplaza el antiguo getPagosPendientes
-    // que no existía en el backend. Usa /api/secretaria/matriculas/periodo/{id}
     if (can.kpiPagos || can.grafPagos) {
       tareas.push(
         getMatriculasPorPeriodo(id)
           .then((r) => {
-            // Filtra solo las que tienen estado pendiente
-            const todas   = r.data ?? [];
-            const pagos   = todas.filter(
+            const todas = r.data ?? [];
+            const pagos = todas.filter(
               (m) => (m.estado ?? "").toLowerCase() === "pendiente"
             );
             setTotalPagos(pagos.length);
@@ -196,7 +222,6 @@ export default function DashboardPage() {
       );
     }
 
-    // ✅ getPrestamosActivosBanda y getPrestamosActivosUniformes — nombres correctos
     if (can.grafPrestamos) {
       tareas.push(
         Promise.allSettled([
@@ -219,8 +244,8 @@ export default function DashboardPage() {
             setSalonesData(
               salones
                 .map((s) => ({
-                  nombre:       s.nombre ?? `${s.grado}°${s.grupo}`,
-                  estudiantes:  s.num_estudiantes ?? 0,
+                  nombre:      s.nombre ?? `${s.grado}°${s.grupo}`,
+                  estudiantes: s.num_estudiantes ?? 0,
                 }))
                 .sort((a, b) => b.estudiantes - a.estudiantes)
                 .slice(0, 10)
@@ -232,10 +257,23 @@ export default function DashboardPage() {
 
     Promise.allSettled(tareas).finally(() => setLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [periodoId]);
+  }, [periodoId, rolesLoaded]);
 
   // ── Render ───────────────────────────────────────────────────
   const periodoLabel = periodos.find((p) => String(p.id_periodo) === periodoId)?.nombre ?? "";
+
+  // Mientras los roles no carguen, mostramos spinner
+  if (!rolesLoaded) {
+    return (
+      <div className="dashboard-container">
+        <Header title="SISTEMA DE PAZ Y SALVO — NEW CAMBRIDGE SCHOOL" />
+        <div className="dash-loading-screen">
+          <span className="dash-spinner" />
+          <p>Cargando tu dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-container">
@@ -255,6 +293,16 @@ export default function DashboardPage() {
 
           {/* ERROR GLOBAL */}
           {error && <p className="dash-error">{error}</p>}
+
+          {/* BADGE DE ROLES ACTIVOS */}
+          {roles.length > 0 && (
+            <div className="dash-roles-bar">
+              <span className="dash-roles-label">Acceso como:</span>
+              {roles.map((r) => (
+                <span key={r} className="dash-role-badge">{r}</span>
+              ))}
+            </div>
+          )}
 
           {/* FILTRO PERÍODO */}
           <div className="dash-filter-bar">
@@ -284,16 +332,16 @@ export default function DashboardPage() {
           {/* KPI CARDS */}
           <div className="dash-kpi-grid">
             {can.kpiEstudiantes && (
-              <KpiCard title="Estudiantes"      value={totalEstudiantes} sub="en el período"          color={C_BLUE}  loading={loading} />
+              <KpiCard title="Estudiantes"           value={totalEstudiantes} sub="en el período"          color={C_BLUE}  loading={loading} />
             )}
             {can.kpiPaz && (
-              <KpiCard title="Paz y Salvo OK"   value={totalPazOk}       sub="sin pendientes"          color={C_GREEN} loading={loading} />
+              <KpiCard title="Paz y Salvo OK"        value={totalPazOk}       sub="sin pendientes"          color={C_GREEN} loading={loading} />
             )}
             {can.kpiPendientes && (
-              <KpiCard title="Con Pendientes"   value={totalPendientes}  sub="paz y salvo incompleto"  color={C_RED}   loading={loading} />
+              <KpiCard title="Con Pendientes"        value={totalPendientes}  sub="paz y salvo incompleto"  color={C_RED}   loading={loading} />
             )}
             {can.kpiPagos && (
-              <KpiCard title="Matrículas Pendientes" value={totalPagos}  sub="por período"             color={C_WARN}  loading={loading} />
+              <KpiCard title="Matrículas Pendientes" value={totalPagos}       sub="por período"             color={C_WARN}  loading={loading} />
             )}
           </div>
 
@@ -314,25 +362,14 @@ export default function DashboardPage() {
                       onChange={setPazChart}
                     />
                   </div>
-
                   {pazData.length === 0 && !loading
                     ? <p className="dash-empty">Sin datos para este período</p>
                     : pazChart === "donut" ? (
                         <ResponsiveContainer width="100%" height={240}>
                           <PieChart>
-                            <Pie
-                              data={pazData}
-                              cx="50%" cy="50%"
-                              innerRadius={60} outerRadius={95}
-                              paddingAngle={4}
-                              dataKey="value"
-                              label={({ name, percent }) =>
-                                `${name} ${(percent * 100).toFixed(0)}%`
-                              }
-                            >
-                              {pazData.map((_, i) => (
-                                <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />
-                              ))}
+                            <Pie data={pazData} cx="50%" cy="50%" innerRadius={60} outerRadius={95} paddingAngle={4} dataKey="value"
+                              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                              {pazData.map((_, i) => <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />)}
                             </Pie>
                             <Tooltip content={<CustomTooltip />} />
                             <Legend />
@@ -346,9 +383,7 @@ export default function DashboardPage() {
                             <YAxis tick={{ fontSize: 12 }} />
                             <Tooltip content={<CustomTooltip />} />
                             <Bar dataKey="value" name="Estudiantes" radius={[4, 4, 0, 0]}>
-                              {pazData.map((_, i) => (
-                                <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />
-                              ))}
+                              {pazData.map((_, i) => <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />)}
                             </Bar>
                           </BarChart>
                         </ResponsiveContainer>
@@ -367,18 +402,13 @@ export default function DashboardPage() {
                     ? <p className="dash-empty">Sin datos disponibles</p>
                     : (
                       <ResponsiveContainer width="100%" height={240}>
-                        <BarChart
-                          data={prestData}
-                          margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-                        >
+                        <BarChart data={prestData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#e0d8cc" />
                           <XAxis dataKey="modulo" tick={{ fontSize: 12 }} />
                           <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
                           <Tooltip content={<CustomTooltip />} />
                           <Bar dataKey="activos" name="Activos" radius={[4, 4, 0, 0]}>
-                            {prestData.map((_, i) => (
-                              <Cell key={i} fill={BAR_COLORS[i % BAR_COLORS.length]} />
-                            ))}
+                            {prestData.map((_, i) => <Cell key={i} fill={BAR_COLORS[i % BAR_COLORS.length]} />)}
                           </Bar>
                         </BarChart>
                       </ResponsiveContainer>
@@ -403,30 +433,12 @@ export default function DashboardPage() {
                     ? <p className="dash-empty">Sin datos para este período</p>
                     : (
                       <ResponsiveContainer width="100%" height={280}>
-                        <BarChart
-                          data={salonesData}
-                          layout="vertical"
-                          margin={{ top: 0, right: 20, left: 30, bottom: 0 }}
-                        >
-                          <CartesianGrid
-                            strokeDasharray="3 3"
-                            stroke="#e0d8cc"
-                            horizontal={false}
-                          />
+                        <BarChart data={salonesData} layout="vertical" margin={{ top: 0, right: 20, left: 30, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e0d8cc" horizontal={false} />
                           <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
-                          <YAxis
-                            type="category"
-                            dataKey="nombre"
-                            tick={{ fontSize: 11 }}
-                            width={45}
-                          />
+                          <YAxis type="category" dataKey="nombre" tick={{ fontSize: 11 }} width={45} />
                           <Tooltip content={<CustomTooltip />} />
-                          <Bar
-                            dataKey="estudiantes"
-                            name="Estudiantes"
-                            fill={C_BLUE}
-                            radius={[0, 4, 4, 0]}
-                          />
+                          <Bar dataKey="estudiantes" name="Estudiantes" fill={C_BLUE} radius={[0, 4, 4, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     )
