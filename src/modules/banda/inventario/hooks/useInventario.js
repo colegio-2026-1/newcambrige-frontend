@@ -145,6 +145,7 @@ const useInventario = () => {
     } catch (e) {
       setModalEliminar(false);
       setModalErrorEliminar(true);
+      console.error("Error al eliminar:", e.response?.data?.detail);
     }
   };
 

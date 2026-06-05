@@ -2,10 +2,10 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 
 // Importamos solo las páginas de Banda
-import BandaHomePage from "./BandaHomePage";
-import InventarioPage from "./inventario/pages/InventarioPage";
-import PrestamosPage from "./prestamos/pages/PrestamosPage";
-import AuditoriaBandaPage from "./inventario/pages/AuditoriaBandaPage";
+import BandaHomePage from "../modules/banda/BandaHomePage";
+import InventarioPage from "../modules/banda/inventario/pages/InventarioPage";
+import PrestamosPage from "../modules/banda/prestamos/pages/PrestamosPage";
+import AuditoriaBandaPage from "../modules/banda/inventario/pages/AuditoriaBandaPage";
 
 const BandaRouter = () => {
   return (

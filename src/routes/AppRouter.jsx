@@ -15,7 +15,7 @@ import NotFound from "../modules/notFound/notFound";
 import Home from "../modules/Home/HomePage";
 
 // ✅ IMPORTAMOS TU ENRUTADOR DE BANDA
-import BandaRouter from "../modules/banda/BandaRouter";
+import BandaRouter from "./BandaRouter";
 
 // TESORERIA
 import Tesoreria from "../modules/tesoreria/Tesoreria";
@@ -97,7 +97,6 @@ const AppRouter = () => {
           </PrivateRoute>
         }
       />
-      */}
     
         {TesoreriaRouter()}  
         {SalonRouter()} 
