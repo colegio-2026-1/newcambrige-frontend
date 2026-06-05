@@ -4,13 +4,14 @@ import ModuleLayout from "../../../components/layout/ModuleLayout";
 import Sidebar from "../../../components/layout/Sidebar";
 import SearchBar from "../../../components/shared/SearchBar";
 import ActionButtons from "../../../components/shared/ActionButtons";
-import AsignacionesTable from "../components/AsignacionesTable";
-import AsignarPrendaModal from "../components/AsignarPrendaModal";
+import DataTable from "../../../components/shared/DataTable";
 import Modal from "../../../components/shared/Modal";
-import { 
-  getAsignacionesRequest, 
-  deletePrestamoRequest, 
-  devolverPrestamoRequest 
+import {
+  getAsignacionesRequest,
+  deletePrestamoRequest,
+  devolverPrestamoRequest,
+  getObjetosDisponiblesRequest,
+  registrarPrestamoRequest
 } from "../../../api/uniformesService";
 import { useAuth } from "../../../api/useAuth";
 import {
@@ -19,22 +20,147 @@ import {
 } from "../../../api/endpoints";
 import "../styles/uniformes.css";
 
+// ─── Utilidad ────────────────────────────────────────────────────────────────
+const capitalizar = (texto) =>
+  texto
+    ? texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase()
+    : "—";
+
+// ─── Columnas de la tabla (definidas fuera del componente: una sola instancia) ─
+const COLUMNS = [
+  { key: "codigo", label: "Código" },
+  { key: "nombre_completo", label: "Nombre completo" },
+  { key: "grado", label: "Grado" },
+  { key: "grupo", label: "Grupo" },
+  {
+    key: "prenda",
+    label: "Prenda",
+    render: (val) => capitalizar(val)
+  },
+  {
+    key: "fecha_entrega",
+    label: "Fecha Entrega",
+    render: (_, row) =>
+      row.fecha_entrega
+        ? new Date(row.fecha_entrega).toLocaleDateString("es-CO")
+        : "—"
+  },
+  {
+    key: "estado",
+    label: "Estado",
+    render: (val) => {
+      const estado = val?.toLowerCase();
+      let clase = "badge--default";
+      if (estado === "prestado")     clase = "badge--warn";
+      else if (estado === "bueno")   clase = "badge--good";
+      else if (estado === "regular") clase = "badge--regular";
+      else if (estado === "malo")    clase = "badge--bad";
+      else if (estado === "sin asignar") clase = "badge--no";
+      return <span className={clase}>{capitalizar(val)}</span>;
+    }
+  }
+];
+
 export default function AsignacionesPage() {
   const { user } = useAuth();
 
-  // Estados de la interfaz
-  const [roles, setRoles] = useState([]);
-  const [selectedRow, setSelectedRow] = useState(null);
+  // ── Estados de la interfaz ──────────────────────────────────────────────────
+  const [roles, setRoles]               = useState([]);
+  const [selectedRow, setSelectedRow]   = useState(null);
   const [asignaciones, setAsignaciones] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [periodos, setPeriodos] = useState([]);
+  const [loading, setLoading]           = useState(true);
+  const [periodos, setPeriodos]         = useState([]);
   const [periodosCargados, setPeriodosCargados] = useState(false);
 
-  // Modales
-  const [openModal, setOpenModal] = useState(false);
+  // ── Modales ─────────────────────────────────────────────────────────────────
+  const [openModal, setOpenModal]       = useState(false);
   const [openDevolver, setOpenDevolver] = useState(false);
   const [openEliminar, setOpenEliminar] = useState(false);
 
+  // ── Estado interno del modal AsignarPrenda ───────────────────────────────────
+  const [prendas, setPrendas]           = useState([]);
+  const [loadingModal, setLoadingModal] = useState(false);
+  const [formAsignar, setFormAsignar]   = useState({
+    id_objeto: "",
+    talla: "",
+    fecha_prestamo: "",
+    estado: "bueno",
+    observacion: ""
+  });
+
+  const fechaVisual = new Date().toLocaleDateString("es-CO");
+
+  // Cargar prendas disponibles y resetear formulario al abrir el modal
+  useEffect(() => {
+    const cargarPrendas = async () => {
+      try {
+        const response = await getObjetosDisponiblesRequest();
+        setPrendas(response.data);
+      } catch (error) {
+        console.error("Error cargando prendas:", error);
+      }
+    };
+
+    if (openModal) {
+      cargarPrendas();
+      setFormAsignar({
+        id_objeto: "",
+        talla: "",
+        fecha_prestamo: fechaVisual,
+        estado: "bueno",
+        observacion: ""
+      });
+    }
+  }, [openModal, fechaVisual]);
+
+  const opcionesPrendas = useMemo(
+    () => prendas.map((item) => ({ value: item.id_objeto, label: item.nombre })),
+    [prendas]
+  );
+
+  const prendaSeleccionada = prendas.find(
+    (p) => p.id_objeto === Number(formAsignar.id_objeto)
+  );
+
+  const handleAsignarSubmit = async () => {
+    if (loadingModal) return;
+
+    if (!formAsignar.id_objeto) {
+      alert("Seleccione una prenda");
+      return;
+    }
+    if (prendaSeleccionada?.tipo === "vestimenta" && !formAsignar.talla) {
+      alert("Seleccione una talla");
+      return;
+    }
+    if (!selectedRow?.id_estudiante) {
+      alert("Debe seleccionar un estudiante");
+      return;
+    }
+
+    const data = {
+      id_objeto: parseInt(formAsignar.id_objeto),
+      id_estudiante: selectedRow.id_estudiante,
+      talla: prendaSeleccionada?.tipo === "vestimenta" ? formAsignar.talla : null,
+      estado: formAsignar.estado,
+      cantidad_prestada: 1
+    };
+
+    try {
+      setLoadingModal(true);
+      await registrarPrestamoRequest(data);
+      alert("Prenda asignada correctamente");
+      await cargarAsignaciones();
+      setOpenModal(false);
+    } catch (error) {
+      console.error("ERROR BACKEND:", error.response?.data);
+      alert(error.response?.data?.detail || "Error al registrar préstamo");
+    } finally {
+      setLoadingModal(false);
+    }
+  };
+
+  // ── Formulario devolución ────────────────────────────────────────────────────
   const [formDevolucion, setFormDevolucion] = useState({
     prenda: "",
     talla: "",
@@ -45,60 +171,36 @@ export default function AsignacionesPage() {
     observacion: ""
   });
 
-  // Filtros iniciales - 'anio' se inicializa vacío para responder dinámicamente a la BD
+  // ── Filtros ──────────────────────────────────────────────────────────────────
   const [filtros, setFiltros] = useState({
-    codigo: "",
-    nombre: "",
-    grado: "",
-    grupo: "",
-    anio: ""
+    codigo: "", nombre: "", grado: "", grupo: "", anio: ""
   });
-
-  // 1. Estado para almacenar los filtros confirmados mediante el botón de búsqueda
   const [filtrosAplicados, setFiltrosAplicados] = useState({
-    codigo: "",
-    nombre: "",
-    grado: "",
-    grupo: "",
-    anio: ""
+    codigo: "", nombre: "", grado: "", grupo: "", anio: ""
   });
 
   const idUser = user?.id_usuario;
-  const rol = roles[0] || "Rol no asignado";
+  const rol    = roles[0] || "Rol no asignado";
 
-  // 2. Modificación de cargarPeriodos para poblar ambos estados simultáneamente usando finally
+  // ── Carga de periodos ────────────────────────────────────────────────────────
   const cargarPeriodos = async () => {
     try {
       const res = await allaniosacademicosRequest();
-
       setPeriodos(res.data);
 
-      // Buscar dinámicamente el periodo con estado activo
-      const periodoActivo = res.data.find(
-        periodo => periodo.activo
-      );
+      const periodoActivo = res.data.find((periodo) => periodo.activo);
+      const anioActivo    = periodoActivo?.nombre || "";
 
-      const anioActivo = periodoActivo?.nombre || ""
-
-      setFiltros(prev => ({
-        ...prev,
-        anio: anioActivo
-      }));
-
-      setFiltrosAplicados(prev => ({
-        ...prev,
-        anio: anioActivo
-      }));
-
+      setFiltros((prev)          => ({ ...prev, anio: anioActivo }));
+      setFiltrosAplicados((prev) => ({ ...prev, anio: anioActivo }));
     } catch (error) {
       console.error("Error cargando periodos", error);
     } finally {
-      // Garantiza que el SearchBar aparezca incluso si la consulta falla
       setPeriodosCargados(true);
     }
   };
 
-  // Carga unificada de Asignaciones y Roles
+  // ── Carga inicial unificada ──────────────────────────────────────────────────
   useEffect(() => {
     const cargarDatosIniciales = async () => {
       try {
@@ -132,6 +234,7 @@ export default function AsignacionesPage() {
     }
   };
 
+  // ── Eliminar ─────────────────────────────────────────────────────────────────
   const eliminarAsignacion = async (id) => {
     try {
       await deletePrestamoRequest(id);
@@ -139,13 +242,12 @@ export default function AsignacionesPage() {
       setSelectedRow(null);
     } catch (error) {
       console.error("Error deleting loan assignment", error);
-      throw error; // Lanzamos el error para que sea capturado en confirmarEliminarAsignacion
+      throw error;
     }
   };
 
   const confirmarEliminarAsignacion = async () => {
     if (!selectedRow) return;
-
     try {
       await eliminarAsignacion(selectedRow.id_prestamo);
       setOpenEliminar(false);
@@ -155,17 +257,16 @@ export default function AsignacionesPage() {
     }
   };
 
+  // ── Devolver ─────────────────────────────────────────────────────────────────
   const devolverPrenda = async () => {
     if (!selectedRow) {
       alert("Seleccione una asignación");
       return;
     }
-
     if (!formDevolucion.estado_devolucion) {
       alert("Seleccione el estado de devolución");
       return;
     }
-
     if (
       formDevolucion.estado_devolucion === "Malo" &&
       !formDevolucion.observacion.trim()
@@ -175,46 +276,33 @@ export default function AsignacionesPage() {
     }
 
     try {
-      await devolverPrestamoRequest(
-        selectedRow.id_prestamo,
-        {
-          estado_devolucion: formDevolucion.estado_devolucion,
-          observacion: formDevolucion.observacion
-        }
-      );
+      await devolverPrestamoRequest(selectedRow.id_prestamo, {
+        estado_devolucion: formDevolucion.estado_devolucion,
+        observacion: formDevolucion.observacion
+      });
 
       await cargarAsignaciones();
       setOpenDevolver(false);
-
       setFormDevolucion({
-        prenda: "",
-        talla: "",
-        fecha_entrega: "",
-        fecha_devolucion: "",
-        estado_entrega: "",
-        estado_devolucion: "",
-        observacion: ""
+        prenda: "", talla: "", fecha_entrega: "", fecha_devolucion: "",
+        estado_entrega: "", estado_devolucion: "", observacion: ""
       });
-
       alert("Devolución registrada");
     } catch (error) {
       console.error(error);
-      alert(
-        error?.response?.data?.detail ||
-        "Error devolver prenda"
-      );
+      alert(error?.response?.data?.detail || "Error devolver prenda");
     }
   };
 
-  // Memorizar opciones de Grados únicos
-  const opcionesGrados = useMemo(() => {
-    return asignaciones
+  // ── Opciones de filtros ──────────────────────────────────────────────────────
+  const opcionesGrados = useMemo(() =>
+    asignaciones
       .map((item) => item.grado?.toString())
       .filter((value, index, self) => value && self.indexOf(value) === index)
-      .sort((a, b) => Number(a) - Number(b));
-  }, [asignaciones]);
+      .sort((a, b) => Number(a) - Number(b)),
+    [asignaciones]
+  );
 
-  // Memorizar opciones de Grupos únicos filtrados por el Grado seleccionado
   const opcionesGrupos = useMemo(() => {
     if (filtros.grado === "") return [];
     return asignaciones
@@ -224,36 +312,30 @@ export default function AsignacionesPage() {
       .sort();
   }, [asignaciones, filtros.grado]);
 
-  // Memorizar opciones de Años únicos desde los periodos de la BD
-  const opcionesAnios = useMemo(() => {
-    return periodos
-      .map((p) => p.nombre)
-      .filter(Boolean);
-  }, [periodos]);
+  const opcionesAnios = useMemo(() =>
+    periodos.map((p) => p.nombre).filter(Boolean),
+    [periodos]
+  );
 
-  // 3 y 4. Cambiadas referencias internas y dependencia de hook a filtrosAplicados
-  const asignacionesFiltradas = useMemo(() => {
-    return asignaciones.filter((item) => {
-      const coincideCodigo = filtrosAplicados.codigo === "" || 
+  // ── Filtrado ─────────────────────────────────────────────────────────────────
+  const asignacionesFiltradas = useMemo(() =>
+    asignaciones.filter((item) => {
+      const coincideCodigo  = filtrosAplicados.codigo === "" ||
         item.codigo?.toString().includes(filtrosAplicados.codigo);
-
-      const coincideNombre = filtrosAplicados.nombre === "" || 
+      const coincideNombre  = filtrosAplicados.nombre === "" ||
         item.nombre_completo?.toLowerCase().includes(filtrosAplicados.nombre.toLowerCase());
-
-      const coincideGrado = filtrosAplicados.grado === "" || 
+      const coincideGrado   = filtrosAplicados.grado === "" ||
         item.grado?.toString() === filtrosAplicados.grado;
-
-      const coincideGrupo = filtrosAplicados.grupo === "" || 
+      const coincideGrupo   = filtrosAplicados.grupo === "" ||
         item.grupo?.toString() === filtrosAplicados.grupo;
-
-      const coincideAnio = filtrosAplicados.anio === "" || 
+      const coincideAnio    = filtrosAplicados.anio === "" ||
         item.anio?.toString() === filtrosAplicados.anio;
-
       return coincideCodigo && coincideNombre && coincideGrado && coincideGrupo && coincideAnio;
-    });
-  }, [asignaciones, filtrosAplicados]);
+    }),
+    [asignaciones, filtrosAplicados]
+  );
 
-  // Bloqueo de seguridad si no hay usuario
+  // ── Guard ─────────────────────────────────────────────────────────────────────
   if (!user) {
     return (
       <div style={{ padding: "30px", fontFamily: "sans-serif", fontWeight: "600" }}>
@@ -262,6 +344,7 @@ export default function AsignacionesPage() {
     );
   }
 
+  // ── Render ────────────────────────────────────────────────────────────────────
   return (
     <div className="uniformes-page">
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
@@ -269,14 +352,11 @@ export default function AsignacionesPage() {
       <ModuleLayout
         sidebar={
           <Sidebar
-            user={{
-              nombre: user?.nombre || "ADMIN",
-              rol: rol
-            }}
+            user={{ nombre: user?.nombre || "ADMIN", rol }}
             menuItems={[
               { label: "Inicio", path: "/home" },
               { label: "Asignaciones", path: "/uniformes/asignaciones" },
-              { label: "Inventario Prenda", path: "/uniformes/inventario" },
+              { label: "Inventario Prenda", path: "/uniformes/inventario" }
             ]}
             selectedMenu="Asignaciones"
           />
@@ -294,7 +374,6 @@ export default function AsignacionesPage() {
                 label: "Devolver Prenda",
                 disabled: !!selectedRow && !selectedRow.id_prestamo,
                 onClick: () => {
-                  console.log("FILA:", selectedRow);
                   if (!selectedRow) {
                     alert("Seleccione una asignación");
                     return;
@@ -303,8 +382,7 @@ export default function AsignacionesPage() {
                     prenda: selectedRow.prenda || "",
                     talla: selectedRow.talla || "",
                     fecha_entrega: selectedRow.fecha_entrega
-                      ? new Date(selectedRow.fecha_entrega)
-                          .toLocaleDateString("es-CO")  
+                      ? new Date(selectedRow.fecha_entrega).toLocaleDateString("es-CO")
                       : "",
                     fecha_devolucion: new Date().toLocaleDateString("es-CO"),
                     estado_entrega: selectedRow.estado_entrega || "",
@@ -323,58 +401,104 @@ export default function AsignacionesPage() {
                     alert("Seleccione una asignación");
                     return;
                   }
-
                   setOpenEliminar(true);
                 },
-                variante: "danger"
+                variante: "primary"
               }
             ]}
           />
         }
       >
         <main className="uniformes-main">
-          {/* 5. Agregada la propiedad onSearch al componente SearchBar */}
           {periodosCargados && (
             <SearchBar
               initialValues={filtros}
               loading={loading}
               fields={[
-                { key: "codigo", label: "Código", type: "text" },
-                { key: "nombre", label: "Nombre", type: "text" },
-                { key: "grado", label: "Grado", type: "select", options: opcionesGrados },
-                { key: "grupo", label: "Grupo", type: "select", options: opcionesGrupos },
-                { key: "anio", label: "Año", type: "select", options: opcionesAnios }
+                { key: "codigo", label: "Código",  type: "text" },
+                { key: "nombre", label: "Nombre",  type: "text" },
+                { key: "grado",  label: "Grado",   type: "select", options: opcionesGrados },
+                { key: "grupo",  label: "Grupo",   type: "select", options: opcionesGrupos },
+                { key: "anio",   label: "Año",     type: "select", options: opcionesAnios }
               ]}
               onChange={(key, value) => {
                 setFiltros((prev) => {
                   const nuevos = { ...prev, [key]: value };
-                  if (key === "grado") nuevos.grupo = ""; 
+                  if (key === "grado") nuevos.grupo = "";
                   return nuevos;
                 });
               }}
-              onSearch={(f) => {
-                setFiltrosAplicados(f);
-              }}
+              onSearch={(f) => setFiltrosAplicados(f)}
             />
           )}
 
           <div className="table-container">
-            <AsignacionesTable
-              asignaciones={asignacionesFiltradas}
-              loading={loading}
-              setSelectedRow={setSelectedRow}
+            <DataTable
+              columns={COLUMNS}
+              rows={asignacionesFiltradas}
+              onRowClick={setSelectedRow}
+              pageSize={10}
+              emptyText={
+                loading
+                  ? "Cargando asignaciones..."
+                  : "No hay asignaciones registradas"
+              }
             />
           </div>
         </main>
       </ModuleLayout>
 
-      <AsignarPrendaModal
+      {/* ── Modal: Asignar Prenda ─────────────────────────────────────────────── */}
+      <Modal
+        title="ASIGNAR PRENDA"
         isOpen={openModal}
-        onClose={() => setOpenModal(false)}
-        estudianteSeleccionado={selectedRow}
-        onSuccess={cargarAsignaciones}
+        onCancel={() => setOpenModal(false)}
+        onAccept={handleAsignarSubmit}
+        values={formAsignar}
+        disabled={loadingModal}
+        onChange={(key, value) => {
+          if (key === "fecha_prestamo" || loadingModal) return;
+          setFormAsignar((prev) => {
+            const nuevo = { ...prev, [key]: value };
+            if (key === "id_objeto") {
+              const objeto = prendas.find((p) => p.id_objeto === Number(value));
+              nuevo.talla = objeto?.tipo === "objeto" ? "No aplica" : "";
+            }
+            return nuevo;
+          });
+        }}
+        fields={[
+          {
+            key: "id_objeto",
+            label: "Prenda",
+            type: "select",
+            options: opcionesPrendas
+          },
+          {
+            key: "talla",
+            label: "Talla",
+            type: "select",
+            options:
+              prendaSeleccionada?.tipo === "objeto"
+                ? ["No aplica"]
+                : ["S", "M", "L", "XL"]
+          },
+          { key: "fecha_prestamo", label: "Fecha de Entrega", type: "text" },
+          {
+            key: "estado",
+            label: "Estado de la prenda",
+            type: "select",
+            options: [
+              { value: "bueno",   label: "Bueno" },
+              { value: "regular", label: "Regular" },
+              { value: "malo",    label: "Malo" }
+            ]
+          },
+          { key: "observacion", label: "Observación", type: "text" }
+        ]}
       />
 
+      {/* ── Modal: Registrar Devolución ───────────────────────────────────────── */}
       <Modal
         title="REGISTRAR DEVOLUCIÓN"
         isOpen={openDevolver}
@@ -382,55 +506,29 @@ export default function AsignacionesPage() {
         onAccept={devolverPrenda}
         values={formDevolucion}
         onChange={(key, value) =>
-          setFormDevolucion((prev) => ({
-            ...prev,
-            [key]: value
-          }))
+          setFormDevolucion((prev) => ({ ...prev, [key]: value }))
         }
         fields={[
-          {
-            key: "prenda",
-            label: "Prenda",
-            type: "text"
-          },
-          {
-            key: "talla",
-            label: "Talla",
-            type: "text"
-          },
-          {
-            key: "fecha_entrega",
-            label: "Fecha de Entrega",
-            type: "text"
-          },
-          {
-            key: "fecha_devolucion",
-            label: "Fecha de Devolución",
-            type: "text"
-          },
-          {
-            key: "estado_entrega",
-            label: "Estado de Entrega",
-            type: "text"
-          },
+          { key: "prenda",           label: "Prenda",               type: "text" },
+          { key: "talla",            label: "Talla",                type: "text" },
+          { key: "fecha_entrega",    label: "Fecha de Entrega",     type: "text" },
+          { key: "fecha_devolucion", label: "Fecha de Devolución",  type: "text" },
+          { key: "estado_entrega",   label: "Estado de Entrega",    type: "text" },
           {
             key: "estado_devolucion",
             label: "Estado de Devolución",
             type: "select",
             options: [
-              { value: "Bueno", label: "Bueno" },
+              { value: "Bueno",   label: "Bueno" },
               { value: "Regular", label: "Regular" },
-              { value: "Malo", label: "Malo" }
+              { value: "Malo",    label: "Malo" }
             ]
           },
-          {
-            key: "observacion",
-            label: "Observación",
-            type: "text"
-          }
+          { key: "observacion", label: "Observación", type: "text" }
         ]}
       />
 
+      {/* ── Modal: Confirmar Eliminación ──────────────────────────────────────── */}
       <Modal
         title="CONFIRMAR ELIMINACIÓN"
         isOpen={openEliminar}
@@ -439,26 +537,10 @@ export default function AsignacionesPage() {
         values={{}}
         onChange={() => {}}
         fields={[
-          {
-            key: "mensaje1",
-            type: "label",
-            label: "¿CONFIRMA ELIMINAR LA ASIGNACIÓN?"
-          },
-          {
-            key: "mensaje2",
-            type: "label",
-            label: `${selectedRow?.nombre_completo || ""}`
-          },
-          {
-            key: "mensaje3",
-            type: "label",
-            label: `${selectedRow?.prenda || ""}`
-          },
-          {
-            key: "mensaje4",
-            type: "label",
-            label: "Esta acción no se puede deshacer."
-          }
+          { key: "mensaje1", type: "label", label: "¿CONFIRMA ELIMINAR LA ASIGNACIÓN?" },
+          { key: "mensaje2", type: "label", label: `${selectedRow?.nombre_completo || ""}` },
+          { key: "mensaje3", type: "label", label: `${selectedRow?.prenda || ""}` },
+          { key: "mensaje4", type: "label", label: "Esta acción no se puede deshacer." }
         ]}
       />
     </div>
