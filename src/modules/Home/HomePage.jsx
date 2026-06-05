@@ -7,10 +7,10 @@ import salonIcon from "../../assets/Salon/salon.svg";
 import tesoreriaIcon from "../../assets/Tesoreria/tesoreria.svg";
 import rectoriaIcon from "../../assets/Rectoria/estudiante.svg";
 import uniformesIcon from "../../assets/Objetos/objetos.svg";
-import bandaIcon from "../../assets/Banda/Banda.svg";
+import bandaIcon from "../../assets/Banda/banda.svg";
 import paraIcon from "../../assets/Parametrizacion/parametrizacion.svg";
 import DashboardIcon from "../../assets/Parametrizacion/parametrizacion.svg";
-import RobotIcon from "../../assets/Robot/robot.svg";
+import RobotIcon from "../../assets/Robot/Robot.svg";
 
 import Header from "../../components/layout/header";
 import Sidebar from "../../components/layout/Sidebar";
