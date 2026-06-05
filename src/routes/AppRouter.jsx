@@ -1,40 +1,126 @@
-/**
- * AppRouter — módulo Dashboard.
- * Sigue el patrón del equipo: importa sub-routers y los invoca como funciones.
- * main.jsx NO se toca.
- */
-import { Routes, Route } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  Navigate
+} from "react-router-dom";
 
-import LoginPage      from "../modules/auth/LoginPage";
-import ProtectedRoute from "./ProtectedRoute";
-import HomePage       from "../modules/Home/HomePage";
-import NotFound       from "../modules/notFound/notFound";
+import LoginPage from "../modules/auth/LoginPage";
+import ProtectedRoute from "./ProtectedRoute"
 
+import TesoreriaRouter from "./TesoreriaRouter";
+import SalonRouter from "./SalonRouter";
 import DashboardRouter from "./DashboardRouter";
 
-const AppRouter = () => (
-  <Routes>
+import ParametrizacionPage from '../modules/parametrizacion/ParametrizacionPage';
+import UsuariosPage from '../modules/parametrizacion/UsuariosPage';
 
-    {/* PÚBLICA */}
-    <Route path="/" element={<LoginPage />} />
+import NotFound from "../modules/notFound/notFound";
 
-    {/* HOME */}
-    <Route
-      path="/home"
-      element={
-        <ProtectedRoute>
-          <HomePage />
-        </ProtectedRoute>
+import Home from "../modules/Home/HomePage";
+
+import TestPage from "../modules/test/testPage";
+
+
+
+// ==============================
+// ROUTER
+// ==============================
+
+const AppRouter = () => {
+
+  return (
+
+    <Routes>
+      {/* Públicas */}
+        <Route path="/" element={<LoginPage />} />
+
+      {/* ===================== */}
+      {/* LOGIN */}
+      {/* ===================== */}
+
+      <Route
+        path="/"
+        element={<LoginPage />}
+      />
+
+      {/* ===================== */}
+      {/* HOME */}
+      {/* ===================== */}
+
+      <Route
+        path="/home"
+        element={
+
+          <ProtectedRoute>
+
+            <Home />
+
+          </ProtectedRoute>
+
+        }
+      />
+
+      {/* ===================== */}
+      {/* FUTURAS RUTAS */}
+      {/* ===================== */}
+
+      {/*
+      <Route
+        path="/estudiantes"
+        element={
+          <PrivateRoute>
+            <EstudiantesPage />
+          </PrivateRoute>
+        }
+      />
+      */}
+
+        {TesoreriaRouter()}
+        {SalonRouter()}
+
+        {/* ===================== */}
+        {/* DASHBOARD */}
+        {/* ===================== */}
+        {DashboardRouter()}
+
+
+      <Route
+        path="/parametrizacion"
+        element={
+          <ProtectedRoute>
+            <ParametrizacionPage />
+          </ProtectedRoute>
       }
-    />
+      />
+      <Route
+        path="/parametrizacion/usuarios"
+        element={
+          <ProtectedRoute>
+             <UsuariosPage />
+          </ProtectedRoute>
+        }
+        />
 
-    {/* DASHBOARD — sub-router del módulo */}
-    {DashboardRouter()}
+      <Route
+        path="/test"
+        element={
+          <TestPage />
+        }
+      />
 
-    {/* CATCH ALL */}
-    <Route path="*" element={<NotFound />} />
+      {/* ===================== */}
+      {/* CATCH ALL */}
+      {/* ===================== */}
 
-  </Routes>
-);
+      <Route
+        path="*"
+        element={
+          <NotFound />
+        }
+      />
+
+    </Routes>
+  );
+};
 
 export default AppRouter;
