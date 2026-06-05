@@ -27,9 +27,10 @@ export default function InventarioPage() {
   // Modales
   const [openAgregar, setOpenAgregar] = useState(false);
   const [openEditar, setOpenEditar] = useState(false);
+  const [openEliminar, setOpenEliminar] = useState(false);
 
   // Filtros de entrada temporal
-  const [filtros, setFiltros] = useState({  codigo: "", prenda: "", tipo: "" });
+  const [filtros, setFiltros] = useState({ codigo: "", prenda: "", tipo: "" });
 
   // 1. Estado agregado para controlar las búsquedas confirmadas
   const [filtrosAplicados, setFiltrosAplicados] = useState({
@@ -47,7 +48,6 @@ export default function InventarioPage() {
     cantidad_total: 1,
     talla: "",
     observacion: "",
-    estado_physical: "Bueno",
     estado_fisico: "Bueno",
     fecha_registro: new Date().toLocaleDateString("en-CA")
   });
@@ -198,19 +198,27 @@ export default function InventarioPage() {
   };
 
   const eliminarPrenda = async () => {
-    if (!selectedRow) return alert("Seleccione una prenda");
-
-    const confirmar = window.confirm("¿Está seguro de eliminar esta prenda?");
-    if (!confirmar) return;
+    if (!selectedRow) return;
 
     try {
-      await deleteObjetoRequest(selectedRow.id_objeto);
+      await deleteObjetoRequest(
+        selectedRow.id_objeto
+      );
+
       await cargarInventario();
+
       setSelectedRow(null);
+
+      setOpenEliminar(false);
+
       alert("Prenda eliminada correctamente");
+
     } catch (error) {
       console.error(error);
-      alert(error?.response?.data?.detail || "Error Cosmic.");
+      alert(
+        error?.response?.data?.detail ||
+        "Error eliminando prenda"
+      );
     }
   };
 
@@ -253,7 +261,6 @@ export default function InventarioPage() {
               { label: "Inicio", path: "/home" },
               { label: "Asignaciones", path: "/uniformes/asignaciones" },
               { label: "Inventario Prendas", path: "/uniformes/inventario" },
-              
             ]}
             selectedMenu="Inventario Prendas"
           />
@@ -300,7 +307,13 @@ export default function InventarioPage() {
               },
               {
                 label: "Eliminar Prenda",
-                onClick: eliminarPrenda,
+                onClick: () => {
+                  if (!selectedRow) {
+                    alert("Seleccione una prenda");
+                    return;
+                  }
+                  setOpenEliminar(true);
+                },
                 variante: "danger"
               }
             ]}
@@ -457,6 +470,38 @@ export default function InventarioPage() {
             key: "observacion",
             label: "Observación",
             type: "text"
+          }
+        ]}
+      />
+
+      <Modal
+        title="CONFIRMAR ELIMINACIÓN"
+        isOpen={openEliminar}
+        onCancel={() => setOpenEliminar(false)}
+        onAccept={eliminarPrenda}
+        values={{}}
+        fields={[
+          {
+            key: "mensaje1",
+            type: "label",
+            label: "¿CONFIRMA ELIMINAR LA PRENDA?"
+          },
+          {
+            key: "mensaje2",
+            type: "label",
+            label:
+              `Prenda:${selectedRow?.nombre || ""}` +
+              (
+                selectedRow?.talla &&
+                selectedRow?.talla !== "No aplica"
+                  ? ` - Talla ${selectedRow.talla}`
+                  : ""
+              )
+          },
+          {
+            key: "mensaje3",
+            type: "label",
+            label: "Esta acción no se puede deshacer."
           }
         ]}
       />

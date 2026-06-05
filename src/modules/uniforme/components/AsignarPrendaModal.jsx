@@ -110,7 +110,7 @@ export default function AsignarPrendaModal({ isOpen, onClose, estudianteSeleccio
       values={formData}
       disabled={loading} 
       onChange={(key, value) => {
-        if (key === "fecha_prestamo" || loading) return; // Bloquear edición de fecha y cambios en loading
+        if (key === "fecha_prestamo" || loading) return; 
 
         setFormData((prev) => {
           const nuevo = {
@@ -139,7 +139,7 @@ export default function AsignarPrendaModal({ isOpen, onClose, estudianteSeleccio
           type: "select",
           options: opcionesPrendas
         },
-        // Cambiado según requerimiento 1 (Mantiene el orden original que tenías)
+        
         {
           key: "talla",
           label: "Talla",

@@ -139,6 +139,19 @@ export default function AsignacionesPage() {
       setSelectedRow(null);
     } catch (error) {
       console.error("Error deleting loan assignment", error);
+      throw error; // Lanzamos el error para que sea capturado en confirmarEliminarAsignacion
+    }
+  };
+
+  const confirmarEliminarAsignacion = async () => {
+    if (!selectedRow) return;
+
+    try {
+      await eliminarAsignacion(selectedRow.id_prestamo);
+      setOpenEliminar(false);
+    } catch (error) {
+      console.error("Error al confirmar la eliminación de la asignación:", error);
+      alert("No se pudo eliminar la asignación. Intente de nuevo.");
     }
   };
 
@@ -263,8 +276,7 @@ export default function AsignacionesPage() {
             menuItems={[
               { label: "Inicio", path: "/home" },
               { label: "Asignaciones", path: "/uniformes/asignaciones" },
-              { label: "Inventario Prendas", path: "/uniformes/inventario" },
-              
+              { label: "Inventario Prenda", path: "/uniformes/inventario" },
             ]}
             selectedMenu="Asignaciones"
           />
@@ -423,17 +435,29 @@ export default function AsignacionesPage() {
         title="CONFIRMAR ELIMINACIÓN"
         isOpen={openEliminar}
         onCancel={() => setOpenEliminar(false)}
-        onAccept={() => {
-          eliminarAsignacion(selectedRow.id_prestamo);
-          setOpenEliminar(false);
-        }}
+        onAccept={confirmarEliminarAsignacion}
         values={{}}
         onChange={() => {}}
         fields={[
           {
-            key: "mensaje",
+            key: "mensaje1",
             type: "label",
-            label: "¿ESTÁ SEGURO DE ELIMINAR LA ASIGNACIÓN SELECCIONADA?"
+            label: "¿CONFIRMA ELIMINAR LA ASIGNACIÓN?"
+          },
+          {
+            key: "mensaje2",
+            type: "label",
+            label: `${selectedRow?.nombre_completo || ""}`
+          },
+          {
+            key: "mensaje3",
+            type: "label",
+            label: `${selectedRow?.prenda || ""}`
+          },
+          {
+            key: "mensaje4",
+            type: "label",
+            label: "Esta acción no se puede deshacer."
           }
         ]}
       />
