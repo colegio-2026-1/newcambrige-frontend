@@ -3,6 +3,7 @@
  * - Usa useAuth() para obtener el usuario y sus roles reales.
  * - Llama a dashboardService.js con los endpoints reales del backend.
  * - Filtra KPIs y gráficas según el rol del usuario autenticado.
+ * - Usa ModuleLayout y Sidebar del equipo.
  * - main.jsx NO se toca.
  */
 import { useEffect, useState } from "react";
@@ -12,9 +13,10 @@ import {
   PieChart, Pie, Cell, Legend, CartesianGrid,
 } from "recharts";
 
-import Header       from "../../components/layout/header";
-import Sidebar      from "../../components/layout/Sidebar";
-import { useAuth }  from "../../api/useAuth";
+import Header        from "../../components/layout/header";
+import ModuleLayout  from "../../components/layout/ModuleLayout";
+import Sidebar       from "../../components/layout/Sidebar";
+import { useAuth }   from "../../api/useAuth";
 
 import {
   getPeriodos,
@@ -24,7 +26,7 @@ import {
   getPrestamosBandaActivos,
   getPrestamosUniformesActivos,
   getSalonesPorPeriodo,
-} from "./dashboardService";
+} from "../../api/dashboard/dashboardService";
 
 import "./DashboardPage.css";
 
@@ -37,18 +39,16 @@ const DONUT_COLORS = [C_GREEN, C_RED];
 const BAR_COLORS   = [C_RED, C_BLUE, C_GREEN, C_WARN];
 
 // ── Permisos por rol ─────────────────────────────────────────────
-// Qué secciones puede ver cada rol
 const PERMISOS = {
-  admin:      { kpiEstudiantes: true, kpiPaz: true, kpiPendientes: true, kpiPagos: true, grafPaz: true, grafPrestamos: true, grafSalones: true, grafPagos: true },
-  secretaria: { kpiEstudiantes: true, kpiPaz: true, kpiPendientes: true, kpiPagos: false, grafPaz: true, grafPrestamos: false, grafSalones: true, grafPagos: false },
-  rectoria:   { kpiEstudiantes: true, kpiPaz: true, kpiPendientes: true, kpiPagos: false, grafPaz: true, grafPrestamos: false, grafSalones: false, grafPagos: false },
-  tesoreria:  { kpiEstudiantes: false, kpiPaz: false, kpiPendientes: false, kpiPagos: true, grafPaz: false, grafPrestamos: false, grafSalones: true, grafPagos: true },
-  banda:      { kpiEstudiantes: false, kpiPaz: false, kpiPendientes: false, kpiPagos: false, grafPaz: false, grafPrestamos: true, grafSalones: false, grafPagos: false },
-  uniformes:  { kpiEstudiantes: false, kpiPaz: false, kpiPendientes: false, kpiPagos: false, grafPaz: false, grafPrestamos: true, grafSalones: false, grafPagos: false },
-  titular:    { kpiEstudiantes: true, kpiPaz: false, kpiPendientes: false, kpiPagos: false, grafPaz: false, grafPrestamos: false, grafSalones: true, grafPagos: false },
+  admin:      { kpiEstudiantes: true,  kpiPaz: true,  kpiPendientes: true,  kpiPagos: true,  grafPaz: true,  grafPrestamos: true,  grafSalones: true,  grafPagos: true  },
+  secretaria: { kpiEstudiantes: true,  kpiPaz: true,  kpiPendientes: true,  kpiPagos: false, grafPaz: true,  grafPrestamos: false, grafSalones: true,  grafPagos: false },
+  rectoria:   { kpiEstudiantes: true,  kpiPaz: true,  kpiPendientes: true,  kpiPagos: false, grafPaz: true,  grafPrestamos: false, grafSalones: false, grafPagos: false },
+  tesoreria:  { kpiEstudiantes: false, kpiPaz: false, kpiPendientes: false, kpiPagos: true,  grafPaz: false, grafPrestamos: false, grafSalones: true,  grafPagos: true  },
+  banda:      { kpiEstudiantes: false, kpiPaz: false, kpiPendientes: false, kpiPagos: false, grafPaz: false, grafPrestamos: true,  grafSalones: false, grafPagos: false },
+  uniformes:  { kpiEstudiantes: false, kpiPaz: false, kpiPendientes: false, kpiPagos: false, grafPaz: false, grafPrestamos: true,  grafSalones: false, grafPagos: false },
+  titular:    { kpiEstudiantes: true,  kpiPaz: false, kpiPendientes: false, kpiPagos: false, grafPaz: false, grafPrestamos: false, grafSalones: true,  grafPagos: false },
 };
 
-// Devuelve los permisos del primer rol conocido, o admin por defecto
 const getPermisos = (roles = []) => {
   for (const r of roles) {
     if (PERMISOS[r]) return PERMISOS[r];
@@ -101,7 +101,6 @@ const ChartSwitch = ({ options, value, onChange }) => (
 export default function DashboardPage() {
   const { user } = useAuth();
 
-  // Roles del usuario autenticado (array de strings)
   const roles = user?.roles?.map((r) => r.nombre ?? r) ?? [];
   const can   = getPermisos(roles);
 
@@ -111,24 +110,24 @@ export default function DashboardPage() {
   ];
 
   // ── Estado ────────────────────────────────────────────────────
-  const [selectedMenu, setSelectedMenu] = useState("Dashboard");
-  const [periodos,     setPeriodos]     = useState([]);
-  const [periodoId,    setPeriodoId]    = useState("");
-  const [loading,      setLoading]      = useState(false);
-  const [error,        setError]        = useState(null);
+  const [selectedMenu,      setSelectedMenu]      = useState("Dashboard");
+  const [periodos,          setPeriodos]          = useState([]);
+  const [periodoId,         setPeriodoId]         = useState("");
+  const [loading,           setLoading]           = useState(false);
+  const [error,             setError]             = useState(null);
 
   // KPIs
-  const [totalEstudiantes, setTotalEstudiantes] = useState(null);
-  const [totalPazOk,       setTotalPazOk]       = useState(null);
-  const [totalPendientes,  setTotalPendientes]  = useState(null);
-  const [totalPagos,       setTotalPagos]       = useState(null);
+  const [totalEstudiantes,  setTotalEstudiantes]  = useState(null);
+  const [totalPazOk,        setTotalPazOk]        = useState(null);
+  const [totalPendientes,   setTotalPendientes]   = useState(null);
+  const [totalPagos,        setTotalPagos]        = useState(null);
 
   // Gráficas
-  const [pazData,     setPazData]     = useState([]);
-  const [prestData,   setPrestData]   = useState([]);
-  const [salonesData, setSalonesData] = useState([]);
-  const [pagosData,   setPagosData]   = useState([]);
-  const [pazChart,    setPazChart]    = useState("donut");
+  const [pazData,           setPazData]           = useState([]);
+  const [prestData,         setPrestData]         = useState([]);
+  const [salonesData,       setSalonesData]       = useState([]);
+  const [pagosData,         setPagosData]         = useState([]);
+  const [pazChart,          setPazChart]          = useState("donut");
 
   // ── Cargar períodos al montar ────────────────────────────────
   useEffect(() => {
@@ -164,7 +163,6 @@ export default function DashboardPage() {
           .then((r) => {
             const pendientes = r.data ?? [];
             setTotalPendientes(pendientes.length);
-            // Paz OK = total - pendientes
             setTotalPazOk(
               totalEstudiantes !== null
                 ? totalEstudiantes - pendientes.length
@@ -232,198 +230,198 @@ export default function DashboardPage() {
     <div className="dashboard-container">
       <Header title="SISTEMA DE PAZ Y SALVO — NEW CAMBRIDGE SCHOOL" />
 
-      <div className="dash-body">
-        <Sidebar
-          menuItems={menuItems}
-          selectedMenu={selectedMenu}
-          setSelectedMenu={setSelectedMenu}
-          user={user}
-        />
+      <ModuleLayout
+        sidebar={
+          <Sidebar
+            menuItems={menuItems}
+            selectedMenu={selectedMenu}
+            setSelectedMenu={setSelectedMenu}
+            user={user}
+          />
+        }
+      >
+        <div className="dash-wrapper">
 
-        <main className="dash-main">
-          <div className="dash-wrapper">
+          {/* ERROR GLOBAL */}
+          {error && <p className="dash-error">{error}</p>}
 
-            {/* ERROR GLOBAL */}
-            {error && <p className="dash-error">{error}</p>}
-
-            {/* FILTRO PERÍODO */}
-            <div className="dash-filter-bar">
-              <label className="dash-filter-label" htmlFor="periodo-select">
-                Período académico
-              </label>
-              <select
-                id="periodo-select"
-                className="dash-filter-select"
-                value={periodoId}
-                onChange={(e) => setPeriodoId(e.target.value)}
-              >
-                {periodos.length === 0 && (
-                  <option value="">Cargando...</option>
-                )}
-                {periodos.map((p) => (
-                  <option key={p.id_periodo} value={String(p.id_periodo)}>
-                    {p.nombre}
-                  </option>
-                ))}
-              </select>
-              {periodoLabel && (
-                <span className="dash-filter-badge">{periodoLabel}</span>
+          {/* FILTRO PERÍODO */}
+          <div className="dash-filter-bar">
+            <label className="dash-filter-label" htmlFor="periodo-select">
+              Período académico
+            </label>
+            <select
+              id="periodo-select"
+              className="dash-filter-select"
+              value={periodoId}
+              onChange={(e) => setPeriodoId(e.target.value)}
+            >
+              {periodos.length === 0 && (
+                <option value="">Cargando...</option>
               )}
-            </div>
+              {periodos.map((p) => (
+                <option key={p.id_periodo} value={String(p.id_periodo)}>
+                  {p.nombre}
+                </option>
+              ))}
+            </select>
+            {periodoLabel && (
+              <span className="dash-filter-badge">{periodoLabel}</span>
+            )}
+          </div>
 
-            {/* KPI CARDS */}
-            <div className="dash-kpi-grid">
-              {can.kpiEstudiantes && (
-                <KpiCard title="Estudiantes"      value={totalEstudiantes} sub="en el período"          color={C_BLUE}  loading={loading} />
-              )}
-              {can.kpiPaz && (
-                <KpiCard title="Paz y Salvo OK"   value={totalPazOk}       sub="sin pendientes"          color={C_GREEN} loading={loading} />
-              )}
-              {can.kpiPendientes && (
-                <KpiCard title="Con Pendientes"   value={totalPendientes}  sub="paz y salvo incompleto"  color={C_RED}   loading={loading} />
-              )}
-              {can.kpiPagos && (
-                <KpiCard title="Pagos Pendientes" value={totalPagos}       sub="por regularizar"         color={C_WARN}  loading={loading} />
-              )}
-            </div>
+          {/* KPI CARDS */}
+          <div className="dash-kpi-grid">
+            {can.kpiEstudiantes && (
+              <KpiCard title="Estudiantes"      value={totalEstudiantes} sub="en el período"          color={C_BLUE}  loading={loading} />
+            )}
+            {can.kpiPaz && (
+              <KpiCard title="Paz y Salvo OK"   value={totalPazOk}       sub="sin pendientes"          color={C_GREEN} loading={loading} />
+            )}
+            {can.kpiPendientes && (
+              <KpiCard title="Con Pendientes"   value={totalPendientes}  sub="paz y salvo incompleto"  color={C_RED}   loading={loading} />
+            )}
+            {can.kpiPagos && (
+              <KpiCard title="Pagos Pendientes" value={totalPagos}       sub="por regularizar"         color={C_WARN}  loading={loading} />
+            )}
+          </div>
 
-            {/* FILA 1: Paz y Salvo + Préstamos */}
-            {(can.grafPaz || can.grafPrestamos) && (
-              <div className="dash-row">
+          {/* FILA 1: Paz y Salvo + Préstamos */}
+          {(can.grafPaz || can.grafPrestamos) && (
+            <div className="dash-row">
 
-                {can.grafPaz && (
-                  <div className="dash-card">
-                    <div className="dash-card-header">
-                      <h3 className="dash-card-title">Estado Paz y Salvo</h3>
-                      <ChartSwitch
-                        options={[
-                          { label: "Donut",  value: "donut" },
-                          { label: "Barras", value: "bar"   },
-                        ]}
-                        value={pazChart}
-                        onChange={setPazChart}
-                      />
-                    </div>
-
-                    {pazData.length === 0 && !loading
-                      ? <p className="dash-empty">Sin datos para este período</p>
-                      : pazChart === "donut" ? (
-                          <ResponsiveContainer width="100%" height={240}>
-                            <PieChart>
-                              <Pie data={pazData} cx="50%" cy="50%" innerRadius={60} outerRadius={95} paddingAngle={4} dataKey="value"
-                                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                                {pazData.map((_, i) => <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />)}
-                              </Pie>
-                              <Tooltip content={<CustomTooltip />} />
-                              <Legend />
-                            </PieChart>
-                          </ResponsiveContainer>
-                        ) : (
-                          <ResponsiveContainer width="100%" height={240}>
-                            <BarChart data={pazData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                              <CartesianGrid strokeDasharray="3 3" stroke="#e0d8cc" />
-                              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                              <YAxis tick={{ fontSize: 12 }} />
-                              <Tooltip content={<CustomTooltip />} />
-                              <Bar dataKey="value" name="Estudiantes" radius={[4, 4, 0, 0]}>
-                                {pazData.map((_, i) => <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />)}
-                              </Bar>
-                            </BarChart>
-                          </ResponsiveContainer>
-                        )
-                    }
+              {can.grafPaz && (
+                <div className="dash-card">
+                  <div className="dash-card-header">
+                    <h3 className="dash-card-title">Estado Paz y Salvo</h3>
+                    <ChartSwitch
+                      options={[
+                        { label: "Donut",  value: "donut" },
+                        { label: "Barras", value: "bar"   },
+                      ]}
+                      value={pazChart}
+                      onChange={setPazChart}
+                    />
                   </div>
-                )}
 
-                {can.grafPrestamos && (
-                  <div className="dash-card">
-                    <div className="dash-card-header">
-                      <h3 className="dash-card-title">Préstamos Activos</h3>
-                      <span className="dash-card-sub">Banda vs Uniformes</span>
-                    </div>
-                    {prestData.length === 0 && !loading
-                      ? <p className="dash-empty">Sin datos disponibles</p>
-                      : (
+                  {pazData.length === 0 && !loading
+                    ? <p className="dash-empty">Sin datos para este período</p>
+                    : pazChart === "donut" ? (
                         <ResponsiveContainer width="100%" height={240}>
-                          <BarChart data={prestData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e0d8cc" />
-                            <XAxis dataKey="modulo" tick={{ fontSize: 12 }} />
-                            <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
+                          <PieChart>
+                            <Pie data={pazData} cx="50%" cy="50%" innerRadius={60} outerRadius={95} paddingAngle={4} dataKey="value"
+                              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                              {pazData.map((_, i) => <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />)}
+                            </Pie>
                             <Tooltip content={<CustomTooltip />} />
-                            <Bar dataKey="activos" name="Activos" radius={[4, 4, 0, 0]}>
-                              {prestData.map((_, i) => <Cell key={i} fill={BAR_COLORS[i % BAR_COLORS.length]} />)}
+                            <Legend />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <ResponsiveContainer width="100%" height={240}>
+                          <BarChart data={pazData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e0d8cc" />
+                            <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                            <YAxis tick={{ fontSize: 12 }} />
+                            <Tooltip content={<CustomTooltip />} />
+                            <Bar dataKey="value" name="Estudiantes" radius={[4, 4, 0, 0]}>
+                              {pazData.map((_, i) => <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />)}
                             </Bar>
                           </BarChart>
                         </ResponsiveContainer>
                       )
-                    }
+                  }
+                </div>
+              )}
+
+              {can.grafPrestamos && (
+                <div className="dash-card">
+                  <div className="dash-card-header">
+                    <h3 className="dash-card-title">Préstamos Activos</h3>
+                    <span className="dash-card-sub">Banda vs Uniformes</span>
                   </div>
-                )}
-              </div>
-            )}
+                  {prestData.length === 0 && !loading
+                    ? <p className="dash-empty">Sin datos disponibles</p>
+                    : (
+                      <ResponsiveContainer width="100%" height={240}>
+                        <BarChart data={prestData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e0d8cc" />
+                          <XAxis dataKey="modulo" tick={{ fontSize: 12 }} />
+                          <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Bar dataKey="activos" name="Activos" radius={[4, 4, 0, 0]}>
+                            {prestData.map((_, i) => <Cell key={i} fill={BAR_COLORS[i % BAR_COLORS.length]} />)}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    )
+                  }
+                </div>
+              )}
+            </div>
+          )}
 
-            {/* FILA 2: Salones + Pagos */}
-            {(can.grafSalones || can.grafPagos) && (
-              <div className="dash-row">
+          {/* FILA 2: Salones + Pagos */}
+          {(can.grafSalones || can.grafPagos) && (
+            <div className="dash-row">
 
-                {can.grafSalones && (
-                  <div className="dash-card">
-                    <div className="dash-card-header">
-                      <h3 className="dash-card-title">Estudiantes por Salón</h3>
-                      <span className="dash-card-sub">Período actual · Top 10</span>
-                    </div>
-                    {salonesData.length === 0 && !loading
-                      ? <p className="dash-empty">Sin datos para este período</p>
-                      : (
-                        <ResponsiveContainer width="100%" height={280}>
-                          <BarChart data={salonesData} layout="vertical" margin={{ top: 0, right: 20, left: 30, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e0d8cc" horizontal={false} />
-                            <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
-                            <YAxis type="category" dataKey="nombre" tick={{ fontSize: 11 }} width={45} />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Bar dataKey="estudiantes" name="Estudiantes" fill={C_BLUE} radius={[0, 4, 4, 0]} />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      )
-                    }
+              {can.grafSalones && (
+                <div className="dash-card">
+                  <div className="dash-card-header">
+                    <h3 className="dash-card-title">Estudiantes por Salón</h3>
+                    <span className="dash-card-sub">Período actual · Top 10</span>
                   </div>
-                )}
+                  {salonesData.length === 0 && !loading
+                    ? <p className="dash-empty">Sin datos para este período</p>
+                    : (
+                      <ResponsiveContainer width="100%" height={280}>
+                        <BarChart data={salonesData} layout="vertical" margin={{ top: 0, right: 20, left: 30, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e0d8cc" horizontal={false} />
+                          <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
+                          <YAxis type="category" dataKey="nombre" tick={{ fontSize: 11 }} width={45} />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Bar dataKey="estudiantes" name="Estudiantes" fill={C_BLUE} radius={[0, 4, 4, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    )
+                  }
+                </div>
+              )}
 
-                {can.grafPagos && (
-                  <div className="dash-card">
-                    <div className="dash-card-header">
-                      <h3 className="dash-card-title">Pagos Pendientes</h3>
-                      <span className="dash-card-sub">Top 5</span>
-                    </div>
-                    {pagosData.length === 0 && !loading
-                      ? <p className="dash-empty">Sin pagos pendientes</p>
-                      : (
-                        <ul className="dash-pagos-list">
-                          {pagosData.map((pago, i) => (
-                            <li key={i} className="dash-pagos-item">
-                              <span className="dash-pagos-num">{i + 1}</span>
-                              <div className="dash-pagos-info">
-                                <span className="dash-pagos-nombre">
-                                  {pago.nombre_estudiante ?? pago.estudiante ?? "Estudiante"}
-                                </span>
-                                <span className="dash-pagos-concepto">
-                                  {pago.concepto ?? pago.detalle ?? "Pendiente"}
-                                </span>
-                              </div>
-                              <span className="dash-pagos-badge">Pendiente</span>
-                            </li>
-                          ))}
-                        </ul>
-                      )
-                    }
+              {can.grafPagos && (
+                <div className="dash-card">
+                  <div className="dash-card-header">
+                    <h3 className="dash-card-title">Pagos Pendientes</h3>
+                    <span className="dash-card-sub">Top 5</span>
                   </div>
-                )}
-              </div>
-            )}
+                  {pagosData.length === 0 && !loading
+                    ? <p className="dash-empty">Sin pagos pendientes</p>
+                    : (
+                      <ul className="dash-pagos-list">
+                        {pagosData.map((pago, i) => (
+                          <li key={i} className="dash-pagos-item">
+                            <span className="dash-pagos-num">{i + 1}</span>
+                            <div className="dash-pagos-info">
+                              <span className="dash-pagos-nombre">
+                                {pago.nombre_estudiante ?? pago.estudiante ?? "Estudiante"}
+                              </span>
+                              <span className="dash-pagos-concepto">
+                                {pago.concepto ?? pago.detalle ?? "Pendiente"}
+                              </span>
+                            </div>
+                            <span className="dash-pagos-badge">Pendiente</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )
+                  }
+                </div>
+              )}
+            </div>
+          )}
 
-          </div>
-        </main>
-      </div>
+        </div>
+      </ModuleLayout>
     </div>
   );
 }
