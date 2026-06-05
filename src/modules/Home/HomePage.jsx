@@ -1,21 +1,28 @@
 // HomePage.js
 import { useEffect, useState } from "react";
-import { Home } from "lucide-react";
+import { Icon } from '@mdi/react';
+import {
+  mdiHome,
+  mdiViewDashboard,
+} from '@mdi/js';
 import "./HomePage.css";
 
 import salonIcon from "../../assets/Salon/salon.svg";
 import tesoreriaIcon from "../../assets/Tesoreria/tesoreria.svg";
 import rectoriaIcon from "../../assets/Rectoria/estudiante.svg";
 import uniformesIcon from "../../assets/Objetos/objetos.svg";
-import bandaIcon from "../../assets/Banda/banda.svg";
+import bandaIcon from "../../assets/Banda/Banda.svg";
 import paraIcon from "../../assets/Parametrizacion/parametrizacion.svg";
 import DashboardIcon from "../../assets/Parametrizacion/parametrizacion.svg";
+import RobotIcon from "../../assets/Robot/robot.svg";
 
 import Header from "../../components/layout/header";
 import Sidebar from "../../components/layout/Sidebar";
 import ModuleLayout from "../../components/layout/ModuleLayout";
 import { useAuth } from "../../api/useAuth";
 import { useNavigate } from 'react-router-dom';
+
+
 
 
 import { allrolesuserRequest } from '../../api/endpoints';
@@ -55,8 +62,8 @@ const HomePage = () => {
 
   // MENU ITEMS CON ICONOS
   const menuItems = [
-    { label: "Inicio", icon: <Home /> },
-    { label: "Dashboard", icon: DashboardIcon },
+    { label: "Inicio", icon: <Icon path={mdiHome} /> },
+    { label: "Dashboard", icon: <Icon path={mdiViewDashboard} /> },
   ];
 
   const cards = [
@@ -66,6 +73,7 @@ const HomePage = () => {
     { title: "Uniformes", icon: uniformesIcon, path: "/uniformes", roles: ["administrador", "admin", "uniformes"] },
     { title: "Banda", icon: bandaIcon, path: "/banda", roles: [ "administrador", "admin", "banda"] },
     { title: "Parametrización", icon: paraIcon, path: "/parametrizacion", roles: ["secretaria", "administrador", "admin", "rectoria"] },
+    { title: "Robot", icon: RobotIcon, path: "/robot", roles: ["administrador", "admin", "robot"] },
   ];
 
   return (
