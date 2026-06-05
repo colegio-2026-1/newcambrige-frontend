@@ -1,5 +1,6 @@
 /* ================================================
    DASHBOARD — NEW CAMBRIDGE SCHOOL
+   Responsive profesional: auto-fit grid por rol
    ================================================ */
 
 /* ── CONTENEDOR PRINCIPAL ── */
@@ -39,7 +40,24 @@
   flex-direction: column;
   gap: var(--space-6);
   padding: var(--space-6);
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
+
+/* ── DENSIDAD POR ROL ─────────────────────────────────────────────
+   admin / secretaria / rectoria → full
+   tesoreria / titular           → mid
+   banda / uniformes             → single
+──────────────────────────────────────────────────────────────── */
+.dash-density-full  .dash-kpi-card,
+.dash-density-full  .dash-card  { padding: var(--space-5) var(--space-6); }
+
+.dash-density-mid   .dash-kpi-card,
+.dash-density-mid   .dash-card  { padding: var(--space-4) var(--space-5); }
+
+.dash-density-single .dash-kpi-card,
+.dash-density-single .dash-card { padding: var(--space-4); }
 
 /* ── FILTRO PERÍODO ── */
 .dash-filter-bar {
@@ -62,6 +80,9 @@
   letter-spacing: var(--letter-wide);
   text-transform: uppercase;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .dash-filter-select {
@@ -74,7 +95,8 @@
   padding: var(--space-2) var(--space-4);
   cursor: pointer;
   transition: border-color var(--transition-fast);
-  min-width: 220px;
+  min-width: 180px;
+  max-width: 100%;
 }
 .dash-filter-select:focus {
   outline: none;
@@ -91,16 +113,44 @@
   padding: 2px var(--space-3);
   letter-spacing: var(--letter-wide);
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
-/* ── KPI GRID ── */
+/* ── ROLES BAR ── */
+.dash-roles-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.dash-roles-label {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-wide);
+}
+.dash-role-badge {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: var(--font-bold);
+  color: var(--color-white);
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  padding: 2px 10px;
+  letter-spacing: var(--letter-wide);
+  text-transform: uppercase;
+}
+
+/* ── KPI GRID — auto-fit, nunca colapsa en pantallas pequeñas ── */
 .dash-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
   gap: var(--space-4);
+  width: 100%;
+  min-width: 0;
 }
-@media (max-width: 1100px) { .dash-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 600px)  { .dash-kpi-grid { grid-template-columns: 1fr; } }
 
 .dash-kpi-card {
   background: var(--color-white);
@@ -112,6 +162,8 @@
   flex-direction: column;
   gap: var(--space-1);
   transition: box-shadow var(--transition-fast);
+  min-width: 0;
+  overflow: hidden;
 }
 .dash-kpi-card:hover { box-shadow: var(--shadow-md); }
 
@@ -122,17 +174,29 @@
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: var(--letter-wide);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 .dash-kpi-value {
   font-family: var(--font-display);
   font-size: var(--text-2xl);
   font-weight: var(--font-bold);
   line-height: 1.1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .dash-kpi-sub {
   font-family: var(--font-body);
   font-size: var(--text-xs);
   color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 .dash-kpi-skeleton {
   display: block;
@@ -148,13 +212,25 @@
   100% { background-position: -200% 0; }
 }
 
-/* ── FILAS DE GRÁFICAS ── */
-.dash-row {
+/* ── GRILLA GRÁFICAS — auto-fit fluido por rol ── */
+.dash-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr));
   gap: var(--space-4);
+  width: 100%;
+  min-width: 0;
+  align-items: start;
 }
-@media (max-width: 900px) { .dash-row { grid-template-columns: 1fr; } }
+
+/* Si solo hay 1 card en la grilla, que ocupe hasta 720px y se centre */
+.dash-grid-single {
+  display: grid;
+  grid-template-columns: minmax(min(400px, 100%), 720px);
+  gap: var(--space-4);
+  width: 100%;
+  min-width: 0;
+  justify-content: start;
+}
 
 /* ── CARD GRÁFICA ── */
 .dash-card {
@@ -166,8 +242,24 @@
   flex-direction: column;
   gap: var(--space-4);
   transition: box-shadow var(--transition-fast);
+  min-width: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  width: 100%;
 }
 .dash-card:hover { box-shadow: var(--shadow-md); }
+
+.dash-card-inner {
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Para contenido horizontal que puede desbordar (tablas, gráficas anchas) */
+.dash-card-scroll {
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
 
 .dash-card-header {
   display: flex;
@@ -175,6 +267,7 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: var(--space-2);
+  min-width: 0;
 }
 .dash-card-title {
   font-family: var(--font-display);
@@ -183,6 +276,11 @@
   color: var(--color-primary);
   margin: 0;
   letter-spacing: var(--letter-wide);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  max-width: 100%;
 }
 .dash-card-sub {
   font-family: var(--font-body);
@@ -190,6 +288,10 @@
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: var(--letter-wide);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 /* ── SWITCH ── */
@@ -198,6 +300,7 @@
   border: var(--border-width) solid var(--color-border-light);
   border-radius: var(--radius-full);
   overflow: hidden;
+  flex-shrink: 0;
 }
 .dash-switch-btn {
   font-family: var(--font-body);
@@ -211,6 +314,7 @@
   transition: background var(--transition-fast), color var(--transition-fast);
   letter-spacing: var(--letter-wide);
   text-transform: uppercase;
+  white-space: nowrap;
 }
 .dash-switch-btn.active {
   background: var(--color-primary);
@@ -230,6 +334,7 @@
   font-family: var(--font-body);
   font-size: var(--text-sm);
   box-shadow: var(--shadow-md);
+  min-width: 0;
 }
 .dash-tooltip-label {
   font-weight: var(--font-bold);
@@ -237,7 +342,7 @@
   margin-bottom: var(--space-1);
 }
 
-/* ── PAGOS LIST ── */
+/* ── LISTAS (matrículas pendientes) ── */
 .dash-pagos-list {
   list-style: none;
   margin: 0;
@@ -245,6 +350,11 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
 }
 .dash-pagos-item {
   display: flex;
@@ -255,6 +365,7 @@
   background: var(--color-bg);
   border-left: 3px solid var(--color-warning, #A06000);
   transition: background var(--transition-fast);
+  min-width: 0;
 }
 .dash-pagos-item:hover { background: #fff8ee; }
 
@@ -265,12 +376,14 @@
   color: var(--color-warning, #A06000);
   min-width: 18px;
   text-align: center;
+  flex-shrink: 0;
 }
 .dash-pagos-info {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-width: 0;
+  overflow: hidden;
 }
 .dash-pagos-nombre {
   font-family: var(--font-body);
@@ -280,11 +393,16 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 100%;
 }
 .dash-pagos-concepto {
   font-family: var(--font-body);
   font-size: var(--text-xs);
   color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 .dash-pagos-badge {
   font-family: var(--font-body);
@@ -298,13 +416,57 @@
   border-radius: var(--radius-full);
   padding: 2px 8px;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
-/* ── EMPTY STATE ── */
+/* ── EMPTY / ERROR STATES ── */
 .dash-empty {
   font-family: var(--font-body);
   font-size: var(--text-sm);
   color: var(--color-text-muted);
   text-align: center;
   padding: var(--space-8) 0;
+}
+.dash-error {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-danger, #8E2A25);
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger, #8E2A25);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+}
+
+/* ── LOADING SCREEN ── */
+.dash-loading-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: var(--space-4);
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+}
+.dash-spinner {
+  display: inline-block;
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--color-border-light);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── RESPONSIVE MOBILE: >= 360px garantizado ── */
+@media (max-width: 480px) {
+  .dash-wrapper      { padding: var(--space-3); gap: var(--space-4); }
+  .dash-filter-bar   { padding: var(--space-3); }
+  .dash-filter-select { min-width: 0; width: 100%; }
+  .dash-card-title   { font-size: var(--text-sm); }
+  .dash-kpi-value    { font-size: var(--text-xl); }
 }

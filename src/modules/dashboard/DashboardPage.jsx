@@ -1,8 +1,7 @@
 /**
  * DashboardPage — New Cambridge School.
- * Los roles se obtienen desde el backend con getRolesUsuario(id_usuario)
- * porque /api/auth/me no los incluye en su response.
- * El dashboard se adapta automáticamente según los roles del usuario.
+ * Layout responsivo profesional: auto-fit grid por rol.
+ * Los roles se obtienen desde el backend con getRolesUsuario(id_usuario).
  */
 import { useEffect, useState } from "react";
 import { Home, LayoutDashboard } from "lucide-react";
@@ -48,10 +47,9 @@ const PERMISOS = {
   titular:    { kpiEstudiantes: true,  kpiPaz: false, kpiPendientes: false, kpiPagos: false, grafPaz: false, grafPrestamos: false, grafSalones: true,  grafPagos: false },
 };
 
-// Combina permisos de TODOS los roles que tiene el usuario (OR lógico)
-// Si tiene banda + secretaria, ve todo lo de banda Y todo lo de secretaria
+// Combina permisos de TODOS los roles (OR lógico)
 const getPermisos = (roles = []) => {
-  if (roles.length === 0) return PERMISOS.admin; // fallback mientras carga
+  if (roles.length === 0) return PERMISOS.admin;
   const base = {
     kpiEstudiantes: false, kpiPaz: false, kpiPendientes: false, kpiPagos: false,
     grafPaz: false, grafPrestamos: false, grafSalones: false, grafPagos: false,
@@ -64,6 +62,20 @@ const getPermisos = (roles = []) => {
     }
   }
   return base;
+};
+
+/**
+ * Determina la clase de densidad visual según cuántos módulos tiene el rol.
+ * full   → admin / secretaria / rectoria (3+ gráficas)
+ * mid    → tesoreria / titular           (2 gráficas)
+ * single → banda / uniformes             (1 gráfica)
+ */
+const getDensity = (can) => {
+  const grafCount = [can.grafPaz, can.grafPrestamos, can.grafSalones, can.grafPagos]
+    .filter(Boolean).length;
+  if (grafCount >= 3) return "dash-density-full";
+  if (grafCount === 2) return "dash-density-mid";
+  return "dash-density-single";
 };
 
 // ── Subcomponentes ───────────────────────────────────────────────
@@ -139,26 +151,18 @@ export default function DashboardPage() {
   const [pazChart,         setPazChart]         = useState("donut");
 
   // ── PASO 1: Obtener roles reales del backend al montar ──────────────
-  // /api/auth/me NO devuelve roles, los pedimos por aparte.
   useEffect(() => {
     if (!user?.id_usuario) return;
     getRolesUsuario(user.id_usuario)
-      .then((res) => {
-        // El backend devuelve array de strings: ["admin", "secretaria"]
-        setRoles(res.data ?? []);
-      })
-      .catch(() => {
-        // Si falla (p.ej. rol sin permisos), usamos array vacío
-        // getPermisos([]) hace fallback a admin para que no quede en blanco
-        setRoles([]);
-      })
+      .then((res) => setRoles(res.data ?? []))
+      .catch(() => setRoles([]))
       .finally(() => setRolesLoaded(true));
   }, [user?.id_usuario]);
 
-  // Permisos calculados en base a los roles reales
-  const can = getPermisos(roles);
+  const can     = getPermisos(roles);
+  const density = getDensity(can);
 
-  // ── PASO 2: Cargar períodos (solo cuando roles ya están listos) ──────
+  // ── PASO 2: Cargar períodos cuando roles estén listos ────────────
   useEffect(() => {
     if (!rolesLoaded) return;
     getPeriodos()
@@ -170,7 +174,7 @@ export default function DashboardPage() {
       .catch(() => setError("No se pudieron cargar los períodos."));
   }, [rolesLoaded]);
 
-  // ── PASO 3: Cargar datos del dashboard según rol + período ─────────
+  // ── PASO 3: Cargar datos según rol + período ────────────────────
   useEffect(() => {
     if (!periodoId || !rolesLoaded) return;
     const id = Number(periodoId);
@@ -259,10 +263,20 @@ export default function DashboardPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [periodoId, rolesLoaded]);
 
-  // ── Render ───────────────────────────────────────────────────
+  // ── Helpers de render ────────────────────────────────────────
   const periodoLabel = periodos.find((p) => String(p.id_periodo) === periodoId)?.nombre ?? "";
 
-  // Mientras los roles no carguen, mostramos spinner
+  // Cuenta cuántas gráficas se van a mostrar para elegir la clase de grilla
+  const grafCards = [
+    can.grafPaz,
+    can.grafPrestamos,
+    can.grafSalones,
+    can.grafPagos,
+  ].filter(Boolean).length;
+
+  const gridClass = grafCards === 1 ? "dash-grid-single" : "dash-grid";
+
+  // ── Spinner mientras cargan roles ────────────────────────────
   if (!rolesLoaded) {
     return (
       <div className="dashboard-container">
@@ -289,7 +303,8 @@ export default function DashboardPage() {
           />
         }
       >
-        <div className="dash-wrapper">
+        {/* density class controla el padding de cards según cuántos módulos tiene el rol */}
+        <div className={`dash-wrapper ${density}`}>
 
           {/* ERROR GLOBAL */}
           {error && <p className="dash-error">{error}</p>}
@@ -329,7 +344,7 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* KPI CARDS */}
+          {/* KPI CARDS — auto-fit, no colapsan en pantallas pequeñas */}
           <div className="dash-kpi-grid">
             {can.kpiEstudiantes && (
               <KpiCard title="Estudiantes"           value={totalEstudiantes} sub="en el período"          color={C_BLUE}  loading={loading} />
@@ -345,9 +360,9 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* FILA 1: Paz y Salvo + Préstamos */}
-          {(can.grafPaz || can.grafPrestamos) && (
-            <div className="dash-row">
+          {/* GRÁFICAS — grilla fluida: 1 col en móvil, 2 en desktop, no deja huecos */}
+          {grafCards > 0 && (
+            <div className={gridClass}>
 
               {can.grafPaz && (
                 <div className="dash-card">
@@ -362,33 +377,35 @@ export default function DashboardPage() {
                       onChange={setPazChart}
                     />
                   </div>
-                  {pazData.length === 0 && !loading
-                    ? <p className="dash-empty">Sin datos para este período</p>
-                    : pazChart === "donut" ? (
-                        <ResponsiveContainer width="100%" height={240}>
-                          <PieChart>
-                            <Pie data={pazData} cx="50%" cy="50%" innerRadius={60} outerRadius={95} paddingAngle={4} dataKey="value"
-                              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                              {pazData.map((_, i) => <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />)}
-                            </Pie>
-                            <Tooltip content={<CustomTooltip />} />
-                            <Legend />
-                          </PieChart>
-                        </ResponsiveContainer>
-                      ) : (
-                        <ResponsiveContainer width="100%" height={240}>
-                          <BarChart data={pazData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e0d8cc" />
-                            <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                            <YAxis tick={{ fontSize: 12 }} />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Bar dataKey="value" name="Estudiantes" radius={[4, 4, 0, 0]}>
-                              {pazData.map((_, i) => <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />)}
-                            </Bar>
-                          </BarChart>
-                        </ResponsiveContainer>
-                      )
-                  }
+                  <div className="dash-card-inner">
+                    {pazData.length === 0 && !loading
+                      ? <p className="dash-empty">Sin datos para este período</p>
+                      : pazChart === "donut" ? (
+                          <ResponsiveContainer width="100%" height={240}>
+                            <PieChart>
+                              <Pie data={pazData} cx="50%" cy="50%" innerRadius={60} outerRadius={95} paddingAngle={4} dataKey="value"
+                                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                                {pazData.map((_, i) => <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />)}
+                              </Pie>
+                              <Tooltip content={<CustomTooltip />} />
+                              <Legend />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        ) : (
+                          <ResponsiveContainer width="100%" height={240}>
+                            <BarChart data={pazData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#e0d8cc" />
+                              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                              <YAxis tick={{ fontSize: 12 }} />
+                              <Tooltip content={<CustomTooltip />} />
+                              <Bar dataKey="value" name="Estudiantes" radius={[4, 4, 0, 0]}>
+                                {pazData.map((_, i) => <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />)}
+                              </Bar>
+                            </BarChart>
+                          </ResponsiveContainer>
+                        )
+                    }
+                  </div>
                 </div>
               )}
 
@@ -398,30 +415,26 @@ export default function DashboardPage() {
                     <h3 className="dash-card-title">Préstamos Activos</h3>
                     <span className="dash-card-sub">Banda vs Uniformes</span>
                   </div>
-                  {prestData.length === 0 && !loading
-                    ? <p className="dash-empty">Sin datos disponibles</p>
-                    : (
-                      <ResponsiveContainer width="100%" height={240}>
-                        <BarChart data={prestData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e0d8cc" />
-                          <XAxis dataKey="modulo" tick={{ fontSize: 12 }} />
-                          <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
-                          <Tooltip content={<CustomTooltip />} />
-                          <Bar dataKey="activos" name="Activos" radius={[4, 4, 0, 0]}>
-                            {prestData.map((_, i) => <Cell key={i} fill={BAR_COLORS[i % BAR_COLORS.length]} />)}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    )
-                  }
+                  <div className="dash-card-inner">
+                    {prestData.length === 0 && !loading
+                      ? <p className="dash-empty">Sin datos disponibles</p>
+                      : (
+                        <ResponsiveContainer width="100%" height={240}>
+                          <BarChart data={prestData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e0d8cc" />
+                            <XAxis dataKey="modulo" tick={{ fontSize: 12 }} />
+                            <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
+                            <Tooltip content={<CustomTooltip />} />
+                            <Bar dataKey="activos" name="Activos" radius={[4, 4, 0, 0]}>
+                              {prestData.map((_, i) => <Cell key={i} fill={BAR_COLORS[i % BAR_COLORS.length]} />)}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      )
+                    }
+                  </div>
                 </div>
               )}
-            </div>
-          )}
-
-          {/* FILA 2: Salones + Matrículas Pendientes */}
-          {(can.grafSalones || can.grafPagos) && (
-            <div className="dash-row">
 
               {can.grafSalones && (
                 <div className="dash-card">
@@ -429,20 +442,22 @@ export default function DashboardPage() {
                     <h3 className="dash-card-title">Estudiantes por Salón</h3>
                     <span className="dash-card-sub">Período actual · Top 10</span>
                   </div>
-                  {salonesData.length === 0 && !loading
-                    ? <p className="dash-empty">Sin datos para este período</p>
-                    : (
-                      <ResponsiveContainer width="100%" height={280}>
-                        <BarChart data={salonesData} layout="vertical" margin={{ top: 0, right: 20, left: 30, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e0d8cc" horizontal={false} />
-                          <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
-                          <YAxis type="category" dataKey="nombre" tick={{ fontSize: 11 }} width={45} />
-                          <Tooltip content={<CustomTooltip />} />
-                          <Bar dataKey="estudiantes" name="Estudiantes" fill={C_BLUE} radius={[0, 4, 4, 0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    )
-                  }
+                  <div className="dash-card-inner">
+                    {salonesData.length === 0 && !loading
+                      ? <p className="dash-empty">Sin datos para este período</p>
+                      : (
+                        <ResponsiveContainer width="100%" height={280}>
+                          <BarChart data={salonesData} layout="vertical" margin={{ top: 0, right: 20, left: 30, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e0d8cc" horizontal={false} />
+                            <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
+                            <YAxis type="category" dataKey="nombre" tick={{ fontSize: 11 }} width={45} />
+                            <Tooltip content={<CustomTooltip />} />
+                            <Bar dataKey="estudiantes" name="Estudiantes" fill={C_BLUE} radius={[0, 4, 4, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      )
+                    }
+                  </div>
                 </div>
               )}
 
@@ -452,29 +467,32 @@ export default function DashboardPage() {
                     <h3 className="dash-card-title">Matrículas Pendientes</h3>
                     <span className="dash-card-sub">Top 5 · Período actual</span>
                   </div>
-                  {pagosData.length === 0 && !loading
-                    ? <p className="dash-empty">Sin matrículas pendientes</p>
-                    : (
-                      <ul className="dash-pagos-list">
-                        {pagosData.map((m, i) => (
-                          <li key={i} className="dash-pagos-item">
-                            <span className="dash-pagos-num">{i + 1}</span>
-                            <div className="dash-pagos-info">
-                              <span className="dash-pagos-nombre">
-                                {m.nombre_estudiante ?? m.estudiante ?? "Estudiante"}
-                              </span>
-                              <span className="dash-pagos-concepto">
-                                {m.concepto ?? m.tipo ?? "Matrícula"}
-                              </span>
-                            </div>
-                            <span className="dash-pagos-badge">Pendiente</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )
-                  }
+                  <div className="dash-card-inner">
+                    {pagosData.length === 0 && !loading
+                      ? <p className="dash-empty">Sin matrículas pendientes</p>
+                      : (
+                        <ul className="dash-pagos-list">
+                          {pagosData.map((m, i) => (
+                            <li key={i} className="dash-pagos-item">
+                              <span className="dash-pagos-num">{i + 1}</span>
+                              <div className="dash-pagos-info">
+                                <span className="dash-pagos-nombre">
+                                  {m.nombre_estudiante ?? m.estudiante ?? "Estudiante"}
+                                </span>
+                                <span className="dash-pagos-concepto">
+                                  {m.concepto ?? m.tipo ?? "Matrícula"}
+                                </span>
+                              </div>
+                              <span className="dash-pagos-badge">Pendiente</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )
+                    }
+                  </div>
                 </div>
               )}
+
             </div>
           )}
 
