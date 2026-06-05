@@ -1,37 +1,36 @@
 import React from 'react';
 import ModalBase from "../../../../../components/shared/ModalBase";
+import "./BandModals.css";
 
 const AdvertenciaModal = ({ open, onClose, onConfirm }) => {
 
   const footer = (
-    <>
-      <button style={btnStyle("#D97706")} onClick={onConfirm}>
-        Continuar
+    <div style={{ display: "flex", gap: "20px", justifyContent: "center", width: "100%" }}>
+      <button className="band-btn-pill band-btn-aceptar" onClick={onConfirm}>
+        Sí, continuar
       </button>
-      <button style={btnStyle("#6B7280")} onClick={onClose}>
-        Cancelar
+      <button className="band-btn-pill band-btn-cancelar" onClick={onClose}>
+        No, volver
       </button>
-    </>
+    </div>
   );
 
   return (
-    <ModalBase
-      open={open}
-      onClose={onClose}
-      title="ADVERTENCIA"
-      width="450px"
-      footer={footer}
-    >
-      <p style={textStyle}>
-        Este instrumento tiene asignaciones activas.
-        <br /><br />
-        Cambiar el estado a "Inactivo" o "Mantenimiento" puede afectar los préstamos actuales. ¿Desea continuar?
-      </p>
+    <ModalBase open={open} onClose={onClose} width="480px" footer={footer}>
+      <div className="band-modal-header">
+        <h2 className="band-modal-title">ADVERTENCIA</h2>
+      </div>
+
+      <div className="band-modal-body-text">
+        <span className="band-modal-icon">⚠️</span>
+        <p><strong>Este instrumento tiene asignaciones activas.</strong></p>
+        <p style={{ marginTop: '10px' }}>
+          Cambiar el estado o reducir el stock total puede afectar los registros de paz y salvo. 
+          ¿Desea aplicar los cambios de todos modos?
+        </p>
+      </div>
     </ModalBase>
   );
 };
-
-const textStyle = { textAlign: "center", color: "#4B5563", lineHeight: "1.7", fontSize: "14px", margin: "10px 0" };
-const btnStyle = (bg) => ({ height: "40px", padding: "0 24px", border: "none", borderRadius: "50px", background: bg, color: "#FFF", fontWeight: "bold", cursor: "pointer", transition: "transform 0.2s" });
 
 export default AdvertenciaModal;

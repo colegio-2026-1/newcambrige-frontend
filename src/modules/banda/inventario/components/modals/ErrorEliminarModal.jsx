@@ -1,32 +1,34 @@
 import React from 'react';
 import ModalBase from "../../../../../components/shared/ModalBase";
+import "./BandModals.css"; // ✅ Importación de estilos locales
 
 const ErrorEliminarModal = ({ open, onClose }) => {
 
   const footer = (
-    <button style={btnStyle("#8E2A25")} onClick={onClose}>
-      Entendido
-    </button>
+    <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+      <button className="band-btn-pill band-btn-aceptar" onClick={onClose}>
+        Entendido
+      </button>
+    </div>
   );
 
   return (
-    <ModalBase
-      open={open}
-      onClose={onClose}
-      title="NO SE PUEDE ELIMINAR"
-      width="450px"
-      footer={footer}
-    >
-      <p style={textStyle}>
-        El instrumento posee asignaciones activas o registros vinculados.
-        <br /><br />
-        Debe registrar la devolución o eliminar primero las relaciones existentes.
-      </p>
+    <ModalBase open={open} onClose={onClose} width="450px" footer={footer}>
+      <div className="band-modal-header-danger">
+        <h2 className="band-modal-title">OPERACIÓN DENEGADA</h2>
+      </div>
+
+      <div className="band-modal-body-text">
+        <span className="band-modal-icon">🚫</span>
+        <p>
+          No es posible eliminar este instrumento porque existen <strong>préstamos vigentes</strong> asociados a él.
+        </p>
+        <p style={{ marginTop: '10px', fontSize: '14px' }}>
+          Debe registrar la devolución de todas las unidades antes de proceder.
+        </p>
+      </div>
     </ModalBase>
   );
 };
-
-const textStyle = { textAlign: "center", color: "#4B5563", lineHeight: "1.7", fontSize: "14px", margin: "10px 0" };
-const btnStyle = (bg) => ({ height: "40px", padding: "0 24px", border: "none", borderRadius: "50px", background: bg, color: "#FFF", fontWeight: "bold", cursor: "pointer", transition: "transform 0.2s" });
 
 export default ErrorEliminarModal;

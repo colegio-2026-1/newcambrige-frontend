@@ -1,42 +1,40 @@
 import React from 'react';
 import ModalBase from "../../../../../components/shared/ModalBase";
+import "./BandModals.css";
 
 const EliminarInstrumentoModal = ({ open, onClose, onConfirm, instrumento }) => {
   
   const footer = (
-    <>
-      <button style={btnStyle("#DC2626")} onClick={onConfirm}>
-        Eliminar
+    <div style={{ display: "flex", gap: "20px", justifyContent: "center", width: "100%" }}>
+      <button className="band-btn-pill band-btn-danger" onClick={onConfirm}>
+        Confirmar Eliminación
       </button>
-      <button style={btnStyle("#6B7280")} onClick={onClose}>
+      <button className="band-btn-pill band-btn-cancelar" onClick={onClose}>
         Cancelar
       </button>
-    </>
+    </div>
   );
 
   return (
-    <ModalBase
-      open={open}
-      onClose={onClose}
-      title="ELIMINAR INSTRUMENTO"
-      width="450px"
-      footer={footer}
-    >
-      <p style={textStyle}>
-        Está a punto de eliminar el instrumento:
-        <br /><br />
-        <strong style={{ color: "#111827", fontSize: "16px" }}>
-          {instrumento?.nombre}
-        </strong>
-        <br /><br />
-        Esta acción no se puede deshacer.
-      </p>
+    <ModalBase open={open} onClose={onClose} width="450px" footer={footer}>
+      <div className="band-modal-header-danger">
+        <h2 className="band-modal-title">ELIMINAR REGISTRO</h2>
+      </div>
+
+      <div className="band-modal-body-text">
+        <p>¿Está seguro de que desea eliminar permanentemente este instrumento?</p>
+        
+        <div style={{ background: "#F3F4F6", padding: "15px", borderRadius: "12px", margin: "15px 0", border: "1px solid #E5E7EB" }}>
+          <p style={{ margin: 0 }}><strong>ID:</strong> {instrumento?.id_instrumento}</p>
+          <p style={{ margin: "5px 0 0 0" }}><strong>Nombre:</strong> {instrumento?.nombre}</p>
+        </div>
+
+        <p style={{ color: "#DC2626", fontWeight: "bold" }}>
+          Esta acción no se puede deshacer.
+        </p>
+      </div>
     </ModalBase>
   );
 };
-
-// Estilos locales para mantener la consistencia
-const textStyle = { textAlign: "center", color: "#4B5563", lineHeight: "1.7", fontSize: "14px", margin: "10px 0" };
-const btnStyle = (bg) => ({ height: "40px", padding: "0 24px", border: "none", borderRadius: "50px", background: bg, color: "#FFF", fontWeight: "bold", cursor: "pointer", transition: "transform 0.2s" });
 
 export default EliminarInstrumentoModal;

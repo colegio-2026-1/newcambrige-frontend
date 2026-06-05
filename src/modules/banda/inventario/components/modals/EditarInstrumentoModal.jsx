@@ -1,44 +1,62 @@
 import React from 'react';
-import Modal from "../../../../../components/shared/Modal"; // ✅ USAMOS EL MODAL GLOBAL DEL EQUIPO
+import ModalBase from "../../../../../components/shared/ModalBase";
+import "./BandModals.css";
 
-const EditarInstrumentoModal = ({
-  open, onClose, onSave, form, setForm, categorias, ubicaciones, validaciones
-}) => {
+const EditarInstrumentoModal = ({ open, onClose, onSave, form, setForm, categorias, ubicaciones }) => {
 
-  const opcionesCategorias = categorias?.map(c => ({ value: c.id_categoria, label: c.nombre })) || [];
-  const opcionesUbicaciones = ubicaciones?.map(u => ({ value: u.id_ubicacion, label: u.nombre })) || [];
-
-  const camposFormulario = [
-    { key: 'codigo', label: 'Código', type: 'text' }, // El hook ya ignora cambios en el código al editar
-    { key: 'nombre', label: 'Nombre', type: 'text' },
-    { key: 'id_categoria', label: 'Categoría', type: 'select', options: opcionesCategorias },
-    { key: 'cantidad_total', label: 'Cantidad Total', type: 'text' },
-    { key: 'id_ubicacion', label: 'Ubicación', type: 'select', options: opcionesUbicaciones },
-    { key: 'estado', label: 'Estado', type: 'select', options: ['Activo', 'Inactivo', 'En mantenimiento'] },
-  ];
-
-  const handleChange = (key, value) => {
-    setForm(prev => ({ ...prev, [key]: value }));
-  };
-
-  const handleAccept = () => {
-    if (validaciones?.todoValido) {
-      onSave();
-    } else {
-      alert("Por favor, verifique los datos:\n- El nombre debe ser único.\n- La cantidad debe ser mayor a 0.");
-    }
-  };
+  const footer = (
+    <div style={{ display: "flex", gap: "20px", justifyContent: "center", width: "100%" }}>
+      <button className="band-btn-pill band-btn-aceptar" onClick={onSave}>Aceptar</button>
+      <button className="band-btn-pill band-btn-cancelar" onClick={onClose}>Cancelar</button>
+    </div>
+  );
 
   return (
-    <Modal
-      title="EDITAR INSTRUMENTO"
-      isOpen={open}
-      values={form}
-      onChange={handleChange}
-      onAccept={handleAccept}
-      onCancel={onClose}
-      fields={camposFormulario}
-    />
+    <ModalBase open={open} onClose={onClose} footer={footer} width="600px">
+      <div className="band-modal-header">
+        <h2 className="band-modal-title">EDITAR INSTRUMENTO</h2>
+      </div>
+
+      <div className="band-modal-grid">
+        <div className="band-field-group">
+          <label className="band-label">Código</label>
+          <input className="band-input" value={form.id_instrumento} disabled style={{opacity: 0.6}} />
+        </div>
+
+        <div className="band-field-group">
+          <label className="band-label">Nombre</label>
+          <input 
+            className="band-input" 
+            value={form.nombre} 
+            onChange={(e) => setForm({...form, nombre: e.target.value})} 
+          />
+        </div>
+
+        <div className="band-field-group">
+          <label className="band-label">Categoría</label>
+          <select 
+            className="band-input" 
+            value={form.id_categoria} 
+            onChange={(e) => setForm({...form, id_categoria: e.target.value})}
+          >
+            {categorias?.map(c => <option key={c.id_categoria} value={c.id_categoria}>{c.nombre}</option>)}
+          </select>
+        </div>
+
+        <div className="band-field-group">
+          <label className="band-label">Disponibilidad</label>
+          <select 
+            className="band-input" 
+            value={form.estado} 
+            onChange={(e) => setForm({...form, estado: e.target.value})}
+          >
+            <option value="Activo">Activo</option>
+            <option value="Inactivo">Inactivo</option>
+            <option value="En mantenimiento">Mantenimiento</option>
+          </select>
+        </div>
+      </div>
+    </ModalBase>
   );
 };
 

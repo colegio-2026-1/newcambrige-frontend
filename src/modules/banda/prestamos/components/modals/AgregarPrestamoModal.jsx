@@ -1,45 +1,51 @@
 import React from 'react';
-import Modal from "../../../../../components/shared/Modal";
+import ModalBase from "../../../../../components/shared/ModalBase";
+import "../../../inventario/components/modals/BandModals.css"; // Reutilizamos estilos de modales del inventario
 
-const AgregarPrestamoModal = ({
-  open, onClose, form, setForm, instrumentos, handleAgregar
-}) => {
+const AgregarPrestamoModal = ({ open, onClose, form, setForm, instrumentos, handleAgregar }) => {
 
-  // 1. Adaptamos los instrumentos al formato { value, label }
-  const opcionesInstrumentos = instrumentos?.map(inst => ({
-    value: inst.id_instrumento,
-    label: `[${inst.codigo}] — ${inst.nombre} — Disponibles: ${inst.cantidad_disponible}`,
-    disabled: inst.cantidad_disponible <= 0 // Opcional: si el Modal global soporta 'disabled'
-  })) || [];
-
-  // 2. Definimos los campos
-  const camposFormulario = [
-    { key: 'id_instrumento', label: 'Instrumento (Código — Nombre — Stock)', type: 'select', options: opcionesInstrumentos },
-    { key: 'observacion', label: 'Observación / Notas de entrega', type: 'text' },
-  ];
-
-  const handleChange = (key, value) => {
-    setForm(prev => ({ ...prev, [key]: value }));
-  };
-
-  const handleAccept = () => {
-    if (form.id_instrumento) {
-      handleAgregar();
-    } else {
-      alert("Por favor, seleccione un instrumento.");
-    }
-  };
+  const footer = (
+    <div style={{ display: "flex", gap: "20px", justifyContent: "center", width: "100%" }}>
+      <button className="band-btn-pill band-btn-aceptar" onClick={handleAgregar}>Aceptar</button>
+      <button className="band-btn-pill band-btn-cancelar" onClick={onClose}>Cancelar</button>
+    </div>
+  );
 
   return (
-    <Modal
-      title="REGISTRAR PRÉSTAMO"
-      isOpen={open}
-      values={form}
-      onChange={handleChange}
-      onAccept={handleAccept}
-      onCancel={onClose}
-      fields={camposFormulario}
-    />
+    <ModalBase open={open} onClose={onClose} footer={footer} width="600px">
+      <div className="band-modal-header">
+        <h2 className="band-modal-title">REGISTRAR ASIGNACIÓN</h2>
+      </div>
+
+      <div className="band-modal-grid" style={{gridTemplateColumns: "1fr"}}>
+        <div className="band-field-group" style={{flexDirection: "column", alignItems: "flex-start"}}>
+          <label className="band-label">Instrumento Disponible</label>
+          <select 
+            className="band-input" 
+            style={{width: "100%"}}
+            value={form.id_instrumento} 
+            onChange={(e) => setForm({...form, id_instrumento: e.target.value})}
+          >
+            <option value="">Seleccione un instrumento...</option>
+            {instrumentos?.map(inst => (
+              <option key={inst.id_instrumento} value={inst.id_instrumento}>
+                {`[ID: ${inst.id_instrumento}] — ${inst.nombre} (${inst.cantidad_disponible} disp.)`}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="band-field-group" style={{flexDirection: "column", alignItems: "flex-start", marginTop: "10px"}}>
+          <label className="band-label">Observaciones de Entrega</label>
+          <textarea 
+            className="band-textarea"
+            placeholder="Ej: Se entrega con estuche y boquilla..."
+            value={form.observacion}
+            onChange={(e) => setForm({...form, observacion: e.target.value})}
+          />
+        </div>
+      </div>
+    </ModalBase>
   );
 };
 
