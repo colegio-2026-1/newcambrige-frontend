@@ -18,13 +18,14 @@ import ModuleLayout  from "../../components/layout/ModuleLayout";
 import Sidebar       from "../../components/layout/Sidebar";
 import { useAuth }   from "../../api/useAuth";
 
+// ✅ Nombres exactos exportados por dashboardService.js
 import {
   getPeriodos,
   getEstudiantesPorPeriodo,
   getPendientesPazSalvo,
-  getPagosPendientes,
-  getPrestamosBandaActivos,
-  getPrestamosUniformesActivos,
+  getMatriculasPorPeriodo,
+  getPrestamosActivosBanda,
+  getPrestamosActivosUniformes,
   getSalonesPorPeriodo,
 } from "../../api/dashboard/dashboardService";
 
@@ -110,24 +111,24 @@ export default function DashboardPage() {
   ];
 
   // ── Estado ────────────────────────────────────────────────────
-  const [selectedMenu,      setSelectedMenu]      = useState("Dashboard");
-  const [periodos,          setPeriodos]          = useState([]);
-  const [periodoId,         setPeriodoId]         = useState("");
-  const [loading,           setLoading]           = useState(false);
-  const [error,             setError]             = useState(null);
+  const [selectedMenu,     setSelectedMenu]     = useState("Dashboard");
+  const [periodos,         setPeriodos]         = useState([]);
+  const [periodoId,        setPeriodoId]        = useState("");
+  const [loading,          setLoading]          = useState(false);
+  const [error,            setError]            = useState(null);
 
   // KPIs
-  const [totalEstudiantes,  setTotalEstudiantes]  = useState(null);
-  const [totalPazOk,        setTotalPazOk]        = useState(null);
-  const [totalPendientes,   setTotalPendientes]   = useState(null);
-  const [totalPagos,        setTotalPagos]        = useState(null);
+  const [totalEstudiantes, setTotalEstudiantes] = useState(null);
+  const [totalPazOk,       setTotalPazOk]       = useState(null);
+  const [totalPendientes,  setTotalPendientes]  = useState(null);
+  const [totalPagos,       setTotalPagos]       = useState(null);
 
   // Gráficas
-  const [pazData,           setPazData]           = useState([]);
-  const [prestData,         setPrestData]         = useState([]);
-  const [salonesData,       setSalonesData]       = useState([]);
-  const [pagosData,         setPagosData]         = useState([]);
-  const [pazChart,          setPazChart]          = useState("donut");
+  const [pazData,          setPazData]          = useState([]);
+  const [prestData,        setPrestData]        = useState([]);
+  const [salonesData,      setSalonesData]      = useState([]);
+  const [pagosData,        setPagosData]        = useState([]);
+  const [pazChart,         setPazChart]         = useState("donut");
 
   // ── Cargar períodos al montar ────────────────────────────────
   useEffect(() => {
@@ -177,11 +178,17 @@ export default function DashboardPage() {
       );
     }
 
+    // ✅ getMatriculasPorPeriodo — reemplaza el antiguo getPagosPendientes
+    // que no existía en el backend. Usa /api/secretaria/matriculas/periodo/{id}
     if (can.kpiPagos || can.grafPagos) {
       tareas.push(
-        getPagosPendientes(id)
+        getMatriculasPorPeriodo(id)
           .then((r) => {
-            const pagos = r.data ?? [];
+            // Filtra solo las que tienen estado pendiente
+            const todas   = r.data ?? [];
+            const pagos   = todas.filter(
+              (m) => (m.estado ?? "").toLowerCase() === "pendiente"
+            );
             setTotalPagos(pagos.length);
             setPagosData(pagos.slice(0, 5));
           })
@@ -189,14 +196,15 @@ export default function DashboardPage() {
       );
     }
 
+    // ✅ getPrestamosActivosBanda y getPrestamosActivosUniformes — nombres correctos
     if (can.grafPrestamos) {
       tareas.push(
         Promise.allSettled([
-          getPrestamosBandaActivos(),
-          getPrestamosUniformesActivos(),
+          getPrestamosActivosBanda(),
+          getPrestamosActivosUniformes(),
         ]).then(([banda, uniformes]) => {
           setPrestData([
-            { modulo: "Banda",     activos: banda.status === "fulfilled" ? (banda.value.data?.length ?? 0) : 0 },
+            { modulo: "Banda",     activos: banda.status     === "fulfilled" ? (banda.value.data?.length     ?? 0) : 0 },
             { modulo: "Uniformes", activos: uniformes.status === "fulfilled" ? (uniformes.value.data?.length ?? 0) : 0 },
           ]);
         })
@@ -210,7 +218,10 @@ export default function DashboardPage() {
             const salones = r.data ?? [];
             setSalonesData(
               salones
-                .map((s) => ({ nombre: s.nombre ?? `${s.grado}°${s.grupo}`, estudiantes: s.num_estudiantes ?? 0 }))
+                .map((s) => ({
+                  nombre:       s.nombre ?? `${s.grado}°${s.grupo}`,
+                  estudiantes:  s.num_estudiantes ?? 0,
+                }))
                 .sort((a, b) => b.estudiantes - a.estudiantes)
                 .slice(0, 10)
             );
@@ -282,7 +293,7 @@ export default function DashboardPage() {
               <KpiCard title="Con Pendientes"   value={totalPendientes}  sub="paz y salvo incompleto"  color={C_RED}   loading={loading} />
             )}
             {can.kpiPagos && (
-              <KpiCard title="Pagos Pendientes" value={totalPagos}       sub="por regularizar"         color={C_WARN}  loading={loading} />
+              <KpiCard title="Matrículas Pendientes" value={totalPagos}  sub="por período"             color={C_WARN}  loading={loading} />
             )}
           </div>
 
@@ -309,9 +320,19 @@ export default function DashboardPage() {
                     : pazChart === "donut" ? (
                         <ResponsiveContainer width="100%" height={240}>
                           <PieChart>
-                            <Pie data={pazData} cx="50%" cy="50%" innerRadius={60} outerRadius={95} paddingAngle={4} dataKey="value"
-                              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                              {pazData.map((_, i) => <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />)}
+                            <Pie
+                              data={pazData}
+                              cx="50%" cy="50%"
+                              innerRadius={60} outerRadius={95}
+                              paddingAngle={4}
+                              dataKey="value"
+                              label={({ name, percent }) =>
+                                `${name} ${(percent * 100).toFixed(0)}%`
+                              }
+                            >
+                              {pazData.map((_, i) => (
+                                <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />
+                              ))}
                             </Pie>
                             <Tooltip content={<CustomTooltip />} />
                             <Legend />
@@ -325,7 +346,9 @@ export default function DashboardPage() {
                             <YAxis tick={{ fontSize: 12 }} />
                             <Tooltip content={<CustomTooltip />} />
                             <Bar dataKey="value" name="Estudiantes" radius={[4, 4, 0, 0]}>
-                              {pazData.map((_, i) => <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />)}
+                              {pazData.map((_, i) => (
+                                <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />
+                              ))}
                             </Bar>
                           </BarChart>
                         </ResponsiveContainer>
@@ -344,13 +367,18 @@ export default function DashboardPage() {
                     ? <p className="dash-empty">Sin datos disponibles</p>
                     : (
                       <ResponsiveContainer width="100%" height={240}>
-                        <BarChart data={prestData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                        <BarChart
+                          data={prestData}
+                          margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                        >
                           <CartesianGrid strokeDasharray="3 3" stroke="#e0d8cc" />
                           <XAxis dataKey="modulo" tick={{ fontSize: 12 }} />
                           <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
                           <Tooltip content={<CustomTooltip />} />
                           <Bar dataKey="activos" name="Activos" radius={[4, 4, 0, 0]}>
-                            {prestData.map((_, i) => <Cell key={i} fill={BAR_COLORS[i % BAR_COLORS.length]} />)}
+                            {prestData.map((_, i) => (
+                              <Cell key={i} fill={BAR_COLORS[i % BAR_COLORS.length]} />
+                            ))}
                           </Bar>
                         </BarChart>
                       </ResponsiveContainer>
@@ -361,7 +389,7 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* FILA 2: Salones + Pagos */}
+          {/* FILA 2: Salones + Matrículas Pendientes */}
           {(can.grafSalones || can.grafPagos) && (
             <div className="dash-row">
 
@@ -375,12 +403,30 @@ export default function DashboardPage() {
                     ? <p className="dash-empty">Sin datos para este período</p>
                     : (
                       <ResponsiveContainer width="100%" height={280}>
-                        <BarChart data={salonesData} layout="vertical" margin={{ top: 0, right: 20, left: 30, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e0d8cc" horizontal={false} />
+                        <BarChart
+                          data={salonesData}
+                          layout="vertical"
+                          margin={{ top: 0, right: 20, left: 30, bottom: 0 }}
+                        >
+                          <CartesianGrid
+                            strokeDasharray="3 3"
+                            stroke="#e0d8cc"
+                            horizontal={false}
+                          />
                           <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
-                          <YAxis type="category" dataKey="nombre" tick={{ fontSize: 11 }} width={45} />
+                          <YAxis
+                            type="category"
+                            dataKey="nombre"
+                            tick={{ fontSize: 11 }}
+                            width={45}
+                          />
                           <Tooltip content={<CustomTooltip />} />
-                          <Bar dataKey="estudiantes" name="Estudiantes" fill={C_BLUE} radius={[0, 4, 4, 0]} />
+                          <Bar
+                            dataKey="estudiantes"
+                            name="Estudiantes"
+                            fill={C_BLUE}
+                            radius={[0, 4, 4, 0]}
+                          />
                         </BarChart>
                       </ResponsiveContainer>
                     )
@@ -391,22 +437,22 @@ export default function DashboardPage() {
               {can.grafPagos && (
                 <div className="dash-card">
                   <div className="dash-card-header">
-                    <h3 className="dash-card-title">Pagos Pendientes</h3>
-                    <span className="dash-card-sub">Top 5</span>
+                    <h3 className="dash-card-title">Matrículas Pendientes</h3>
+                    <span className="dash-card-sub">Top 5 · Período actual</span>
                   </div>
                   {pagosData.length === 0 && !loading
-                    ? <p className="dash-empty">Sin pagos pendientes</p>
+                    ? <p className="dash-empty">Sin matrículas pendientes</p>
                     : (
                       <ul className="dash-pagos-list">
-                        {pagosData.map((pago, i) => (
+                        {pagosData.map((m, i) => (
                           <li key={i} className="dash-pagos-item">
                             <span className="dash-pagos-num">{i + 1}</span>
                             <div className="dash-pagos-info">
                               <span className="dash-pagos-nombre">
-                                {pago.nombre_estudiante ?? pago.estudiante ?? "Estudiante"}
+                                {m.nombre_estudiante ?? m.estudiante ?? "Estudiante"}
                               </span>
                               <span className="dash-pagos-concepto">
-                                {pago.concepto ?? pago.detalle ?? "Pendiente"}
+                                {m.concepto ?? m.tipo ?? "Matrícula"}
                               </span>
                             </div>
                             <span className="dash-pagos-badge">Pendiente</span>
