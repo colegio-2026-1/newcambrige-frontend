@@ -45,7 +45,7 @@ const AppRouter = () => {
       {/* DASHBOARD */}
       {DashboardRouter()}
 
-      {/* SALÓN */}
+      {/* SALï¿½N */}
       {SalonRouter()}
 
       {/* UNIFORMES */}
