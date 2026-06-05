@@ -8,6 +8,8 @@ import ProtectedRoute from "./ProtectedRoute";
 
 import TesoreriaRouter  from "./TesoreriaRouter";
 import DashboardRouter  from "./DashboardRouter";
+import SalonRouter     from "./SalonRouter";
+import UniformeRouter  from "./UniformeRouter";
 
 import ParametrizacionPage from '../modules/parametrizacion/ParametrizacionPage';
 import UsuariosPage        from '../modules/parametrizacion/UsuariosPage';
@@ -42,6 +44,12 @@ const AppRouter = () => {
 
       {/* DASHBOARD */}
       {DashboardRouter()}
+
+      {/* SALÓN */}
+      {SalonRouter()}
+
+      {/* UNIFORMES */}
+      {UniformeRouter()}
 
       {/* PARAMETRIZACIÃ“N */}
       <Route
