@@ -13,42 +13,90 @@ import {
   devolverPrestamoRequest 
 } from "../../../api/uniformesService";
 import { useAuth } from "../../../api/useAuth";
-import { allrolesuserRequest } from "../../../api/endpoints";
+import {
+  allrolesuserRequest,
+  allaniosacademicosRequest
+} from "../../../api/endpoints";
 import "../styles/uniformes.css";
 
 export default function AsignacionesPage() {
   const { user } = useAuth();
-
-  // Periodo Académico
-  const anioActual = new Date().getFullYear().toString();
-  const anioAnterior = (new Date().getFullYear() - 1).toString();
 
   // Estados de la interfaz
   const [roles, setRoles] = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
   const [asignaciones, setAsignaciones] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [periodos, setPeriodos] = useState([]);
+  const [periodosCargados, setPeriodosCargados] = useState(false);
 
   // Modales
   const [openModal, setOpenModal] = useState(false);
   const [openDevolver, setOpenDevolver] = useState(false);
+  const [openEliminar, setOpenEliminar] = useState(false);
 
   const [formDevolucion, setFormDevolucion] = useState({
+    prenda: "",
+    talla: "",
+    fecha_entrega: "",
+    fecha_devolucion: "",
+    estado_entrega: "",
     estado_devolucion: "",
     observacion: ""
   });
 
-  // Filtros iniciales
+  // Filtros iniciales - 'anio' se inicializa vacío para responder dinámicamente a la BD
   const [filtros, setFiltros] = useState({
     codigo: "",
     nombre: "",
     grado: "",
     grupo: "",
-    anio: anioActual
+    anio: ""
+  });
+
+  // 1. Estado para almacenar los filtros confirmados mediante el botón de búsqueda
+  const [filtrosAplicados, setFiltrosAplicados] = useState({
+    codigo: "",
+    nombre: "",
+    grado: "",
+    grupo: "",
+    anio: ""
   });
 
   const idUser = user?.id_usuario;
   const rol = roles[0] || "Rol no asignado";
+
+  // 2. Modificación de cargarPeriodos para poblar ambos estados simultáneamente usando finally
+  const cargarPeriodos = async () => {
+    try {
+      const res = await allaniosacademicosRequest();
+
+      setPeriodos(res.data);
+
+      // Buscar dinámicamente el periodo con estado activo
+      const periodoActivo = res.data.find(
+        periodo => periodo.activo
+      );
+
+      const anioActivo = periodoActivo?.nombre || ""
+
+      setFiltros(prev => ({
+        ...prev,
+        anio: anioActivo
+      }));
+
+      setFiltrosAplicados(prev => ({
+        ...prev,
+        anio: anioActivo
+      }));
+
+    } catch (error) {
+      console.error("Error cargando periodos", error);
+    } finally {
+      // Garantiza que el SearchBar aparezca incluso si la consulta falla
+      setPeriodosCargados(true);
+    }
+  };
 
   // Carga unificada de Asignaciones y Roles
   useEffect(() => {
@@ -71,6 +119,10 @@ export default function AsignacionesPage() {
     cargarDatosIniciales();
   }, [idUser]);
 
+  useEffect(() => {
+    cargarPeriodos();
+  }, []);
+
   const cargarAsignaciones = async () => {
     try {
       const response = await getAsignacionesRequest();
@@ -81,15 +133,12 @@ export default function AsignacionesPage() {
   };
 
   const eliminarAsignacion = async (id) => {
-    const confirmar = window.confirm("¿Eliminar asignación?");
-    if (!confirmar) return;
-
     try {
       await deletePrestamoRequest(id);
       await cargarAsignaciones();
       setSelectedRow(null);
     } catch (error) {
-      console.error("Error eliminando asignación", error);
+      console.error("Error deleting loan assignment", error);
     }
   };
 
@@ -125,6 +174,11 @@ export default function AsignacionesPage() {
       setOpenDevolver(false);
 
       setFormDevolucion({
+        prenda: "",
+        talla: "",
+        fecha_entrega: "",
+        fecha_devolucion: "",
+        estado_entrega: "",
         estado_devolucion: "",
         observacion: ""
       });
@@ -134,7 +188,7 @@ export default function AsignacionesPage() {
       console.error(error);
       alert(
         error?.response?.data?.detail ||
-        "Error devolviendo prenda"
+        "Error devolver prenda"
       );
     }
   };
@@ -157,27 +211,34 @@ export default function AsignacionesPage() {
       .sort();
   }, [asignaciones, filtros.grado]);
 
-  // Filtros Dinámicos Eficientes 
+  // Memorizar opciones de Años únicos desde los periodos de la BD
+  const opcionesAnios = useMemo(() => {
+    return periodos
+      .map((p) => p.nombre)
+      .filter(Boolean);
+  }, [periodos]);
+
+  // 3 y 4. Cambiadas referencias internas y dependencia de hook a filtrosAplicados
   const asignacionesFiltradas = useMemo(() => {
     return asignaciones.filter((item) => {
-      const coincideCodigo = filtros.codigo === "" || 
-        item.codigo?.toString().includes(filtros.codigo);
+      const coincideCodigo = filtrosAplicados.codigo === "" || 
+        item.codigo?.toString().includes(filtrosAplicados.codigo);
 
-      const coincideNombre = filtros.nombre === "" || 
-        item.nombre_completo?.toLowerCase().includes(filtros.nombre.toLowerCase());
+      const coincideNombre = filtrosAplicados.nombre === "" || 
+        item.nombre_completo?.toLowerCase().includes(filtrosAplicados.nombre.toLowerCase());
 
-      const coincideGrado = filtros.grado === "" || 
-        item.grado?.toString() === filtros.grado;
+      const coincideGrado = filtrosAplicados.grado === "" || 
+        item.grado?.toString() === filtrosAplicados.grado;
 
-      const coincideGrupo = filtros.grupo === "" || 
-        item.grupo?.toString() === filtros.grupo;
+      const coincideGrupo = filtrosAplicados.grupo === "" || 
+        item.grupo?.toString() === filtrosAplicados.grupo;
 
-      const coincideAnio = filtros.anio === "" || 
-        item.anio?.toString() === filtros.anio;
+      const coincideAnio = filtrosAplicados.anio === "" || 
+        item.anio?.toString() === filtrosAplicados.anio;
 
       return coincideCodigo && coincideNombre && coincideGrado && coincideGrupo && coincideAnio;
     });
-  }, [asignaciones, filtros]);
+  }, [asignaciones, filtrosAplicados]);
 
   // Bloqueo de seguridad si no hay usuario
   if (!user) {
@@ -201,8 +262,9 @@ export default function AsignacionesPage() {
             }}
             menuItems={[
               { label: "Inicio", path: "/home" },
-              { label: "Inventario Prendas", path: "/uniformes/inventario" },
               { label: "Asignaciones", path: "/uniformes/asignaciones" },
+              { label: "Inventario Prendas", path: "/uniformes/inventario" },
+              
             ]}
             selectedMenu="Asignaciones"
           />
@@ -218,12 +280,22 @@ export default function AsignacionesPage() {
               },
               {
                 label: "Devolver Prenda",
+                disabled: !!selectedRow && !selectedRow.id_prestamo,
                 onClick: () => {
+                  console.log("FILA:", selectedRow);
                   if (!selectedRow) {
                     alert("Seleccione una asignación");
                     return;
                   }
                   setFormDevolucion({
+                    prenda: selectedRow.prenda || "",
+                    talla: selectedRow.talla || "",
+                    fecha_entrega: selectedRow.fecha_entrega
+                      ? new Date(selectedRow.fecha_entrega)
+                          .toLocaleDateString("es-CO")  
+                      : "",
+                    fecha_devolucion: new Date().toLocaleDateString("es-CO"),
+                    estado_entrega: selectedRow.estado_entrega || "",
                     estado_devolucion: "",
                     observacion: ""
                   });
@@ -233,9 +305,14 @@ export default function AsignacionesPage() {
               },
               {
                 label: "Eliminar",
+                disabled: !!selectedRow && !selectedRow.id_prestamo,
                 onClick: () => {
-                  if (!selectedRow) return alert("Seleccione una asignación");
-                  eliminarAsignacion(selectedRow.id_prestamo);
+                  if (!selectedRow) {
+                    alert("Seleccione una asignación");
+                    return;
+                  }
+
+                  setOpenEliminar(true);
                 },
                 variante: "danger"
               }
@@ -244,24 +321,30 @@ export default function AsignacionesPage() {
         }
       >
         <main className="uniformes-main">
-          <SearchBar
-            initialValues={filtros}
-            loading={loading}
-            fields={[
-              { key: "codigo", label: "Código", type: "text" },
-              { key: "nombre", label: "Nombre", type: "text" },
-              { key: "grado", label: "Grado", type: "select", options: opcionesGrados },
-              { key: "grupo", label: "Grupo", type: "select", options: opcionesGrupos },
-              { key: "anio", label: "Año", type: "select", options: [anioAnterior, anioActual] }
-            ]}
-            onChange={(key, value) => {
-              setFiltros((prev) => {
-                const nuevos = { ...prev, [key]: value };
-                if (key === "grado") nuevos.grupo = ""; 
-                return nuevos;
-              });
-            }}
-          />
+          {/* 5. Agregada la propiedad onSearch al componente SearchBar */}
+          {periodosCargados && (
+            <SearchBar
+              initialValues={filtros}
+              loading={loading}
+              fields={[
+                { key: "codigo", label: "Código", type: "text" },
+                { key: "nombre", label: "Nombre", type: "text" },
+                { key: "grado", label: "Grado", type: "select", options: opcionesGrados },
+                { key: "grupo", label: "Grupo", type: "select", options: opcionesGrupos },
+                { key: "anio", label: "Año", type: "select", options: opcionesAnios }
+              ]}
+              onChange={(key, value) => {
+                setFiltros((prev) => {
+                  const nuevos = { ...prev, [key]: value };
+                  if (key === "grado") nuevos.grupo = ""; 
+                  return nuevos;
+                });
+              }}
+              onSearch={(f) => {
+                setFiltrosAplicados(f);
+              }}
+            />
+          )}
 
           <div className="table-container">
             <AsignacionesTable
@@ -294,8 +377,33 @@ export default function AsignacionesPage() {
         }
         fields={[
           {
+            key: "prenda",
+            label: "Prenda",
+            type: "text"
+          },
+          {
+            key: "talla",
+            label: "Talla",
+            type: "text"
+          },
+          {
+            key: "fecha_entrega",
+            label: "Fecha de Entrega",
+            type: "text"
+          },
+          {
+            key: "fecha_devolucion",
+            label: "Fecha de Devolución",
+            type: "text"
+          },
+          {
+            key: "estado_entrega",
+            label: "Estado de Entrega",
+            type: "text"
+          },
+          {
             key: "estado_devolucion",
-            label: "Estado de la Prenda",
+            label: "Estado de Devolución",
             type: "select",
             options: [
               { value: "Bueno", label: "Bueno" },
@@ -307,6 +415,25 @@ export default function AsignacionesPage() {
             key: "observacion",
             label: "Observación",
             type: "text"
+          }
+        ]}
+      />
+
+      <Modal
+        title="CONFIRMAR ELIMINACIÓN"
+        isOpen={openEliminar}
+        onCancel={() => setOpenEliminar(false)}
+        onAccept={() => {
+          eliminarAsignacion(selectedRow.id_prestamo);
+          setOpenEliminar(false);
+        }}
+        values={{}}
+        onChange={() => {}}
+        fields={[
+          {
+            key: "mensaje",
+            type: "label",
+            label: "¿ESTÁ SEGURO DE ELIMINAR LA ASIGNACIÓN SELECCIONADA?"
           }
         ]}
       />

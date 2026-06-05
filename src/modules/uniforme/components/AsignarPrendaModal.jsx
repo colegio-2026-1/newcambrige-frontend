@@ -13,7 +13,7 @@ export default function AsignarPrendaModal({ isOpen, onClose, estudianteSeleccio
     observacion: ""
   });
 
-  const fechaVisual = new Date().toLocaleDateString("en-CA");
+  const fechaVisual = new Date().toLocaleDateString("es-CO");
 
   // Cargar prendas y resetear formulario al abrir el modal
   useEffect(() => {
@@ -42,7 +42,7 @@ export default function AsignarPrendaModal({ isOpen, onClose, estudianteSeleccio
   const opcionesPrendas = useMemo(() => {
     return prendas.map((item) => ({
       value: item.id_objeto,
-      label: `${item.nombre} - ${item.cantidad_disponible} disponibles`
+      label: item.nombre
     }));
   }, [prendas]);
 
@@ -117,9 +117,17 @@ export default function AsignarPrendaModal({ isOpen, onClose, estudianteSeleccio
             ...prev,
             [key]: value
           };
-          // Si cambia la prenda, limpiamos la talla anterior para que no quede basura
+          
+          // Cambiado según requerimiento 2
           if (key === "id_objeto") {
-            nuevo.talla = "";
+            const objeto = prendas.find(
+              (p) => p.id_objeto === Number(value)
+            );
+
+            nuevo.talla =
+              objeto?.tipo === "objeto"
+                ? "No aplica"
+                : "";
           }
           return nuevo;
         });
@@ -131,15 +139,16 @@ export default function AsignarPrendaModal({ isOpen, onClose, estudianteSeleccio
           type: "select",
           options: opcionesPrendas
         },
-        ...(prendaSeleccionada?.tipo === "vestimenta"
-          ? [{
-              key: "talla",
-              label: "Talla",
-              type: "select",
-              options: ["S", "M", "L", "XL"]
-            }]
-          : []
-        ),
+        // Cambiado según requerimiento 1 (Mantiene el orden original que tenías)
+        {
+          key: "talla",
+          label: "Talla",
+          type: "select",
+          options:
+            prendaSeleccionada?.tipo === "objeto"
+              ? ["No aplica"]
+              : ["S", "M", "L", "XL"]
+        },
         {
           key: "fecha_prestamo",
           label: "Fecha de Entrega",

@@ -28,8 +28,15 @@ export default function InventarioPage() {
   const [openAgregar, setOpenAgregar] = useState(false);
   const [openEditar, setOpenEditar] = useState(false);
 
-  // Filtros
+  // Filtros de entrada temporal
   const [filtros, setFiltros] = useState({  codigo: "", prenda: "", tipo: "" });
+
+  // 1. Estado agregado para controlar las búsquedas confirmadas
+  const [filtrosAplicados, setFiltrosAplicados] = useState({
+    codigo: "",
+    prenda: "",
+    tipo: ""
+  });
 
   const idUser = user?.id_usuario;
   const rol = roles[0] || "Rol no asignado";
@@ -40,10 +47,9 @@ export default function InventarioPage() {
     cantidad_total: 1,
     talla: "",
     observacion: "",
+    estado_physical: "Bueno",
     estado_fisico: "Bueno",
-    fecha_registro: new Date()
-      .toISOString()
-      .split("T")[0]
+    fecha_registro: new Date().toLocaleDateString("en-CA")
   });
 
   const [formEditar, setFormEditar] = useState({
@@ -62,14 +68,6 @@ export default function InventarioPage() {
     }
 
     if (
-      formAgregar.estado_fisico === "Malo" &&
-      !formAgregar.observacion.trim()
-    ) {
-      alert("Debe ingresar una observación para prendas en mal estado");
-      return;
-    }
-
-    if (
       formAgregar.tipo === "vestimenta" &&
       !formAgregar.talla
     ) {
@@ -82,6 +80,14 @@ export default function InventarioPage() {
       return;
     }
 
+    if (
+      ["regular", "malo"].includes(formAgregar.estado_fisico?.toLowerCase()) &&
+      !formAgregar.observacion?.trim()
+    ) {
+      alert("Debe ingresar una observación para prendas en estado Regular o Malo");
+      return;
+    }
+
     try {
       await createObjetoRequest({
         nombre: formAgregar.nombre,
@@ -91,9 +97,7 @@ export default function InventarioPage() {
         estado_fisico: formAgregar.estado_fisico,
         talla: formAgregar.talla,
         observacion: formAgregar.observacion,
-        fecha_registro: new Date()
-          .toISOString()
-          .split("T")[0]
+        fecha_registro: new Date().toLocaleDateString("en-CA")
       });
 
       await cargarInventario();
@@ -106,9 +110,7 @@ export default function InventarioPage() {
         estado_fisico: "Bueno",
         talla: "",
         observacion: "",
-        fecha_registro: new Date()
-          .toISOString()
-          .split("T")[0]
+        fecha_registro: new Date().toLocaleDateString("en-CA")
       });
 
       alert("Prenda registrada correctamente");
@@ -126,6 +128,14 @@ export default function InventarioPage() {
 
     if (!formEditar.nombre.trim()) {
       alert("Ingrese el nombre");
+      return;
+    }
+
+    if (
+      ["regular", "malo"].includes(formEditar.estado_fisico?.toLowerCase()) &&
+      !formEditar.observacion?.trim()
+    ) {
+      alert("Debe ingresar una observación para prendas en estado Regular o Malo");
       return;
     }
 
@@ -147,7 +157,7 @@ export default function InventarioPage() {
       alert("Prenda actualizada correctamente");
     } catch (error) {
       console.error(error);
-      alert("Error actualizando prenda");
+      alert( error?.response?.data?.detail || "Error actualizando prenda");
     }
   };
 
@@ -204,23 +214,29 @@ export default function InventarioPage() {
     }
   };
 
-  // Filtrado en tiempo real mediante useMemo
+  // 2. Hook useMemo modificado para usar filtrosAplicados en su lógica y dependencias
   const inventarioFiltrado = useMemo(() => {
     return inventario.filter((item) => {
       const coincideCodigo =
-        filtros.codigo === "" ||
+        filtrosAplicados.codigo === "" ||
         String(item.id_objeto)
-          .includes(filtros.codigo);
+          .includes(filtrosAplicados.codigo);
 
-      const coincidePrenda = filtros.prenda === "" || 
-        item.nombre?.toLowerCase().includes(filtros.prenda.toLowerCase());
+      const coincidePrenda =
+        filtrosAplicados.prenda === "" ||
+        item.nombre?.toLowerCase().includes(
+          filtrosAplicados.prenda.toLowerCase()
+        );
 
-      const coincideTipo = filtros.tipo === "" || 
-        item.tipo?.toLowerCase().includes(filtros.tipo.toLowerCase());
+      const coincideTipo =
+        filtrosAplicados.tipo === "" ||
+        item.tipo?.toLowerCase().includes(
+          filtrosAplicados.tipo.toLowerCase()
+        );
 
       return coincideCodigo && coincidePrenda && coincideTipo;
     });
-  }, [inventario, filtros]);
+  }, [inventario, filtrosAplicados]);
 
   return (
     <div className="uniformes-page">
@@ -235,8 +251,9 @@ export default function InventarioPage() {
             }}
             menuItems={[
               { label: "Inicio", path: "/home" },
-              { label: "Inventario Prendas", path: "/uniformes/inventario" },
               { label: "Asignaciones", path: "/uniformes/asignaciones" },
+              { label: "Inventario Prendas", path: "/uniformes/inventario" },
+              
             ]}
             selectedMenu="Inventario Prendas"
           />
@@ -255,9 +272,7 @@ export default function InventarioPage() {
                     estado_fisico: "Bueno",
                     talla: "",
                     observacion: "",
-                    fecha_registro: new Date()
-                      .toISOString()
-                      .split("T")[0]
+                    fecha_registro: new Date().toLocaleDateString("en-CA")
                   });
                   setOpenAgregar(true);
                 },
@@ -293,6 +308,7 @@ export default function InventarioPage() {
         }
       >
         <main className="uniformes-main">
+          {/* 3. SearchBar modificado incluyendo la propiedad onSearch */}
           <SearchBar
             initialValues={filtros}
             fields={[
@@ -302,16 +318,20 @@ export default function InventarioPage() {
             ]}
             loading={loading}
             onChange={(key, value) => {
-              setFiltros((prev) => ({ ...prev, [key]: value }));
+              setFiltros((prev) => ({
+                ...prev,
+                [key]: value
+              }));
+            }}
+            onSearch={(f) => {
+              setFiltrosAplicados(f);
             }}
           />
-
 
           <div className="table-container">
             <InventoryTable
               inventario={inventarioFiltrado}
               setSelectedRow={setSelectedRow}
-
             />
           </div>
         </main>
@@ -329,8 +349,8 @@ export default function InventarioPage() {
               ...prev,
               [key]: value
             };
-            if (key === "tipo" && value === "objeto") {
-              nuevo.talla = ""; 
+            if (key === "tipo") {
+              nuevo.talla = value === "objeto" ? "No aplica" : "";
             }
             return nuevo;
           });
@@ -362,17 +382,15 @@ export default function InventarioPage() {
               "Malo"
             ]
           },
-          ...(formAgregar.tipo === "vestimenta"
-            ? [{
-                key: "talla",
-                label: "Talla",
-                type: "select",
-                options: [
-                  "XS", "S", "M", "L", "XL"
-                ]
-              }]
-            : []
-          ),
+          {
+            key: "talla",
+            label: "Talla",
+            type: "select",
+            options:
+              formAgregar.tipo === "objeto"
+                ? ["No aplica"]
+                : ["XS", "S", "M", "L", "XL"]
+          },
           {
             key: "observacion",
             label: "Observación",
@@ -393,8 +411,8 @@ export default function InventarioPage() {
               ...prev,
               [key]: value
             };
-            if (key === "tipo" && value === "objeto") {
-              nuevo.talla = "";
+            if (key === "tipo") {
+              nuevo.talla = value === "objeto" ? "No aplica" : "";
             }
             return nuevo;
           })
@@ -426,17 +444,15 @@ export default function InventarioPage() {
               "Malo"
             ]
           },
-          ...(formEditar.tipo === "vestimenta"
-            ? [{
-                key: "talla",
-                label: "Talla",
-                type: "select",
-                options: [
-                  "XS", "S", "M", "L", "XL"
-                ]
-              }]
-            : []
-          ),
+          {
+            key: "talla",
+            label: "Talla",
+            type: "select",
+            options:
+              formEditar.tipo === "objeto"
+                ? ["No aplica"]
+                : ["XS", "S", "M", "L", "XL"]
+          },
           {
             key: "observacion",
             label: "Observación",

@@ -1,5 +1,12 @@
 import DataTable from "../../../components/shared/DataTable";
 
+// Función utilitaria agregada para formatear los textos de forma segura
+const capitalizar = (texto) =>
+  texto
+    ? texto.charAt(0).toUpperCase() +
+      texto.slice(1).toLowerCase()
+    : "—";
+
 export default function InventoryTable({
   inventario = [],
   setSelectedRow
@@ -8,40 +15,35 @@ export default function InventoryTable({
   const columns = [
     {
       key: "id_objeto",
-      label: "CODIGO"
+      label: "Código"
     },
     {
-    key: "nombre",
-    label: "NOMBRE"
+      key: "nombre",
+      label: "Nombre",
+      // Cambiado por la renderización capitalizada
+      render: (val) => capitalizar(val)
     },
     {
       key: "tipo",
-      label: "CATEGORIA",
-      render: (val) => {
-        return val || "—";
-      }
+      label: "Categoría",
+      // Cambiado por la renderización capitalizada
+      render: (val) => capitalizar(val)
     },
     {
       key: "cantidad_disponible",
-      label: "DISPONIBILIDAD",
-
+      label: "Disponibilidad",
       render: (val) => {
         return Number(val) > 0
           ? "Activo"
           : "Inactivo";
       }
     },
-
     {
       key: "estado_fisico",
-      label: "ESTADO FÍSICO",
-      render: (val) => {
-        
-        return val || "—";
-      }
+      label: "Estado físico",
+      // Cambiado por la renderización capitalizada
+      render: (val) => capitalizar(val)
     },
-  
-    
   ];
 
   return (
