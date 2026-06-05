@@ -1,5 +1,4 @@
 import axiosClient from "./axiosClient";
-import { endpoints } from "./endpoints";
 
 const BANDA_URLS = {
   categorias: "/api/banda/categorias",
@@ -14,27 +13,19 @@ const BANDA_URLS = {
 };
 
 export const bandaService = {
-  // Categorías
-  getCategorias: () => axiosClient.get(BANDA.categorias),
+  // ✅ AGREGAMOS ESTA LÍNEA PARA NO DEPENDER DE ENDPOINTS.JS
+  getEstudiantes: () => axiosClient.get("/api/estudiantes"), 
 
-  // Ubicaciones
-  getUbicaciones: () => axiosClient.get(BANDA.ubicaciones),
-
-  // Instrumentos
-  getInstrumentos: () => axiosClient.get(BANDA.instrumentos),
-  getInstrumentosDisponibles: () => axiosClient.get(BANDA.instrumentosDisponibles),
-  crearInstrumento: (data) => axiosClient.post(BANDA.instrumentos, data),
-  editarInstrumento: (id, data) => axiosClient.put(BANDA.instrumentoById(id), data),
-  eliminarInstrumento: (id) => axiosClient.delete(BANDA.instrumentoById(id)),
-
-  // Préstamos
-  getPrestamos: () => axiosClient.get(BANDA.prestamos),
-  crearPrestamo: (data) => axiosClient.post(BANDA.prestamos, data),
-  devolverInstrumento: (id, data) => axiosClient.put(BANDA.devolverPrestamo(id), data),
-
-// ✅ CAMBIAR ESTO PARA USAR EL ENDPOINT GLOBAL
-  getAuditoria: () => axiosClient.get(BANDA.auditoria),
-
-  // Estadísticas
-  getEstadisticas: () => axiosClient.get(BANDA.estadisticas),
+  getCategorias: () => axiosClient.get(BANDA_URLS.categorias),
+  getUbicaciones: () => axiosClient.get(BANDA_URLS.ubicaciones),
+  getInstrumentos: () => axiosClient.get(BANDA_URLS.instrumentos),
+  getInstrumentosDisponibles: () => axiosClient.get(BANDA_URLS.instrumentosDisponibles),
+  crearInstrumento: (data) => axiosClient.post(BANDA_URLS.instrumentos, data),
+  editarInstrumento: (id, data) => axiosClient.put(BANDA_URLS.instrumentoById(id), data),
+  eliminarInstrumento: (id) => axiosClient.delete(BANDA_URLS.instrumentoById(id)),
+  getPrestamos: () => axiosClient.get(BANDA_URLS.prestamos),
+  crearPrestamo: (data) => axiosClient.post(BANDA_URLS.prestamos, data),
+  devolverInstrumento: (id, data) => axiosClient.put(BANDA_URLS.devolverPrestamo(id), data),
+  getAuditoria: () => axiosClient.get(BANDA_URLS.auditoria),
+  getEstadisticas: () => axiosClient.get(BANDA_URLS.estadisticas),
 };
