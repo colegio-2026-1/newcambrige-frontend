@@ -1,122 +1,76 @@
 import {
   Routes,
   Route,
-  Navigate
 } from "react-router-dom";
 
 import LoginPage from "../modules/auth/LoginPage";
-import ProtectedRoute from "./ProtectedRoute"
+import ProtectedRoute from "./ProtectedRoute";
 
-import TesoreriaRouter from "./TesoreriaRouter";
-import SalonRouter from "./SalonRouter";
-import DashboardRouter from "./DashboardRouter";
+import TesoreriaRouter  from "./TesoreriaRouter";
+import DashboardRouter  from "./DashboardRouter";
 
 import ParametrizacionPage from '../modules/parametrizacion/ParametrizacionPage';
-import UsuariosPage from '../modules/parametrizacion/UsuariosPage';
+import UsuariosPage        from '../modules/parametrizacion/UsuariosPage';
 
 import NotFound from "../modules/notFound/notFound";
-
-import Home from "../modules/Home/HomePage";
-
+import Home     from "../modules/Home/HomePage";
 import TestPage from "../modules/test/testPage";
-
-
 
 // ==============================
 // ROUTER
 // ==============================
 
 const AppRouter = () => {
-
   return (
-
     <Routes>
-      {/* Públicas */}
-        <Route path="/" element={<LoginPage />} />
 
-      {/* ===================== */}
-      {/* LOGIN */}
-      {/* ===================== */}
+      {/* PÚBLICAS */}
+      <Route path="/" element={<LoginPage />} />
 
-      <Route
-        path="/"
-        element={<LoginPage />}
-      />
-
-      {/* ===================== */}
       {/* HOME */}
-      {/* ===================== */}
-
       <Route
         path="/home"
         element={
-
           <ProtectedRoute>
-
             <Home />
-
           </ProtectedRoute>
-
         }
       />
 
-      {/* ===================== */}
-      {/* FUTURAS RUTAS */}
-      {/* ===================== */}
+      {/* MÓDULOS */}
+      {TesoreriaRouter()}
 
-      {/*
-      <Route
-        path="/estudiantes"
-        element={
-          <PrivateRoute>
-            <EstudiantesPage />
-          </PrivateRoute>
-        }
-      />
-      */}
+      {/* DASHBOARD */}
+      {DashboardRouter()}
 
-        {TesoreriaRouter()}
-        {SalonRouter()}
-
-        {/* ===================== */}
-        {/* DASHBOARD */}
-        {/* ===================== */}
-        {DashboardRouter()}
-
-
+      {/* PARAMETRIZACIÓN */}
       <Route
         path="/parametrizacion"
         element={
           <ProtectedRoute>
             <ParametrizacionPage />
           </ProtectedRoute>
-      }
+        }
       />
       <Route
         path="/parametrizacion/usuarios"
         element={
           <ProtectedRoute>
-             <UsuariosPage />
+            <UsuariosPage />
           </ProtectedRoute>
-        }
-        />
-
-      <Route
-        path="/test"
-        element={
-          <TestPage />
         }
       />
 
-      {/* ===================== */}
-      {/* CATCH ALL */}
-      {/* ===================== */}
+      {/* TEST */}
+      <Route
+        path="/test"
+        element={<TestPage />}
+      />
 
+      {/* CATCH ALL */}
       <Route
         path="*"
-        element={
-          <NotFound />
-        }
+        element={<NotFound />}
       />
 
     </Routes>
