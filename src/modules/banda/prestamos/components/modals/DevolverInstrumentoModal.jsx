@@ -1,64 +1,56 @@
 import React from 'react';
 import ModalBase from "../../../../../components/shared/ModalBase";
+import "../../../inventario/components/modals/BandModals.css"; // Reutilizamos estilos de modales del inventario
 
 const DevolverInstrumentoModal = ({ open, onClose, onConfirm, prestamo, form, setForm, errores }) => {
-  if (!open || !prestamo || !form) return null;
+  if (!open || !prestamo) return null;
 
   const footer = (
-    <>
-      <button style={btnStyle("var(--color-secondary)")} onClick={onConfirm}>
-        Confirmar Devolución
-      </button>
-      <button style={btnStyle("#6B7280")} onClick={onClose}>
-        Cancelar
-      </button>
-    </>
+    <div style={{ display: "flex", gap: "20px", justifyContent: "center", width: "100%" }}>
+      <button className="band-btn-pill band-btn-aceptar" onClick={onConfirm}>Confirmar Devolución</button>
+      <button className="band-btn-pill band-btn-cancelar" onClick={onClose}>Cancelar</button>
+    </div>
   );
 
   return (
-    <ModalBase
-      open={open}
-      onClose={onClose}
-      title="REGISTRAR DEVOLUCIÓN DE INSTRUMENTO"
-      width="500px"
-      footer={footer}
-    >
-      <div style={{ padding: '10px 0' }}>
-        <p style={{ fontSize: '14px', color: '#4B5563', marginBottom: '20px' }}>
-          Registrando devolución para: <br />
-          <b style={{color: 'var(--color-text)'}}>{prestamo.instrumento_nombre}</b> — Estudiante: <b style={{color: 'var(--color-text)'}}>{prestamo.estudiante_nombre}</b>
-        </p>
+    <ModalBase open={open} onClose={onClose} title="" width="550px" footer={footer}>
+      <div className="band-modal-header">
+        <h2 className="band-modal-title">DEVOLUCIÓN</h2>
+      </div>
 
-        <div style={fieldGroup}>
-          <label style={labelStyle}>ESTADO DEL INSTRUMENTO</label>
+      <div className="band-modal-body-text">
+        Instrumento: <b>{prestamo.instrumento_nombre}</b> <br/>
+        Estudiante: <b>{prestamo.estudiante_nombre}</b>
+      </div>
+
+      <div className="band-modal-grid">
+        <div className="band-field-group" style={{gridColumn: "1 / -1"}}>
+          <label className="band-label" style={{minWidth: "180px"}}>Estado de recepción</label>
           <select 
-            style={inputStyle}
-            value={form?.estado_al_devolver || "Bueno"}
+            className="band-input"
+            value={form?.estado_al_devolver}
             onChange={(e) => setForm({ ...form, estado_al_devolver: e.target.value })}
           >
-            <option value="Bueno">Bueno (Reingresa al inventario)</option>
-            <option value="Malo">Malo (Pasa a mantenimiento)</option>
+            <option value="Bueno">Bueno (Reingresa a Stock)</option>
+            <option value="Malo">Malo (Requiere Mantenimiento)</option>
           </select>
         </div>
 
-        <div style={{ ...fieldGroup, marginTop: '20px' }}>
-          <label style={labelStyle}>OBSERVACIONES {form?.estado_al_devolver === 'Malo' && '(OBLIGATORIO)'}</label>
+        <div className="band-field-full">
+          <label className="band-label">
+            Observaciones {form?.estado_al_devolver === 'Malo' && <span style={{color: 'red'}}>*</span>}
+          </label>
           <textarea 
-            style={{ ...inputStyle, height: '100px', paddingTop: '10px', resize: 'none' }}
-            placeholder="Describa el estado en que se recibe el instrumento..."
-            value={form?.observaciones || ""}
+            className="band-textarea"
+            placeholder="Describa el estado físico del instrumento..."
+            value={form?.observaciones}
             onChange={(e) => setForm({ ...form, observaciones: e.target.value })}
           />
-          {errores?.observaciones && <p style={{ color: 'var(--color-danger)', fontSize: '12px', marginTop: '5px' }}>{errores.observaciones}</p>}
+          {errores?.observaciones && <p className="band-error-text">{errores.observaciones}</p>}
         </div>
       </div>
     </ModalBase>
   );
 };
-
-const fieldGroup = { display: 'flex', flexDirection: 'column', gap: '8px' };
-const labelStyle = { fontSize: '11px', fontWeight: '800', color: 'var(--color-secondary)' };
-const inputStyle = { width: '100%', height: '45px', borderRadius: '10px', border: '1px solid #D1D5DB', padding: '0 12px', fontFamily: 'var(--font-body)' };
-const btnStyle = (bg) => ({ height: "40px", padding: "0 24px", border: "none", borderRadius: "50px", background: bg, color: "#FFF", fontWeight: "bold", cursor: "pointer", transition: "transform 0.2s" });
 
 export default DevolverInstrumentoModal;
