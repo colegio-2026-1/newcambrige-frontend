@@ -2,7 +2,16 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 // AUTH & CORE
 import LoginPage from "../modules/auth/LoginPage";
-import ProtectedRoute from "./ProtectedRoute";
+import ProtectedRoute from "./ProtectedRoute"
+
+import TesoreriaRouter from "./TesoreriaRouter";
+import SalonRouter from "./SalonRouter"
+
+import ParametrizacionPage from '../modules/parametrizacion/ParametrizacionPage';
+import UsuariosPage from '../modules/parametrizacion/UsuariosPage';
+
+import NotFound from "../modules/notFound/notFound";
+
 import Home from "../modules/Home/HomePage";
 
 // ✅ IMPORTAMOS TU ENRUTADOR DE BANDA
@@ -36,9 +45,8 @@ const PrivateRoute = ({ children }) => {
 const AppRouter = () => {
   return (
     <Routes>
-      {/* PUBLIC ROUTES */}
-      <Route path="/" element={<LoginPage />} />
-      <Route path="/test" element={<TestPage />} />
+      {/* Públicas */}
+        <Route path="/" element={<LoginPage />} />
 
       {/* PRIVATE ROUTES (Requieren Login) */}
       <Route
@@ -47,8 +55,17 @@ const AppRouter = () => {
           <ProtectedRoute>
             <Home />
           </ProtectedRoute>
+
         }
       />
+
+      {/* ===================== */}
+      {/* FUTURAS RUTAS */}
+      {/* ===================== */}
+
+      
+      
+      
 
       {/* MODULO TESORERIA (Limpiado y corregido) */}
       <Route path="/tesoreria">
@@ -78,6 +95,35 @@ const AppRouter = () => {
           <PrivateRoute>
             <BandaRouter />
           </PrivateRoute>
+        }
+      />
+      */}
+    
+        {TesoreriaRouter()}  
+        {SalonRouter()} 
+      
+ 
+      <Route 
+        path="/parametrizacion" 
+        element={
+          <ProtectedRoute>
+            <ParametrizacionPage />
+          </ProtectedRoute>
+      } 
+      />
+      <Route 
+        path="/parametrizacion/usuarios" 
+        element={
+          <ProtectedRoute>
+             <UsuariosPage />
+          </ProtectedRoute>
+        } 
+        />
+      
+      <Route
+        path="/test"
+        element={
+          <TestPage />
         }
       />
 
