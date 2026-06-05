@@ -48,7 +48,7 @@ export default function ImportacionMasivaPage() {
   const sidebarUser = user ? { ...user, rol: user.roles?.[0]?.toUpperCase() || "TITULAR" } : null;
 
   const menuItems = [
-    { label: "Inicio", path: "/importacion", icon: iconHome },
+    { label: "Inicio", path: "/home", icon: iconHome },
     { label: "Conexión", path: `/importacion/${tipo}`, icon: iconRobot },
     { label: "Carga Masiva", path: `/importacion/masiva/${tipo}`, icon: iconCargaMasiva },
     { label: "Carga Individual", path: `/importacion/individual/${tipo}`, icon: iconCargaIndividual },

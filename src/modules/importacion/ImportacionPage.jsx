@@ -19,7 +19,7 @@ export default function ImportacionPage() {
   const { user } = useAuth();
 
   const menuItems = [
-    { label: "Inicio", path: "/importacion", icon: <Home /> },
+    { label: "Inicio", path: "/home", icon: <Home /> },
   ];
 
   const handleEstudianteClick = () => {
