@@ -78,8 +78,26 @@ const AppRouter = () => {
       */}
     
         {TesoreriaRouter()}  
-        {SalonRouter()}
-        {ParametrizacionRouter()} 
+        {SalonRouter()} 
+        {UniformeRouter()} 
+      
+ 
+      <Route 
+        path="/parametrizacion" 
+        element={
+          <ProtectedRoute>
+            <ParametrizacionPage />
+          </ProtectedRoute>
+      } 
+      />
+      <Route 
+        path="/parametrizacion/usuarios" 
+        element={
+          <ProtectedRoute>
+             <UsuariosPage />
+          </ProtectedRoute>
+        } 
+        />
       
       <Route
         path="/test"
