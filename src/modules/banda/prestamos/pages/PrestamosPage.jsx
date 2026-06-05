@@ -36,104 +36,131 @@ const PrestamosPage = () => {
 
   // --- TABLA ÚNICA MAESTRA ---
   const columnasEstudiantes = [
-    { key: "documento", label: "CÓDIGO" },
+    { key: "documento", label: "CÓDIGO" }, // Documento del estudiante
     { key: "nombre", label: "NOMBRE COMPLETO" },
+    { key: "salon_grado", label: "GRADO" },
+    { key: "salon_grupo", label: "GRUPO" },
     { 
       key: "instrumento", 
-      label: "INSTRUMENTO ASIGNADO",
+      label: "INSTRUMENTO",
       render: (val, row) => {
-        const prestamoActivo = (prestamos.prestamos || []).find(p => p.id_estudiante === row.id_estudiante && p.estado_entrega === "prestado");
-        return prestamoActivo ? <b style={{color: "var(--color-primary)"}}>{prestamoActivo.instrumento_nombre}</b> : "—";
+        const pActivo = prestamos.prestamos.find(p => p.id_estudiante === row.id_estudiante && p.estado_entrega === "prestado");
+        return pActivo ? pActivo.instrumento_nombre : "—";
       }
     },
     { 
-      key: "paz_y_salvo", 
-      label: "PAZ Y SALVO",
+      key: "estado", 
+      label: "ESTADO",
       render: (val, row) => {
-        const tienePrestamo = (prestamos.prestamos || []).some(p => p.id_estudiante === row.id_estudiante && p.estado_entrega === "prestado");
-        return (
-          <span style={{ color: tienePrestamo ? "#D97706" : "var(--color-success)", fontWeight: "bold", fontSize: "12px" }}>
-            {tienePrestamo ? "Pendiente" : "Completo"}
-          </span>
-        );
+        const tiene = prestamos.prestamos.some(p => p.id_estudiante === row.id_estudiante && p.estado_entrega === "prestado");
+        return <span style={{ color: tiene ? "#D97706" : "#059669", fontWeight: "bold" }}>
+          {tiene ? "Pendiente" : "Paz y Salvo"}
+        </span>;
       }
     },
   ];
 
-  // Lógica para habilitar/deshabilitar botones
+  const camposBusqueda = [
+    { key: "documento", label: "Código", type: "text" },
+    { key: "nombre", label: "Nombre", type: "text" },
+    { key: "grado", label: "Grado", type: "select", options: ["6°", "7°", "8°", "9°", "10°", "11°"] },
+    { key: "grupo", label: "Grupo", type: "select", options: ["A", "B", "C"] },
+    { key: "año", label: "Año", type: "select", options: ["2024", "2025", "2026"] },
+  ];
+
   const estudianteSel = prestamos.estudianteSeleccionado;
   const tienePrestamoActivo = estudianteSel ? (prestamos.prestamos || []).some(p => p.id_estudiante === estudianteSel.id_estudiante && p.estado_entrega === "prestado") : false;
 
   return (
-    <div className='banda-module-container banda-custom-sidebar'>
+    <div className='banda-module-container banda-custom-sidebar view-prestamos'>
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
       
-      <div className="prestamos-page" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div className="inventario-page">
         <Toast message={prestamos.toast} />
 
         <ModuleLayout
-          sidebar={
-            <Sidebar moduloActual="Préstamos" selectedMenu="Asignaciones" menuItems={menuBanda} user={user} />
-          }
+          sidebar={<Sidebar moduloActual="Asignaciones" menuItems={menuBanda} user={user} />}
         >
-          <SearchBar 
-            fields={[{ key: "nombre", label: "Buscar Estudiante", type: "text" }]} 
-            onSearch={(f) => {
-              prestamos.setFiltroNombre(f.nombre);
-              prestamos.setPaginaEstudiantes(1);
-            }} 
-          />
+          {/* SECCIÓN SUPERIOR: FILTROS A TODO EL ANCHO */}
+          <div className="banda-filters-fullwidth">
+            <SearchBar 
+              fields={camposBusqueda} 
+              onSearch={(f) => {
+                prestamos.setFiltroDocumento(f.documento);
+                prestamos.setFiltroNombre(f.nombre);
+                prestamos.setFiltroGrado(f.grado);
+                prestamos.setFiltroGrupo(f.grupo);
+                prestamos.setFiltroAño(f.año);
+                prestamos.handleBuscar();
+              }} 
+            />
+          </div>
 
-          <div className="banda-split-container">
-            <div className="banda-table-section" style={{ overflowY: 'auto', paddingRight: '10px' }}>
-              
-              {/* TABLA ÚNICA */}
+          {/* SECCIÓN INFERIOR: GRID DIVIDIDO (TABLA | BOTONES) */}
+          <div className="banda-main-grid">
+            <div className="banda-table-container">
               <div className="inventario-table-card">
                 <DataTable 
                   columns={columnasEstudiantes} 
                   rows={prestamos.estudiantesPaginados} 
                   onRowClick={(row) => {
                     prestamos.setEstudianteSeleccionado(row);
+                    // Actualizamos el formulario de préstamo con el ID del estudiante clickeado
                     prestamos.setForm({ ...prestamos.form, id_estudiante: row?.id_estudiante });
                   }} 
-                  emptyText="No hay estudiantes disponibles" 
+                  emptyText="No hay estudiantes registrados" 
                 />
               </div>
               
-              {/* PAGINACIÓN CON FLECHAS AZULES */}
               <InventarioPagination 
                 paginaActual={prestamos.paginaEstudiantes} 
                 totalPaginas={prestamos.totalPaginasEstudiantes} 
                 setPagina={prestamos.setPaginaEstudiantes} 
               />
-
             </div>
 
-            <div className="banda-actions-section">
+            <div className="banda-sidebar-actions">
               <ActionButtons
                 filaSeleccionada={estudianteSel}
                 botones={[
                   { 
                     label: "Asignar Instrumento", 
                     onClick: () => prestamos.setModalAgregar(true), 
-                    disabled: !estudianteSel || tienePrestamoActivo, // Se bloquea si ya tiene uno
+                    disabled: !estudianteSel || tienePrestamoActivo, 
                     variante: "primary" 
                   },
                   { 
                     label: "Registrar Devolución", 
                     onClick: () => prestamos.abrirModalDevolver(estudianteSel), 
-                    disabled: !estudianteSel || !tienePrestamoActivo, // Se bloquea si NO tiene uno
+                    disabled: !estudianteSel || !tienePrestamoActivo, 
                     variante: "secondary" 
                   },
                 ]}
               />
-              <PrestamosSidebar estudiantes={prestamos.estudiantes} instrumentos={prestamos.instrumentos} estadisticas={prestamos.estadisticas} />
+              {/* Aquí ya no van estadísticas, solo los botones de acción */}
             </div>
           </div>
         </ModuleLayout>
 
-        <AgregarPrestamoModal open={prestamos.modalAgregar} onClose={() => prestamos.setModalAgregar(false)} form={prestamos.form} setForm={prestamos.setForm} instrumentos={prestamos.instrumentos} handleAgregar={prestamos.handleAgregar} />
-        <DevolverInstrumentoModal open={prestamos.modalDevolver} onClose={() => prestamos.setModalDevolver(false)} onConfirm={prestamos.handleDevolver} prestamo={prestamos.prestamoSeleccionado} form={prestamos.formDevolucion} setForm={prestamos.setFormDevolucion} errores={prestamos.errores} />
+        {/* MODALES DE LÓGICA */}
+        <AgregarPrestamoModal 
+            open={prestamos.modalAgregar} 
+            onClose={() => prestamos.setModalAgregar(false)} 
+            form={prestamos.form} 
+            setForm={prestamos.setForm} 
+            instrumentos={prestamos.instrumentos} 
+            handleAgregar={prestamos.handleAgregar} 
+        />
+        
+        <DevolverInstrumentoModal 
+            open={prestamos.modalDevolver} 
+            onClose={() => prestamos.setModalDevolver(false)} 
+            onConfirm={prestamos.handleDevolver} 
+            prestamo={prestamos.prestamoSeleccionado} 
+            form={prestamos.formDevolucion} 
+            setForm={prestamos.setFormDevolucion} 
+            errores={prestamos.errores} 
+        />
       </div>
     </div>
   );

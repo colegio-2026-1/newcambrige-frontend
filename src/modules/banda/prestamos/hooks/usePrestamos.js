@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { prestamoService } from "../services/prestamoService";
-import { allestudiantesRequest } from "../../../../api/endpoints";
+import { bandaService } from "../../../../api/bandaService";
 import { FORM_VACIO, FORM_DEVOLUCION_VACIO, POR_PAGINA } from "../utils/prestamosConstants";
 
 const usePrestamos = () => {
@@ -13,6 +13,10 @@ const usePrestamos = () => {
   const [prestamoSeleccionado, setPrestamoSeleccionado] = useState(null);
 
   const [filtroNombre, setFiltroNombre] = useState("");
+  const [filtroDocumento, setFiltroDocumento] = useState("");
+  const [filtroGrado, setFiltroGrado] = useState("");
+  const [filtroGrupo, setFiltroGrupo] = useState("");
+  const [filtroAño, setFiltroAño] = useState("");
   const [paginaEstudiantes, setPaginaEstudiantes] = useState(1);
 
   const [modalAgregar, setModalAgregar] = useState(false);
@@ -28,7 +32,7 @@ const usePrestamos = () => {
       const [pRes, iRes, eRes] = await Promise.all([
         prestamoService.getPrestamos(),
         prestamoService.getInstrumentosDisponibles(),
-        allestudiantesRequest(),
+        bandaService.getEstudiantes(),
       ]);
       setPrestamos(pRes.data);
       setInstrumentos(iRes.data);
@@ -40,9 +44,18 @@ const usePrestamos = () => {
   useEffect(() => { cargarDatos(); }, [cargarDatos]);
 
   // --- LÓGICA ESTUDIANTES (Única tabla) ---
-  const estudiantesFiltrados = useMemo(() => {
-    return estudiantes.filter(e => e.nombre?.toLowerCase().includes(filtroNombre.toLowerCase()));
-  }, [estudiantes, filtroNombre]);
+ const estudiantesFiltrados = useMemo(() => {
+    return estudiantes.filter(e => {
+      const matchDoc = !filtroDocumento || e.documento.includes(filtroDocumento);
+      const matchNom = !filtroNombre || e.nombre.toLowerCase().includes(filtroNombre.toLowerCase());
+      // Nota: asumiendo que el objeto estudiante trae e.salon_grado y e.salon_grupo
+      const matchGra = !filtroGrado || e.salon_grado === filtroGrado;
+      const matchGru = !filtroGrupo || e.salon_grupo === filtroGrupo;
+      
+      return matchDoc && matchNom && matchGra && matchGru;
+    });
+  }, [estudiantes, filtroDocumento, filtroNombre, filtroGrado, filtroGrupo]);
+
 
   const estudiantesPaginados = useMemo(() => {
     return estudiantesFiltrados.slice((paginaEstudiantes - 1) * POR_PAGINA, paginaEstudiantes * POR_PAGINA);
@@ -91,13 +104,20 @@ const usePrestamos = () => {
     prestamos, instrumentos, estudiantes, loading,
     estudianteSeleccionado, setEstudianteSeleccionado,
     prestamoSeleccionado, setPrestamoSeleccionado,
-    filtroNombre, setFiltroNombre, 
+    filtroNombre, setFiltroNombre, filtroDocumento, setFiltroDocumento, 
+    filtroGrado, setFiltroGrado, filtroGrupo, setFiltroGrupo, filtroAño, setFiltroAño,
     estudiantesPaginados, totalPaginasEstudiantes, paginaEstudiantes, setPaginaEstudiantes,
     modalAgregar, setModalAgregar, modalDevolver, setModalDevolver,
     form, setForm, formDevolucion, setFormDevolucion, toast,
     handleAgregar, handleDevolver, errores, setErrores, estadisticas,
     
-    // ✅ LÓGICA INTELIGENTE: Busca el préstamo activo del estudiante seleccionado
+    handleLimpiar: () => {
+      setFiltroDocumento(""); setFiltroNombre(""); setFiltroGrado(""); setFiltroGrupo(""); setFiltroAño("");
+      setPaginaEstudiantes(1);
+    },
+        handleBuscar: () => setPaginaEstudiantes(1),
+        // ✅ LÓGICA INTELIGENTE: Busca el préstamo activo del estudiante seleccionado
+
     abrirModalDevolver: (estudiante) => { 
       const prestamoActivo = prestamos.find(p => p.id_estudiante === estudiante.id_estudiante && p.estado_entrega === "prestado");
       if (prestamoActivo) {
