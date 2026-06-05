@@ -8,6 +8,7 @@ import LoginPage from "../modules/auth/LoginPage";
 import ProtectedRoute from "./ProtectedRoute"
 
 import TesoreriaRouter from "./TesoreriaRouter";
+import SalonRouter from "./SalonRouter"
 
 import ParametrizacionPage from '../modules/parametrizacion/ParametrizacionPage';
 import UsuariosPage from '../modules/parametrizacion/UsuariosPage';
@@ -30,6 +31,8 @@ const AppRouter = () => {
   return (
 
     <Routes>
+      {/* Públicas */}
+        <Route path="/" element={<LoginPage />} />
 
       {/* ===================== */}
       {/* LOGIN */}
@@ -61,16 +64,9 @@ const AppRouter = () => {
       {/* FUTURAS RUTAS */}
       {/* ===================== */}
 
-      {/*
-      <Route
-        path="/salones"
-        element={
-          <PrivateRoute>
-            <SalonPage />
-          </PrivateRoute>
-        }
-      />
-      */}
+      
+      
+      
 
       {/*
       <Route
@@ -84,7 +80,7 @@ const AppRouter = () => {
       */}
     
         {TesoreriaRouter()}  
-     
+        {SalonRouter()} 
       
  
       <Route 

@@ -138,6 +138,146 @@
   }
 }
 
+/* ============================================
+   Header.css
+   src/components/layout/Header.css
+   ============================================ */
+
+@font-face {
+  font-family: 'Staatliches';
+  src: url('../../assets/fonts/Staatliches-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* ── HEADER ── */
+.header {
+  width: 100%;
+  height: 130px;
+  background: var(--color-primary);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-8);
+  position: relative;
+  box-shadow: var(--shadow-header);
+  overflow: hidden;
+}
+
+/* ── LOGOS ── */
+.header-logos {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  flex-shrink: 0;
+  z-index: 2;
+}
+
+.header-logo {
+  position: absolute;
+  top: 50%;
+  left: 73px;
+  width: 100px;
+  height: 100px;
+  transform: translateY(-50%);
+  object-fit: contain;
+  opacity: 0;
+  transition:
+    opacity var(--transition-slow),
+    transform var(--transition-slow);
+}
+
+.header-logo.active {
+  opacity: 1;
+}
+
+/* ── TÍTULO ── */
+.header-title {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: auto;
+  padding: 0;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.header-title h1 {
+  font-family: 'Staatliches', sans-serif;
+  font-size: 40px;
+  font-weight: 400;
+  letter-spacing: 1.5px;
+  color: var(--color-text-white);
+  text-align: center;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── TABLET (≤1024px) ── */
+@media (max-width: 1024px) {
+  .header {
+    height: 115px;
+  }
+
+  .header-logos {
+    width: 95px;
+    height: 95px;
+  }
+
+  .header-logo {
+    width: 85px;
+    height: 85px;
+    left: 60px;
+  }
+
+  .header-title h1 {
+    font-size: 28px;
+  }
+}
+
+/* ── MÓVIL (≤768px) ── */
+@media (max-width: 768px) {
+  .header {
+    height: auto;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--space-5) var(--space-4);
+  }
+
+  .header-logos {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 10px;
+  }
+
+  .header-logo {
+    top: 50%;
+    left: 50%;
+    width: 70px;
+    height: 70px;
+    transform: translate(-50%, -50%);
+  }
+
+  .header-title {
+    position: relative;
+    left: unset;
+    transform: none;
+    width: 100%;
+    padding: 0;
+  }
+
+  .header-title h1 {
+    font-size: 24px;
+    white-space: normal;
+    line-height: 1.3;
+    letter-spacing: 1px;
+  }
+}
+
 /* ── MÓVIL PEQUEÑO (≤480px) ── */
 @media (max-width: 480px) {
   .header-logos {
