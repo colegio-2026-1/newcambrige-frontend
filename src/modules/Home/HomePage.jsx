@@ -7,7 +7,7 @@ import salonIcon from "../../assets/Salon/salon.svg";
 import tesoreriaIcon from "../../assets/Tesoreria/tesoreria.svg";
 import rectoriaIcon from "../../assets/Rectoria/estudiante.svg";
 import uniformesIcon from "../../assets/Objetos/objetos.svg";
-import bandaIcon from "../../assets/Banda/banda.svg";
+import bandaIcon from "../../assets/Banda/Banda.svg";
 import paraIcon from "../../assets/Parametrizacion/parametrizacion.svg";
 import DashboardIcon from "../../assets/Parametrizacion/parametrizacion.svg";
 import importacionIcon from "../../assets/importacion/Robot 1941.svg";
@@ -67,7 +67,7 @@ const HomePage = () => {
     { title: "Uniformes", icon: uniformesIcon, path: "/uniformes", roles: ["administrador", "admin", "uniformes"] },
     { title: "Banda", icon: bandaIcon, path: "/banda", roles: [ "administrador", "admin", "banda"] },
     { title: "Parametrización", icon: paraIcon, path: "/parametrizacion", roles: ["secretaria", "administrador", "admin", "rectoria"] },
-    { title: "Importaciones", icon: importacionIcon, path: "/importacion", roles: ["admin", "administrador", "secretaria", "titular"] },
+    { title: "Importaciones", icon: importacionIcon, path: "/importacion", roles: ["admin", "administrador", "secretaria", "titular", "robot"] },
   ];
 
   return (
