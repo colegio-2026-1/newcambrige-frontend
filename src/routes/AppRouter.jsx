@@ -2,33 +2,33 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 // AUTH & CORE
 import LoginPage from "../modules/auth/LoginPage";
-import ProtectedRoute from "./ProtectedRoute"
-
-import TesoreriaRouter from "./TesoreriaRouter";
-
-import ParametrizacionPage from '../modules/parametrizacion/ParametrizacionPage';
-import UsuariosPage from '../modules/parametrizacion/UsuariosPage';
-
-import NotFound from "../modules/notFound/notFound";
-
+import ProtectedRoute from "./ProtectedRoute";
 import Home from "../modules/Home/HomePage";
 
-// ⚠️ COMENTADO TEMPORALMENTE: El archivo DashboardPage no existe en la carpeta modules/dashboard
-// Al comentar esta línea, evitamos el error de "Failed to resolve import"
-// import Dashboard from "../modules/dashboard/DashboardPage"; 
+// ✅ IMPORTAMOS TU ENRUTADOR DE BANDA
+import BandaRouter from "../modules/banda/BandaRouter";
 
 // TESORERIA
 import Tesoreria from "../modules/tesoreria/Tesoreria";
 import TesoreriaMatricula from "../modules/tesoreria/TesoreriaMatricula";
 import TesoreriaNotificaciones from "../modules/tesoreria/TesoreriaNotificaciones";
-import TesoreriaEstadistica from "../modules/tesoreria/TesoreriaEstadistica";
 import TesoreriaPension from "../modules/tesoreria/TesoreriaPension";
 import TesoreriaPapeleria from "../modules/tesoreria/TesoreriaPapeleria";
+// import TesoreriaEstadistica from "../modules/tesoreria/TesoreriaEstadistica"; // ⚠️ Comentado por error de import
 
 // TEST
 import TestPage from "../modules/test/testPage";
 
-
+// ==========================================
+// COMPONENTE DE PROTECCIÓN DE RUTAS (Local)
+// ==========================================
+const PrivateRoute = ({ children }) => {
+  const token = localStorage.getItem("access_token");
+  if (!token) {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+};
 
 // ==========================================
 // ENRUTADOR PRINCIPAL
@@ -44,42 +44,22 @@ const AppRouter = () => {
       <Route
         path="/home"
         element={
-
           <ProtectedRoute>
-
             <Home />
-
           </ProtectedRoute>
-
         }
       />
 
-      {/* MODULO TESORERIA */}
+      {/* MODULO TESORERIA (Limpiado y corregido) */}
       <Route path="/tesoreria">
-        <Route
-          index
-          element={
-            <PrivateRoute>
-              <Tesoreria />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="matricula"
-          element={
-            <PrivateRoute>
-              <TesoreriaMatricula />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="notificaciones"
-          element={
-            <PrivateRoute>
-              <TesoreriaNotificaciones />
-            </PrivateRoute>
-          }
-        />
+        <Route index element={<PrivateRoute><Tesoreria /></PrivateRoute>} />
+        <Route path="matricula" element={<PrivateRoute><TesoreriaMatricula /></PrivateRoute>} />
+        <Route path="notificaciones" element={<PrivateRoute><TesoreriaNotificaciones /></PrivateRoute>} />
+        <Route path="pension" element={<PrivateRoute><TesoreriaPension /></PrivateRoute>} />
+        <Route path="papeleria" element={<PrivateRoute><TesoreriaPapeleria /></PrivateRoute>} />
+        
+        {/* ⚠️ Ruta de estadísticas comentada porque el archivo no existe */}
+        {/* 
         <Route
           path="estadisticas"
           element={
@@ -87,25 +67,11 @@ const AppRouter = () => {
               <TesoreriaEstadistica />
             </PrivateRoute>
           }
-        />
-        <Route
-          path="pension"
-          element={
-            <PrivateRoute>
-              <TesoreriaPension />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="papeleria"
-          element={
-            <PrivateRoute>
-              <TesoreriaPapeleria />
-            </PrivateRoute>
-          }
-        />
+        /> 
+        */}
       </Route>
-      {/* MODULO BANDA */}
+
+      {/* ✅ MODULO BANDA (Independiente) */}
       <Route
         path="/banda/*"
         element={
@@ -114,17 +80,8 @@ const AppRouter = () => {
           </PrivateRoute>
         }
       />
-      {/* ⚠️ RUTA COMENTADA TEMPORALMENTE: Depende del componente Dashboard que no existe */}
-      {/* 
-      <Route
-        path="/dashboard"
-        element={
-          <NotFound />
-        }
-      /> 
-      */}
 
-      {/* CATCH ALL - Redirige a login si la ruta no existe */}
+      {/* CATCH ALL */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
