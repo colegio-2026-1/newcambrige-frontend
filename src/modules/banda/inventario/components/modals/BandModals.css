@@ -1,0 +1,145 @@
+/* --- Estilos exclusivos para Modales de Banda --- */
+.band-modal-header {
+    background-color: #A5D8FF; /* Azul claro de la imagen */
+    margin: -22px -22px 20px -22px; /* Compensa el padding del ModalBase */
+    padding: 15px;
+    text-align: center;
+    border-bottom: 2px solid #3B82F6;
+}
+
+.band-modal-title {
+    font-family: 'Staatliches', cursive;
+    font-size: 28px;
+    color: #333;
+    margin: 0;
+    letter-spacing: 2px;
+}
+
+.band-modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2 columnas como la imagen */
+    gap: 20px;
+    padding: 10px 0;
+}
+
+.band-field-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.band-label {
+    font-family: 'Bentham', serif;
+    font-size: 18px;
+    color: #444;
+    min-width: 80px;
+}
+
+.band-input {
+    flex: 1;
+    background-color: #E5E7EB; /* Gris de la imagen */
+    border: 1px solid #D1D5DB;
+    border-radius: 12px;
+    padding: 5px 12px;
+    font-family: 'Bentham', serif;
+    font-size: 18px;
+    height: 35px;
+}
+
+/* --- Extensiones para Préstamos en BandModals.css --- */
+
+.band-modal-body-text {
+    font-family: 'Bentham', serif;
+    font-size: 16px;
+    color: #4B5563;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.band-modal-body-text b {
+    color: #1a1a1a;
+}
+
+.band-textarea {
+    width: 100%;
+    min-height: 100px;
+    background-color: #E5E7EB;
+    border: 1px solid #D1D5DB;
+    border-radius: 12px;
+    padding: 10px;
+    font-family: 'Bentham', serif;
+    font-size: 16px;
+    resize: none;
+    box-sizing: border-box;
+}
+
+.band-error-text {
+    color: #8E2A25;
+    font-family: 'Bentham', serif;
+    font-size: 14px;
+    margin-top: 5px;
+    font-weight: bold;
+}
+
+.band-field-full {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Cabecera Roja para Errores o Eliminación */
+.band-modal-header-danger {
+    background-color: #FCA5A5; /* Rojo suave de alerta */
+    margin: -22px -22px 20px -22px;
+    padding: 15px;
+    text-align: center;
+    border-bottom: 2px solid #d61010;
+}
+
+/* Estilo para el icono grande (🚫 o ⚠️) */
+.band-modal-icon {
+    font-size: 50px;
+    margin-bottom: 15px;
+    display: block;
+    text-align: center;
+}
+
+/* Botón de eliminación (Rojo Píldora) */
+.band-btn-danger {
+    background-color: #DC2626 !important;
+}
+
+/* Botones tipo Píldora */
+.band-btn-pill {
+    width: auto !important;
+    min-width: 200px !important; /* Ancho mínimo para que no se vea comprimido */
+    height: 65px !important;     /* Altura proporcional al texto 30 */
+    border-radius: 50px !important;
+    border: none !important;
+    cursor: pointer;
+    
+    /* Tipografía solicitada */
+    font-family: 'Bentham', serif !important;
+    font-size: 30px !important;
+    font-weight: normal !important;
+    color: white !important;
+
+    /* Centrado absoluto */
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    
+    box-shadow: 0 4px 0px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+}
+
+.band-btn-pill:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0px rgba(0,0,0,0.1);
+}
+
+.band-btn-aceptar { background-color: #2B5797 !important; }
+.band-btn-cancelar { background-color: #4A6982 !important; }
+.band-btn-danger { background-color: #DC2626 !important; }
