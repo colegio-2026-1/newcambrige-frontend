@@ -20,52 +20,64 @@
 .sidebar-menu {
   display: flex;
   flex-direction: column;
+  gap: 8px;
+  padding: 16px 12px;
 }
 
 .menu-item {
   border: none;
   background: transparent;
-  padding: 24px 30px;
+  padding: 12px 16px;     /* antes 24px 30px */
   display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
+  align-items: center;    /* centrado vertical */
+  justify-content: flex-start;
+  gap: 16px;              /* espacio entre icono y texto */
   font-family: 'Bentham', serif;
-  font-size: 30px;
+  font-size: 28px;        /* antes 30px */
   font-weight: normal;
   color: #6b2020;
   cursor: pointer;
   transition: background 0.2s;
+  border-radius: 12px;
 }
 
 .menu-item:hover {
-  background: #dddddd;
+  background: var(--color-primary);
+  color: white;
 }
 
 .menu-item.active {
-  background: white;
-  color: #8e2a25;
-  box-shadow: inset 4px 0 0 #8e2a25;
+  background: var(--color-primary);      
+  color: white;             
+  box-shadow: none;         
 }
-
+.menu-item.active .menu-icon svg {
+  color: white;
+}
 /* ── ICONOS DE MENÚ ── */
 .menu-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0; /* evita que el icono se reduzca de tamaño */
 }
 
 .menu-icon svg {
-  width: 30px;
-  height: 30px;
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .menu-icon img {
-  width: 40px;
-  height: 40px;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
-
+.menu-label {
+  line-height: 1.2;
+}
 /* ── USUARIO ── */
 .sidebar-user {
   margin-top: auto;
