@@ -19,15 +19,15 @@ export default function ImportacionPage() {
   const { user } = useAuth();
 
   const menuItems = [
-    { label: "Inicio", path: "/parametrizacion", icon: <Home /> },
+    { label: "Inicio", path: "/importacion", icon: <Home /> },
   ];
 
   const handleEstudianteClick = () => {
-    console.log("Clic en estudiante");
+    navigate("/parametrizacion/importacion/estudiante");
   };
 
   const handleDocenteClick = () => {
-    console.log("Clic en docente");
+    navigate("/parametrizacion/importacion/docente");
   };
 
   // useEffect para forzar el fondo blanco en el contenedor padre (module-content)

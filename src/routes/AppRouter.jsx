@@ -12,6 +12,9 @@ import TesoreriaRouter from "./TesoreriaRouter";
 import ParametrizacionPage from '../modules/parametrizacion/ParametrizacionPage';
 import UsuariosPage from '../modules/parametrizacion/UsuariosPage';
 import ImportacionPage from '../modules/importacion/ImportacionPage';
+import ImportacionRobotPage from '../modules/importacion/ImportacionRobotPage';
+import ImportacionMasivaPage from '../modules/importacion/ImportacionMasivaPage';
+import ImportacionIndividualPage from '../modules/importacion/ImportacionIndividualPage';
 
 import NotFound from "../modules/notFound/notFound";
 
@@ -106,10 +109,37 @@ const AppRouter = () => {
         />
       
       <Route 
-        path="/parametrizacion/importacion" 
+        path="/importacion" 
         element={
           <ProtectedRoute>
              <ImportacionPage />
+          </ProtectedRoute>
+        } 
+        />
+
+      <Route 
+        path="/importacion/:tipo" 
+        element={
+          <ProtectedRoute>
+             <ImportacionRobotPage />
+          </ProtectedRoute>
+        } 
+        />
+
+      <Route 
+        path="/importacion/masiva/:tipo" 
+        element={
+          <ProtectedRoute>
+             <ImportacionMasivaPage />
+          </ProtectedRoute>
+        } 
+        />
+
+      <Route 
+        path="/importacion/individual/:tipo" 
+        element={
+          <ProtectedRoute>
+             <ImportacionIndividualPage />
           </ProtectedRoute>
         } 
         />
