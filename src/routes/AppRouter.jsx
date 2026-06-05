@@ -9,9 +9,7 @@ import ProtectedRoute from "./ProtectedRoute"
 
 import TesoreriaRouter from "./TesoreriaRouter";
 import SalonRouter from "./SalonRouter"
-
-import ParametrizacionPage from '../modules/parametrizacion/ParametrizacionPage';
-import UsuariosPage from '../modules/parametrizacion/UsuariosPage';
+import ParametrizacionRouter from "./ParametrizacionRouter";
 
 import NotFound from "../modules/notFound/notFound";
 
@@ -80,25 +78,8 @@ const AppRouter = () => {
       */}
     
         {TesoreriaRouter()}  
-        {SalonRouter()} 
-      
- 
-      <Route 
-        path="/parametrizacion" 
-        element={
-          <ProtectedRoute>
-            <ParametrizacionPage />
-          </ProtectedRoute>
-      } 
-      />
-      <Route 
-        path="/parametrizacion/usuarios" 
-        element={
-          <ProtectedRoute>
-             <UsuariosPage />
-          </ProtectedRoute>
-        } 
-        />
+        {SalonRouter()}
+        {ParametrizacionRouter()} 
       
       <Route
         path="/test"
