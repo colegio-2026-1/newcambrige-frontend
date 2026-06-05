@@ -1,0 +1,181 @@
+/* ============================================
+   VARIABLES GLOBALES Y FUENTES
+============================================ */
+@font-face {
+  font-family: 'Bentham';
+  src: url('../../assets/fonts/Bentham-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Staatliches';
+  src: url('../../assets/fonts/Staatliches-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'HeyGotcha';
+  src: url('../../assets/fonts/HeyGotchaRegular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* ============================================
+   ESTILOS GENERALES
+============================================ */
+.dashboard-container, 
+.modal-overlay { 
+  font-family: 'Bentham', serif; 
+}
+
+button, input, select, span, label, p, .toolbar-title { 
+  font-family: 'Bentham', serif !important; 
+}
+
+.anio-content {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  background-color: var(--color-white, #FFFFFF); 
+}
+
+/* ==================== TOOLBAR COMPACTA ==================== */
+.toolbar-custom {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 30px; background: white;
+  border-bottom: 1px solid #EBEBEB; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.toolbar-title { 
+  font-size: 24px; color: #333; letter-spacing: 1px;
+}
+
+.btn-crear {
+  background-color: #3F5D93; color: white; border: none;
+  border-radius: 20px; padding: 0 30px; height: 38px; font-size: 18px;
+  cursor: pointer; box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+/* ==================== ÁREA PRINCIPAL Y PAGINACIÓN ==================== */
+.main-area { flex: 1; padding: 20px 30px; }
+.empty-state { display: flex; justify-content: center; align-items: center; height: 200px; color: #666; font-size: 18px; }
+.table-layout-wrapper { display: flex; align-items: flex-start; gap: 30px; width: 100%; }
+.table-main-section { flex: 1; display: flex; flex-direction: column; }
+.datatable-fixed-container { min-height: 370px; }
+
+.pagination-center {
+  display: flex; justify-content: center; gap: 15px; margin-top: 20px;
+}
+.btn-circle {
+  width: 32px; height: 32px; border-radius: 50%;
+  background-color: #264A7F; color: white; border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
+}
+.btn-circle:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+
+/* ==================== MODAL ==================== */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4); display: flex;
+  justify-content: center; align-items: center; z-index: 1000;
+}
+.modal-content {
+  background-color: white; border-radius: 12px; width: 550px;
+  max-width: 95%; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  overflow: visible !important;
+}
+.modal-header {
+  background-color: #D0E1FF; padding: 20px; display: flex;
+  justify-content: center; align-items: center; position: relative;
+}
+.modal-header h3 {
+  font-family: 'Staatliches', sans-serif !important; 
+  font-size: 28px !important; 
+  color: #333; margin: 0; letter-spacing: 1px;
+}
+.modal-close {
+  background: none; border: none; font-size: 24px; font-weight: bold;
+  cursor: pointer; color: #333; position: absolute; right: 20px;
+}
+.modal-body { 
+  padding: 30px; display: flex; flex-direction: column; gap: 25px; 
+  overflow: visible !important;
+}
+
+/* ==================== FORMULARIO ==================== */
+.form-row { display: flex; align-items: center; gap: 20px; overflow: visible !important; }
+.form-group { display: flex; flex-direction: column; flex: 1; gap: 5px; position: relative; overflow: visible !important; margin: 0; }
+.form-group label { font-weight: bold; color: #333; font-size: 16px; }
+
+.input-style {
+  background-color: #EBEBEB; border: 1px solid #CCC;
+  border-radius: 6px; height: 38px; padding: 0 10px;
+  font-size: 16px; outline: none; width: 100%; box-sizing: border-box;
+}
+
+/* ==================== CALENDARIO DE AÑOS (CUSTOM DROPDOWN) ==================== */
+.custom-year-picker {
+  background-color: #EBEBEB; border: 1px solid #CCC; border-radius: 6px;
+  height: 38px; padding: 0 10px; font-size: 16px; display: flex;
+  align-items: center; justify-content: space-between; cursor: pointer;
+  min-width: 150px;
+}
+.year-grid-popover {
+  position: absolute; 
+  top: 100%; 
+  left: 0; 
+  width: 250px; 
+  background: white; border: 1px solid #3F5D93; border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+  z-index: 2000; 
+  padding: 15px;
+  margin-top: 5px; 
+}
+.year-grid-header {
+  display: flex; justify-content: space-between; align-items: center;
+  font-weight: bold; color: #333; margin-bottom: 15px; font-size: 14px;
+}
+.year-grid-header button {
+  background: none; border: none; cursor: pointer; padding: 5px;
+  display: flex; align-items: center; justify-content: center;
+}
+.year-grid-header button:hover { background-color: #EBEBEB; border-radius: 4px; }
+.year-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+}
+.year-btn {
+  background: none; border: none; padding: 8px 0; font-size: 16px;
+  cursor: pointer; border-radius: 50%; width: 45px; height: 45px;
+  margin: 0 auto; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.year-btn:hover { background-color: #EBEBEB; }
+.year-btn.active { background-color: #3F5D93; color: white; font-weight: bold; }
+
+.toolbar-custom .form-group {
+  position: relative; 
+  margin: 0;
+}
+
+/* ==================== TOGGLE SWITCH ==================== */
+.toggle-wrapper { display: flex; align-items: center; gap: 10px; }
+.toggle-wrapper span { font-weight: bold; color: #333; font-size: 16px;}
+.toggle-switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc; transition: .4s; border-radius: 26px;
+}
+.slider:before {
+  position: absolute; content: ""; height: 20px; width: 20px;
+  left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%;
+}
+input:checked + .slider { background-color: #3F5D93; }
+input:checked + .slider:before { transform: translateX(24px); }
+
+/* ==================== BOTONES MODAL ==================== */
+.modal-footer { display: flex; justify-content: center; gap: 20px; padding: 0 30px 30px; }
+.btn-primary { background-color: #3F5D93; color: white; border: none; border-radius: 20px; padding: 8px 30px; font-size: 18px; cursor: pointer; }
+.btn-secondary { background-color: #6C757D; color: white; border: none; border-radius: 20px; padding: 8px 30px; font-size: 18px; cursor: pointer; }
