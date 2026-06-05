@@ -23,11 +23,11 @@ export default function ImportacionPage() {
   ];
 
   const handleEstudianteClick = () => {
-    navigate("/parametrizacion/importacion/estudiante");
+    navigate("/importacion/estudiante");
   };
 
   const handleDocenteClick = () => {
-    navigate("/parametrizacion/importacion/docente");
+    navigate("/importacion/docente");
   };
 
   // useEffect para forzar el fondo blanco en el contenedor padre (module-content)
