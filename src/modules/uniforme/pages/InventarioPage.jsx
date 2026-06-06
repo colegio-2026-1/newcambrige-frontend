@@ -6,7 +6,6 @@ import {
   updateObjetoRequest
 } from "../../../api/uniformesService";
 import { useAuth } from "../../../api/useAuth";
-import { allrolesuserRequest } from "../../../api/endpoints";
 
 import Header from "../../../components/layout/header";
 import ModuleLayout from "../../../components/layout/ModuleLayout";
@@ -49,9 +48,8 @@ const COLUMNS = [
 ];
 
 export default function InventarioPage() {
-  const { user } = useAuth();
+  const { user, roles, loadingRoles } = useAuth();
 
-  const [roles, setRoles]             = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
   const [inventario, setInventario]   = useState([]);
   const [loading, setLoading]         = useState(true);
@@ -67,8 +65,7 @@ export default function InventarioPage() {
     codigo: "", prenda: "", tipo: ""
   });
 
-  const idUser = user?.id_usuario;
-  const rol    = roles[0] || "Rol no asignado";
+  const rol = roles[0] || (loadingRoles ? "Cargando rol..." : "Sin rol");
 
   // ── Formularios ──────────────────────────────────────────────────────────────
   const [formAgregar, setFormAgregar] = useState({
@@ -214,20 +211,6 @@ export default function InventarioPage() {
     cargarInventario();
   }, []);
 
-  useEffect(() => {
-    const obtenerRoles = async () => {
-      if (!idUser) return;
-      try {
-        const response = await allrolesuserRequest(idUser);
-        setRoles(response?.data || []);
-      } catch (error) {
-        console.error("Error cargando roles", error);
-        setRoles([]);
-      }
-    };
-    obtenerRoles();
-  }, [idUser]);
-
   // ── Filtrado ─────────────────────────────────────────────────────────────────
   const inventarioFiltrado = useMemo(() =>
     inventario.filter((item) => {
@@ -254,6 +237,7 @@ export default function InventarioPage() {
         sidebar={
           <Sidebar
             user={{ nombre: user?.nombre || "Usuario", rol }}
+            loadingRoles={loadingRoles}
             menuItems={[
               { label: "Inicio", path: "/home" },
               { label: "Asignaciones", path: "/uniformes/asignaciones" },
@@ -428,7 +412,6 @@ export default function InventarioPage() {
             key: "mensaje",
             type: "label",
             label:`¿CONFIRMA ELIMINAR LA PRENDA ${selectedRow?.nombre || ""}?`
-      
           }  
         ]}
       />

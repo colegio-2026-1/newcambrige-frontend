@@ -47,27 +47,27 @@ const YearPicker = ({ selectedYear, onYearSelect, placeholder = "Seleccionar añ
   const aniosVisibles = Array.from({ length: 16 }, (_, i) => baseYear + i);
 
   return (
-    <div className="form-group" ref={popoverRef} style={{ width: '100%' }}>
-      <div className="custom-year-picker" onClick={() => setIsOpen(!isOpen)}>
+    <div className="anio-form-group" ref={popoverRef} style={{ width: '100%' }}>
+      <div className="anio-custom-year-picker" onClick={() => setIsOpen(!isOpen)}>
         <span>{selectedYear ? formatAnioDoble(selectedYear) : placeholder}</span>
         <CalendarIcon size={18} color="#3F5D93" />
       </div>
 
       {isOpen && (
-        <div className="year-grid-popover">
-          <div className="year-grid-header">
+        <div className="anio-year-grid-popover">
+          <div className="anio-year-grid-header">
             <span>{aniosVisibles[0]} - {aniosVisibles[15]}</span>
             <div style={{ display: 'flex', gap: '5px' }}>
               <button type="button" onClick={(e) => { e.stopPropagation(); setBaseYear(b => b - 16); }}><ChevronUp size={16} /></button>
               <button type="button" onClick={(e) => { e.stopPropagation(); setBaseYear(b => b + 16); }}><ChevronDown size={16} /></button>
             </div>
           </div>
-          <div className="year-grid">
+          <div className="anio-year-grid">
             {aniosVisibles.map(anio => (
               <button 
                 key={anio} 
                 type="button"
-                className={`year-btn ${anio === selectedYear ? 'active' : ''}`}
+                className={`anio-year-btn ${anio === selectedYear ? 'active' : ''}`}
                 onClick={(e) => { 
                   e.stopPropagation(); 
                   onYearSelect(anio); 
@@ -85,7 +85,7 @@ const YearPicker = ({ selectedYear, onYearSelect, placeholder = "Seleccionar añ
 };
 
 // ==========================================
-// MODAL (CREAR / EDITAR)
+// MODAL (CREAR / EDITAR) – CON CLASES PREFIJADAS "anio-"
 // ==========================================
 const AnioModal = ({ isOpen, onClose, anioEdit, alTerminar }) => {
   if (!isOpen) return null;
@@ -155,19 +155,19 @@ const AnioModal = ({ isOpen, onClose, anioEdit, alTerminar }) => {
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">
+    <div className="anio-modal-overlay">
+      <div className="anio-modal-content">
+        <div className="anio-modal-header">
           <h3>{isEdit ? "ADMINISTRADOR" : "NUEVO AÑO ESCOLAR"}</h3>
-          <button className="modal-close" onClick={onClose} disabled={cargando}>×</button>
+          <button className="anio-modal-close" onClick={onClose} disabled={cargando}>×</button>
         </div>
         
-        <div className="modal-body">
-          <div className="form-row" style={{ justifyContent: "space-between" }}>
+        <div className="anio-modal-body">
+          <div className="anio-form-row" style={{ justifyContent: "space-between" }}>
             <div style={{ flex: 0.6 }}>
-              <label style={{fontWeight: 'bold', color: '#333', fontSize: '16px', display: 'block', marginBottom: '5px'}}>Año Escolar</label>
+              <label className="anio-form-label">Año Escolar</label>
               {isEdit ? (
-                <div className="input-style" style={{ display: 'flex', alignItems: 'center', backgroundColor: '#d3d3d3', color: '#666' }}>
+                <div className="anio-input-style" style={{ display: 'flex', alignItems: 'center', backgroundColor: '#d3d3d3', color: '#666' }}>
                   {formatAnioDoble(anioInicio)}
                 </div>
               ) : (
@@ -175,48 +175,30 @@ const AnioModal = ({ isOpen, onClose, anioEdit, alTerminar }) => {
               )}
             </div>
             
-            <div className="toggle-wrapper">
+            <div className="anio-toggle-wrapper">
               <span>Activo</span>
-              <label className="toggle-switch">
+              <label className="anio-toggle-switch">
                 <input type="checkbox" checked={activo} onChange={(e) => setActivo(e.target.checked)} />
                 <span className="slider"></span>
               </label>
             </div>
           </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label>Fecha de Inicio</label>
-              <input type="date" className="input-style" value={fechaInicio} onChange={(e) => setFechaInicio(e.target.value)} />
+          <div className="anio-form-row">
+            <div className="anio-form-group">
+              <label className="anio-form-label">Fecha de Inicio</label>
+              <input type="date" className="anio-input-style" value={fechaInicio} onChange={(e) => setFechaInicio(e.target.value)} />
             </div>
-            <div className="form-group">
-              <label>Fecha de Fin</label>
-              <input type="date" className="input-style" value={fechaFin} onChange={(e) => setFechaFin(e.target.value)} min={fechaInicio} />
+            <div className="anio-form-group">
+              <label className="anio-form-label">Fecha de Fin</label>
+              <input type="date" className="anio-input-style" value={fechaFin} onChange={(e) => setFechaFin(e.target.value)} min={fechaInicio} />
             </div>
           </div>
         </div>
 
-        <div className="modal-footer">
-          <ActionButtons
-            botones={[
-              { 
-                label: "Aceptar", 
-                onClick: handleGuardar, 
-                variante: "primary",
-                siempreActivo: true
-              }
-            ]}
-          />
-          <ActionButtons
-            botones={[
-              { 
-                label: "Cancelar", 
-                onClick: onClose, 
-                variante: "secondary",
-                siempreActivo: true
-              }
-            ]}
-          />
+        <div className="anio-modal-footer">
+          <button className="anio-btn-primary" onClick={handleGuardar} disabled={cargando}>Aceptar</button>
+          <button className="anio-btn-secondary" onClick={onClose} disabled={cargando}>Cancelar</button>
         </div>
       </div>
     </div>
@@ -227,7 +209,7 @@ const AnioModal = ({ isOpen, onClose, anioEdit, alTerminar }) => {
 // COMPONENTE PRINCIPAL
 // ==========================================
 const AnioEscolarPage = () => {
-  const { user, logout } = useAuth();
+  const { user, roles, loadingRoles, logout } = useAuth();  // ✅ roles globales
   
   const [anios, setAnios] = useState([]);
   const [anioSeleccionado, setAnioSeleccionado] = useState(null);
@@ -295,17 +277,28 @@ const AnioEscolarPage = () => {
   const abrirModalCrear = () => { setModalModeEdit(false); setIsModalOpen(true); };
   const abrirModalEditar = () => { setModalModeEdit(true); setIsModalOpen(true); };
 
+  const userName = user?.nombre || "Usuario";
+  const rol = roles[0] || (loadingRoles ? "Cargando rol..." : "Sin rol");
+
   return (
     <div className="dashboard-container">
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
       <ModuleLayout
-        sidebar={<Sidebar menuItems={menuItems} selectedMenu="Parametrización" user={{ nombre: user?.nombre || "Usuario", rol: user?.rol || "TITULAR" }} logout={logout} />}
+        sidebar={
+          <Sidebar 
+            menuItems={menuItems} 
+            selectedMenu="Parametrización" 
+            user={{ nombre: userName, rol }}
+            loadingRoles={loadingRoles}
+            logout={logout} 
+          />
+        }
       >
         <div className="anio-content">
           
-          <div className="toolbar-custom">
+          <div className="anio-toolbar-custom">
             <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-              <span className="toolbar-title" style={{ marginRight: '10px' }}>Año Escolar:</span>
+              <span className="anio-toolbar-title">Año Escolar:</span>
               
               <div style={{ width: '200px' }}>
                 <YearPicker 
@@ -318,39 +311,33 @@ const AnioEscolarPage = () => {
               {filtroAnio && (
                 <button 
                   onClick={() => { setFiltroAnio(null); setPaginaActual(1); }}
-                  style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', textDecoration: 'underline' }}
+                  className="anio-clear-filter"
                 >
                   Limpiar Filtro
                 </button>
               )}
             </div>
             
-            <ActionButtons
-              botones={[
-                { 
-                  label: "Crear", 
-                  onClick: abrirModalCrear, 
-                  variante: "primary",
-                  siempreActivo: true 
-                }
-              ]}
-            />
+            {/* Botón Crear independiente (no depende de ActionButtons) */}
+            <button className="anio-btn-crear" onClick={abrirModalCrear}>
+              Crear
+            </button>
           </div>
 
-          <div className="main-area">
+          <div className="anio-main-area">
             {anios.length === 0 ? (
-              <div className="empty-state">
+              <div className="anio-empty-state">
                 <p>Aún no hay años escolares registrados</p>
               </div>
             ) : aniosFiltrados.length === 0 ? (
-                <div className="empty-state">
+                <div className="anio-empty-state">
                   <p>No se encontraron registros para el año {formatAnioDoble(filtroAnio)}</p>
                 </div>
             ) : (
-              <div className="table-layout-wrapper">
+              <div className="anio-table-layout-wrapper">
                 
-                <div className="table-main-section">
-                  <div className="datatable-fixed-container">
+                <div className="anio-table-main-section">
+                  <div className="anio-datatable-fixed-container">
                     <DataTable 
                       columns={columnasTabla} 
                       rows={aniosPaginados} 
@@ -361,16 +348,16 @@ const AnioEscolarPage = () => {
                     />
                   </div>
                   
-                  <div className="pagination-center">
+                  <div className="anio-pagination-center">
                     <button 
-                      className="btn-circle"
+                      className="anio-btn-circle"
                       onClick={() => { setPaginaActual(p => Math.max(1, p - 1)); setAnioSeleccionado(null); }}
                       disabled={paginaActual === 1}
                     >
                       <ChevronLeft size={20} />
                     </button>
                     <button 
-                      className="btn-circle"
+                      className="anio-btn-circle"
                       onClick={() => { setPaginaActual(p => Math.min(totalPaginas, p + 1)); setAnioSeleccionado(null); }}
                       disabled={paginaActual === totalPaginas}
                     >
@@ -379,7 +366,7 @@ const AnioEscolarPage = () => {
                   </div>
                 </div>
 
-                <div className="side-actions">
+                <div className="anio-side-actions">
                   <ActionButtons
                     filaSeleccionada={anioSeleccionado}
                     botones={[

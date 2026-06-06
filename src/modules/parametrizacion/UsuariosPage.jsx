@@ -40,13 +40,13 @@ const mapaRolesBackendAFrontend = Object.fromEntries(
 const rolesDisponibles = Object.keys(mapaRolesFrontendABackend);
 
 // ==========================================
-// MODAL PARA CREAR USUARIO (CORREGIDO)
+// MODAL PARA CREAR USUARIO
 // ==========================================
 const CrearUsuarioModal = ({ isOpen, onClose, alTerminar }) => {
   if (!isOpen) return null;
 
   const [nombreUsuario, setNombreUsuario] = useState("");
-  const [documento, setDocumento] = useState("");      // ← ESTADO FALTANTE
+  const [documento, setDocumento] = useState("");
   const [password, setPassword] = useState("");
   const [rolesSeleccionados, setRolesSeleccionados] = useState([]);
   const [cargando, setCargando] = useState(false);
@@ -58,7 +58,6 @@ const CrearUsuarioModal = ({ isOpen, onClose, alTerminar }) => {
   };
 
   const handleCrear = async () => {
-    // Validación incluyendo documento
     if (!nombreUsuario || !documento || !password)
       return alert("Llena usuario, documento y contraseña");
 
@@ -129,7 +128,7 @@ const CrearUsuarioModal = ({ isOpen, onClose, alTerminar }) => {
 };
 
 // ==========================================
-// MODAL PARA EDITAR USUARIO (CON LIMPIEZA DE NULL)
+// MODAL PARA EDITAR USUARIO
 // ==========================================
 const EditarUsuarioModal = ({ isOpen, onClose, usuario, alTerminar }) => {
   if (!isOpen || !usuario) return null;
@@ -145,7 +144,6 @@ const EditarUsuarioModal = ({ isOpen, onClose, usuario, alTerminar }) => {
       setNombreUsuario(usuario.nombre);
       setEstado(usuario.estado ?? true);
       setPassword("");
-      // Limpieza de nulls al cargar roles
       const rolesLimpios = (usuario.roles || []).filter(r => r && typeof r === 'string');
       const rolesVisuales = rolesLimpios.map(r => mapaRolesBackendAFrontend[r] || r);
       setRolesSeleccionados(rolesVisuales);
@@ -166,7 +164,6 @@ const EditarUsuarioModal = ({ isOpen, onClose, usuario, alTerminar }) => {
 
       await actualizarUsuarioRequest(usuario.id_usuario, payloadBasico);
 
-      // Limpieza de nulls antes de enviar
       const rolesValidos = rolesSeleccionados.filter(r => r && typeof r === 'string');
       const rolesParaBackend = rolesValidos.map(r => mapaRolesFrontendABackend[r]);
 
@@ -227,10 +224,10 @@ const EditarUsuarioModal = ({ isOpen, onClose, usuario, alTerminar }) => {
 };
 
 // ==========================================
-// COMPONENTE PRINCIPAL (SIN CAMBIOS ADICIONALES)
+// COMPONENTE PRINCIPAL (CON ROLES GLOBALES)
 // ==========================================
 const UsuariosPage = () => {
-  const { user, logout } = useAuth();
+  const { user, roles, loadingRoles, logout } = useAuth();
 
   const [usuarios, setUsuarios] = useState([]);
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null);
@@ -282,7 +279,7 @@ const UsuariosPage = () => {
   const filasProcesadas = usuariosFiltrados.map(u => ({
     ...u,
     rolesStr: (u.roles || [])
-      .filter(r => r && typeof r === 'string')   // evitar nulls en la tabla
+      .filter(r => r && typeof r === 'string')
       .map(r => mapaRolesBackendAFrontend[r] || r)
       .join(" - ")
   }));
@@ -291,11 +288,22 @@ const UsuariosPage = () => {
   const startIndex = (paginaActual - 1) * itemsPorPagina;
   const filasPaginadas = filasProcesadas.slice(startIndex, startIndex + itemsPorPagina);
 
+  const userName = user?.nombre || "Usuario";
+  const rol = roles[0] || (loadingRoles ? "Cargando rol..." : "Sin rol");
+
   return (
     <div className="dashboard-container">
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
       <ModuleLayout
-        sidebar={<Sidebar menuItems={menuItems} selectedMenu="Parametrización" user={{ nombre: user?.nombre || "Usuario", rol: user?.rol || "TITULAR" }} logout={logout} />}
+        sidebar={
+          <Sidebar
+            menuItems={menuItems}
+            selectedMenu="Parametrización"
+            user={{ nombre: userName, rol }}
+            loadingRoles={loadingRoles}
+            logout={logout}
+          />
+        }
       >
         <div className="usuarios-page-content">
           <div className="toolbar-custom">

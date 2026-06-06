@@ -1,32 +1,23 @@
-import {
-  Routes,
-  Route,
-} from "react-router-dom";
+// src/router/AppRouter.js
+import { Routes, Route } from "react-router-dom";
 
 import LoginPage from "../modules/auth/LoginPage";
 import ProtectedRoute from "./ProtectedRoute";
 
 import TesoreriaRouter  from "./TesoreriaRouter";
 import DashboardRouter  from "./DashboardRouter";
-import SalonRouter     from "./SalonRouter";
-import UniformeRouter  from "./UniformeRouter";
-
-import ParametrizacionPage from '../modules/parametrizacion/ParametrizacionPage';
-import UsuariosPage        from '../modules/parametrizacion/UsuariosPage';
+import SalonRouter      from "./SalonRouter";
+import UniformeRouter   from "./UniformeRouter";
+import ParametrizacionRouter from "./ParametrizacionRouter";
 
 import NotFound from "../modules/notFound/notFound";
 import Home     from "../modules/Home/HomePage";
 import TestPage from "../modules/test/testPage";
 
-// ==============================
-// ROUTER
-// ==============================
-
 const AppRouter = () => {
   return (
     <Routes>
-
-      {/* PÚBLICAS */}
+      {/* RUTAS PÚBLICAS */}
       <Route path="/" element={<LoginPage />} />
 
       {/* HOME */}
@@ -39,48 +30,18 @@ const AppRouter = () => {
         }
       />
 
-      {/* MÓDULOS */}
+      {/* MÓDULOS PRINCIPALES (cada uno exporta sus subrutas) */}
       {TesoreriaRouter()}
-
-      {/* DASHBOARD */}
       {DashboardRouter()}
-
-      {/* SAL�N */}
       {SalonRouter()}
-
-      {/* UNIFORMES */}
       {UniformeRouter()}
+      {ParametrizacionRouter()}   {/* ✅ AHORA INCLUYE todas las rutas de parametrización */}
 
-      {/* PARAMETRIZACIÓN */}
-      <Route
-        path="/parametrizacion"
-        element={
-          <ProtectedRoute>
-            <ParametrizacionPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/parametrizacion/usuarios"
-        element={
-          <ProtectedRoute>
-            <UsuariosPage />
-          </ProtectedRoute>
-        }
-      />
+      {/* RUTA DE PRUEBAS / TEST */}
+      <Route path="/test" element={<TestPage />} />
 
-      {/* TEST */}
-      <Route
-        path="/test"
-        element={<TestPage />}
-      />
-
-      {/* CATCH ALL */}
-      <Route
-        path="*"
-        element={<NotFound />}
-      />
-
+      {/* RUTA CATCH ALL – 404 */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };

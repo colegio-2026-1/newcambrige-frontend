@@ -9,7 +9,7 @@ import Header from "../../components/layout/header";
 import Sidebar from "../../components/layout/Sidebar";
 import ModuleLayout from "../../components/layout/ModuleLayout";
 import DataTable from "../../components/shared/DataTable";
-import SearchBar from "../../components/shared/SearchBar";
+import SearchBar from "../../components/shared/searchBar";
 import ActionButtons from "../../components/shared/ActionButtons";
 
 import { useAuth } from "../../api/useAuth";
@@ -35,13 +35,14 @@ const GRADOS_ESCOLARES = [
 ];
 
 // ==========================================
-// MODAL UNIFICADO (CREAR / EDITAR)
+// MODAL UNIFICADO (CREAR / EDITAR) CORREGIDO
 // ==========================================
 const PruebaModal = ({ isOpen, onClose, pruebaEdit, alTerminar }) => {
   if (!isOpen) return null;
 
   const isEdit = Boolean(pruebaEdit);
   
+  // Estados del formulario
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [rangoSelect, setRangoSelect] = useState("Todo");
@@ -49,21 +50,23 @@ const PruebaModal = ({ isOpen, onClose, pruebaEdit, alTerminar }) => {
   const [gradoMax, setGradoMax] = useState(11);
   const [cargando, setCargando] = useState(false);
 
+  // Cargar datos cuando se abre el modal en modo edición
   useEffect(() => {
     if (isEdit && pruebaEdit) {
-      setNombre(pruebaEdit.nombre);
+      setNombre(pruebaEdit.nombre || "");
       setDescripcion(pruebaEdit.descripcion || "");
       setGradoMin(pruebaEdit.grado_min);
       setGradoMax(pruebaEdit.grado_max);
       determinarRangoPorGrados(pruebaEdit.grado_min, pruebaEdit.grado_max);
     } else {
+      // Resetear para creación
       setNombre("");
       setDescripcion("");
       setRangoSelect("Todo");
       setGradoMin(1);
       setGradoMax(11);
     }
-  }, [isOpen, pruebaEdit]);
+  }, [isOpen, pruebaEdit, isEdit]);
 
   const determinarRangoPorGrados = (min, max) => {
     if (min === 1 && max === 11) setRangoSelect("Todo");
@@ -81,87 +84,119 @@ const PruebaModal = ({ isOpen, onClose, pruebaEdit, alTerminar }) => {
   };
 
   const handleGradoManualChange = (tipo, valor) => {
-    const val = parseInt(valor);
+    const val = parseInt(valor, 10);
     if (tipo === 'min') {
-      setGradoMin(val);
-      if (val > gradoMax) setGradoMax(val); 
-      determinarRangoPorGrados(val, Math.max(val, gradoMax));
+      const newMin = val;
+      const newMax = Math.max(newMin, gradoMax);
+      setGradoMin(newMin);
+      setGradoMax(newMax);
+      determinarRangoPorGrados(newMin, newMax);
     } else {
-      setGradoMax(val);
-      if (val < gradoMin) setGradoMin(val); 
-      determinarRangoPorGrados(Math.min(val, gradoMin), val);
+      const newMax = val;
+      const newMin = Math.min(gradoMin, newMax);
+      setGradoMax(newMax);
+      setGradoMin(newMin);
+      determinarRangoPorGrados(newMin, newMax);
     }
   };
 
   const handleGuardar = async () => {
-    if (!nombre) return alert("El nombre de la prueba es obligatorio.");
+    // Validaciones
+    if (!nombre.trim()) {
+      alert("El nombre de la prueba es obligatorio.");
+      return;
+    }
+    if (gradoMin > gradoMax) {
+      alert("El grado inicial no puede ser mayor al grado final.");
+      return;
+    }
     
     try {
       setCargando(true);
       const payload = {
+        nombre: nombre.trim(),
         grado_min: gradoMin,
         grado_max: gradoMax,
-        descripcion: descripcion
+        descripcion: descripcion.trim() || null
       };
 
       if (isEdit) {
         await actualizarTipoPruebaRequest(pruebaEdit.id_tipo_prueba, payload);
       } else {
-        payload.nombre = nombre; 
         await crearTipoPruebaRequest(payload);
       }
       
-      alTerminar();
+      alTerminar(); // Recargar lista
       onClose();
     } catch (error) {
-      alert(error.response?.data?.detail || "Error al guardar el tipo de prueba.");
+      const mensaje = error.response?.data?.detail || "Error al guardar el tipo de prueba.";
+      alert(mensaje);
     } finally {
       setCargando(false);
     }
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">
-          <h3>{isEdit ? `PRUEBA - ${nombre}` : "NUEVA PRUEBA"}</h3>
-          <button className="modal-close" onClick={onClose} disabled={cargando}>×</button>
+    <div className="tp-modal-overlay">
+      <div className="tp-modal-content">
+        <div className="tp-modal-header">
+          <h3>{isEdit ? `EDITAR PRUEBA: ${nombre}` : "NUEVA PRUEBA"}</h3>
+          <button className="tp-modal-close" onClick={onClose} disabled={cargando}>×</button>
         </div>
-        <div className="modal-body">
-        <div className="modal-form-row">
-          {!isEdit && (
-            <div className="input-group">
-              <label>Prueba</label>
-              <input type="text" placeholder="Ej: Saber 11" value={nombre} onChange={(e) => setNombre(e.target.value)} />
+        
+        <div className="tp-modal-body">
+          {/* Campo NOMBRE siempre visible */}
+          <div className="tp-modal-form-row">
+            <div className="tp-input-group">
+              <label>Prueba *</label>
+              <input 
+                type="text" 
+                placeholder="Ej: Saber 11" 
+                value={nombre} 
+                onChange={(e) => setNombre(e.target.value)}
+                disabled={cargando}
+              />
             </div>
-          )}
-          <div className="input-group">
-            <label>Descripción</label>
-            <input type="text" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} />
+            <div className="tp-input-group">
+              <label>Descripción</label>
+              <input 
+                type="text" 
+                value={descripcion} 
+                onChange={(e) => setDescripcion(e.target.value)}
+                disabled={cargando}
+              />
+            </div>
+            <div className="tp-input-group">
+              <label>Rango</label>
+              <select value={rangoSelect} onChange={handleRangoChange} disabled={cargando}>
+                <option value="Todo">Todo</option>
+                <option value="Primaria">Primaria</option>
+                <option value="Secundaria">Secundaria</option>
+                <option value="Personalizado">Personalizado</option>
+              </select>
+            </div>
           </div>
-          <div className="input-group">
-            <label>Rango</label>
-            <select value={rangoSelect} onChange={handleRangoChange}>
-              <option value="Todo">Todo</option>
-              <option value="Primaria">Primaria</option>
-              <option value="Secundaria">Secundaria</option>
-              <option value="Personalizado">Personalizado</option>
-            </select>
-          </div>
-        </div>
 
-          <div className="modal-form-row">
-            <div className="input-group">
+          <div className="tp-modal-form-row">
+            <div className="tp-input-group">
               <label>Grado Inicial</label>
-              <select value={gradoMin} onChange={(e) => handleGradoManualChange('min', e.target.value)}>
+              <select 
+                value={gradoMin} 
+                onChange={(e) => handleGradoManualChange('min', e.target.value)}
+                disabled={cargando}
+              >
                 {GRADOS_ESCOLARES.map(g => (
                   <option key={`min-${g.id}`} value={g.id}>{g.label}</option>
                 ))}
               </select>
             </div>
-            <div className="input-group">
+            <div className="tp-input-group">
               <label>Grado Final</label>
-              <select value={gradoMax} onChange={(e) => handleGradoManualChange('max', e.target.value)}>
+              <select 
+                value={gradoMax} 
+                onChange={(e) => handleGradoManualChange('max', e.target.value)}
+                disabled={cargando}
+              >
                 {GRADOS_ESCOLARES.map(g => (
                   <option key={`max-${g.id}`} value={g.id}>{g.label}</option>
                 ))}
@@ -169,28 +204,36 @@ const PruebaModal = ({ isOpen, onClose, pruebaEdit, alTerminar }) => {
             </div>
           </div>
 
-          <div className="grados-section">
+          <div className="tp-grados-section">
             <h4>GRADOS</h4>
-            <div className="grados-grid">
+            <div className="tp-grados-grid">
               {GRADOS_ESCOLARES.map(grado => {
                 const estaIluminado = grado.id >= gradoMin && grado.id <= gradoMax;
                 return (
-                  <div key={grado.id} className={`grado-caja ${estaIluminado ? 'iluminado' : ''}`}>
+                  <div key={grado.id} className={`tp-grado-caja ${estaIluminado ? 'iluminado' : ''}`}>
                     {grado.label}
                   </div>
                 );
               })}
             </div>
           </div>
-
         </div>
-        <div className="modal-footer">
-          <ActionButtons
-            botones={[{ label: "Aceptar", onClick: handleGuardar, variante: "primary", siempreActivo: true }]}
-          />
-          <ActionButtons
-            botones={[{ label: "Cancelar", onClick: onClose, variante: "secondary", siempreActivo: true }]}
-          />
+
+        <div className="tp-modal-footer">
+          <button 
+            className="tp-btn-primary" 
+            onClick={handleGuardar} 
+            disabled={cargando}
+          >
+            {cargando ? "Guardando..." : "Aceptar"}
+          </button>
+          <button 
+            className="tp-btn-secondary" 
+            onClick={onClose} 
+            disabled={cargando}
+          >
+            Cancelar
+          </button>
         </div>
       </div>
     </div>
@@ -220,6 +263,7 @@ const TiposPruebaPage = () => {
       setPruebaSeleccionada(null); 
     } catch (error) {
       console.error("Error al cargar tipos de prueba:", error);
+      alert("No se pudieron cargar las pruebas. Verifique la conexión.");
     }
   };
 
@@ -254,8 +298,19 @@ const TiposPruebaPage = () => {
   const startIndex = (paginaActual - 1) * itemsPorPagina;
   const filasPaginadas = filasProcesadas.slice(startIndex, startIndex + itemsPorPagina);
 
-  const abrirModalCrear = () => { setModalModeEdit(false); setIsModalOpen(true); };
-  const abrirModalEditar = () => { setModalModeEdit(true); setIsModalOpen(true); };
+  const abrirModalCrear = () => { 
+    setModalModeEdit(false); 
+    setIsModalOpen(true); 
+  };
+  
+  const abrirModalEditar = () => { 
+    if (!pruebaSeleccionada) {
+      alert("Seleccione una prueba para editar.");
+      return;
+    }
+    setModalModeEdit(true); 
+    setIsModalOpen(true); 
+  };
 
   return (
     <div className="dashboard-container">
@@ -266,7 +321,6 @@ const TiposPruebaPage = () => {
         <div className="tipos-prueba-content">
           
           <div className="module-toolbar-container">
-            {/* Contenedor extra para obligar a flexbox a pegar los elementos */}
             <div className="toolbar-grouped-actions">
               <SearchBar
                 fields={[

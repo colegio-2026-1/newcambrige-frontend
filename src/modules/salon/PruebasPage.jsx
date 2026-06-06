@@ -6,7 +6,7 @@ import {
   updateEstadoPruebaRequest,
   allsalonesRequest,
 } from "../../api/endpointsSalon";
-import { allrolesuserRequest, allaniosacademicosRequest } from "../../api/endpoints";
+import { allaniosacademicosRequest } from "../../api/endpoints";
 
 import PupitresIcon   from "../../assets/Salon/pupitres.svg";
 import BibliotecaIcon from "../../assets/Salon/biblioteca.svg";
@@ -20,14 +20,11 @@ import ActionButtons from "../../components/shared/ActionButtons";
 import Modal         from "../../components/shared/Modal";
 
 export default function PruebasPage() {
-  const { user, logout } = useAuth();
+  const { user, roles, loadingRoles, logout } = useAuth();
 
   // ── Auth ──────────────────────────────────────────────────────────────────
   const userName = user?.nombre || "Usuario";
-  const idUser   = user?.id_usuario;
-  const [roles, setRoles]             = useState([]);
-  const [cargandoRol, setCargandoRol] = useState(true);
-  const rol = roles[0] || "Rol Desconocido";
+  const rol = roles[0] || (loadingRoles ? "Cargando rol..." : "Sin rol");
 
   // ── UI ────────────────────────────────────────────────────────────────────
   const [fila, setFila]   = useState(null);
@@ -80,24 +77,6 @@ export default function PruebasPage() {
       render: (val) => (!val || val === "" ? <span>---</span> : <span>{val}</span>),
     },
   ];
-
-  // ── Carga de roles ────────────────────────────────────────────────────────
-  useEffect(() => {
-    const obtenerRoles = async () => {
-      if (!idUser) return;
-      try {
-        setCargandoRol(true);
-        const response = await allrolesuserRequest(idUser);
-        setRoles(response?.data || []);
-      } catch (error) {
-        console.error("Error al obtener el rol:", error);
-        setRoles([]);
-      } finally {
-        setCargandoRol(false);
-      }
-    };
-    obtenerRoles();
-  }, [idUser]);
 
   // ── Carga de datos ────────────────────────────────────────────────────────
   const cargarPruebas = async () => {
@@ -189,10 +168,6 @@ export default function PruebasPage() {
     }
   };
 
-  // ── Loading / Error ───────────────────────────────────────────────────────
-  if (loading) return <div>Cargando pruebas...</div>;
-  if (error)   return <div>Error cargando datos: {error}</div>;
-
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div>
@@ -210,6 +185,7 @@ export default function PruebasPage() {
             selectedMenu="Pruebas"
             setSelectedMenu={() => {}}
             user={{ nombre: userName, rol: rol }}
+            loadingRoles={loadingRoles}
             logout={logout}
           />
         }
