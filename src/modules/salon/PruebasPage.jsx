@@ -11,10 +11,10 @@ import { allrolesuserRequest, allaniosacademicosRequest } from "../../api/endpoi
 import PupitresIcon   from "../../assets/Salon/pupitres.svg";
 import BibliotecaIcon from "../../assets/Salon/biblioteca.svg";
 
-import Header        from "../../components/layout/Header";
+import Header        from "../../components/layout/header";
 import ModuleLayout  from "../../components/layout/ModuleLayout";
 import Sidebar       from "../../components/layout/Sidebar";
-import SearchBar     from "../../components/shared/SearchBar";
+import SearchBar     from "../../components/shared/searchBar";
 import DataTable     from "../../components/shared/DataTable";
 import ActionButtons from "../../components/shared/ActionButtons";
 import Modal         from "../../components/shared/Modal";

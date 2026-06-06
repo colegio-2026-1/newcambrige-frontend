@@ -8,10 +8,10 @@ import {
 import { useAuth } from "../../../api/useAuth";
 import { allrolesuserRequest } from "../../../api/endpoints";
 
-import Header from "../../../components/layout/Header";
+import Header from "../../../components/layout/header";
 import ModuleLayout from "../../../components/layout/ModuleLayout";
 import Sidebar from "../../../components/layout/Sidebar";
-import SearchBar from "../../../components/shared/SearchBar";
+import SearchBar from "../../../components/shared/searchBar";
 import Modal from "../../../components/shared/Modal";
 import ActionButtons from "../../../components/shared/ActionButtons";
 import DataTable from "../../../components/shared/DataTable";
