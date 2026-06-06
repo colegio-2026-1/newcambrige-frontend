@@ -3,19 +3,6 @@
    src/components/shared/Modal.css
    ============================================ */
 
-@font-face {
-  font-family: 'Bentham';
-  src: url('../../assets/fonts/Bentham-Regular.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'Staatliches';
-  src: url('../../assets/fonts/Staatliches-Regular.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-
 /* ── OVERLAY ── */
 .modal-overlay {
   position: fixed;
