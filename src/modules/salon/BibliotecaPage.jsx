@@ -17,19 +17,19 @@ import {
   devolverLibroRequest,
 } from "../../api/endpointsSalon";
 
-import { allrolesuserRequest, allaniosacademicosRequest } from "../../api/endpoints";
+import { allaniosacademicosRequest } from "../../api/endpoints";
 
-import Header from "../../components/layout/Header";
+import Header from "../../components/layout/header";
 import ModuleLayout from "../../components/layout/ModuleLayout";
 import Sidebar from "../../components/layout/Sidebar";
-import SearchBar from "../../components/shared/SearchBar";
+import SearchBar from "../../components/shared/searchBar";
 import DataTable from "../../components/shared/DataTable";
 import ActionButtons from "../../components/shared/ActionButtons";
 import Modal from "../../components/shared/Modal";
 
 export default function BibliotecaPage() {
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, roles, loadingRoles, logout } = useAuth();
 
   // ── UI ──────────────────────────────────────────────────────────────────
   const [pestanaActiva, setPestanaActiva]       = useState("prestamos");
@@ -42,10 +42,7 @@ export default function BibliotecaPage() {
   const [formValues, setFormValues] = useState({});
 
   const userName = user?.nombre || "Usuario";
-  const [cargandoRol, setCargandoRol] = useState(true);
-  const idUser = user?.id_usuario;
-  const [roles, setRoles] = useState([]);
-  const rol = roles[0] || "Rol Desconocido";
+  const rol = roles[0] || (loadingRoles ? "Cargando rol..." : "Sin rol");
 
   const [prestamoIdActivo, setPrestamoIdActivo] = useState(null);
 
@@ -105,23 +102,6 @@ export default function BibliotecaPage() {
     };
     cargarTodo();
   }, []);
-
-  useEffect(() => {
-    const obtenerRoles = async () => {
-      if (!idUser) return;
-      try {
-        setCargandoRol(true);
-        const response = await allrolesuserRequest(idUser);
-        setRoles(response?.data || []);
-      } catch (error) {
-        console.error("Error al obtener el rol:", error);
-        setRoles([]);
-      } finally {
-        setCargandoRol(false);
-      }
-    };
-    obtenerRoles();
-  }, [idUser]);
 
   // ── Cargar préstamos ─────────────────────────────────────────────────────
   const cargarPrestamos = async () => {
@@ -449,9 +429,6 @@ export default function BibliotecaPage() {
 
   const { titulo: tituloModal, campos: camposModal } = configModal[modalTipo] ?? { titulo: "", campos: [] };
 
-  // ── Render ───────────────────────────────────────────────────────────────
-  if (loading) return <div>Cargando biblioteca...</div>;
-  if (error)   return <div>Error: {error}</div>;
 
   return (
     <div>
@@ -459,16 +436,6 @@ export default function BibliotecaPage() {
         .badge--ok      { display:inline-block; padding:.4rem .8rem; background:#D4EDDA; color:#155724; border-radius:.4rem; font-weight:600; font-size:.9rem; }
         .badge--warning { display:inline-block; padding:.4rem .8rem; background:#FFF3CD; color:#856404; border-radius:.4rem; font-weight:600; font-size:.9rem; }
         .badge--no      { display:inline-block; padding:.4rem .8rem; background:#F8D7DA; color:#721C24; border-radius:.4rem; font-weight:600; font-size:.9rem; }
-
-        /* ── Arreglo tamaño icono usuario en sidebar ── */
-        .sidebar-user-icon,
-        .user-avatar,
-        [class*="user-icon"],
-        [class*="avatar"] {
-          width: 32px !important;
-          height: 32px !important;
-          font-size: 0.85rem !important;
-        }
       `}</style>
 
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
@@ -480,6 +447,7 @@ export default function BibliotecaPage() {
             selectedMenu={selectedMenu}
             setSelectedMenu={setSelectedMenu}
             user={{ nombre: userName, rol: rol }}
+            loadingRoles={loadingRoles}
             logout={logout}
           />
         }

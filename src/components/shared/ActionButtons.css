@@ -3,13 +3,6 @@
    src/components/shared/ActionButtons.css
    ============================================ */
 
-@font-face {
-  font-family: 'Bentham';
-  src: url('../../assets/fonts/Bentham-Regular.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-
 /* ── CONTENEDOR ── */
 .action-buttons {
   display: flex;
@@ -56,21 +49,21 @@
 }
 
 .action-btn--secondary {
-  background: #ffc107;
+  background: var(--color-secondary);
   color: var(--color-text-white);
 }
 
 .action-btn--secondary:hover:not(.action-btn--disabled) {
-  background: #e0a800;
+  background: var(--color-secondary-dark);
 }
 
 .action-btn--danger {
-  background: #1a1a1a;
+  background: var(--color-danger);
   color: var(--color-text-white);
 }
 
 .action-btn--danger:hover:not(.action-btn--disabled) {
-  background: #000000;
+  background: var(--color-danger-dark);
 }
 
 /* ── DESACTIVADO ── */

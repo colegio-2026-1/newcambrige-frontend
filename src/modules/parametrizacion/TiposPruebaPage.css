@@ -1,0 +1,265 @@
+/* ============================================
+   ESTILOS EXCLUSIVOS PARA "TIPOS DE PRUEBA"
+============================================ */
+.tipos-prueba-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-white, #FFFFFF);
+  font-family: 'Bentham', serif;
+}
+
+/* Toolbar */
+.tipos-prueba-content .module-toolbar-container {
+  display: flex;
+  align-items: center;
+  padding: 20px 30px;
+  background: white;
+  border-bottom: 1px solid #EBEBEB;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.tipos-prueba-content .toolbar-grouped-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.tipos-prueba-content .toolbar-grouped-actions .searchbar-wrapper {
+  width: auto;
+  padding: 0;
+  margin-right: 15px;
+}
+
+/* Área principal */
+.tipos-prueba-content .main-area {
+  flex: 1;
+  padding: 20px 30px;
+}
+
+.tipos-prueba-content .table-layout-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 30px;
+  width: 100%;
+}
+
+.tipos-prueba-content .table-main-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.tipos-prueba-content .pagination-center {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.tipos-prueba-content .btn-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #264A7F;
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
+}
+
+.tipos-prueba-content .btn-circle:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Modal */
+.tp-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  font-family: 'Bentham', serif;
+}
+
+.tp-modal-content {
+  background-color: white;
+  border-radius: 12px;
+  width: 750px;
+  max-width: 95%;
+  overflow: visible;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.tp-modal-header {
+  background-color: #D0E1FF;
+  padding: 24px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.tp-modal-header h3 {
+  font-family: 'Staatliches', sans-serif;
+  font-size: 32px;
+  letter-spacing: 2px;
+  color: #333333;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.tp-modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #333;
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.tp-modal-body {
+  padding: 30px;
+  overflow: visible;
+}
+
+.tp-modal-form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 25px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.tp-input-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.tp-input-group label {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  white-space: nowrap;
+}
+
+.tp-input-group input,
+.tp-input-group select {
+  background-color: #EBEBEB;
+  border: 1px solid #CCC;
+  border-radius: 6px;
+  height: 38px;
+  padding: 0 8px;
+  font-size: 14px;
+  color: #333;
+  outline: none;
+}
+
+/* Tamaños específicos */
+.tp-modal-form-row:first-child .tp-input-group:first-child input {
+  width: 120px;
+}
+.tp-modal-form-row:first-child .tp-input-group:nth-child(2) input {
+  width: 150px;
+}
+.tp-modal-form-row:first-child .tp-input-group:nth-child(3) select {
+  width: 100px;
+}
+.tp-modal-form-row:nth-child(2) .tp-input-group select {
+  width: 160px;
+}
+
+/* Grados visuales */
+.tp-grados-section {
+  margin-top: 30px;
+}
+
+.tp-grados-section h4 {
+  font-family: 'Staatliches', sans-serif;
+  font-size: 24px;
+  letter-spacing: 1px;
+  color: #333333;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.tp-grados-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.tp-grado-caja {
+  flex: 0 0 calc(25% - 10px);
+  min-width: 90px;
+  background-color: white;
+  border: 1px solid #AAB6C7;
+  padding: 8px;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 16px;
+  color: #333;
+  transition: all 0.3s ease;
+}
+
+.tp-grado-caja.iluminado {
+  background-color: #D0E1FF;
+  border-color: #3F5D93;
+  color: #333;
+  font-weight: bold;
+}
+
+/* Footer */
+.tp-modal-footer {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 0 30px 30px;
+}
+
+.tp-btn-primary {
+  background-color: #3F5D93;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 30px;
+  font-size: 18px;
+  cursor: pointer;
+  font-family: 'Bentham', serif;
+}
+
+.tp-btn-secondary {
+  background-color: #6C757D;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 30px;
+  font-size: 18px;
+  cursor: pointer;
+  font-family: 'Bentham', serif;
+}
+
+.tp-btn-primary:disabled,
+.tp-btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
