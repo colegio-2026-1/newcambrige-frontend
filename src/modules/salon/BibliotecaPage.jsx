@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { Home, BookOpen, Layout } from "lucide-react";
-import PupitresIcon from "../../assets/Salon/pupitres.svg";
-import PruebasIcon  from "../../assets/Salon/pruebas.svg";
+import { Home } from "lucide-react";
+import PupitresIcon   from "../../assets/Salon/pupitres.svg";
+import PruebasIcon    from "../../assets/Salon/pruebas.svg";
 import BibliotecaIcon from "../../assets/Salon/biblioteca.svg";
 import { useAuth } from "../../api/useAuth";
 
@@ -18,35 +18,41 @@ import {
 } from "../../api/endpointsSalon";
 
 import { allaniosacademicosRequest } from "../../api/endpoints";
+import { Icon } from '@mdi/react';
+import {
+  mdiHome,
+  mdiChairSchool,   
+  mdiLibrary,                 // Biblioteca
+  mdiBookOpenPageVariant,     // Préstamos
+  mdiBookshelf,               // Inventario
+  mdiClipboardTextOutline,    // Pruebas
+} from '@mdi/js';
 
-import Header from "../../components/layout/header";
-import ModuleLayout from "../../components/layout/ModuleLayout";
-import Sidebar from "../../components/layout/Sidebar";
-import SearchBar from "../../components/shared/searchBar";
-import DataTable from "../../components/shared/DataTable";
+import Header        from "../../components/layout/header";
+import ModuleLayout  from "../../components/layout/ModuleLayout";
+import Sidebar       from "../../components/layout/Sidebar";
+import SearchBar     from "../../components/shared/searchBar";
+import DataTable     from "../../components/shared/DataTable";
 import ActionButtons from "../../components/shared/ActionButtons";
-import Modal from "../../components/shared/Modal";
+import Modal         from "../../components/shared/Modal";
 
 export default function BibliotecaPage() {
   const location = useLocation();
   const { user, roles, loadingRoles, logout } = useAuth();
 
-  // ── UI ──────────────────────────────────────────────────────────────────
   const [pestanaActiva, setPestanaActiva]       = useState("prestamos");
   const [selectedMenu, setSelectedMenu]         = useState("Préstamos");
   const [filaSeleccionada, setFilaSeleccionada] = useState(null);
 
-  // ── Modal ────────────────────────────────────────────────────────────────
   const [modal, setModal]           = useState(false);
   const [modalTipo, setModalTipo]   = useState("agregar");
   const [formValues, setFormValues] = useState({});
-
+  const [modalEliminar, setModalEliminar] = useState(false);
   const userName = user?.nombre || "Usuario";
   const rol = roles[0] || (loadingRoles ? "Cargando rol..." : "Sin rol");
 
   const [prestamoIdActivo, setPrestamoIdActivo] = useState(null);
 
-  // ── Datos ────────────────────────────────────────────────────────────────
   const [loading, setLoading]                     = useState(true);
   const [error, setError]                         = useState(null);
   const [libros, setLibros]                       = useState([]);
@@ -56,20 +62,25 @@ export default function BibliotecaPage() {
   const [salones, setSalones]                     = useState([]);
   const [periodos, setPeriodos]                   = useState([]);
 
-  // ── Maps auxiliares ──────────────────────────────────────────────────────
+  const [filtrosPrestamos, setFiltrosPrestamos] = useState({
+    codigo: "",
+    nombre: "",
+    grado: "",
+    grupo: "",
+    periodo: ""
+  });
+
   const salonesMap  = Object.fromEntries(salones.map((s) => [s.id_salon, s]));
   const periodosMap = Object.fromEntries(periodos.map((p) => [p.id_periodo, p]));
 
-  // ── Sidebar ──────────────────────────────────────────────────────────────
   const menuItems = [
-    { label: "Inicio",     icon: <Home size={18} />,  path: "/salon" },
-    { label: "Préstamos",  icon: BibliotecaIcon,       path: "/salon/biblioteca/inicio" },
-    { label: "Inventario", icon: BibliotecaIcon,       path: "/salon/biblioteca/inventario" },
-    { label: "Pupitres",   icon: PupitresIcon,         path: "/salon/pupitre" },
-    { label: "Pruebas",    icon: PruebasIcon,          path: "/salon/pruebas" },
-  ];
+  { label: "Inicio",      icon: <Icon path={mdiHome}                    size={1} />, path: "/salon" },
+  { label: "Pupitres",    icon: <Icon path={mdiChairSchool }                size={1} />, path: "/salon/pupitre" },
+  { label: "Préstamos",   icon: <Icon path={mdiBookOpenPageVariant}     size={1} />, path: "/salon/biblioteca/inicio" },
+  { label: "Inventario",  icon: <Icon path={mdiBookshelf}               size={1} />, path: "/salon/biblioteca/inventario" },
+  { label: "Pruebas",     icon: <Icon path={mdiClipboardTextOutline}    size={1} />, path: "/salon/pruebas" },
+];
 
-  // ── Sync ruta → pestaña ──────────────────────────────────────────────────
   useEffect(() => {
     if (location.pathname.includes("inventario")) {
       setPestanaActiva("libros");
@@ -81,7 +92,6 @@ export default function BibliotecaPage() {
     setFilaSeleccionada(null);
   }, [location.pathname]);
 
-  // ── Carga inicial ────────────────────────────────────────────────────────
   useEffect(() => {
     const cargarTodo = async () => {
       try {
@@ -103,7 +113,6 @@ export default function BibliotecaPage() {
     cargarTodo();
   }, []);
 
-  // ── Cargar préstamos ─────────────────────────────────────────────────────
   const cargarPrestamos = async () => {
     try {
       const { data } = await getPrestamosRequest();
@@ -133,7 +142,6 @@ export default function BibliotecaPage() {
     }
   };
 
-  // ── Cargar libros ────────────────────────────────────────────────────────
   const cargarLibros = async () => {
     try {
       const { data } = await getLibrosRequest();
@@ -170,13 +178,14 @@ export default function BibliotecaPage() {
   const cargarPeriodos = async () => {
     try {
       const { data } = await allaniosacademicosRequest();
-      setPeriodos(data ?? []);
+      const lista = data ?? [];
+      setPeriodos(lista);
+      setFiltrosPrestamos(prev => ({ ...prev, periodo: lista[0]?.nombre || "" }));
     } catch (err) {
       console.error("Error cargando periodos:", err);
     }
   };
 
-  // ── Abrir modales ────────────────────────────────────────────────────────
   const abrirModalAsignar = () => {
     setModalTipo("asignar");
     setFormValues({
@@ -241,7 +250,6 @@ export default function BibliotecaPage() {
     setPrestamoIdActivo(null);
   };
 
-  // ── Guardar / procesar ───────────────────────────────────────────────────
   const handleGuardarTodo = async () => {
     try {
       if (modalTipo === "agregar") {
@@ -295,42 +303,43 @@ export default function BibliotecaPage() {
     }
   };
 
-  // ── Eliminar libro ───────────────────────────────────────────────────────
-  const handleEliminarLibro = async () => {
-    if (!filaSeleccionada) { alert("Selecciona un libro primero."); return; }
-    if (filaSeleccionada.disponible === "Prestado") {
-      alert("No es posible eliminar un libro con préstamo activo.");
-      return;
-    }
-    if (!window.confirm(`¿Eliminar "${filaSeleccionada.nombre}" de ${filaSeleccionada.autor}? Esta acción no puede deshacerse.`)) return;
+  const handleEliminarLibro = () => {
+  if (!filaSeleccionada) { alert("Selecciona un libro primero."); return; }
+  if (filaSeleccionada.disponible === "Prestado") {
+    alert("No es posible eliminar un libro con préstamo activo.");
+    return;
+  }
+  setModalEliminar(true);
+};
 
-    try {
-      await deleteLibroRequest(filaSeleccionada.id);
-      await cargarLibros();
-      await cargarPrestamos();
-      setFilaSeleccionada(null);
-    } catch (err) {
-      console.error("Error eliminando libro:", err);
-      alert("Error en el servidor al intentar eliminar el libro.");
-    }
-  };
+const confirmarEliminarLibro = async () => {
+  try {
+    await deleteLibroRequest(filaSeleccionada.id);
+    await cargarLibros();
+    await cargarPrestamos();
+    setFilaSeleccionada(null);
+    setModalEliminar(false);
+  } catch (err) {
+    console.error("Error eliminando libro:", err);
+    alert("Error en el servidor al intentar eliminar el libro.");
+  }
+};
 
-  // ── Filtros ──────────────────────────────────────────────────────────────
-  const filtrarPrestamos = (filtros) => {
-    let f = prestamos;
-    if (filtros.codigo)  f = f.filter((r) => r.codigo?.toString().includes(filtros.codigo));
-    if (filtros.nombre)  f = f.filter((r) => r.nombre?.toLowerCase().includes(filtros.nombre.toLowerCase()));
-    if (filtros.grado)   f = f.filter((r) => r.grado?.toString() === filtros.grado.toString());
-    if (filtros.grupo)   f = f.filter((r) => r.grupo?.toString() === filtros.grupo.toString());
-    if (filtros.periodo) {
-      f = f.filter((r) => {
+  const filtrarPrestamos = (f) => {
+    let filtered = prestamos;
+    if (f.codigo)  filtered = filtered.filter((r) => r.codigo?.toString().includes(f.codigo));
+    if (f.nombre)  filtered = filtered.filter((r) => r.nombre?.toLowerCase().includes(f.nombre.toLowerCase()));
+    if (f.grado)   filtered = filtered.filter((r) => r.grado?.toString() === f.grado.toString());
+    if (f.grupo)   filtered = filtered.filter((r) => r.grupo?.toString() === f.grupo.toString());
+    if (f.periodo) {
+      filtered = filtered.filter((r) => {
         const salon = Object.values(salonesMap).find(
           (s) => s.grado?.toString() === r.grado?.toString() && s.grupo?.toString() === r.grupo?.toString()
         );
-        return periodosMap[salon?.id_periodo]?.nombre?.toString() === filtros.periodo.toString();
+        return periodosMap[salon?.id_periodo]?.nombre?.toString() === f.periodo.toString();
       });
     }
-    setPrestamosFiltered(f);
+    setPrestamosFiltered(filtered);
   };
 
   const filtrarLibros = (filtros) => {
@@ -341,7 +350,6 @@ export default function BibliotecaPage() {
     setLibrosFiltered(f);
   };
 
-  // ── Columnas ─────────────────────────────────────────────────────────────
   const columnasInicio = [
     { key: "codigo",        label: "CÓDIGO" },
     { key: "nombre",        label: "NOMBRE COMPLETO" },
@@ -377,7 +385,6 @@ export default function BibliotecaPage() {
     },
   ];
 
-  // ── Campos del modal según tipo ──────────────────────────────────────────
   const configModal = {
     agregar: {
       titulo: "AGREGAR LIBRO",
@@ -429,7 +436,6 @@ export default function BibliotecaPage() {
 
   const { titulo: tituloModal, campos: camposModal } = configModal[modalTipo] ?? { titulo: "", campos: [] };
 
-
   return (
     <div>
       <style>{`
@@ -461,28 +467,61 @@ export default function BibliotecaPage() {
                     { label: "Devolver Libro", onClick: abrirModalDevolver, disabled: !filaSeleccionada, variante: "primary" },
                   ]
                 : [
-                    { label: "Agregar Libro",  onClick: abrirModalAgregar,   siempreActivo: true,                                                       variante: "primary" },
-                    { label: "Editar Libro",   onClick: abrirModalEditar,    disabled: !filaSeleccionada || filaSeleccionada.disponible === "Prestado",  variante: "primary" },
-                    { label: "Eliminar Libro", onClick: handleEliminarLibro, disabled: !filaSeleccionada || filaSeleccionada.disponible === "Prestado",  variante: "primary" },
+                    { label: "Agregar Libro",  onClick: abrirModalAgregar,   siempreActivo: true,                                                      variante: "primary" },
+                    { label: "Editar Libro",   onClick: abrirModalEditar,    disabled: !filaSeleccionada || filaSeleccionada.disponible === "Prestado", variante: "primary" },
+                    { label: "Eliminar Libro", onClick: handleEliminarLibro, disabled: !filaSeleccionada || filaSeleccionada.disponible === "Prestado", variante: "primary" },
                   ]
             }
           />
         }
       >
-        {/* ── PRÉSTAMOS ── */}
         {pestanaActiva === "prestamos" && (
           <div>
-            <SearchBar
-              loading={loading}
-              onSearch={filtrarPrestamos}
-              fields={[
-                { key: "codigo",  label: "Código",  type: "number", maxLength: 10 },
-                { key: "nombre",  label: "Nombre",  type: "text" },
-                { key: "grado",   label: "Grado",   type: "select", options: [...new Set(Object.values(salonesMap).map((s) => s.grado).filter(Boolean))] },
-                { key: "grupo",   label: "Grupo",   type: "select", options: [...new Set(Object.values(salonesMap).map((s) => s.grupo).filter(Boolean))] },
-                { key: "periodo", label: "Periodo", type: "select", options: [...new Set(Object.values(periodosMap).map((p) => p.nombre).filter(Boolean))] },
-              ]}
-            />
+            {filtrosPrestamos.periodo && (
+              <SearchBar
+                loading={loading}
+                fields={[
+                  { key: "codigo", label: "Código", type: "number", maxLength: 10 },
+                  { key: "nombre", label: "Nombre", type: "text" },
+                  {
+                    key: "grado", label: "Grado", type: "select",
+                    options: [...new Set(Object.values(salonesMap).map((s) => s.grado).filter(Boolean))],
+                  },
+                  {
+                    key: "grupo", label: "Grupo", type: "select",
+                    options: filtrosPrestamos.grado
+                      ? [...new Set(
+                          Object.values(salonesMap)
+                            .filter(s => s.grado?.toString() === filtrosPrestamos.grado)
+                            .map(s => s.grupo).filter(Boolean)
+                        )]
+                      : [],
+                  },
+                  {
+                    key: "periodo", label: "Periodo", type: "select",
+                    options: [...new Set(Object.values(periodosMap).map((p) => p.nombre).filter(Boolean))],
+                  },
+                ]}
+                initialValues={{ periodo: filtrosPrestamos.periodo }}
+                onChange={(key, value) => {
+                  setFiltrosPrestamos(prev => {
+                    const nuevos = { ...prev, [key]: value };
+                    if (key === "grado") nuevos.grupo = "";
+                    if (key === "periodo") {
+                      nuevos.grado = "";
+                      nuevos.grupo = "";
+                    }
+                    return nuevos;
+                  });
+                }}
+                onSearch={(f) => {
+                  filtrarPrestamos(f);
+                  setFiltrosPrestamos(f);
+                  setFilaSeleccionada(null);
+                }}
+                cleanFilter={{ codigo: "", nombre: "", grado: "", grupo: "", periodo: filtrosPrestamos.periodo }}
+              />
+            )}
             <div style={{ marginTop: "1rem", background: "#fff", borderRadius: ".8rem", overflow: "hidden", border: "1px solid #D9D9D9" }}>
               <DataTable
                 columns={columnasInicio}
@@ -495,7 +534,6 @@ export default function BibliotecaPage() {
           </div>
         )}
 
-        {/* ── INVENTARIO ── */}
         {pestanaActiva === "libros" && (
           <div>
             <SearchBar
@@ -528,6 +566,12 @@ export default function BibliotecaPage() {
         onChange={(key, val) => setFormValues((prev) => ({ ...prev, [key]: val }))}
         onAccept={handleGuardarTodo}
         onCancel={cerrarModal}
+      />
+      <Modal
+        title={`¿Confirmas que deseas eliminar el libro "${filaSeleccionada?.nombre}" de ${filaSeleccionada?.autor}? Esta acción no puede deshacerse.`}
+        isOpen={modalEliminar}
+        onAccept={confirmarEliminarLibro}
+        onCancel={() => setModalEliminar(false)}
       />
     </div>
   );

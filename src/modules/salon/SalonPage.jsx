@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import { Home } from "lucide-react";
 import { useAuth } from "../../api/useAuth";
 import Header from "../../components/layout/header";
@@ -15,35 +14,26 @@ import "./SalonPage.css";
 
 export default function SalonPage() {
   const navigate = useNavigate();
-  const { user, roles, loadingRoles, logout } = useAuth(); 
+  const { user, roles, loadingRoles, logout } = useAuth();
   const userName = user?.nombre || "Usuario";
-  const rol = roles[0] || "Rol Desconocido";
-  const [selectedMenu, setSelectedMenu] = useState("Inicio");
+  const rol = roles[0] || (loadingRoles ? "Cargando rol..." : "Sin rol");
+  const selectedMenu = "Salón";
 
-  const menuItems = [
+  const modulos = [
     { label: "Inicio", icon: <Home />, path: "/home" },
+    { label: "Salón", path: "/salon/", roles: ["admin", "administrador", "titular"] },
   ];
 
+  const menuItems = modulos.filter(modulo => {
+    if (!modulo) return false;
+    if (!modulo.roles || !Array.isArray(modulo.roles) || modulo.roles.length === 0) return true;
+    return roles.some(r => modulo.roles.includes(r));
+  });
 
   const cards = [
-    {
-      title: "Pupitres",
-      icon: PupitresIcon,
-      path: "/salon/pupitre",
-      roles: ["admin", "administrador", "titular"],
-    },
-    {
-      title: "Biblioteca",
-      icon: BibliotecaIcon,
-      path: "/salon/biblioteca",
-      roles: ["admin", "administrador", "titular"],
-    },
-    {
-      title: "Pruebas",
-      icon: PruebasIcon,
-      path: "/salon/pruebas",
-      roles: ["admin", "administrador", "titular"],
-    },
+    { title: "Pupitres",   icon: PupitresIcon,   path: "/salon/pupitre",    roles: ["admin", "titular"] },
+    { title: "Biblioteca", icon: BibliotecaIcon, path: "/salon/biblioteca", roles: ["admin", "titular"] },
+    { title: "Pruebas",    icon: PruebasIcon,    path: "/salon/pruebas",    roles: ["admin", "titular"] },
   ];
 
   const handleCardClick = (path) => {
@@ -53,15 +43,13 @@ export default function SalonPage() {
   return (
     <div className="dashboard-container">
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
-
       <ModuleLayout
         sidebar={
           <Sidebar
             menuItems={menuItems}
             selectedMenu={selectedMenu}
-            setSelectedMenu={setSelectedMenu}
-            user={{ nombre: userName, rol: rol }}
-            loadingRoles={loadingRoles} 
+            user={{ nombre: userName, rol }}
+            loadingRoles={loadingRoles}
             logout={logout}
           />
         }
