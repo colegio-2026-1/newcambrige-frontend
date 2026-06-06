@@ -1,109 +1,47 @@
-import {
-  Routes,
-  Route,
-  Navigate
-} from "react-router-dom";
+// src/router/AppRouter.js
+import { Routes, Route } from "react-router-dom";
 
 import LoginPage from "../modules/auth/LoginPage";
-import ProtectedRoute from "./ProtectedRoute"
+import ProtectedRoute from "./ProtectedRoute";
 
-import TesoreriaRouter from "./TesoreriaRouter";
-import SalonRouter from "./SalonRouter"
+import TesoreriaRouter  from "./TesoreriaRouter";
+import DashboardRouter  from "./DashboardRouter";
+import SalonRouter      from "./SalonRouter";
+import UniformeRouter   from "./UniformeRouter";
+import ParametrizacionRouter from "./ParametrizacionRouter";
 
-import ParametrizacionPage from '../modules/parametrizacion/ParametrizacionPage';
-import UsuariosPage from '../modules/parametrizacion/UsuariosPage';
 import ImportacionPage from '../modules/importacion/ImportacionPage';
 import ImportacionRobotPage from '../modules/importacion/ImportacionRobotPage';
 import ImportacionMasivaPage from '../modules/importacion/ImportacionMasivaPage';
 import ImportacionIndividualPage from '../modules/importacion/ImportacionIndividualPage';
 
 import NotFound from "../modules/notFound/notFound";
-
-import Home from "../modules/Home/HomePage";
-
-
+import Home     from "../modules/Home/HomePage";
 import TestPage from "../modules/test/testPage";
 
-
-
-// ==============================
-// ROUTER
-// ==============================
-
 const AppRouter = () => {
-
   return (
-
     <Routes>
-      {/* Públicas */}
-        <Route path="/" element={<LoginPage />} />
+      {/* RUTAS PÚBLICAS */}
+      <Route path="/" element={<LoginPage />} />
 
-      {/* ===================== */}
-      {/* LOGIN */}
-      {/* ===================== */}
-
-      <Route
-        path="/"
-        element={<LoginPage />}
-      />
-
-      {/* ===================== */}
       {/* HOME */}
-      {/* ===================== */}
-
       <Route
         path="/home"
         element={
-
           <ProtectedRoute>
-
             <Home />
-
           </ProtectedRoute>
-
         }
       />
 
-      {/* ===================== */}
-      {/* FUTURAS RUTAS */}
-      {/* ===================== */}
+      {/* MÓDULOS PRINCIPALES (cada uno exporta sus subrutas) */}
+      {TesoreriaRouter()}
+      {DashboardRouter()}
+      {SalonRouter()}
+      {UniformeRouter()}
+      {ParametrizacionRouter()}   {/* ✅ AHORA INCLUYE todas las rutas de parametrización */}
 
-      
-      
-      
-
-      {/*
-      <Route
-        path="/estudiantes"
-        element={
-          <PrivateRoute>
-            <EstudiantesPage />
-          </PrivateRoute>
-        }
-      />
-      */}
-    
-        {TesoreriaRouter()}  
-        {SalonRouter()} 
-      
- 
-      <Route 
-        path="/parametrizacion" 
-        element={
-          <ProtectedRoute>
-            <ParametrizacionPage />
-          </ProtectedRoute>
-      } 
-      />
-      <Route 
-        path="/parametrizacion/usuarios" 
-        element={
-          <ProtectedRoute>
-             <UsuariosPage />
-          </ProtectedRoute>
-        } 
-        />
-      
       <Route 
         path="/importacion" 
         element={
@@ -111,7 +49,7 @@ const AppRouter = () => {
              <ImportacionPage />
           </ProtectedRoute>
         } 
-        />
+      />
 
       <Route 
         path="/importacion/:tipo" 
@@ -120,7 +58,7 @@ const AppRouter = () => {
              <ImportacionRobotPage />
           </ProtectedRoute>
         } 
-        />
+      />
 
       <Route 
         path="/importacion/masiva/:tipo" 
@@ -129,7 +67,7 @@ const AppRouter = () => {
              <ImportacionMasivaPage />
           </ProtectedRoute>
         } 
-        />
+      />
 
       <Route 
         path="/importacion/individual/:tipo" 
@@ -138,26 +76,13 @@ const AppRouter = () => {
              <ImportacionIndividualPage />
           </ProtectedRoute>
         } 
-        />
-      
-      <Route
-        path="/test"
-        element={
-          <TestPage />
-        }
       />
 
-      {/* ===================== */}
-      {/* CATCH ALL */}
-      {/* ===================== */}
+      {/* RUTA DE PRUEBAS / TEST */}
+      <Route path="/test" element={<TestPage />} />
 
-      <Route
-        path="*"
-        element={
-          <NotFound />
-        }
-      />
-
+      {/* RUTA CATCH ALL – 404 */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };

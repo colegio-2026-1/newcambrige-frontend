@@ -14,45 +14,59 @@ import { useAuth } from "../../api/useAuth";
 // ==========================================
 // IMPORTACIONES DE ICONOS
 // ==========================================
-import salonIcon from "../../assets/Salon/salon.svg";
-import tesoreriaIcon from "../../assets/Tesoreria/tesoreria.svg";
-import rectoriaIcon from "../../assets/Rectoria/estudiante.svg";
-import uniformesIcon from "../../assets/Objetos/objetos.svg";
-import bandaIcon from "../../assets/Banda/banda.svg";
-import paraIcon from "../../assets/Parametrizacion/parametrizacion.svg";
-import DashboardIcon from "../../assets/Parametrizacion/parametrizacion.svg";
+import { Icon } from '@mdi/react';
+import {
+  // Iconos para el menú lateral
+  mdiHome,
+  mdiViewDashboard,
+  mdiSchool,
+  mdiTshirtCrew,
+  mdiCash,
+  mdiAccountSchool,
+  mdiCog,
+
+  // Iconos para las tarjetas 
+  mdiAccount,
+  mdiCalendar,
+  mdiTestTube,
+  mdiGuitarElectric,
+  mdiCube,
+  mdiBook,
+  mdiAccountGroup,
+} from '@mdi/js';
 
 // ==========================================
 // COMPONENTE PRINCIPAL
 // ==========================================
 const ParametrizacionPage = () => {
-  const { user, logout } = useAuth();
+  const { user, roles, loadingRoles, logout } = useAuth();
   const navigate = useNavigate();
   
   const userName = user?.nombre || "Usuario";
-  const rol = user?.rol || "TITULAR";
+  const rol = roles[0] || (loadingRoles ? "Cargando rol..." : "Sin rol");
   const [selectedMenu, setSelectedMenu] = useState("Parametrización");
 
   // ==========================================
   // CONFIGURACIÓN DEL MENÚ Y TARJETAS
   // ==========================================
   const menuItems = [
-    { label: "Inicio", icon: <Home />, path: "/home" },
-    { label: "Dashboard", icon: DashboardIcon },
-    { label: "Salón", icon: salonIcon, path: "/salon" },
-    { label: "Uniformes", icon: uniformesIcon, path: "/uniformes" },
-    { label: "Tesorería", icon: tesoreriaIcon, path: "/tesoreria" },
-    { label: "Rectoría", icon: rectoriaIcon, path: "/rectoria" },
-    { label: "Parametrización", icon: paraIcon, path: "/parametrizacion" },
+    { label: "Inicio", icon: <Icon path={mdiHome} size="32px" />, path: "/home" },
+    { label: "Dashboard", icon: <Icon path={mdiViewDashboard} size="50px" />, path: "/dashboard" },
+    { label: "Salón", icon: <Icon path={mdiSchool} size="32px" />, path: "/salon" },
+    { label: "Uniformes", icon: <Icon path={mdiTshirtCrew} size="32px" />, path: "/uniformes" },
+    { label: "Tesorería", icon: <Icon path={mdiCash} size="32px" />, path: "/tesoreria" },
+    { label: "Rectoría", icon: <Icon path={mdiAccountSchool} size="32px" />, path: "/rectoria" },
+    { label: "Parametrización", icon: <Icon path={mdiCog} size="32px" />, path: "/parametrizacion" },
   ];
 
   const cards = [
-    { title: "Usuarios", icon: null, path: "/parametrizacion/usuarios" },
-    { title: "Año escolar", icon: null, path: "/parametrizacion/anio-escolar" },
-    { title: "Pruebas", icon: null, path: "/parametrizacion/pruebas" },
-    { title: "Instrumentos", icon: null, path: "/parametrizacion/instrumentos" },
-    { title: "Objetos", icon: null, path: "/parametrizacion/objetos" },
-    { title: "Asignar titulares", icon: null, path: "/parametrizacion/titulares" },
+    { title: "Usuarios", iconPath: mdiAccount, path: "/parametrizacion/usuarios" },
+    { title: "Año escolar", iconPath: mdiCalendar, path: "/parametrizacion/anio-escolar" },
+    { title: "Pruebas", iconPath: mdiTestTube, path: "/parametrizacion/pruebas" },
+    { title: "Instrumentos", iconPath: mdiGuitarElectric, path: "/parametrizacion/instrumentos" },
+    { title: "Objetos", iconPath: mdiCube, path: "/parametrizacion/objetos" },
+    { title: "Libros", iconPath: mdiBook, path: "/parametrizacion/libros" },
+    { title: "Asignar titulares", iconPath: mdiAccountGroup, path: "/parametrizacion/titulares" },
   ];
 
   // ==========================================
@@ -73,7 +87,8 @@ const ParametrizacionPage = () => {
                    navigate(itemSeleccionado.path);
                }
             }}
-            user={{ nombre: userName, rol: rol }}
+            user={{ nombre: userName, rol }}
+            loadingRoles={loadingRoles}
             logout={logout}
           />
         }
@@ -87,7 +102,12 @@ const ParametrizacionPage = () => {
                 onClick={() => navigate(card.path)}
               >
                 <div className="param-icon-wrapper">
-                  <img src={card.icon || "ruta_falsa"} alt={card.title} className="param-icon" />
+                  <Icon 
+                    path={card.iconPath} 
+                    size="32px"
+                    color="#b89130"
+                    className="param-icon"
+                  />
                 </div>
                 <span className="param-title">{card.title}</span>
               </button>
