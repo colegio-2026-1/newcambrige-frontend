@@ -2,17 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axiosClient from "../../api/axiosClient";
 import ModuleLayout from "../../components/layout/ModuleLayout";
-import Sidebar from "../../components/layout/Sidebar";
+import ImportacionSidebar from "./ImportacionSidebar";
 import Header from "../../components/layout/header";
 import { useAuth } from "../../api/useAuth";
 import { sincronizarEstudiantesRequest, sincronizarDocentesRequest } from "../../api/importacionService";
 
 import styles from "./ImportacionIndividualPage.module.css";
 
-import iconHome from "../../assets/importacion/Icons/Home.svg";
-import iconRobot from "../../assets/importacion/Icons/Robot.svg";
-import iconCargaMasiva from "../../assets/importacion/Icons/Carga_Masiva.svg";
-import iconCargaIndividual from "../../assets/importacion/Icons/Carga_Individual.svg";
+import Icon from "../../components/common/Icon";
+import { mdiHome, mdiRobot, mdiServer, mdiCardAccountDetails } from '@mdi/js';
 
 export default function ImportacionIndividualPage() {
   const navigate = useNavigate();
@@ -45,10 +43,10 @@ export default function ImportacionIndividualPage() {
   const sidebarUser = user ? { ...user, rol: user.roles?.[0]?.toUpperCase() || "TITULAR" } : null;
 
   const menuItems = [
-    { label: "Inicio", path: "/home", icon: iconHome },
-    { label: "Conexión", path: `/importacion/${tipo}`, icon: iconRobot },
-    { label: "Carga Masiva", path: `/importacion/masiva/${tipo}`, icon: iconCargaMasiva },
-    { label: "Carga Individual", path: `/importacion/individual/${tipo}`, icon: iconCargaIndividual },
+    { label: "Inicio", path: "/home", icon: <Icon icon={mdiHome} size={1.5} /> },
+    { label: "Conexión", path: `/importacion/${tipo}`, icon: <Icon icon={mdiRobot} size={1.5} /> },
+    { label: "Carga Masiva", path: `/importacion/masiva/${tipo}`, icon: <Icon icon={mdiServer} size={1.5} /> },
+    { label: "Carga Individual", path: `/importacion/individual/${tipo}`, icon: <Icon icon={mdiCardAccountDetails} size={1.5} /> }
   ];
 
   // Reset CSS background
@@ -196,7 +194,7 @@ export default function ImportacionIndividualPage() {
   return (
     <div>
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIGDE SCHOOL" />
-      <ModuleLayout sidebar={<Sidebar menuItems={menuItems} selectedMenu="Carga Individual" user={sidebarUser} />}>
+      <ModuleLayout sidebar={<ImportacionSidebar menuItems={menuItems} selectedMenu="Carga Individual" user={sidebarUser} />}>
         <div className={styles.container}>
           
           <div className={styles.topSection}>

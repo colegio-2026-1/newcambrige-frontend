@@ -5,7 +5,7 @@ import * as XLSX from "xlsx";
 import axiosClient from "../../api/axiosClient";
 
 import ModuleLayout from "../../components/layout/ModuleLayout";
-import Sidebar from "../../components/layout/Sidebar";
+import ImportacionSidebar from "./ImportacionSidebar";
 import Header from "../../components/layout/header";
 import { useAuth } from "../../api/useAuth";
 
@@ -17,10 +17,8 @@ import {
 
 import styles from "./ImportacionMasivaPage.module.css";
 
-import iconHome from "../../assets/importacion/Icons/Home.svg";
-import iconRobot from "../../assets/importacion/Icons/Robot.svg";
-import iconCargaMasiva from "../../assets/importacion/Icons/Carga_Masiva.svg";
-import iconCargaIndividual from "../../assets/importacion/Icons/Carga_Individual.svg";
+import Icon from "../../components/common/Icon";
+import { mdiHome, mdiRobot, mdiServer, mdiCardAccountDetails } from '@mdi/js';
 
 export default function ImportacionMasivaPage() {
   const navigate = useNavigate();
@@ -48,10 +46,10 @@ export default function ImportacionMasivaPage() {
   const sidebarUser = user ? { ...user, rol: user.roles?.[0]?.toUpperCase() || "TITULAR" } : null;
 
   const menuItems = [
-    { label: "Inicio", path: "/home", icon: iconHome },
-    { label: "Conexión", path: `/importacion/${tipo}`, icon: iconRobot },
-    { label: "Carga Masiva", path: `/importacion/masiva/${tipo}`, icon: iconCargaMasiva },
-    { label: "Carga Individual", path: `/importacion/individual/${tipo}`, icon: iconCargaIndividual },
+    { label: "Inicio", path: "/home", icon: <Icon icon={mdiHome} size={1.5} /> },
+    { label: "Conexión", path: `/importacion/${tipo}`, icon: <Icon icon={mdiRobot} size={1.5} /> },
+    { label: "Carga Masiva", path: `/importacion/masiva/${tipo}`, icon: <Icon icon={mdiServer} size={1.5} /> },
+    { label: "Carga Individual", path: `/importacion/individual/${tipo}`, icon: <Icon icon={mdiCardAccountDetails} size={1.5} /> }
   ];
 
   useEffect(() => {
@@ -222,7 +220,11 @@ export default function ImportacionMasivaPage() {
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIGDE SCHOOL" />
       <ModuleLayout
         sidebar={
-          <Sidebar menuItems={menuItems} selectedMenu="Carga Masiva" user={sidebarUser} />
+          <ImportacionSidebar
+            menuItems={menuItems}
+            selectedMenu="Carga Masiva"
+            user={sidebarUser}
+          />
         }
       >
         <div className={styles.container}>

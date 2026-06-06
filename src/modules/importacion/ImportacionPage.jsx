@@ -1,9 +1,10 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Home } from "lucide-react";
+import Icon from "../../components/common/Icon";
+import { mdiHome } from '@mdi/js';
 
 import ModuleLayout from "../../components/layout/ModuleLayout";
-import Sidebar from "../../components/layout/Sidebar";
+import ImportacionSidebar from "./ImportacionSidebar";
 import Header from "../../components/layout/header";
 
 import styles from "./ImportacionPage.module.css";
@@ -19,7 +20,7 @@ export default function ImportacionPage() {
   const { user } = useAuth();
 
   const menuItems = [
-    { label: "Inicio", path: "/home", icon: <Home /> },
+    { label: "Inicio", path: "/home", icon: <Icon icon={mdiHome} size={1.2} /> },
   ];
 
   const handleEstudianteClick = () => {
@@ -53,7 +54,7 @@ export default function ImportacionPage() {
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIGDE SCHOOL" />
       <ModuleLayout
         sidebar={
-          <Sidebar
+          <ImportacionSidebar
             menuItems={menuItems}
             selectedMenu="Inicio"
             user={user}
