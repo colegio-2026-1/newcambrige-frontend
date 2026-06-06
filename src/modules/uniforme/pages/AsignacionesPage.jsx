@@ -14,10 +14,7 @@ import {
   registrarPrestamoRequest
 } from "../../../api/uniformesService";
 import { useAuth } from "../../../api/useAuth";
-import {
-  allrolesuserRequest,
-  allaniosacademicosRequest
-} from "../../../api/endpoints";
+import { allaniosacademicosRequest } from "../../../api/endpoints";
 import "../styles/uniformes.css";
 
 // ─── Utilidad ────────────────────────────────────────────────────────────────
@@ -62,10 +59,9 @@ const COLUMNS = [
 ];
 
 export default function AsignacionesPage() {
-  const { user } = useAuth();
+  const { user, roles, loadingRoles } = useAuth();
 
   // ── Estados de la interfaz ──────────────────────────────────────────────────
-  const [roles, setRoles]               = useState([]);
   const [selectedRow, setSelectedRow]   = useState(null);
   const [asignaciones, setAsignaciones] = useState([]);
   const [loading, setLoading]           = useState(true);
@@ -179,8 +175,7 @@ export default function AsignacionesPage() {
     codigo: "", nombre: "", grado: "", grupo: "", anio: ""
   });
 
-  const idUser = user?.id_usuario;
-  const rol    = roles[0] || "Rol no asignado";
+  const rol = roles[0] || (loadingRoles ? "Cargando rol..." : "Sin rol");
 
   // ── Carga de periodos ────────────────────────────────────────────────────────
   const cargarPeriodos = async () => {
@@ -200,31 +195,7 @@ export default function AsignacionesPage() {
     }
   };
 
-  // ── Carga inicial unificada ──────────────────────────────────────────────────
-  useEffect(() => {
-    const cargarDatosIniciales = async () => {
-      try {
-        setLoading(true);
-        const resAsignaciones = await getAsignacionesRequest();
-        setAsignaciones(resAsignaciones.data);
-
-        if (idUser) {
-          const resRoles = await allrolesuserRequest(idUser);
-          setRoles(resRoles?.data || []);
-        }
-      } catch (error) {
-        console.error("Error cargando datos del módulo:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    cargarDatosIniciales();
-  }, [idUser]);
-
-  useEffect(() => {
-    cargarPeriodos();
-  }, []);
-
+  // ── Carga de asignaciones (sin roles, solo datos) ────────────────────────────
   const cargarAsignaciones = async () => {
     try {
       const response = await getAsignacionesRequest();
@@ -233,6 +204,25 @@ export default function AsignacionesPage() {
       console.error("Error cargando asignaciones", error);
     }
   };
+
+  // ── Carga inicial unificada ──────────────────────────────────────────────────
+  useEffect(() => {
+    const cargarDatosIniciales = async () => {
+      try {
+        setLoading(true);
+        await cargarAsignaciones();
+      } catch (error) {
+        console.error("Error cargando datos del módulo:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    cargarDatosIniciales();
+  }, []);
+
+  useEffect(() => {
+    cargarPeriodos();
+  }, []);
 
   // ── Eliminar ─────────────────────────────────────────────────────────────────
   const eliminarAsignacion = async (id) => {
@@ -335,15 +325,6 @@ export default function AsignacionesPage() {
     [asignaciones, filtrosAplicados]
   );
 
-  // ── Guard ─────────────────────────────────────────────────────────────────────
-  if (!user) {
-    return (
-      <div style={{ padding: "30px", fontFamily: "sans-serif", fontWeight: "600" }}>
-        Cargando usuario...
-      </div>
-    );
-  }
-
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
     <div className="uniformes-page">
@@ -353,6 +334,7 @@ export default function AsignacionesPage() {
         sidebar={
           <Sidebar
             user={{ nombre: user?.nombre || "admin", rol }}
+            loadingRoles={loadingRoles}
             menuItems={[
               { label: "Inicio", path: "/home" },
               { label: "Asignaciones", path: "/uniformes/asignaciones" },

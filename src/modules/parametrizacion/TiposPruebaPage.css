@@ -1,49 +1,17 @@
 /* ============================================
-   VARIABLES GLOBALES Y FUENTES
+   ESTILOS EXCLUSIVOS PARA "TIPOS DE PRUEBA"
 ============================================ */
-@font-face {
-  font-family: 'Bentham';
-  src: url('../../assets/fonts/Bentham-Regular.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Staatliches';
-  src: url('../../assets/fonts/Staatliches-Regular.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'HeyGotcha';
-  src: url('../../assets/fonts/HeyGotchaRegular.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-
-/* ============================================
-   ESTILOS GENERALES Y LAYOUT
-============================================ */
-.dashboard-container, 
-.modal-overlay {
-  font-family: 'Bentham', serif;
-}
-
-button, input, select, span, label, p {
-  font-family: 'Bentham', serif !important;
-}
-
 .tipos-prueba-content {
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
-  background-color: var(--color-white, #FFFFFF); 
+  background-color: var(--color-white, #FFFFFF);
+  font-family: 'Bentham', serif;
 }
 
-/* ==================== TOOLBAR Y OVERRIDES SEARCHBAR ==================== */
-.module-toolbar-container {
+/* Toolbar */
+.tipos-prueba-content .module-toolbar-container {
   display: flex;
   align-items: center;
   padding: 20px 30px;
@@ -52,67 +20,50 @@ button, input, select, span, label, p {
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.toolbar-grouped-actions {
+.tipos-prueba-content .toolbar-grouped-actions {
   display: flex;
   align-items: center;
   justify-content: flex-start;
   width: 100%;
 }
 
-.toolbar-grouped-actions .searchbar-wrapper {
-  width: auto !important;
-  padding: 0 !important;
-  margin-right: 15px !important;
+.tipos-prueba-content .toolbar-grouped-actions .searchbar-wrapper {
+  width: auto;
+  padding: 0;
+  margin-right: 15px;
 }
 
-.toolbar-grouped-actions .searchbar-btn {
-  margin-left: 15px !important; 
-}
-
-/* ==================== ÁREA DE TABLA ==================== */
-.main-area {
+/* Área principal */
+.tipos-prueba-content .main-area {
   flex: 1;
   padding: 20px 30px;
 }
 
-.empty-state {
+.tipos-prueba-content .table-layout-wrapper {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 200px;
-  color: #666;
-  font-size: 18px;
-}
-
-.table-layout-wrapper {
-  display: flex;
-  align-items: flex-start; 
+  align-items: flex-start;
   gap: 30px;
   width: 100%;
 }
 
-.table-main-section {
-  flex: 1; 
+.tipos-prueba-content .table-main-section {
+  flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-.datatable-fixed-container { min-height: 370px; }
-
-.pagination-center {
+.tipos-prueba-content .pagination-center {
   display: flex;
   justify-content: center;
   gap: 15px;
   margin-top: 20px;
 }
 
-.side-actions { margin-bottom: 45px; }
-
-.btn-circle {
+.tipos-prueba-content .btn-circle {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background-color: #264A7F; 
+  background-color: #264A7F;
   color: white;
   border: none;
   display: flex;
@@ -122,49 +73,54 @@ button, input, select, span, label, p {
   box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
 }
 
-.btn-circle:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+.tipos-prueba-content .btn-circle:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 
-/* ==================== MODAL ==================== */
-.modal-overlay {
+/* Modal */
+.tp-modal-overlay {
   position: fixed;
-  top: 0; left: 0; width: 100vw; height: 100vh;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   background-color: rgba(0, 0, 0, 0.4);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  font-family: 'Bentham', serif;
 }
 
-.modal-content {
+.tp-modal-content {
   background-color: white;
   border-radius: 12px;
-  width: 750px  !important;
-  max-width: 95% !important;
-  overflow: visible !important;
+  width: 750px;
+  max-width: 95%;
+  overflow: visible;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-.modal-header {
-  background-color: #D0E1FF; 
-  padding: 24px 20px; 
+.tp-modal-header {
+  background-color: #D0E1FF;
+  padding: 24px 20px;
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
 }
 
-.modal-header h3 {
-  font-family: 'Staatliches', sans-serif !important;
-  font-size: 32px !important; 
+.tp-modal-header h3 {
+  font-family: 'Staatliches', sans-serif;
+  font-size: 32px;
   letter-spacing: 2px;
   color: #333333;
   margin: 0;
-  line-height: 1;
-  text-align: center;
   text-transform: uppercase;
 }
 
-.modal-close {
+.tp-modal-close {
   background: none;
   border: none;
   font-size: 24px;
@@ -177,92 +133,86 @@ button, input, select, span, label, p {
   transform: translateY(-50%);
 }
 
-.modal-body { padding: 30px; overflow: visible !important; }
+.tp-modal-body {
+  padding: 30px;
+  overflow: visible;
+}
 
-/* ==================== FORMULARIO DEL MODAL ==================== */
-.modal-form-row {
+.tp-modal-form-row {
   display: flex;
-  gap: 16px;                 
+  gap: 16px;
   margin-bottom: 25px;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  flex-wrap: wrap;           
+  flex-wrap: wrap;
 }
 
-.input-group {
+.tp-input-group {
   display: flex;
   align-items: center;
   gap: 6px;
-  flex: 0 0 auto;             
-  overflow: visible !important;
+  flex: 0 0 auto;
 }
 
-.input-group label {
+.tp-input-group label {
   font-size: 16px;
   font-weight: bold;
   color: #333;
   white-space: nowrap;
-  flex-shrink: 0;         
-  min-width: max-content;     
 }
 
-.input-group input,
-.input-group select {
+.tp-input-group input,
+.tp-input-group select {
   background-color: #EBEBEB;
   border: 1px solid #CCC;
   border-radius: 6px;
   height: 38px;
   padding: 0 8px;
-  font-size: 14x;
+  font-size: 14px;
   color: #333;
   outline: none;
-  flex-shrink: 0;            
-  box-sizing: border-box;
 }
 
-/* ==================== TAMAÑOS ESPECÍFICOS DE INPUTS ==================== */
-
-.modal-form-row:nth-child(1) .input-group:nth-child(1) input {
+/* Tamaños específicos */
+.tp-modal-form-row:first-child .tp-input-group:first-child input {
   width: 120px;
 }
-
-.modal-form-row:nth-child(1) .input-group:nth-child(2) input {
-  width: 150px;   
+.tp-modal-form-row:first-child .tp-input-group:nth-child(2) input {
+  width: 150px;
 }
-
-.modal-form-row:nth-child(1) .input-group:nth-child(3) select {
+.tp-modal-form-row:first-child .tp-input-group:nth-child(3) select {
   width: 100px;
 }
-
-.modal-form-row:nth-child(2) .input-group select {
+.tp-modal-form-row:nth-child(2) .tp-input-group select {
   width: 160px;
 }
 
-/* ==================== GRILLA VISUAL DE GRADOS ==================== */
-.grados-section { margin-top: 30px; }
+/* Grados visuales */
+.tp-grados-section {
+  margin-top: 30px;
+}
 
-.grados-section h4 {
-  font-family: 'Staatliches', sans-serif !important;
-  font-size: 24px !important; 
+.tp-grados-section h4 {
+  font-family: 'Staatliches', sans-serif;
+  font-size: 24px;
   letter-spacing: 1px;
   color: #333333;
   text-align: center;
   margin-bottom: 15px;
 }
 
-.grados-grid {
+.tp-grados-grid {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 10px;
 }
 
-.grado-caja {
+.tp-grado-caja {
   flex: 0 0 calc(25% - 10px);
   min-width: 90px;
   background-color: white;
-  border: 1px solid #AAB6C7; 
+  border: 1px solid #AAB6C7;
   padding: 8px;
   border-radius: 4px;
   text-align: center;
@@ -271,17 +221,45 @@ button, input, select, span, label, p {
   transition: all 0.3s ease;
 }
 
-.grado-caja.iluminado {
-  background-color: #D0E1FF; 
-  border-color: #3F5D93; 
+.tp-grado-caja.iluminado {
+  background-color: #D0E1FF;
+  border-color: #3F5D93;
   color: #333;
   font-weight: bold;
 }
 
-/* ==================== FOOTER MODAL ==================== */
-.modal-footer {
+/* Footer */
+.tp-modal-footer {
   display: flex;
   justify-content: center;
   gap: 20px;
   padding: 0 30px 30px;
+}
+
+.tp-btn-primary {
+  background-color: #3F5D93;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 30px;
+  font-size: 18px;
+  cursor: pointer;
+  font-family: 'Bentham', serif;
+}
+
+.tp-btn-secondary {
+  background-color: #6C757D;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 30px;
+  font-size: 18px;
+  cursor: pointer;
+  font-family: 'Bentham', serif;
+}
+
+.tp-btn-primary:disabled,
+.tp-btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

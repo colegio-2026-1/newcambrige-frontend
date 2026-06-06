@@ -14,14 +14,6 @@ import { useAuth } from "../../api/useAuth";
 // ==========================================
 // IMPORTACIONES DE ICONOS
 // ==========================================
-import salonIcon from "../../assets/Salon/salon.svg";
-import tesoreriaIcon from "../../assets/Tesoreria/tesoreria.svg";
-import rectoriaIcon from "../../assets/Rectoria/estudiante.svg";
-import uniformesIcon from "../../assets/Objetos/objetos.svg";
-import bandaIcon from "../../assets/Banda/banda.svg";
-import paraIcon from "../../assets/Parametrizacion/parametrizacion.svg";
-import DashboardIcon from "../../assets/Parametrizacion/parametrizacion.svg";
-
 import { Icon } from '@mdi/react';
 import {
   // Iconos para el menú lateral
@@ -47,11 +39,11 @@ import {
 // COMPONENTE PRINCIPAL
 // ==========================================
 const ParametrizacionPage = () => {
-  const { user, logout } = useAuth();
+  const { user, roles, loadingRoles, logout } = useAuth();
   const navigate = useNavigate();
   
   const userName = user?.nombre || "Usuario";
-  const rol = user?.rol || "TITULAR";
+  const rol = roles[0] || (loadingRoles ? "Cargando rol..." : "Sin rol");
   const [selectedMenu, setSelectedMenu] = useState("Parametrización");
 
   // ==========================================
@@ -95,7 +87,8 @@ const ParametrizacionPage = () => {
                    navigate(itemSeleccionado.path);
                }
             }}
-            user={{ nombre: userName, rol: rol }}
+            user={{ nombre: userName, rol }}
+            loadingRoles={loadingRoles}
             logout={logout}
           />
         }
@@ -111,8 +104,8 @@ const ParametrizacionPage = () => {
                 <div className="param-icon-wrapper">
                   <Icon 
                     path={card.iconPath} 
-                    size="32px"           // también puedes usar 2 (rem) o 32 (px)
-                    color="#b89130"       // color que desees, ej: el color de la sombra de tus tarjetas
+                    size="32px"
+                    color="#b89130"
                     className="param-icon"
                   />
                 </div>
