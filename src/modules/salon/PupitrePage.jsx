@@ -57,9 +57,9 @@ export default function PupitrePage() {
   periodos.forEach((p) => { periodosMap[p.id_periodo] = p; });
 
   const menuItems = [
-  { label: "Inicio",      icon: <Icon path={mdiHome}                    size={1} />, path: "/salon" },
-  { label: "Biblioteca",  icon: <Icon path={mdiLibrary}  size={1} />, path: "/salon/biblioteca/inicio" },
-  { label: "Pruebas",     icon: <Icon path={mdiClipboardTextOutline}    size={1} />, path: "/salon/pruebas" },
+  { label: "Inicio",      icon: <Icon path={mdiHome}                    size={1} />, path: "/salon" , roles:["titular", "admin"]},
+  { label: "Biblioteca",  icon: <Icon path={mdiLibrary}  size={1} />, path: "/salon/biblioteca/inicio" , roles:["titular", "admin"]},
+  { label: "Pruebas",     icon: <Icon path={mdiClipboardTextOutline}    size={1} />, path: "/salon/pruebas", roles:["titular", "admin"]},
 ];
 
   const columns = [

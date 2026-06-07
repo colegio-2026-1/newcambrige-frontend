@@ -21,11 +21,11 @@ import { allaniosacademicosRequest } from "../../api/endpoints";
 import { Icon } from '@mdi/react';
 import {
   mdiHome,
-  mdiChairSchool,   
-  mdiLibrary,                 // Biblioteca
-  mdiBookOpenPageVariant,     // Préstamos
-  mdiBookshelf,               // Inventario
-  mdiClipboardTextOutline,    // Pruebas
+  mdiChairSchool,
+  mdiLibrary,
+  mdiBookOpenPageVariant,
+  mdiBookshelf,
+  mdiClipboardTextOutline,
 } from '@mdi/js';
 
 import Header        from "../../components/layout/header";
@@ -74,12 +74,12 @@ export default function BibliotecaPage() {
   const periodosMap = Object.fromEntries(periodos.map((p) => [p.id_periodo, p]));
 
   const menuItems = [
-  { label: "Inicio",      icon: <Icon path={mdiHome}                    size={1} />, path: "/salon" },
-  { label: "Pupitres",    icon: <Icon path={mdiChairSchool }                size={1} />, path: "/salon/pupitre" },
-  { label: "Préstamos",   icon: <Icon path={mdiBookOpenPageVariant}     size={1} />, path: "/salon/biblioteca/inicio" },
-  { label: "Inventario",  icon: <Icon path={mdiBookshelf}               size={1} />, path: "/salon/biblioteca/inventario" },
-  { label: "Pruebas",     icon: <Icon path={mdiClipboardTextOutline}    size={1} />, path: "/salon/pruebas" },
-];
+    { label: "Inicio",     icon: <Icon path={mdiHome}                 size={1} />, path: "/salon",                     roles: ["titular", "admin"] },
+    { label: "Pupitres",   icon: <Icon path={mdiChairSchool}          size={1} />, path: "/salon/pupitre",              roles: ["titular", "admin"] },
+    { label: "Préstamos",  icon: <Icon path={mdiBookOpenPageVariant}  size={1} />, path: "/salon/biblioteca/inicio",    roles: ["titular", "admin"] },
+    { label: "Inventario", icon: <Icon path={mdiBookshelf}            size={1} />, path: "/salon/biblioteca/inventario",roles: ["titular", "admin"] },
+    { label: "Pruebas",    icon: <Icon path={mdiClipboardTextOutline} size={1} />, path: "/salon/pruebas",              roles: ["titular", "admin"] },
+  ];
 
   useEffect(() => {
     if (location.pathname.includes("inventario")) {
@@ -117,21 +117,25 @@ export default function BibliotecaPage() {
     try {
       const { data } = await getPrestamosRequest();
       const formateados = Array.isArray(data)
-        ? data.map((p) => ({
-            id:             p.id_prestamo,
-            id_prestamo:    p.id_prestamo,
-            codigo:         p.codigo  ?? "",
-            nombre:         p.nombre  ?? "",
-            grado:          p.grado   ?? "",
-            grupo:          p.grupo   ?? "",
-            titulo_libro:   p.libro   ?? "",
-            fecha_prestamo: p.fecha_prestamo    ?? "",
-            fecha_entrega:  p.fecha_devolucion  ?? "",
-            estado:
-              p.estado === "Devuelto" || p.estado === true || p.estado === "true"
-                ? "Devuelto"
-                : "Prestado",
-          }))
+        ? data.map((p) => {
+            const devuelto =
+              p.estado === "Devuelto" || p.estado === true || p.estado === "true";
+            return {
+              id:            p.id_prestamo,
+              id_prestamo:   p.id_prestamo,
+              codigo:        p.codigo  ?? "",
+              nombre:        p.nombre  ?? "",
+              grado:         p.grado   ?? "",
+              grupo:         p.grupo   ?? "",
+              titulo_libro:  p.libro   ?? "",
+              // Si ya fue devuelto → muestra la fecha real de devolución
+              // Si aún está prestado → muestra la fecha en que se prestó
+              fecha_entrega: devuelto
+                ? (p.fecha_devolucion ?? "")
+                : (p.fecha_devolucion   ?? ""),
+              estado: devuelto ? "Devuelto" : "Prestado",
+            };
+          })
         : [];
       setPrestamos(formateados);
       setPrestamosFiltered(formateados);
@@ -217,7 +221,6 @@ export default function BibliotecaPage() {
     setModalTipo("devolver");
     setFormValues({
       titulo_libro:         filaSeleccionada.titulo_libro,
-      fecha_entrega:        filaSeleccionada.fecha_entrega,
       fecha_devolucion:     new Date().toISOString().split("T")[0],
       estado_de_devolucion: "Excelente",
       observacion:          "",
@@ -304,26 +307,26 @@ export default function BibliotecaPage() {
   };
 
   const handleEliminarLibro = () => {
-  if (!filaSeleccionada) { alert("Selecciona un libro primero."); return; }
-  if (filaSeleccionada.disponible === "Prestado") {
-    alert("No es posible eliminar un libro con préstamo activo.");
-    return;
-  }
-  setModalEliminar(true);
-};
+    if (!filaSeleccionada) { alert("Selecciona un libro primero."); return; }
+    if (filaSeleccionada.disponible === "Prestado") {
+      alert("No es posible eliminar un libro con préstamo activo.");
+      return;
+    }
+    setModalEliminar(true);
+  };
 
-const confirmarEliminarLibro = async () => {
-  try {
-    await deleteLibroRequest(filaSeleccionada.id);
-    await cargarLibros();
-    await cargarPrestamos();
-    setFilaSeleccionada(null);
-    setModalEliminar(false);
-  } catch (err) {
-    console.error("Error eliminando libro:", err);
-    alert("Error en el servidor al intentar eliminar el libro.");
-  }
-};
+  const confirmarEliminarLibro = async () => {
+    try {
+      await deleteLibroRequest(filaSeleccionada.id);
+      await cargarLibros();
+      await cargarPrestamos();
+      setFilaSeleccionada(null);
+      setModalEliminar(false);
+    } catch (err) {
+      console.error("Error eliminando libro:", err);
+      alert("Error en el servidor al intentar eliminar el libro.");
+    }
+  };
 
   const filtrarPrestamos = (f) => {
     let filtered = prestamos;
@@ -425,9 +428,8 @@ const confirmarEliminarLibro = async () => {
     devolver: {
       titulo: "DEVOLVER LIBRO",
       campos: [
-        { key: "titulo_libro",         label: "Título del Libro",     type: "text", disabled: true },
-        { key: "fecha_entrega",        label: "Fecha de Entrega",     type: "text", disabled: true },
-        { key: "fecha_devolucion",     label: "Fecha de Devolución",  type: "text" },
+        { key: "titulo_libro",         label: "Título del Libro",     type: "text",   disabled: true },
+        { key: "fecha_devolucion",     label: "Fecha de Devolución",  type: "date" },
         { key: "estado_de_devolucion", label: "Estado de Devolución", type: "select", options: ["Excelente", "Regular", "Malo"] },
         { key: "observacion",          label: "Observación",          type: "text" },
       ],
