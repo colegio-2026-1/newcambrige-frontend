@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaDownload, FaCloudUploadAlt } from "react-icons/fa";
 import * as XLSX from "xlsx";
 import axiosClient from "../../api/axiosClient";
 
 import ModuleLayout from "../../components/layout/ModuleLayout";
-import ImportacionSidebar from "./ImportacionSidebar";
+import Sidebar from "../../components/layout/Sidebar";
 import Header from "../../components/layout/header";
 import { useAuth } from "../../api/useAuth";
 
@@ -15,14 +14,17 @@ import {
   cancelarScrapingRequest
 } from "../../api/importacionService";
 
+import { useImportacionGuard } from "./hooks/useImportacionGuard";
 import styles from "./ImportacionMasivaPage.module.css";
 
 import Icon from "../../components/common/Icon";
-import { mdiHome, mdiRobot, mdiServer, mdiCardAccountDetails } from '@mdi/js';
+import { mdiHome, mdiRobot, mdiServer, mdiCardAccountDetails, mdiDownload, mdiCloudUpload } from '@mdi/js';
+import Alert from "../../components/shared/Alert";
+import Modal from "../../components/shared/Modal";
 
 export default function ImportacionMasivaPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, roles, loadingRoles, logout } = useAuth();
   const { tipo } = useParams(); // 'estudiante' o 'docente'
   
   const [fileData, setFileData] = useState([]);
@@ -39,14 +41,35 @@ export default function ImportacionMasivaPage() {
   const [ejecucionInfo, setEjecucionInfo] = useState(null);
   const [modalMessage, setModalMessage] = useState("");
   const [syncDone, setSyncDone] = useState(false);
+  // true cuando la sincronización o cancelación termina: libera el guard
+  const [procesoConcluido, setProcesoConcluido] = useState(false);
+
+  // Guard de navegación: activo si hay carga en curso o modal pendiente, pero no si ya concluyó
+  const guardActivo = (isUploading || (showModal && !syncDone)) && !procesoConcluido;
+  const { handleBeforeNavigate } = useImportacionGuard({
+    isExecuting: guardActivo,
+    ejecucionId: ejecucionInfo?.id,
+    tipo: tipo,
+    onCancelCallback: () => {
+      setIsUploading(false);
+      setShowModal(false);
+      setFileData([]);
+      setProcesoConcluido(true);
+    }
+  });
 
   const tituloBandera = tipo ? tipo.toUpperCase() : "MASIVA";
   const isEstudiante = tipo === "estudiante";
 
-  const sidebarUser = user ? { ...user, rol: user.roles?.[0]?.toUpperCase() || "TITULAR" } : null;
+  const userName = user?.nombre || "Usuario";
+  const rol = roles[0] || (loadingRoles ? "Cargando rol..." : "Sin rol");
+
+  const [alertInfo, setAlertInfo] = useState({ isOpen: false, type: '', title: '', message: '' });
+  const showAlert = (type, message, title = '') => setAlertInfo({ isOpen: true, type, message, title });
+  const closeAlert = () => setAlertInfo((prev) => ({ ...prev, isOpen: false }));
 
   const menuItems = [
-    { label: "Inicio", path: "/home", icon: <Icon icon={mdiHome} size={1.5} /> },
+    { label: "Inicio", path: "/home", icon: <Icon icon={mdiHome} size={1.2} /> },
     { label: "Conexión", path: `/importacion/${tipo}`, icon: <Icon icon={mdiRobot} size={1.5} /> },
     { label: "Carga Masiva", path: `/importacion/masiva/${tipo}`, icon: <Icon icon={mdiServer} size={1.5} /> },
     { label: "Carga Individual", path: `/importacion/individual/${tipo}`, icon: <Icon icon={mdiCardAccountDetails} size={1.5} /> }
@@ -158,7 +181,7 @@ export default function ImportacionMasivaPage() {
       setShowModal(true);
       
     } catch (error) {
-      alert("Error de conexión con el servidor.");
+      showAlert("error", "Error de conexión con el servidor.");
     } finally {
       setIsUploading(false);
     }
@@ -180,7 +203,8 @@ export default function ImportacionMasivaPage() {
 
   // --- MODAL ACTIONS ---
   const handleAceptar = async () => {
-    setModalMessage("Sincronizando datos en el sistema...");
+    setShowModal(false);
+    setIsUploading(true);
     try {
       let resSync;
       if (tipo === "estudiante") {
@@ -189,29 +213,30 @@ export default function ImportacionMasivaPage() {
          resSync = await sincronizarDocentesRequest(ejecucionInfo.id);
       }
       setSyncDone(true);
-      setModalMessage(`¡Sincronización exitosa!\\nInsertados: ${resSync.data.insertados} | Actualizados: ${resSync.data.actualizados} | Rechazados: ${resSync.data.rechazados}`);
-      setFileData([]); // Limpiar la vista
+      setProcesoConcluido(true); // Liberar guard: sincronización completada
+      showAlert("success", `¡Sincronización exitosa!\nInsertados: ${resSync.data.insertados} | Actualizados: ${resSync.data.actualizados} | Rechazados: ${resSync.data.rechazados}`, "Carga Masiva Completada");
+      setFileData([]);
     } catch (e) {
-      setModalMessage("Error al sincronizar los datos.");
+      showAlert("error", "Error al sincronizar los datos.");
+      setProcesoConcluido(true); // Liberar guard incluso en error
+    } finally {
+      setIsUploading(false);
     }
   };
 
   const handleCancelar = async () => {
-    if (syncDone) {
-      setShowModal(false);
-      return;
-    }
-    const confirmar = window.confirm("¿Seguro que deseas cancelar? Se truncarán los datos de esta ejecución.");
-    if (confirmar) {
-      setModalMessage("Cancelando ejecución y limpiando datos...");
-      try {
-        await cancelarScrapingRequest(ejecucionInfo.id, tipo);
-        setShowModal(false);
-        alert("Operación cancelada. Datos truncados.");
-      } catch (e) {
-        alert("Error al cancelar la operación.");
-        setShowModal(false);
-      }
+    setShowModal(false);
+    setIsUploading(true);
+    try {
+      await cancelarScrapingRequest(ejecucionInfo.id, tipo);
+      showAlert("info", "Operación cancelada. Datos truncados.", "Cancelado");
+      setProcesoConcluido(true); // Liberar guard: cancelación completada
+    } catch (error) {
+      showAlert("error", "Error al cancelar la operación.");
+      setProcesoConcluido(true); // Liberar guard de todas formas
+    } finally {
+      setIsUploading(false);
+      setFileData([]);
     }
   };
 
@@ -220,10 +245,13 @@ export default function ImportacionMasivaPage() {
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIGDE SCHOOL" />
       <ModuleLayout
         sidebar={
-          <ImportacionSidebar
+          <Sidebar
             menuItems={menuItems}
             selectedMenu="Carga Masiva"
-            user={sidebarUser}
+            user={{ nombre: userName, rol }}
+            loadingRoles={loadingRoles}
+            logout={logout}
+            onBeforeNavigate={handleBeforeNavigate}
           />
         }
       >
@@ -234,7 +262,7 @@ export default function ImportacionMasivaPage() {
               <h3>CARGA MASIVA</h3>
               <p>Carga {tipo}s desde un archivo .xlsx</p>
               <button className={styles.downloadBtn} onClick={handleDownloadTemplate}>
-                <FaDownload /> Descargar plantilla
+                <Icon icon={mdiDownload} size={1} /> Descargar plantilla
               </button>
             </div>
 
@@ -245,7 +273,7 @@ export default function ImportacionMasivaPage() {
               onDrop={onDrop}
               onClick={() => fileInputRef.current.click()}
             >
-              <FaCloudUploadAlt className={styles.uploadIcon} />
+              <Icon icon={mdiCloudUpload} size={3} className={styles.uploadIcon} />
               <p className={styles.dropzoneText}>Arrastra tu archivo aquí o <u>seleccionar</u></p>
               <p className={styles.dropzoneSubText}>.xlsx máximo 500 registros</p>
               <input 
@@ -258,7 +286,13 @@ export default function ImportacionMasivaPage() {
             </div>
 
             <div className={styles.badgeSection}>
-              <div className={styles.badgeFlag}>{tituloBandera}</div>
+              <div 
+                className={styles.badgeFlag}
+                onClick={() => navigate("/importacion")}
+                title="Volver a Importaciones"
+              >
+                {tituloBandera}
+              </div>
             </div>
           </div>
 
@@ -330,38 +364,31 @@ export default function ImportacionMasivaPage() {
             )}
           </div>
 
-          {/* MODAL EMERGENTE */}
-          {showModal && (
-            <div className={styles.modalOverlay}>
-              <div className={styles.modalContent}>
-                <div className={styles.modalHeader}>
-                  <span>CARGA MASIVA</span>
-                  <button type="button" className={styles.closeButton} onClick={handleCancelar}>&times;</button>
-                </div>
-                <div className={styles.modalBody}>
-                  {modalMessage ? (
-                     <p style={{ whiteSpace: "pre-line" }}>{modalMessage}</p>
-                  ) : (
-                    <>
-                      <p>Información que se cargó.</p>
-                      <p>ID de Ejecución: <strong>{ejecucionInfo?.id}</strong></p>
-                      <p>Registros validados: <strong>{ejecucionInfo?.registros}</strong></p>
-                      <p>¿Desea validar e insertar los datos?</p>
-                    </>
-                  )}
-                </div>
-                <div className={styles.modalActions}>
-                  {!syncDone && <button type="button" className={styles.btnAceptar} onClick={handleAceptar}>Aceptar</button>}
-                  <button type="button" className={styles.btnCancelar} onClick={handleCancelar}>
-                    {syncDone ? "Cerrar" : "Cancelar"}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* MODAL EMERGENTE COMPONENTE GLOBAL */}
+          <Modal
+            isOpen={showModal}
+            title="CARGA MASIVA"
+            onCancel={handleCancelar}
+            onAccept={handleAceptar}
+            fields={[
+              {
+                key: "info",
+                type: "label",
+                label: (
+                  <div style={{ textAlign: "center" }}>
+                    <p>Información que se cargó.</p>
+                    <p>ID de Ejecución: <strong>{ejecucionInfo?.id}</strong></p>
+                    <p>Registros validados: <strong>{ejecucionInfo?.registros}</strong></p>
+                    <p style={{ marginTop: "20px" }}>¿Desea validar e insertar los datos?</p>
+                  </div>
+                )
+              }
+            ]}
+          />
 
         </div>
       </ModuleLayout>
+      <Alert {...alertInfo} onClose={closeAlert} />
     </div>
   );
 }

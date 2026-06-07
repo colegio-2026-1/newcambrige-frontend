@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ModuleLayout from "../../components/layout/ModuleLayout";
-import ImportacionSidebar from "./ImportacionSidebar";
+import Sidebar from "../../components/layout/Sidebar";
 import Header from "../../components/layout/header";
 import { useAuth } from "../../api/useAuth";
 
@@ -15,10 +15,13 @@ import {
   cancelarScrapingRequest
 } from "../../api/importacionService";
 
+import { useImportacionGuard } from "./hooks/useImportacionGuard";
 import styles from "./ImportacionRobotPage.module.css";
 
 import Icon from "../../components/common/Icon";
 import { mdiHome, mdiRobot, mdiServer, mdiCardAccountDetails } from '@mdi/js';
+import Alert from "../../components/shared/Alert";
+import Modal from "../../components/shared/Modal";
 
 // Videos MP4 locales
 import videoIdle from "../../assets/importacion/GIF/Robot.mp4";
@@ -28,7 +31,7 @@ import videoError from "../../assets/importacion/GIF/Robot_Error.mp4";
 
 export default function ImportacionRobotPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, roles, loadingRoles, logout } = useAuth();
   
   // :tipo vendrá en la URL (ej. 'estudiante' o 'docente')
   const { tipo } = useParams();
@@ -47,6 +50,23 @@ export default function ImportacionRobotPage() {
   // Estados del Modal
   const [showModal, setShowModal] = useState(false);
   const [ejecucionInfo, setEjecucionInfo] = useState(null);
+  // true cuando la sincronización o cancelación termina: libera el guard
+  const [procesoConcluido, setProcesoConcluido] = useState(false);
+
+  // Guard de navegación: activo solo si hay proceso en curso Y no ha concluido
+  const guardActivo = (robotState === 'loading' || robotState === 'success') && !procesoConcluido;
+  const { handleBeforeNavigate } = useImportacionGuard({
+    isExecuting: guardActivo,
+    ejecucionId: ejecucionInfo?.id,
+    tipo: tipo,
+    onCancelCallback: () => {
+      setRobotState("idle");
+      setMensaje("Operación cancelada al cambiar de vista.");
+      setProgress(0);
+      setShowModal(false);
+      setProcesoConcluido(true);
+    }
+  });
 
   // Timer para progreso simulado
   useEffect(() => {
@@ -69,10 +89,15 @@ export default function ImportacionRobotPage() {
     return () => clearInterval(intervalId);
   }, [robotState]);
 
-  const sidebarUser = user ? { ...user, rol: user.roles?.[0]?.toUpperCase() || "TITULAR" } : null;
+  const userName = user?.nombre || "Usuario";
+  const rol = roles[0] || (loadingRoles ? "Cargando rol..." : "Sin rol");
+
+  const [alertInfo, setAlertInfo] = useState({ isOpen: false, type: '', title: '', message: '' });
+  const showAlert = (type, message, title = '') => setAlertInfo({ isOpen: true, type, message, title });
+  const closeAlert = () => setAlertInfo((prev) => ({ ...prev, isOpen: false }));
 
   const menuItems = [
-    { label: "Inicio", path: "/home", icon: <Icon icon={mdiHome} size={1.5} /> },
+    { label: "Inicio", path: "/home", icon: <Icon icon={mdiHome} size={1.2} /> },
     { label: "Conexión", path: `/importacion/${tipo}`, icon: <Icon icon={mdiRobot} size={1.5} /> },
     { label: "Carga Masiva", path: `/importacion/masiva/${tipo}`, icon: <Icon icon={mdiServer} size={1.5} /> },
     { label: "Carga Individual", path: `/importacion/individual/${tipo}`, icon: <Icon icon={mdiCardAccountDetails} size={1.5} /> }
@@ -137,7 +162,7 @@ export default function ImportacionRobotPage() {
 
       if (resScraping.data.estado === "error") {
         setRobotState("error");
-        setMensaje("El robot se ha tropezado. Revisa la consola o los logs.");
+        setMensaje("Algo falló, revisa credenciales y conexión a internet");
       } else if (resScraping.data.estado === "completado_con_errores") {
         setRobotState("error");
         setMensaje("Scraping finalizado, pero hubo algunos errores de extracción.");
@@ -152,8 +177,9 @@ export default function ImportacionRobotPage() {
       }
 
     } catch (error) {
-      alert("Ocurrió un error al contactar al servidor.");
-      setMensaje("Error crítico de conexión. Asegúrate de que las credenciales sean correctas.");
+      showAlert("error", "Ocurrió un error al contactar al servidor.");
+      setRobotState("error");
+      setMensaje("Algo falló, revisa credenciales y conexión a internet");
     }
   };
 
@@ -170,27 +196,28 @@ export default function ImportacionRobotPage() {
       }
       setRobotState("success");
       setMensaje(`¡Sincronización exitosa!\\nInsertados: ${resSync.data.insertados} | Actualizados: ${resSync.data.actualizados} | Rechazados: ${resSync.data.rechazados}`);
+      setProcesoConcluido(true); // Liberar guard: proceso terminó correctamente
     } catch (e) {
       setRobotState("error");
       setMensaje("Error al sincronizar los datos.");
+      setProcesoConcluido(true); // Liberar guard incluso en error: no hay staging pendiente
     }
   };
 
   const handleCancelar = async () => {
-    const confirmar = window.confirm("¿Seguro que deseas cancelar? Se truncarán los datos descargados en esta ejecución.");
-    if (confirmar) {
-      setShowModal(false);
-      setRobotState("loading");
-      setMensaje("Cancelando ejecución y limpiando datos temporales...");
-      try {
-        await cancelarScrapingRequest(ejecucionInfo.id, tipo);
-        setRobotState("idle");
-        setMensaje("Operación cancelada. Datos truncados exitosamente.");
-        setProgress(0);
-      } catch (e) {
-        setRobotState("error");
-        setMensaje("Error al cancelar la operación.");
-      }
+    setShowModal(false);
+    setRobotState("loading");
+    setMensaje("Cancelando ejecución y limpiando datos temporales...");
+    try {
+      await cancelarScrapingRequest(ejecucionInfo.id, tipo);
+      setRobotState("idle");
+      setMensaje("Operación cancelada. Datos truncados exitosamente.");
+      setProgress(0);
+      setProcesoConcluido(true); // Liberar guard: cancelación completada
+    } catch (e) {
+      setRobotState("error");
+      setMensaje("Error al cancelar la operación.");
+      setProcesoConcluido(true); // Liberar guard de todas formas
     }
   };
 
@@ -209,10 +236,13 @@ export default function ImportacionRobotPage() {
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIGDE SCHOOL" />
       <ModuleLayout
         sidebar={
-          <ImportacionSidebar
+          <Sidebar
             menuItems={menuItems}
             selectedMenu="Conexión"
-            user={sidebarUser}
+            user={{ nombre: userName, rol }}
+            loadingRoles={loadingRoles}
+            logout={logout}
+            onBeforeNavigate={handleBeforeNavigate}
           />
         }
       >
@@ -256,7 +286,13 @@ export default function ImportacionRobotPage() {
             </form>
 
             <div className={styles.badgeSection}>
-              <div className={styles.badgeFlag}>{tituloBandera}</div>
+              <div 
+                className={styles.badgeFlag}
+                onClick={() => navigate("/importacion")}
+                title="Volver a Importaciones"
+              >
+                {tituloBandera}
+              </div>
             </div>
           </div>
 
@@ -296,30 +332,31 @@ export default function ImportacionRobotPage() {
             </div>
           </div>
 
-          {/* MODAL EMERGENTE */}
-          {showModal && (
-            <div className={styles.modalOverlay}>
-              <div className={styles.modalContent}>
-                <div className={styles.modalHeader}>
-                  <span>CONEXIÓN DEL ROBOT</span>
-                  <button type="button" className={styles.closeButton} onClick={handleCancelar}>&times;</button>
-                </div>
-                <div className={styles.modalBody}>
-                  <p>Información que se cargó.</p>
-                  <p>ID de Ejecución: <strong>{ejecucionInfo?.id}</strong></p>
-                  <p>Registros listos: <strong>{ejecucionInfo?.registros}</strong></p>
-                  <p>¿Desea validar e insertar los datos?</p>
-                </div>
-                <div className={styles.modalActions}>
-                  <button type="button" className={styles.btnAceptar} onClick={handleAceptar}>Aceptar</button>
-                  <button type="button" className={styles.btnCancelar} onClick={handleCancelar}>Cancelar</button>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* MODAL EMERGENTE COMPONENTE GLOBAL */}
+          <Modal
+            isOpen={showModal}
+            title="CONEXIÓN DEL ROBOT"
+            onCancel={handleCancelar}
+            onAccept={handleAceptar}
+            fields={[
+              {
+                key: "info",
+                type: "label",
+                label: (
+                  <div style={{ textAlign: "center" }}>
+                    <p>Información que se cargó.</p>
+                    <p>ID de Ejecución: <strong>{ejecucionInfo?.id}</strong></p>
+                    <p>Registros listos: <strong>{ejecucionInfo?.registros}</strong></p>
+                    <p style={{ marginTop: "20px" }}>¿Desea validar e insertar los datos?</p>
+                  </div>
+                )
+              }
+            ]}
+          />
 
         </div>
       </ModuleLayout>
+      <Alert {...alertInfo} onClose={closeAlert} />
     </div>
   );
 }

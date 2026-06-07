@@ -9,11 +9,7 @@ import DashboardRouter  from "./DashboardRouter";
 import SalonRouter      from "./SalonRouter";
 import UniformeRouter   from "./UniformeRouter";
 import ParametrizacionRouter from "./ParametrizacionRouter";
-
-import ImportacionPage from '../modules/importacion/ImportacionPage';
-import ImportacionRobotPage from '../modules/importacion/ImportacionRobotPage';
-import ImportacionMasivaPage from '../modules/importacion/ImportacionMasivaPage';
-import ImportacionIndividualPage from '../modules/importacion/ImportacionIndividualPage';
+import ImportacionRouter from "./ImportacionRouter";
 
 import NotFound from "../modules/notFound/notFound";
 import Home     from "../modules/Home/HomePage";
@@ -40,43 +36,8 @@ const AppRouter = () => {
       {DashboardRouter()}
       {SalonRouter()}
       {UniformeRouter()}
-      {ParametrizacionRouter()}   {/* ✅ AHORA INCLUYE todas las rutas de parametrización */}
-
-      <Route 
-        path="/importacion" 
-        element={
-          <ProtectedRoute>
-             <ImportacionPage />
-          </ProtectedRoute>
-        } 
-      />
-
-      <Route 
-        path="/importacion/:tipo" 
-        element={
-          <ProtectedRoute>
-             <ImportacionRobotPage />
-          </ProtectedRoute>
-        } 
-      />
-
-      <Route 
-        path="/importacion/masiva/:tipo" 
-        element={
-          <ProtectedRoute>
-             <ImportacionMasivaPage />
-          </ProtectedRoute>
-        } 
-      />
-
-      <Route 
-        path="/importacion/individual/:tipo" 
-        element={
-          <ProtectedRoute>
-             <ImportacionIndividualPage />
-          </ProtectedRoute>
-        } 
-      />
+      {ParametrizacionRouter()}
+      {ImportacionRouter()}
 
       {/* RUTA DE PRUEBAS / TEST */}
       <Route path="/test" element={<TestPage />} />

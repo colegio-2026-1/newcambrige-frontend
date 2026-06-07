@@ -4,10 +4,12 @@ import Icon from "../../components/common/Icon";
 import { mdiHome } from '@mdi/js';
 
 import ModuleLayout from "../../components/layout/ModuleLayout";
-import ImportacionSidebar from "./ImportacionSidebar";
+import Sidebar from "../../components/layout/Sidebar";
 import Header from "../../components/layout/header";
+import CardsGrid from "../../components/layout/CardsGrid";
 
-import styles from "./ImportacionPage.module.css";
+import "./Importacion.css";
+
 import { useAuth } from "../../api/useAuth";
 
 // Eliminamos lucide-react y prepararemos las imágenes que enviaste
@@ -17,18 +19,24 @@ import iconDocente from "../../assets/importacion/docente.svg";
 
 export default function ImportacionPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, roles, loadingRoles, logout } = useAuth();
+  
+  const userName = user?.nombre || "Usuario";
+  const rol = roles[0] || (loadingRoles ? "Cargando rol..." : "Sin rol");
+  const selectedMenu = "Importaciones";
 
   const menuItems = [
     { label: "Inicio", path: "/home", icon: <Icon icon={mdiHome} size={1.2} /> },
+    { label: "Importaciones", path: "/importacion" },
   ];
 
-  const handleEstudianteClick = () => {
-    navigate("/importacion/estudiante");
-  };
+  const cards = [
+    { title: "Estudiante", icon: iconEstudiante, path: "/importacion/estudiante", roles: ["admin", "administrador", "secretaria", "titular", "robot"] },
+    { title: "Docente", icon: iconDocente, path: "/importacion/docente", roles: ["admin", "administrador", "secretaria", "titular", "robot"] },
+  ];
 
-  const handleDocenteClick = () => {
-    navigate("/importacion/docente");
+  const handleCardClick = (path) => {
+    navigate(path);
   };
 
   // useEffect para forzar el fondo blanco en el contenedor padre (module-content)
@@ -54,34 +62,22 @@ export default function ImportacionPage() {
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIGDE SCHOOL" />
       <ModuleLayout
         sidebar={
-          <ImportacionSidebar
+          <Sidebar
             menuItems={menuItems}
-            selectedMenu="Inicio"
-            user={user}
+            selectedMenu={selectedMenu}
+            user={{ nombre: userName, rol }}
+            loadingRoles={loadingRoles}
+            logout={logout}
           />
         }
       >
-        <div className={styles.container}>
-          <div className={styles.cardsWrapper}>
-            
-            {/* Tarjeta Estudiante */}
-            <button className={styles.cardBtn} onClick={handleEstudianteClick}>
-              <h2 className={styles.cardTitle}>Estudiante</h2>
-              <div className={styles.iconWrapper}>
-                {/* Aquí cargamos la imagen en lugar del ícono */}
-                <img src={iconEstudiante} alt="Estudiante" className={styles.customIcon} />
-              </div>
-            </button>
-
-            {/* Tarjeta Docente */}
-            <button className={styles.cardBtn} onClick={handleDocenteClick}>
-              <h2 className={styles.cardTitle}>Docente</h2>
-              <div className={styles.iconWrapper}>
-                <img src={iconDocente} alt="Docente" className={styles.customIcon} />
-              </div>
-            </button>
-
-          </div>
+        <div className="importacion-content">
+          <CardsGrid 
+            cards={cards} 
+            roles={roles} 
+            loading={loadingRoles} 
+            onCardClick={handleCardClick} 
+          />
         </div>
       </ModuleLayout>
     </div>

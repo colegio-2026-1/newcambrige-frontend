@@ -10,6 +10,7 @@ export default function Sidebar({
   selectedMenu,
   setSelectedMenu,
   user: propUser,
+  onBeforeNavigate,
 }) {
 
   
@@ -18,10 +19,14 @@ export default function Sidebar({
   const { user: authUser, logout } = useAuth();
   const user = propUser || authUser;
 
-  const handleNavigation = (item, e) => {
+  const handleNavigation = async (item, e) => {
     e.preventDefault();
     e.stopPropagation();
-    //setSelectedMenu(item.label);
+
+    if (onBeforeNavigate) {
+      const canNavigate = await onBeforeNavigate(item);
+      if (!canNavigate) return;
+    }
     
     //(es solo un planteamiento de redireccion se debe modificar segun sea el caso)
 

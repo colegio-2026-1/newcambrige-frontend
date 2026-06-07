@@ -5,7 +5,7 @@
   flex: 1; /* Para que ocupe todo el espacio del padre */
   width: 100%;
   min-height: calc(100vh - var(--header-height));
-  background-color: #FFFFFF; /* Fondo completamente blanco */
+  background-color: var(--color-bg); /* Fondo completamente blanco */
 }
 
 .cardsWrapper {

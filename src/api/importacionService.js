@@ -19,6 +19,12 @@ export const iniciarScrapingDocentesRequest = () =>
     axiosClient.post("/api/importacion/scraping/docentes");
 
 // ==============================
+// CARGA INDIVIDUAL
+// ==============================
+export const crearIndividualRequest = (tipo, datos) =>
+    axiosClient.post("/api/importacion/carga-individual", { tipo, datos });
+
+// ==============================
 // SINCRONIZACIÓN Y CANCELACIÓN
 // ==============================
 export const sincronizarEstudiantesRequest = (ejecucion_id) =>
