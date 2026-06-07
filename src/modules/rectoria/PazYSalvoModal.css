@@ -1,0 +1,134 @@
+@import url('https://fonts.googleapis.com/css2?family=Bentham&display=swap');
+
+.paz-salvo-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.paz-salvo-modal {
+  width: 900px;
+  min-height: 620px;
+
+  background: white;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0,0,0,.25);
+
+  font-family: 'Bentham', serif;
+}
+.paz-salvo-header {
+  background: #c8d7f0;
+  padding: 18px;
+  position: relative;
+  text-align: center;
+}
+
+.paz-salvo-header h2 {
+  margin: 0;
+  font-family: 'Bentham', serif;
+  font-size: 54px;
+  font-weight: bold;
+}
+
+.paz-salvo-close {
+  position: absolute;
+  right: 12px;
+  top: 8px;
+  border: none;
+  background: transparent;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.paz-salvo-info {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px 30px;
+}
+
+.paz-salvo-dato {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.paz-salvo-linea {
+  min-width: 240px;
+  border-bottom: 1px solid #888;
+  padding-bottom: 4px;
+}
+
+.paz-salvo-grid {
+  padding: 30px 35px;
+
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+
+  row-gap: 45px;
+  column-gap: 35px;
+}
+
+.firma-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.firma-linea {
+  width: 170px;
+  border-top: 1px solid #777;
+  margin-bottom: 8px;
+}
+
+.firma-item span {
+  font-family: 'Bentham', serif;
+  font-size: 28px;
+  line-height: 1;
+}
+.paz-salvo-sello {
+  width: 90px;
+  height: 90px;
+
+  object-fit: contain;
+
+  margin-top: 4px;
+  margin-bottom: 6px;
+}
+
+.paz-salvo-footer {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px;
+}
+
+.paz-btn {
+  background: #3f63a5;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 24px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.paz-btn:hover {
+  opacity: .9;
+}
+.paz-salvo-info {
+  padding: 22px 30px;
+}
+
+.paz-salvo-dato span {
+  font-size: 24px;
+  font-family: 'Bentham', serif;
+}
+
+.paz-salvo-linea {
+  font-size: 22px;
+  font-family: 'Bentham', serif;
+}

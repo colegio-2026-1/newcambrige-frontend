@@ -13,6 +13,7 @@ import ParametrizacionRouter from "./ParametrizacionRouter";
 import NotFound from "../modules/notFound/notFound";
 import Home     from "../modules/Home/HomePage";
 import TestPage from "../modules/test/testPage";
+import RectoriaRoutes from "./RectoriaRouter";
 
 const AppRouter = () => {
   return (
@@ -36,6 +37,7 @@ const AppRouter = () => {
       {SalonRouter()}
       {UniformeRouter()}
       {ParametrizacionRouter()}   {/* ✅ AHORA INCLUYE todas las rutas de parametrización */}
+      {RectoriaRoutes()}
 
       {/* RUTA DE PRUEBAS / TEST */}
       <Route path="/test" element={<TestPage />} />
