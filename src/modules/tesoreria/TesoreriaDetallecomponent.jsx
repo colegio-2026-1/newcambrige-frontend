@@ -8,8 +8,8 @@ import {
   alltipoconceptoRequest,
   crearDetalleRequest
 } from '../../api/endpointsTesoreria';
-
-import { Home } from "lucide-react";
+import Icon from '@mdi/react';
+import { mdiHome } from "@mdi/js";
 import { useAuth } from "../../api/useAuth";
 import Header from "../../components/layout/header";
 import ModuleLayout from "../../components/layout/ModuleLayout";
@@ -18,6 +18,7 @@ import SearchBar from "../../components/shared/searchBar";
 import DataTable from "../../components/shared/DataTable";
 import ActionButtons from "../../components/shared/ActionButtons";
 import Modal from "../../components/shared/Modal";
+import Alert from "../../components/shared/Alert";
 
 const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }) => {
   const [selectedModule, setSelectedModule] = useState(selectedMenu);
@@ -31,6 +32,7 @@ const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }
   const [fila, setFila] = useState(null);
   const [modal, setModal] = useState(false);
   const [modalVer, setModalVer] = useState(false);
+  const [alert, setAlert] = useState({ isOpen: false, type: "", title: "", message: "" });
   const [cargandoPeriodos, setCargandoPeriodos] = useState(true);
   const [cargandoTipo, setCargandoTipo] = useState(true);
   const [tipo, setTipo] = useState([]);
@@ -236,12 +238,12 @@ const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }
     }
     const matricula = matriculasMap[fila.id_estudiante];
     if (!matricula) {
-      alert("El estudiante no tiene una matrícula activa en este período.");
+      showAlert("error", "El estudiante no tiene una matrícula activa en este período.");
       return;
     }
     const id_tipo = tipoMap[tiporecibed]?.id_tipo;
     if (!id_tipo) {
-      alert("Tipo de concepto no válido.");
+      showAlert("error", "Tipo de concepto no válido.");
       return;
     }
     try {
@@ -255,10 +257,10 @@ const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }
       await cargarDetalles(idPeriodoActual, id_tipo);
       // Limpiar selección para que se actualice el estado de pago en la fila seleccionada
       setFila(null);
-      alert("Pago registrado correctamente");
+      showAlert("success", "Pago registrado correctamente.");
     } catch (error) {
       console.error(`Error al crear el detalle ${tiporecibed}:`, error);
-      alert(error.response?.data?.detail || "Error al registrar el pago");
+      showAlert("error", error.response?.data?.detail || "Error al registrar el pago");
     }
   };
 
@@ -266,9 +268,14 @@ const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }
   // Configuración del sidebar
   // =========================
   const modulos = modulosRecibed || [
-    { label: "Inicio", icon: <Home />, path: "/tesoreria" },
+    { label: "Inicio", icon: <Icon path={mdiHome} />, path: "/home" },
   ];
 
+  const showAlert = (type, message, title = "") =>
+    setAlert({ isOpen: true, type, message, title });
+
+  const closeAlert = () =>
+    setAlert((prev) => ({ ...prev, isOpen: false }));
   // =========================
   // Renderizado principal
   // =========================
@@ -453,7 +460,7 @@ const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }
         onAccept={() => { setModal(false); crearDetalle(); }}
         onCancel={() => setModal(false)}
       />
-
+      <Alert {...alert} onClose={closeAlert} />
       {/* Modal ver detalles de pagos */}
       <Modal
         title={tiporecibed}

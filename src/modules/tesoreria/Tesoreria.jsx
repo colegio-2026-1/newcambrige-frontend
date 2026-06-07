@@ -1,7 +1,8 @@
 // src/pages/Tesoreria/Tesoreria.js
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home } from "lucide-react";
+import { Icon } from '@mdi/react';
+import { mdiHome, mdiCash, mdiBell } from "@mdi/js";
 import { useAuth } from "../../api/useAuth";
 import Header from "../../components/layout/header";
 import ModuleLayout from "../../components/layout/ModuleLayout";
@@ -30,9 +31,9 @@ const Tesoreria = () => {
 
   // Items del sidebar (con roles para filtrar)
   const modulos = [
-    { label: "Inicio", icon: <Home />, path: "/home" },
-    { label: "Tesoreria", path: "/tesoreria/", roles: ["secretaria", "admin", "tesoreria"] },
-    { label: "Notificaciones", path: "/tesoreria/notificaciones", roles: ["secretaria", "admin", "tesoreria"] },
+    { label: "Inicio", icon: <Icon path={mdiHome} />, path: "/home" },
+    { label: "Tesoreria", icon: <Icon path={mdiCash} />, path: "/tesoreria/", roles: ["secretaria", "admin", "tesoreria"] },
+    { label: "Notificaciones", icon: <Icon path={mdiBell} />, path: "/tesoreria/notificaciones", roles: ["secretaria", "admin", "tesoreria"] },
   ];
 
   // Filtrar los módulos del sidebar según los roles del usuario
