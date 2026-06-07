@@ -6,8 +6,8 @@ import {
   allmatriculasbyperiodoRequest,
   crearMatriculaRequest
 } from '../../api/endpointsTesoreria';
-
-import { Home } from "lucide-react";
+import { Icon } from '@mdi/react';
+import { mdiHome,  mdiHandCoin, mdiBookEducation, mdiNotebookEdit  } from "@mdi/js";
 import { useAuth } from "../../api/useAuth";
 import Header from "../../components/layout/header";
 import ModuleLayout from "../../components/layout/ModuleLayout";
@@ -16,6 +16,7 @@ import SearchBar from "../../components/shared/searchBar";
 import DataTable from "../../components/shared/DataTable";
 import ActionButtons from "../../components/shared/ActionButtons";
 import Modal from "../../components/shared/Modal";
+import Alert from "../../components/shared/Alert"
 
 const TesoreriaMatricula = () => {
   const [selectedMenu, setSelectedMenu] = useState("Matricula");
@@ -26,6 +27,7 @@ const TesoreriaMatricula = () => {
   const [periodos, setPeriodos] = useState([]);
   const [fila, setFila] = useState(null);
   const [modal, setModal] = useState(false);
+  const [alert, setAlert] = useState({ isOpen: false, type: "", title: "", message: "" });
   const [cargandoPeriodos, setCargandoPeriodos] = useState(true);
   const [filtros, setFiltros] = useState({
     documento: "",
@@ -142,8 +144,10 @@ const TesoreriaMatricula = () => {
         cargarMatriculas(idPeriodoActual);
       }
       setFila(null);
+      showAlert("success", "Pago registrado correctamente.");
     } catch (error) {
       console.error("Error al crear la matrícula:", error);
+      showAlert("error", error.response?.data?.detail || "Error al registrar el pago");
     }
   };
 
@@ -151,11 +155,16 @@ const TesoreriaMatricula = () => {
   // Configuración del sidebar
   // =========================
   const modulos = [
-    { label: "Inicio", icon: <Home />, path: "/tesoreria" },
-    { label: "Matricula", path: "/tesoreria/matricula", roles: ["secretaria", "admin", "tesoreria"] },
-    { label: "Pension", path: "/tesoreria/pension", roles: ["secretaria", "admin", "tesoreria"] },
-    { label: "Papeleria", path: "/tesoreria/papeleria", roles: ["secretaria", "admin", "tesoreria"] },
+    { label: "Inicio", icon: <Icon path={mdiHome} />, path: "/home" },
+    { label: "Matricula", icon: <Icon path={mdiHandCoin} />, path: "/tesoreria/matricula", roles: ["secretaria", "admin", "tesoreria"] },
+    { label: "Pension", icon: <Icon path={mdiBookEducation} />, path: "/tesoreria/pension", roles: ["secretaria", "admin", "tesoreria"] },
+    { label: "Papeleria", icon: <Icon path={mdiNotebookEdit} />, path: "/tesoreria/papeleria", roles: ["secretaria", "admin", "tesoreria"] },
   ];
+  const showAlert = (type, message, title = "") =>
+    setAlert({ isOpen: true, type, message, title });
+
+  const closeAlert = () =>
+    setAlert((prev) => ({ ...prev, isOpen: false }));
 
   // =========================
   // Renderizado principal
@@ -311,7 +320,7 @@ const TesoreriaMatricula = () => {
           </div>
         )}
       </ModuleLayout>
-
+      <Alert {...alert} onClose={closeAlert} />
       <Modal
         title={`¿Confirmas que el estudiante ${fila?.nombre || ""} ha realizado el pago de la matrícula?`}
         isOpen={modal}
