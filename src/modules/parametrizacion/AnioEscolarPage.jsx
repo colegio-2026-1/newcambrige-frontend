@@ -327,7 +327,6 @@ const AnioEscolarPage = () => {
           <div className="anio-main-area">
             {anios.length === 0 ? (
               <div className="anio-empty-state">
-                <p>Aún no hay años escolares registrados</p>
               </div>
             ) : aniosFiltrados.length === 0 ? (
                 <div className="anio-empty-state">
