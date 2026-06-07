@@ -12,25 +12,22 @@ import {
 import PruebasIcon    from "../../assets/Salon/pruebas.svg";
 import BibliotecaIcon from "../../assets/Salon/biblioteca.svg";
 
-import { allrolesuserRequest, allaniosacademicosRequest } from "../../api/endpoints";
+import { allaniosacademicosRequest } from "../../api/endpoints";
 import Header         from "../../components/layout/header";
 import ModuleLayout   from "../../components/layout/ModuleLayout";
 import Sidebar        from "../../components/layout/Sidebar";
-import SearchBar      from "../../components/shared/SearchBar";
+import SearchBar      from "../../components/shared/searchBar";
 import DataTable      from "../../components/shared/DataTable";
 import ActionButtons  from "../../components/shared/ActionButtons";
 import Modal          from "../../components/shared/Modal";
 
 export default function PupitrePage() {
   const navigate  = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, roles, loadingRoles, logout } = useAuth();
 
   // ── Auth ──────────────────────────────────────────────────────────────────
   const userName = user?.nombre || "Usuario";
-  const idUser   = user?.id_usuario;
-  const [roles, setRoles]           = useState([]);
-  const [cargandoRol, setCargandoRol] = useState(true);
-  const rol = roles[0] || "Rol Desconocido";
+  const rol = roles[0] || (loadingRoles ? "Cargando rol..." : "Sin rol");
 
   // ── UI ────────────────────────────────────────────────────────────────────
   const [fila, setFila]   = useState(null);
@@ -82,24 +79,6 @@ export default function PupitrePage() {
       render: (val) => (!val || val === "" ? <span>---</span> : <span>{val}</span>),
     },
   ];
-
-  // ── Carga de roles ────────────────────────────────────────────────────────
-  useEffect(() => {
-    const obtenerRoles = async () => {
-      if (!idUser) return;
-      try {
-        setCargandoRol(true);
-        const response = await allrolesuserRequest(idUser);
-        setRoles(response?.data || []);
-      } catch (error) {
-        console.error("Error al obtener el rol:", error);
-        setRoles([]);
-      } finally {
-        setCargandoRol(false);
-      }
-    };
-    obtenerRoles();
-  }, [idUser]);
 
   // ── Carga de datos ────────────────────────────────────────────────────────
   const cargarPupitres = async () => {
@@ -197,9 +176,7 @@ export default function PupitrePage() {
     setFila(null);
   };
 
-  // ── Loading / Error ───────────────────────────────────────────────────────
-  if (loading) return <div>Cargando pupitres...</div>;
-  if (error)   return <div>Error cargando datos: {error}</div>;
+
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -218,6 +195,7 @@ export default function PupitrePage() {
             selectedMenu="Pupitres"
             setSelectedMenu={() => {}}
             user={{ nombre: userName, rol: rol }}
+            loadingRoles={loadingRoles}
             logout={logout}
           />
         }
