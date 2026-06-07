@@ -22,9 +22,9 @@
     background: var(--color-white);
     border-radius: var(--radius-lg);
     border: var(--border-width) solid var(--color-border-light);
-    padding: var(--space-8) var(--space-10);
+    padding: var(--space-10) var(--space-12);  /*padding*/
     width: 100%;
-    max-width: 380px;
+    max-width: 480px;                          /*ancho maximo*/
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -41,8 +41,8 @@
 /* ── ÍCONO ── */
 
 .alert-icon {
-    width: 56px;
-    height: 56px;
+    width: 72px;                    /*ancho*/
+    height: 72px;                   /*alto*/
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -127,8 +127,9 @@
     background: var(--color-success);
 }
 .alert-btn--success:hover {
-    background: #235e3b;
+    background: var(--color-success-dark);
 }
+
 
 .alert-btn--error {
     background: var(--color-danger);
@@ -141,7 +142,7 @@
     background: var(--color-warning);
 }
 .alert-btn--warning:hover {
-    background: #7a4900;
+    background: var(--color-warning-dark);
 }
 
 .alert-btn--info {

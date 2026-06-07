@@ -82,12 +82,6 @@ export const useAuth = () => {
     // Si ya tenemos usuario y roles en caché, no llamamos a la API
     const cachedUser = sessionStorage.getItem("user");
     const cachedRoles = sessionStorage.getItem("roles");
-    if (cachedUser && cachedRoles) {
-      setUser(JSON.parse(cachedUser));
-      setRoles(JSON.parse(cachedRoles));
-      setLoadingRoles(false);
-      return;
-    }
     try {
       const meResponse = await getMeRequest();
       const userData = meResponse.data;
