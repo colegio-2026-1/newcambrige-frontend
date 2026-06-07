@@ -16,7 +16,7 @@ import SearchBar from "../../components/shared/searchBar";
 import DataTable from "../../components/shared/DataTable";
 import ActionButtons from "../../components/shared/ActionButtons";
 import Modal from "../../components/shared/Modal";
-import Alert from "../../components/shared/Alert"
+import Alert from "../../components/shared/Alert";
 
 const TesoreriaMatricula = () => {
   const [selectedMenu, setSelectedMenu] = useState("Matricula");
@@ -46,16 +46,6 @@ const TesoreriaMatricula = () => {
   const rolespermitidos = ["secretaria", "admin", "tesoreria"];
 
   // =========================
-  // Mapeos para acceso rápido
-  // =========================
-  const salonesMap = {};
-  salones.forEach(s => { salonesMap[s.id_salon] = s; });
-  const matriculasMap = {};
-  matriculas.forEach(m => { matriculasMap[m.id_estudiante] = m; });
-  const periodoMapname = {};
-  periodos.forEach(p => { periodoMapname[p.nombre] = p; });
-
-  // =========================
   // Carga de períodos
   // =========================
   const cargarPeriodos = async () => {
@@ -66,6 +56,7 @@ const TesoreriaMatricula = () => {
       setCargandoPeriodos(false);
     } catch (error) {
       console.error("Error cargando periodos:", error);
+      setCargandoPeriodos(false);
     }
   };
 
@@ -104,6 +95,14 @@ const TesoreriaMatricula = () => {
     }
   };
 
+  // Reconstruir mapeos cuando cambian los datos
+  const salonesMap = {};
+  salones.forEach(s => { salonesMap[s.id_salon] = s; });
+  const matriculasMap = {};
+  matriculas.forEach(m => { matriculasMap[m.id_estudiante] = m; });
+  const periodoMapname = {};
+  periodos.forEach(p => { periodoMapname[p.nombre] = p; });
+
   useEffect(() => {
     const idPeriodoActual = periodoMapname[filtros.Periodo]?.id_periodo;
     if (idPeriodoActual) {
@@ -111,7 +110,7 @@ const TesoreriaMatricula = () => {
       cargarSalones(idPeriodoActual);
       cargarMatriculas(idPeriodoActual);
     }
-  }, [filtros.Periodo]);
+  }, [filtros.Periodo, periodos]); // Dependencia en periodos para actualizar mapa
 
   // =========================
   // Filtrado de estudiantes
@@ -160,6 +159,7 @@ const TesoreriaMatricula = () => {
     { label: "Pension", icon: <Icon path={mdiBookEducation} />, path: "/tesoreria/pension", roles: ["secretaria", "admin", "tesoreria"] },
     { label: "Papeleria", icon: <Icon path={mdiNotebookEdit} />, path: "/tesoreria/papeleria", roles: ["secretaria", "admin", "tesoreria"] },
   ];
+
   const showAlert = (type, message, title = "") =>
     setAlert({ isOpen: true, type, message, title });
 
@@ -167,158 +167,176 @@ const TesoreriaMatricula = () => {
     setAlert((prev) => ({ ...prev, isOpen: false }));
 
   // =========================
-  // Renderizado principal
+  // Renderizado principal (sin mensaje de carga)
   // =========================
-  return (
-    <div>
-      <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
-      <ModuleLayout
-        sidebar={
-          <Sidebar
-            menuItems={modulos.filter(modulo => {
-              if (!modulo) return false;
-              if (!modulo.roles || !Array.isArray(modulo.roles) || modulo.roles.length === 0) return true;
-              return roles.some(r => modulo.roles.includes(r));
-            })}
-            selectedMenu={selectedMenu}
-            user={{ nombre: userName, rol }}
-            loadingRoles={loadingRoles}
-            onLogout={logout}
-          />
-        }
-        actions={
-          <ActionButtons
-            filaSeleccionada={fila}
-            botones={
-              roles.some(r => rolespermitidos.includes(r))
-                ? [
-                    {
-                      label: "Validar Pago",
-                      onClick: () => setModal(true),
-                      siempreActivo: false,
-                      variante: "primary",
-                      disabled:
-                        matriculasMap[fila?.id_estudiante] ||
-                        !periodoMapname[filtros.Periodo]?.activo ||
-                        (fila && salonesMap[fila.id_salon]?.id_periodo !== periodoMapname[filtros.Periodo]?.id_periodo)
-                    }
-                  ]
-                : []
-            }
-          />
-        }
-      >
-        {loadingRoles || cargandoPeriodos ? (
-          <div className="status-message status-message--loading">
-            Cargando módulo Matrícula...
-          </div>
-        ) : roles.some(r => rolespermitidos.includes(r)) ? (
-          <div>
-            <SearchBar
-              fields={[
-                { key: "documento", label: "Código", type: "number", maxLength: 10 },
-                { key: "nombre", label: "Nombre", type: "text", maxLength: 100 },
-                {
-                  key: "Grado",
-                  label: "Grado",
-                  type: "select",
-                  options: Array.from(new Set(
-                    Object.values(salonesMap)
-                      .filter(s => s.id_periodo === periodoMapname[filtros.Periodo]?.id_periodo)
-                      .map(s => s.grado).filter(Boolean)
-                  ))
-                },
-                {
-                  key: "Grupo",
-                  label: "Grupo",
-                  type: "select",
-                  options: Array.from(new Set(
-                    Object.values(salonesMap)
-                      .filter(s => (s.grado).toString() === filtros.Grado)
-                      .map(s => s.grupo).filter(Boolean)
-                  ))
-                },
-                {
-                  key: "Periodo",
-                  label: "Periodo",
-                  type: "select",
-                  options: periodos.map(p => p.nombre).filter(Boolean)
-                }
-              ]}
-              initialValues={{ Periodo: periodos[0]?.nombre }}
-              onChange={(key, value) => {
-                setFiltros(prev => {
-                  const nuevos = { ...prev, [key]: value };
-                  if (key === "Grado") nuevos.Grupo = "";
-                  if (key === "Periodo") {
-                    nuevos.Grado = "";
-                    nuevos.Grupo = "";
-                  }
-                  return nuevos;
-                });
-              }}
-              onSearch={(f) => {
-                FiltrarEstudiantes(f);
-                setFiltros(f);
-                setFila(null);
-              }}
-              cleanFilter={{ documento: "", nombre: "", Grado: "", Grupo: "", Periodo: filtros.Periodo }}
-            />
+  const sidebar = (
+    <Sidebar
+      menuItems={modulos.filter(modulo => {
+        if (!modulo) return false;
+        if (!modulo.roles || !Array.isArray(modulo.roles) || modulo.roles.length === 0) return true;
+        return roles.some(r => modulo.roles.includes(r));
+      })}
+      selectedMenu={selectedMenu}
+      user={{ nombre: userName, rol }}
+      loadingRoles={loadingRoles}
+      onLogout={logout}
+    />
+  );
 
-            <DataTable
-              key={matriculas.length}
-              pageSize={10}
-              columns={[
-                { key: "documento", label: "Documento" },
-                { key: "nombre", label: "Nombre" },
-                {
-                  key: "grado",
-                  label: "Grado",
-                  render: (_, val) => <span>{salonesMap[val.id_salon]?.grado}</span>
-                },
-                {
-                  key: "grupo",
-                  label: "Grupo",
-                  render: (_, val) => <span>{salonesMap[val.id_salon]?.grupo}</span>
-                },
-                {
-                  key: "pago",
-                  label: "Pago",
-                  render: (_, val) => {
-                    const matricula = matriculasMap[val.id_estudiante];
-                    let estado = matricula?.estado;
-                    let texto = "Pendiente";
-                    let clase = "badge--no";
-                    if (estado === "activa") {
-                      texto = "Pagado";
-                      clase = "badge--ok";
-                    } else if (estado && estado !== "activa") {
-                      texto = estado;
-                      clase = "badge--no";
-                    }
-                    return <span className={clase}>{texto}</span>;
-                  }
-                },
-                {
-                  key: "fecha_pago",
-                  label: "Fecha de Pago",
-                  render: (_, val) => {
-                    const matricula = matriculasMap[val.id_estudiante];
-                    return matricula?.estado === "activa" && matricula?.created_at
-                      ? new Date(matricula.created_at).toLocaleDateString()
-                      : "---";
-                  }
-                }
-              ]}
-              rows={estudiantesFiltrados}
-              onRowClick={(f) => setFila(f)}
-            />
-          </div>
-        ) : (
+  const acciones = (
+    <ActionButtons
+      filaSeleccionada={fila}
+      botones={
+        roles.some(r => rolespermitidos.includes(r))
+          ? [
+              {
+                label: "Validar Pago",
+                onClick: () => setModal(true),
+                siempreActivo: false,
+                variante: "primary",
+                disabled:
+                  matriculasMap[fila?.id_estudiante] ||
+                  !periodoMapname[filtros.Periodo]?.activo ||
+                  (fila && salonesMap[fila.id_salon]?.id_periodo !== periodoMapname[filtros.Periodo]?.id_periodo)
+              }
+            ]
+          : []
+      }
+    />
+  );
+
+  // Mientras cargan los datos esenciales (períodos), mostrar layout vacío
+  if (cargandoPeriodos) {
+    return (
+      <div>
+        <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
+        <ModuleLayout sidebar={sidebar} actions={acciones}>
+          <div style={{ minHeight: '400px' }}></div>
+        </ModuleLayout>
+      </div>
+    );
+  }
+
+  // Una vez cargados, verificar permisos
+  if (!roles.some(r => rolespermitidos.includes(r))) {
+    return (
+      <div>
+        <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
+        <ModuleLayout sidebar={sidebar} actions={acciones}>
           <div className="status-message status-message--empty">
             Tu usuario no tiene permisos para acceder a este módulo.
           </div>
-        )}
+        </ModuleLayout>
+      </div>
+    );
+  }
+
+  // Renderizado completo
+  return (
+    <div>
+      <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
+      <ModuleLayout sidebar={sidebar} actions={acciones}>
+        <div>
+          <SearchBar
+            fields={[
+              { key: "documento", label: "Código", type: "number", maxLength: 10 },
+              { key: "nombre", label: "Nombre", type: "text", maxLength: 100 },
+              {
+                key: "Grado",
+                label: "Grado",
+                type: "select",
+                options: Array.from(new Set(
+                  Object.values(salonesMap)
+                    .filter(s => s.id_periodo === periodoMapname[filtros.Periodo]?.id_periodo)
+                    .map(s => s.grado).filter(Boolean)
+                ))
+              },
+              {
+                key: "Grupo",
+                label: "Grupo",
+                type: "select",
+                options: Array.from(new Set(
+                  Object.values(salonesMap)
+                    .filter(s => (s.grado).toString() === filtros.Grado)
+                    .map(s => s.grupo).filter(Boolean)
+                ))
+              },
+              {
+                key: "Periodo",
+                label: "Periodo",
+                type: "select",
+                options: periodos.map(p => p.nombre).filter(Boolean)
+              }
+            ]}
+            initialValues={{ Periodo: periodos[0]?.nombre }}
+            onChange={(key, value) => {
+              setFiltros(prev => {
+                const nuevos = { ...prev, [key]: value };
+                if (key === "Grado") nuevos.Grupo = "";
+                if (key === "Periodo") {
+                  nuevos.Grado = "";
+                  nuevos.Grupo = "";
+                }
+                return nuevos;
+              });
+            }}
+            onSearch={(f) => {
+              FiltrarEstudiantes(f);
+              setFiltros(f);
+              setFila(null);
+            }}
+            cleanFilter={{ documento: "", nombre: "", Grado: "", Grupo: "", Periodo: filtros.Periodo }}
+          />
+
+          <DataTable
+            key={matriculas.length}
+            pageSize={10}
+            columns={[
+              { key: "documento", label: "Documento" },
+              { key: "nombre", label: "Nombre" },
+              {
+                key: "grado",
+                label: "Grado",
+                render: (_, val) => <span>{salonesMap[val.id_salon]?.grado}</span>
+              },
+              {
+                key: "grupo",
+                label: "Grupo",
+                render: (_, val) => <span>{salonesMap[val.id_salon]?.grupo}</span>
+              },
+              {
+                key: "pago",
+                label: "Pago",
+                render: (_, val) => {
+                  const matricula = matriculasMap[val.id_estudiante];
+                  let estado = matricula?.estado;
+                  let texto = "Pendiente";
+                  let clase = "badge--no";
+                  if (estado === "activa") {
+                    texto = "Pagado";
+                    clase = "badge--ok";
+                  } else if (estado && estado !== "activa") {
+                    texto = estado;
+                    clase = "badge--no";
+                  }
+                  return <span className={clase}>{texto}</span>;
+                }
+              },
+              {
+                key: "fecha_pago",
+                label: "Fecha de Pago",
+                render: (_, val) => {
+                  const matricula = matriculasMap[val.id_estudiante];
+                  return matricula?.estado === "activa" && matricula?.created_at
+                    ? new Date(matricula.created_at).toLocaleDateString()
+                    : "---";
+                }
+              }
+            ]}
+            rows={estudiantesFiltrados}
+            onRowClick={(f) => setFila(f)}
+          />
+        </div>
       </ModuleLayout>
       <Alert {...alert} onClose={closeAlert} />
       <Modal

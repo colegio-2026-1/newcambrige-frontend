@@ -31,7 +31,7 @@ const HomePage = () => {
   ];
 
   const cards = [
-    { title: "Salón", icon: salonIcon, path: "/salon", roles: ["admin", "administrador", "titular"] },
+    { title: "Salón", icon: salonIcon, path: "/salon", roles: ["admin", "titular"] },
     { title: "Tesorería", icon: tesoreriaIcon, path: "/tesoreria", roles: ["secretaria", "administrador", "admin", "tesoreria"] },
     { title: "Rectoría", icon: rectoriaIcon, path: "/rectoria", roles: ["secretaria", "administrador", "admin", "rectoria"] },
     { title: "Uniformes", icon: uniformesIcon, path: "/uniformes", roles: ["administrador", "admin", "uniformes"] },
