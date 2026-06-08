@@ -9,16 +9,13 @@
   align-items: center;
   z-index: 9999;
 }
-
 .paz-salvo-modal {
   width: 900px;
   min-height: 620px;
-
   background: white;
   border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 8px 25px rgba(0,0,0,.25);
-
   font-family: 'Bentham', serif;
 }
 .paz-salvo-header {
@@ -27,14 +24,12 @@
   position: relative;
   text-align: center;
 }
-
 .paz-salvo-header h2 {
   margin: 0;
   font-family: 'Bentham', serif;
   font-size: 54px;
   font-weight: bold;
 }
-
 .paz-salvo-close {
   position: absolute;
   right: 12px;
@@ -44,35 +39,28 @@
   font-size: 24px;
   cursor: pointer;
 }
-
 .paz-salvo-info {
   display: flex;
   justify-content: space-between;
   padding: 20px 30px;
 }
-
 .paz-salvo-dato {
   display: flex;
   align-items: center;
   gap: 10px;
 }
-
 .paz-salvo-linea {
   min-width: 240px;
   border-bottom: 1px solid #888;
   padding-bottom: 4px;
 }
-
 .paz-salvo-grid {
   padding: 30px 35px;
-
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-
   row-gap: 45px;
   column-gap: 35px;
 }
-
 .firma-item {
   display: flex;
   flex-direction: column;
@@ -83,29 +71,24 @@
   border-top: 1px solid #777;
   margin-bottom: 8px;
 }
-
 .firma-item span {
   font-family: 'Bentham', serif;
   font-size: 28px;
   line-height: 1;
 }
 .paz-salvo-sello {
-  width: 90px;
-  height: 90px;
-
+  max-width: 90px;
+  max-height: 90px;
+  width: auto;
+  height: auto;
   object-fit: contain;
-
-  margin-top: 4px;
-  margin-bottom: 6px;
 }
-
 .paz-salvo-footer {
   display: flex;
   justify-content: center;
   gap: 20px;
   padding: 20px;
 }
-
 .paz-btn {
   background: #3f63a5;
   color: white;
@@ -115,20 +98,65 @@
   cursor: pointer;
   font-size: 15px;
 }
-
 .paz-btn:hover {
   opacity: .9;
 }
 .paz-salvo-info {
   padding: 22px 30px;
 }
-
 .paz-salvo-dato span {
   font-size: 24px;
   font-family: 'Bentham', serif;
 }
-
 .paz-salvo-linea {
   font-size: 22px;
   font-family: 'Bentham', serif;
+}
+.paz-salvo-firma {
+  max-width: 140px;
+  max-height: 60px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+.firma-imagen-container {
+  width: 180px;
+  height: 100px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 8px;
+}
+.paz-salvo-grid-docente {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  min-height: 260px;
+  width: 100%;
+}
+.paz-salvo-grid-docente .firma-item {
+  width: 320px;
+}
+.paz-salvo-grid-docente .firma-imagen-container {
+  width: 300px;
+  height: 140px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.paz-salvo-grid-docente .paz-salvo-firma {
+  max-width: 280px;
+  max-height: 120px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+.paz-salvo-grid-docente .firma-linea {
+  width: 250px;
+}
+.paz-salvo-grid-docente span {
+  font-size: 34px;
 }

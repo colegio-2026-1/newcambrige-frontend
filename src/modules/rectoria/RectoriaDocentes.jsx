@@ -1,18 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { allrolesuserRequest, allaniosacademicosRequest } from '../../api/endpoints';
-import { allestudiantesbyperiodoRequest, allsalonesbyperiodoRequest, allmatriculasbyperiodoRequest, crearMatriculaRequest} from '../../api/endpointsTesoreria';
-import {
-  estudiantesRectoriaRequest,
-  estudianteFirmasRequest,
-  firmarRectoriaEstudianteRequest,
-  docentesRectoriaRequest,
-  firmarDocenteRequest,
-  descargarPdfEstudianteRequest,
-  descargarPdfDocenteRequest,
-  selloRequest
-} from "../../api/endpointsRectoria";
+import {estudiantesRectoriaRequest,estudianteFirmasRequest,firmarRectoriaEstudianteRequest,docentesRectoriaRequest,firmarDocenteRequest,descargarPdfEstudianteRequest,descargarPdfDocenteRequest,descargarPdfEstudiantesBatchRequest,imagenFirmaRequest,selloRequest} from "../../api/endpointsRectoria";
 import PazYSalvoModal from "./PazYSalvoModal";
+import {allsalonesbyperiodoRequest,} from '../../api/endpointsTesoreria';
 import { Home } from "lucide-react";
 import { useAuth } from "../../api/useAuth";
 import Header from "../../components/layout/header";
@@ -24,10 +15,8 @@ import ActionButtons from "../../components/shared/ActionButtons";
 import Modal from "../../components/shared/Modal";
 
 
-
 const RectoriaDocentes = () => {
   const [docentes, setDocentes] = useState([]);
-const [docentesFiltrados, setDocentesFiltrados] = useState([]);
   const [periodos, setPeriodos] = useState([]);
   const rolespermitidos = ["secretaria", "admin", "rectoria"]
   const { user, logout } = useAuth();
@@ -39,30 +28,30 @@ const [docentesFiltrados, setDocentesFiltrados] = useState([]);
   const [fila, setFila] = useState(null);
   const [modal, setModal] = useState(false);
   const [cargandoPeriodos, setCargandoPeriodos] = useState(true);
-  const [filtros, setFiltros] = useState({
-  documento: "",
-  nombre: "",
-  Periodo: ""
-});
-  //para el sidebar
+  const [filtros, setFiltros] = useState({documento: "",nombre: "",Periodo: ""});
+  const [modalValidar, setModalValidar] = useState(false);
+  const [estudianteSeleccionado, setEstudianteSeleccionado] = useState(null);
+  const [salones, setSalones] = useState([]);
+  const [modalVerPazSalvo, setModalVerPazSalvo] = useState(false);
+  const [firmasDetalle, setFirmasDetalle] = useState(null);
+  const [selloUrl, setSelloUrl] = useState(null);
+  const [filtroGrado, setFiltroGrado] = useState("");
+  const [filtroGrupo, setFiltroGrupo] = useState("");
+  const [firmasUrls, setFirmasUrls] = useState({});
+
   const modulos = [
     { label: "Inicio", icon: <Home />, path: "/Rectoria" },
     { label: "Estudiantes", path: "/rectoria/estudiantes", roles: ["secretaria", "admin", "rectoria"] },
     { label: "Docentes", path: "/rectoria/docentes", roles: ["secretaria", "admin", "rectoria"] },
   ];
-  //maps para acceso rápido a datos relacionados
-  
   const periodoMapname = {};
   periodos.forEach(p => {
     periodoMapname[p.nombre] = p;
   });
-  const [modalValidar, setModalValidar] = useState(false);
-  const [estudianteSeleccionado, setEstudianteSeleccionado] = useState(null);
-  const [modalVerPazSalvo, setModalVerPazSalvo] = useState(false);
-  const [firmasDetalle, setFirmasDetalle] = useState(null);
-  const [selloUrl, setSelloUrl] = useState(null);
-
-  //carga de datos iniciales
+  const salonesMap = {};
+  salones.forEach(s => {
+    salonesMap[s.id_salon] = s;
+  });
   useEffect(() => {
     const obtenerRoles = async () => {
       if (!idUser) return;
@@ -79,30 +68,16 @@ const [docentesFiltrados, setDocentesFiltrados] = useState([]);
     };
     obtenerRoles();
   }, [idUser]);
-  
-  const abrirModalValidacion = (estudiante) => {
-  setEstudianteSeleccionado(estudiante);
-  setModalValidar(true);
-};
+
 const cargarDocentes = async (id_periodo) => {
   try {
-
-    const res = await docentesRectoriaRequest(
-      id_periodo,
-      filtros.nombre,
-      filtros.documento
-    );
-
+    const res = await docentesRectoriaRequest(id_periodo,filtros.nombre,filtros.documento );
+    console.log("Respuesta API:", res.data);
     setDocentes(res.data);
-    setDocentesFiltrados(res.data);
-
   } catch (error) {
     console.error("Error cargando docentes:", error);
   }
 };
-
-  
-
 
   const cargarPeriodos = async () => {
     try {
@@ -115,20 +90,15 @@ const cargarDocentes = async (id_periodo) => {
     }
   };
 
-  
 const cargarSello = async () => {
   try {
     const response = await selloRequest();
-
     const blob = new Blob(
       [response.data],
       { type: "image/jpeg" }
     );
-
     const url = URL.createObjectURL(blob);
-
     setSelloUrl(url);
-
     return url;
   } catch (error) {
     console.error("Error cargando sello:", error);
@@ -136,102 +106,100 @@ const cargarSello = async () => {
   }
 };
 
-const firmarDocente = async () => {
+const cargarSalones = async (id_periodo) => {
+    try {
+      const res = await allsalonesbyperiodoRequest(id_periodo);
+      setSalones(res.data);
+    } catch (error) {
+      console.error("Error cargando salones:", error);
+    }
+  };
 
+const firmarDocente = async () => {
   if (!fila) {
     alert("Seleccione un docente");
     return;
   }
-
   try {
-
-    const periodoId =
-      periodoMapname[filtros.Periodo]?.id_periodo;
-
+    const periodoId =periodoMapname[filtros.Periodo]?.id_periodo;
     await firmarDocenteRequest(
       fila.id_docente,
       periodoId
     );
-
     await cargarDocentes(periodoId);
-
     alert("Docente firmado correctamente");
-
   } catch (error) {
-
     console.error(error);
-
-    alert(
-      error?.response?.data?.detail ||
-      "Error al firmar docente"
+    alert(error?.response?.data?.detail ||"Error al firmar docente");
+  }
+};
+const cargarFirma = async (nombreModulo) => {
+  try {
+    const response =await imagenFirmaRequest(nombreModulo);
+    const blob = new Blob(
+      [response.data],
+      { type: "image/png" }
     );
+    return URL.createObjectURL(blob);
+  } catch (error) {
+    console.error(`No existe firma para ${nombreModulo}`);
+    return null;
   }
 };
 
 const descargarPazYSalvo = async () => {
-
   if (!fila) {
     alert("Seleccione un docente");
     return;
   }
-
   try {
-
-    const periodoId =
-      periodoMapname[filtros.Periodo]?.id_periodo;
-
-    const response =
-      await descargarPdfDocenteRequest(
-        fila.id_docente,
-        periodoId
-      );
-
+    const periodoId =periodoMapname[filtros.Periodo]?.id_periodo;
+    const response =await descargarPdfDocenteRequest(fila.id_docente,periodoId);
     const blob = new Blob(
       [response.data],
       { type: "application/pdf" }
     );
-
     const url =
       window.URL.createObjectURL(blob);
-
-    const link =
-      document.createElement("a");
-
+    const link =document.createElement("a");
     link.href = url;
-
-    link.download =
-      `paz_y_salvo_docente_${fila.id_docente}.pdf`;
-
+    link.download = `paz_y_salvo_docente_${fila.id_docente}.pdf`;
     document.body.appendChild(link);
-
     link.click();
-
     link.remove();
-
     window.URL.revokeObjectURL(url);
-
   } catch (error) {
-
     console.error(error);
-
-    alert(
-      error?.response?.data?.detail ||
-      "Error descargando PDF"
-    );
+    alert( error?.response?.data?.detail || "Error descargando PDF");
   }
 };
-
+const verPazYSalvoDocente = async () => {
+  if (!fila) {
+    alert("Seleccione un docente");
+    return;
+  }
+  try {
+    const firmaRectoria =await cargarFirma("Rectoría");setFirmasDetalle({nombre: fila.nombre,documento: fila.documento,detalle_firmas: [{nombre: "Rectoría",firmado: fila.firmado,no_aplica: false } ]});
+    setFirmasUrls({Rectoría: firmaRectoria});
+    setModalVerPazSalvo(true);
+  } catch (error) {
+    console.error(error);
+    alert("Error cargando paz y salvo");
+  }
+};
   useEffect(() => {
     cargarPeriodos();
   }, []);
 
   useEffect(() => {
-    const idPeriodoActual = periodoMapname[filtros.Periodo]?.id_periodo;
-    if (idPeriodoActual) {
-      cargarDocentes(idPeriodoActual);
-    }
+  const idPeriodoActual =
+    periodoMapname[filtros.Periodo]?.id_periodo;
 
-  }, [filtros.Periodo]);
+  if (idPeriodoActual) {
+    cargarDocentes(idPeriodoActual);
+    cargarSalones(idPeriodoActual);
+  }
+}, [filtros.Periodo]);
     useEffect(() => {
       return () => {
         if (selloUrl) {
@@ -240,29 +208,13 @@ const descargarPazYSalvo = async () => {
       };
     }, [selloUrl]);
 
-  
-  const FiltrarDocentes = (filtros) => {
-
-  setDocentesFiltrados(
-    docentes.filter(docente => {
-
-      const cumpleDocumento =
-        docente.documento
-          ?.toString()
-          .includes(filtros.documento);
-
-      const cumpleNombre =
-        docente.nombre
-          ?.toLowerCase()
-          .includes(filtros.nombre.toLowerCase());
-
-      return (
-        cumpleDocumento &&
-        cumpleNombre
-      );
-    })
-  );
-};
+  const docentesFiltrados = docentes.filter((docente) => {
+    const coincideNombre =!filtros.nombre ||docente.nombre?.toLowerCase().includes(filtros.nombre.toLowerCase());
+    const coincideDocumento =!filtros.documento ||docente.documento?.toString().includes(filtros.documento);
+    const coincideGrado =!filtros.Grado ||docente.grado?.toString() === filtros.Grado;
+    const coincideGrupo =!filtros.Grupo ||docente.grupo?.toString() === filtros.Grupo;
+    return (coincideNombre &&coincideDocumento &&coincideGrado &&coincideGrupo);
+});
 
   return (
     <div >
@@ -283,9 +235,15 @@ const descargarPazYSalvo = async () => {
             filaSeleccionada={fila}
             botones={[
               {
+                label: "Ver Paz y Salvo",
+                onClick: verPazYSalvoDocente,
+                variante: "primary"
+              },
+              {
                 label: "Firmar Docente",
                 onClick: firmarDocente,
-                variante: "primary"
+                variante: "primary",
+                disabled: !fila || fila.firmado === true
               },
               {
                 label: "Descargar Paz y Salvo",
@@ -295,7 +253,6 @@ const descargarPazYSalvo = async () => {
             ]}
           />
         }
-        
       >
         {cargandoRol || cargandoPeriodos ? (
           <div className="status-message status-message--loading">
@@ -306,26 +263,15 @@ const descargarPazYSalvo = async () => {
             <div>
               <SearchBar
                 fields={[
-                        {
-                            key: "documento",
-                            label: "Documento",
-                            type: "number",
-                            maxLength: 15
+                        {key: "documento",label: "Documento", type: "number",maxLength: 15},
+                        {key: "nombre", label: "Nombre",type: "text",maxLength: 100 },
+                        {key: "Grado", label: "Grado", type: "select",
+                          options: Array.from(new Set(Object.values(salonesMap)
+                            .filter(s => s.id_periodo === periodoMapname[filtros.Periodo]?.id_periodo)
+                            .map(s => s.grado).filter(Boolean)))
                         },
-
-                        {
-                            key: "nombre",
-                            label: "Nombre",
-                            type: "text",
-                            maxLength: 100
-                        },
-
-                        {
-                            key: "Periodo",
-                            label: "Periodo",
-                            type: "select",
-                            options: periodos.map(p => p.nombre)
-                        }
+                        {key: "Grupo", label: "Grupo", type: "select",options: Array.from(new Set(Object.values(salonesMap).filter(s => (s.grado).toString() === filtros.Grado).map(s => s.grupo).filter(Boolean)))},
+                        {key: "Periodo",label: "Periodo",type: "select",options: periodos.map(p => p.nombre)}
                         ]}
                 initialValues={{ Periodo: periodos[0]?.nombre }}
                 onChange={(key, value) => {
@@ -342,7 +288,6 @@ const descargarPazYSalvo = async () => {
                   });
                 }}
                 onSearch={(f) => {
-                    FiltrarDocentes(f);
                     setFiltros(f);
                     setFila(null);
                     }}
@@ -360,39 +305,21 @@ const descargarPazYSalvo = async () => {
                     rows={docentesFiltrados}
                     onRowClick={(f) => setFila(f)}
                     columns={[
-                        {
-                        key: "documento",
-                        label: "Documento"
-                        },
-
-                        {
-                        key: "nombre",
-                        label: "Nombre"
-                        },
-
-                        {
-                        key: "estado",
-                        label: "Estado",
-                        render: (_, docente) => {
-
-                            const firmado =
-                            docente.firmado_rectoria;
-
-                            return (
-                            <div
+                        {key: "documento",label: "Documento"},
+                        {key: "nombre",label: "Nombre"},
+                        {key: "grado", label: "Grado",render: (_, docente) => (<span>{docente.grado}</span>)},
+                        {key: "grupo",label: "Grupo",render: (_, docente) => (<span>{docente.grupo}</span>)},
+                        {key: "estado",label: "Paz y Salvo",render: (_, docente) => {const firmado = docente.firmado;return (<span
                                 style={{
-                                width: "18px",
-                                height: "18px",
-                                borderRadius: "50%",
-                                margin: "auto",
-                                backgroundColor:
-                                    firmado
-                                    ? "#16a34a"
-                                    : "#dc2626"
+                                  color: firmado ? "#16a34a" : "#dc2626",
+                                  fontWeight: "bold",
+                                  textTransform: "uppercase"
                                 }}
-                            />
+                              >
+                                {firmado ? "COMPLETO" : "PENDIENTE"}
+                              </span>
                             );
-                        }
+                          }
                         }
                     ]}
                     />
@@ -403,15 +330,14 @@ const descargarPazYSalvo = async () => {
             </div>))}
       </ModuleLayout>
             <PazYSalvoModal
+              tipo="docente"
               isOpen={modalVerPazSalvo}
               onClose={() => setModalVerPazSalvo(false)}
               estudiante={firmasDetalle}
-              firmas={firmasDetalle?.firmas}
               selloUrl={selloUrl}
-            />
-            
+              firmasUrls={firmasUrls}
+          />  
     </div>
-
   );
 };
 
