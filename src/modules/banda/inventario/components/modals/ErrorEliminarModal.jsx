@@ -1,16 +1,16 @@
 import React from 'react';
 import ModalBase from "../../../../../components/shared/ModalBase";
-import "./BandModals.css"; // ✅ Importación de estilos locales
+import "./BandModals.css"; 
 
 const ErrorEliminarModal = ({ open, onClose }) => {
 
-  const footer = (
-    <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
-      <button className="band-btn-pill band-btn-aceptar" onClick={onClose}>
-        Entendido
-      </button>
-    </div>
-  );
+ const footer = (
+  <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+    <button className="band-btn-pill band-btn-aceptar" onClick={onClose}>
+      Entendido
+    </button>
+  </div>
+);
 
   return (
     <ModalBase open={open} onClose={onClose} width="450px" footer={footer}>

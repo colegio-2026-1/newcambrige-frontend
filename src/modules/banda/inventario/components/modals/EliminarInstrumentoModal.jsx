@@ -5,19 +5,19 @@ import "./BandModals.css";
 const EliminarInstrumentoModal = ({ open, onClose, onConfirm, instrumento }) => {
   
   const footer = (
-    <div style={{ display: "flex", gap: "20px", justifyContent: "center", width: "100%" }}>
-      <button className="band-btn-pill band-btn-danger" onClick={onConfirm}>
-        Confirmar Eliminación
-      </button>
-      <button className="band-btn-pill band-btn-cancelar" onClick={onClose}>
-        Cancelar
-      </button>
-    </div>
-  );
+  <div style={{ display: "flex", gap: "20px", justifyContent: "center", width: "100%" }}>
+    <button className="band-btn-pill band-btn-danger" onClick={onConfirm}>
+      Eliminar
+    </button>
+    <button className="band-btn-pill band-btn-cancelar" onClick={onClose}>
+      Cancelar
+    </button>
+  </div>
+);
 
   return (
     <ModalBase open={open} onClose={onClose} width="450px" footer={footer}>
-      <div className="band-modal-header-danger">
+      <div className="band-modal-header">
         <h2 className="band-modal-title">ELIMINAR REGISTRO</h2>
       </div>
 
@@ -29,7 +29,7 @@ const EliminarInstrumentoModal = ({ open, onClose, onConfirm, instrumento }) => 
           <p style={{ margin: "5px 0 0 0" }}><strong>Nombre:</strong> {instrumento?.nombre}</p>
         </div>
 
-        <p style={{ color: "#DC2626", fontWeight: "bold" }}>
+        <p style={{ color: "#1884c2", fontWeight: "bold" }}>
           Esta acción no se puede deshacer.
         </p>
       </div>

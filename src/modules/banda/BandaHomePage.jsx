@@ -2,31 +2,32 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "../../api/useAuth";
 
-// RECURSOS GLOBALES
+import Icon from '@mdi/react';
+import { mdiHome, mdiAccountMusic, mdiPiano } from '@mdi/js';
+import { Home, LayoutList, ClipboardCheck } from "lucide-react"; 
+
 import ModuleLayout from "../../components/layout/ModuleLayout";
 import Sidebar from "../../components/layout/Sidebar";
 import Header from "../../components/layout/header";
-import "../Home/HomePage.css"; // ✅ Usamos los estilos del equipo
+import "../Home/HomePage.css"; 
 
-// ICONO OFICIAL
 import bandaIcon from "../../assets/Banda/banda.svg";
 
 const BandaHomePage = () => {
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
+  const { user, roles, loading } = useAuth();
 
   if (loading || !user) return <div className="status-message status-message--loading">Cargando...</div>;
 
-  const menuBanda = [
-    { label: "Inicio", path: "/banda" },
-    { label: "Inventario", path: "/banda/inventario" },
-    { label: "Préstamos", path: "/banda/prestamos" },
-  ];
+ const menuBanda = [
+  { label: "Inicio", path: "/banda", icon: <Home size={18} /> },
+  { label: "Inventario", path: "/banda/inventario", icon: <LayoutList size={18} /> },
+  { label: "Asignaciones", path: "/banda/prestamos", icon: <ClipboardCheck size={18} /> }
+ ];
 
-  if (user?.roles?.includes("admin") || user?.rol === "admin") {
-    menuBanda.push({ label: "Auditoría", path: "/banda/auditoria" });
-  }
-
+const primerRol = roles?.[0];
+  const rolTexto = typeof primerRol === 'object' ? primerRol.nombre : (primerRol || "Banda");
+  
   return (
     <div className="dashboard-container banda-custom-sidebar">
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
@@ -36,14 +37,13 @@ const BandaHomePage = () => {
           <Sidebar
             selectedMenu="Inicio"
             menuItems={menuBanda}
-            user={user}
+            user={{ nombre: String(user?.nombre || "Usuario"),
+               rol: String(rolTexto) }}
+               logout={() => {}}
           />
         }
       >
-        {/* Contenedor de centrado absoluto */}
         <div style={centerWrapperStyle}>
-          
-          {/* ✅ Envoltura para forzar el tamaño correcto de la tarjeta (331px es el estándar de tu grid) */}
           <div style={{ width: '100%', maxWidth: '331px' }}>
             <div 
               className="dashboard-card" 
@@ -56,16 +56,11 @@ const BandaHomePage = () => {
               </div>
             </div>
           </div>
-
         </div>
       </ModuleLayout>
     </div>
   );
 };
-
-// =====================================================
-// ESTILOS DE POSICIONAMIENTO (LOCALES)
-// =====================================================
 
 const centerWrapperStyle = {
   display: 'flex',

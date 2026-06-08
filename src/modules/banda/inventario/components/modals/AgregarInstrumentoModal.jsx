@@ -1,6 +1,6 @@
 import React from 'react';
 import ModalBase from "../../../../../components/shared/ModalBase";
-import "./BandModals.css"; // Importamos el CSS local
+import "./BandModals.css"; 
 
 const AgregarInstrumentoModal = ({ open, onClose, onSave, form, setForm, categorias, ubicaciones }) => {
 

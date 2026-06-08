@@ -3,9 +3,9 @@ import React from 'react';
 const navBtn = (disabled = false) => ({
   width: "38px",
   height: "38px",
-  borderRadius: "50%", /* Círculo perfecto como en la imagen */
+  borderRadius: "50%", 
   border: "none",
-  background: disabled ? "#9CA3AF" : "#335C8E", /* Azul oscuro institucional */
+  background: disabled ? "#9CA3AF" : "#335C8E", 
   color: "#FFFFFF",
   fontWeight: "bold",
   cursor: disabled ? "not-allowed" : "pointer",

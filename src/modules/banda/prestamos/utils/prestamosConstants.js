@@ -4,12 +4,10 @@ export const FORM_VACIO = {
   id_instrumento: "",
   id_estudiante: "",
   observacion: "",
-  // Eliminamos fecha_prestamo: el Backend usa la del servidor
 };
 
-// NUEVO: Para el formulario de devoluciones (Requerimiento BR22)
 export const FORM_DEVOLUCION_VACIO = {
-  estado_al_devolver: "Bueno", // Bueno o Malo
+  estado_al_devolver: "Bueno", 
   observaciones: "",
 };
 

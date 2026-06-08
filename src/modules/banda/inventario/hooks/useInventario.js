@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { inventarioService } from "../services/inventarioService";
 import { FORM_VACIO, ERRORES_VACIO, POR_PAGINA } from "../utils/inventarioConstants";
+import { getInstrumentosRequest, 
+  getCategoriasRequest, 
+  getUbicacionesRequest,
+  createInstrumentoRequest,
+  updateInstrumentoRequest,
+  deleteInstrumentoRequest 
+} from "../../../../api/endpointsBanda";
 
 const useInventario = () => {
   const [instrumentos, setInstrumentos] = useState([]);
@@ -9,7 +15,6 @@ const useInventario = () => {
   const [loading, setLoading] = useState(true);
   const [seleccionado, setSeleccionado] = useState(null);
 
-  // ✅ Filtros actualizados para coincidir con la imagen
   const [filtroId, setFiltroId] = useState(""); 
   const [filtroNombre, setFiltroNombre] = useState("");
   const [filtroCategoria, setFiltroCategoria] = useState("");
@@ -18,7 +23,6 @@ const useInventario = () => {
   const [form, setForm] = useState(FORM_VACIO);
   const [toast, setToast] = useState(null);
 
-  // Modales
   const [modalAgregar, setModalAgregar] = useState(false);
   const [modalEditar, setModalEditar] = useState(false);
   const [modalEliminar, setModalEliminar] = useState(false);
@@ -41,9 +45,9 @@ const useInventario = () => {
   const cargarDatos = useCallback(async () => {
     try {
       const [instRes, catRes, ubiRes] = await Promise.all([
-        inventarioService.getInstrumentos(),
-        inventarioService.getCategorias(),
-        inventarioService.getUbicaciones(),
+        getInstrumentosRequest(),
+        getCategoriasRequest(),
+        getUbicacionesRequest(),
       ]);
       setInstrumentos(instRes.data);
       setCategorias(catRes.data);
@@ -58,7 +62,6 @@ const useInventario = () => {
 
   useEffect(() => { cargarDatos(); }, [cargarDatos]);
 
-  // ✅ VALIDACIONES SIN 'CODIGO' (id_instrumento es automático)
   const validaciones = useMemo(() => {
     const nombreVal = form.nombre?.trim();
     const cantidadVal = parseInt(form.cantidad_total);
@@ -71,15 +74,13 @@ const useInventario = () => {
                        (!!form.id_categoria && !isNaN(cantidadVal) && cantidadVal >= 0);
 
     return {
-      ombre: nombreVal?.length >= 2 && nombreUnico,
+      nombre: nombreVal?.length >= 2 && nombreUnico,
       datos: !!form.id_categoria && !isNaN(cantidadVal) && cantidadVal >= 0,
       todoValido
     };
   }, [form, instrumentos, seleccionado]);
 
-  // ✅ PAYLOAD LIMPIO (Evita error 422 en el Backend)
   const handleAgregar = async () => {
-  // Ajustamos la validación para que no dependa de 'codigo'
   if (!form.nombre || !form.id_categoria || !form.cantidad_total) {
     mostrarToast("Por favor complete los campos obligatorios.");
     return;
@@ -87,7 +88,6 @@ const useInventario = () => {
   
   try {
     const payload = {
-      // ❌ ELIMINAMOS 'codigo' de aquí, ya no se envía
       nombre: form.nombre.trim(),
       id_categoria: parseInt(form.id_categoria),
       id_ubicacion: form.id_ubicacion ? parseInt(form.id_ubicacion) : null,
@@ -95,7 +95,7 @@ const useInventario = () => {
       estado: form.estado || "Activo"
     };
 
-    await inventarioService.crearInstrumento(payload);
+    await createInstrumentoRequest(payload);
     setModalAgregar(false);
     cargarDatos();
     mostrarToast("Instrumento agregado correctamente.");
@@ -115,19 +115,18 @@ const useInventario = () => {
         estado: form.estado
       };
 
-      await inventarioService.editarInstrumento(seleccionado.id_instrumento, payload);
+      await updateInstrumentoRequest(seleccionado.id_instrumento, payload);
       setModalEditar(false);
       setModalAdvertencia(false);
-      cargarDatos();
+      await cargarDatos();
       mostrarToast("Cambios guardados.");
     } catch (e) { 
-      mostrarToast(extraerErrorBackend(e, "Error al actualizar."));
+      mostrarToast( "Error al actualizar.");
     }
   };
 
   const handleEditar = async () => {
     if (!validaciones.todoValido) return;
-    // Lógica de advertencia si se cambia a inactivo con préstamos
     if (seleccionado?.estado === "Activo" && form.estado !== "Activo" && seleccionado?.cantidad_disponible < seleccionado?.cantidad_total) {
       setModalAdvertencia(true);
       return;
@@ -137,19 +136,22 @@ const useInventario = () => {
 
   const handleEliminar = async () => {
     try {
-      await inventarioService.eliminarInstrumento(seleccionado.id_instrumento);
+      await deleteInstrumentoRequest(seleccionado.id_instrumento);
       setModalEliminar(false);
       setSeleccionado(null);
-      cargarDatos();
+      await cargarDatos();
       mostrarToast("Registro eliminado.");
     } catch (e) {
       setModalEliminar(false);
-      setModalErrorEliminar(true);
-      console.error("Error al eliminar:", e.response?.data?.detail);
+      if (e.response?.status === 400) {
+      setModalErrorEliminar(true); 
+    } else {
+      mostrarToast(extraerErrorBackend(e, "Ocurrió un error inesperado al eliminar."));
     }
+    console.warn("Error al eliminar:", e.response?.data?.detail);
+  }
   };
 
-  // ✅ FILTRADO POR ID Y NOMBRE (Sincronizado con la SearchBar)
   const filtrados = useMemo(() => {
     return instrumentos.filter((i) => {
       const matchId = !filtroId || i.id_instrumento.toString().includes(filtroId);

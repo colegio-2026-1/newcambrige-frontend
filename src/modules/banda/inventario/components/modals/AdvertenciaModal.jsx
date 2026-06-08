@@ -22,7 +22,7 @@ const AdvertenciaModal = ({ open, onClose, onConfirm }) => {
       </div>
 
       <div className="band-modal-body-text">
-        <span className="band-modal-icon">⚠️</span>
+        <span className="band-modal-icon"></span>
         <p><strong>Este instrumento tiene asignaciones activas.</strong></p>
         <p style={{ marginTop: '10px' }}>
           Cambiar el estado o reducir el stock total puede afectar los registros de paz y salvo. 
