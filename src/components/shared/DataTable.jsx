@@ -46,7 +46,6 @@ export default function DataTable({
   columns = [],
   rows = [],
   onRowClick,
-  emptyText = "No se encontraron resultados",
   pageSize = null
   
 }) {
@@ -85,7 +84,7 @@ export default function DataTable({
       {rows.length === 0 ? (
 
         <div className="datatable-empty datatable-empty--main">
-          {emptyText}
+
         </div>
       )
       :(

@@ -348,7 +348,6 @@ const TiposPruebaPage = () => {
           <div className="main-area">
             {pruebas.length === 0 ? (
               <div className="empty-state">
-                <p>Aún no hay pruebas registradas</p>
               </div>
             ) : (
               <div className="table-layout-wrapper">
