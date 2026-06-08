@@ -1,13 +1,6 @@
 import "./CardsGrid.css";
 
-const CardsGrid = ({ cards, roles, onCardClick, loading = false }) => {
-  if (loading) {
-    return (
-      <div className="status-message status-message--loading">
-        Verificando credenciales institucionales...
-      </div>
-    );
-  }
+const CardsGrid = ({ cards, roles, onCardClick}) => {
 
   const filteredCards = cards.filter(
     (card) =>

@@ -326,7 +326,6 @@ const UsuariosPage = () => {
           <div className="main-area" style={{ paddingTop: '20px' }}>
             {usuarios.length === 0 ? (
               <div className="empty-state">
-                <p>Aún no hay usuarios registrados en el sistema</p>
               </div>
             ) : (
               <div className="table-layout-wrapper">
