@@ -72,6 +72,7 @@ export default function LoginPage() {
     // ==========================
     // MANEJAR SUBMIT
     // ==========================
+    // Dentro de LoginPage.tsx, en handleSubmit
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError("");
@@ -87,7 +88,13 @@ export default function LoginPage() {
         } catch (err: any) {
             const status = err.response?.status;
             if (status === 429) {
-                setError(""); // El popup se encarga
+                setError("");
+            } else if (status === 403) {
+
+                const mensaje = err.response?.data?.detail || "Usuario inactivo. Contacte al administrador.";
+                setPopupMessage(mensaje);
+                setShowPopup(true);
+                setError("");
             } else {
                 setError("Usuario o contraseña incorrectos.");
             }
@@ -108,7 +115,9 @@ export default function LoginPage() {
                             <h2>
                                 {popupMessage.includes("intentos") || popupMessage.includes("Demasiados")
                                     ? "Demasiados Intentos"
-                                    : "Sesión Cerrada"}
+                                    : popupMessage.includes("inactivo") || popupMessage.includes("Inactivo")
+                                        ? "Cuenta Inactiva"
+                                        : "Sesión Cerrada"}
                             </h2>
                         </div>
                         <div className={styles["popup-body"]}>
@@ -125,7 +134,6 @@ export default function LoginPage() {
                     </div>
                 </div>
             )}
-
             <div
                 className={styles["login-root"]}
                 style={{ backgroundImage: `url(${bgImage})` }}

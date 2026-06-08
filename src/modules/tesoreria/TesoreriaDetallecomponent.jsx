@@ -8,8 +8,8 @@ import {
   alltipoconceptoRequest,
   crearDetalleRequest
 } from '../../api/endpointsTesoreria';
-
-import { Home } from "lucide-react";
+import Icon from '@mdi/react';
+import { mdiHome } from "@mdi/js";
 import { useAuth } from "../../api/useAuth";
 import Header from "../../components/layout/header";
 import ModuleLayout from "../../components/layout/ModuleLayout";
@@ -18,6 +18,7 @@ import SearchBar from "../../components/shared/searchBar";
 import DataTable from "../../components/shared/DataTable";
 import ActionButtons from "../../components/shared/ActionButtons";
 import Modal from "../../components/shared/Modal";
+import Alert from "../../components/shared/Alert";
 
 const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }) => {
   const [selectedModule, setSelectedModule] = useState(selectedMenu);
@@ -31,6 +32,7 @@ const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }
   const [fila, setFila] = useState(null);
   const [modal, setModal] = useState(false);
   const [modalVer, setModalVer] = useState(false);
+  const [alert, setAlert] = useState({ isOpen: false, type: "", title: "", message: "" });
   const [cargandoPeriodos, setCargandoPeriodos] = useState(true);
   const [cargandoTipo, setCargandoTipo] = useState(true);
   const [tipo, setTipo] = useState([]);
@@ -95,6 +97,7 @@ const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }
       setCargandoPeriodos(false);
     } catch (error) {
       console.error("Error cargando periodos:", error);
+      setCargandoPeriodos(false);
     }
   };
 
@@ -105,6 +108,7 @@ const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }
       setCargandoTipo(false);
     } catch (error) {
       console.error("Error cargando tipos:", error);
+      setCargandoTipo(false);
     }
   };
 
@@ -173,7 +177,6 @@ const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }
     setEstudiantesMatriculados(matriculadosActivos);
     setEstudiantesFiltrados(matriculadosActivos);
 
-    // Inicializar meses seleccionados solo para los nuevos estudiantes
     const nuevosMeses = {};
     matriculadosActivos.forEach(est => {
       if (!mesesSeleccionados[est.id_estudiante]) {
@@ -185,7 +188,6 @@ const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }
     }
   }, [estudiantes, matriculasMap]);
 
-  // Filtrar estudiantes según búsqueda
   const FiltrarEstudiantes = (filtros) => {
     setEstudiantesFiltrados(estudiantesMatriculados.filter(e => {
       const cumpleDocumento = e.documento.toString().includes(filtros.documento);
@@ -196,31 +198,24 @@ const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }
     }));
   };
 
-  // Verificar si el botón "Validar Pago" debe estar deshabilitado
   const isDisabledValidarPago = () => {
     if (!fila || !fila.id_estudiante) return true;
-    
     const matricula = matriculasMap[fila.id_estudiante];
     if (!matricula || matricula.estado !== 'activa') return true;
-    
     const idPeriodoFiltro = periodoMapname[filtros.Periodo]?.id_periodo;
     const salonEstudiante = salonesMap[fila.id_salon];
     if (!salonEstudiante || salonEstudiante.id_periodo !== idPeriodoFiltro) return true;
-    
     const periodoActivo = periodoMapname[filtros.Periodo]?.activo;
     const esAdmin = roles.includes("admin");
     if (!periodoActivo && !esAdmin) return true;
-    
     const mesActual = mesesSeleccionados[fila.id_estudiante]?.toLowerCase();
     const yaPagado = detalles.some(d =>
       d.id_matricula === matricula.id_matricula && d.mes === mesActual
     );
     if (yaPagado) return true;
-    
     return false;
   };
 
-  // Verificar si el botón "Ver" debe estar deshabilitado (solo si no hay fila o el estudiante no pertenece al período actual)
   const isDisabledVer = () => {
     if (!fila || !fila.id_estudiante) return true;
     const salonEstudiante = salonesMap[fila.id_salon];
@@ -228,7 +223,6 @@ const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }
     return !salonEstudiante || salonEstudiante.id_periodo !== idPeriodoFiltro;
   };
 
-  // Crear detalle de pago
   const crearDetalle = async () => {
     if (!fila || !fila.id_estudiante) {
       console.error("No hay ningún estudiante seleccionado.");
@@ -236,12 +230,12 @@ const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }
     }
     const matricula = matriculasMap[fila.id_estudiante];
     if (!matricula) {
-      alert("El estudiante no tiene una matrícula activa en este período.");
+      showAlert("error", "El estudiante no tiene una matrícula activa en este período.");
       return;
     }
     const id_tipo = tipoMap[tiporecibed]?.id_tipo;
     if (!id_tipo) {
-      alert("Tipo de concepto no válido.");
+      showAlert("error", "Tipo de concepto no válido.");
       return;
     }
     try {
@@ -250,211 +244,235 @@ const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }
         id_tipo,
         mesesSeleccionados[fila.id_estudiante]?.toLowerCase()
       );
-      // Recargar detalles para actualizar la tabla y el modal "Ver"
       const idPeriodoActual = periodoMapname[filtros.Periodo]?.id_periodo;
       await cargarDetalles(idPeriodoActual, id_tipo);
-      // Limpiar selección para que se actualice el estado de pago en la fila seleccionada
       setFila(null);
-      alert("Pago registrado correctamente");
+      showAlert("success", "Pago registrado correctamente.");
     } catch (error) {
       console.error(`Error al crear el detalle ${tiporecibed}:`, error);
-      alert(error.response?.data?.detail || "Error al registrar el pago");
+      showAlert("error", error.response?.data?.detail || "Error al registrar el pago");
     }
   };
 
-  // =========================
-  // Configuración del sidebar
-  // =========================
   const modulos = modulosRecibed || [
-    { label: "Inicio", icon: <Home />, path: "/tesoreria" },
+    { label: "Inicio", icon: <Icon path={mdiHome} />, path: "/home" },
   ];
 
+  const showAlert = (type, message, title = "") =>
+    setAlert({ isOpen: true, type, message, title });
+
+  const closeAlert = () =>
+    setAlert((prev) => ({ ...prev, isOpen: false }));
+
   // =========================
-  // Renderizado principal
+  // Renderizado principal (siempre se muestra la estructura)
   // =========================
+  const sidebar = (
+    <Sidebar
+      menuItems={modulos.filter(modulo => {
+        if (!modulo) return false;
+        if (!modulo.roles || !Array.isArray(modulo.roles) || modulo.roles.length === 0) return true;
+        return roles.some(r => modulo.roles.includes(r));
+      })}
+      user={{ nombre: userName, rol }}
+      selectedMenu={selectedModule}
+      loadingRoles={loadingRoles}
+      onLogout={logout}
+    />
+  );
+
+  const acciones = (
+    <ActionButtons
+      filaSeleccionada={fila}
+      botones={
+        roles.some(r => rolespermitidos.includes(r)) && tipoMap[tiporecibed]
+          ? [
+              {
+                label: "Validar Pago",
+                onClick: () => setModal(true),
+                siempreActivo: false,
+                variante: "primary",
+                disabled: isDisabledValidarPago()
+              },
+              {
+                label: "Ver",
+                onClick: () => setModalVer(true),
+                siempreActivo: false,
+                variante: "secondary",
+                disabled: isDisabledVer()
+              }
+            ]
+          : []
+      }
+    />
+  );
+
+  // Mientras cargan los datos esenciales, mostrar la página con un área de contenido vacía
+  if (cargandoPeriodos || cargandoTipo) {
+    return (
+      <div>
+        <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
+        <ModuleLayout sidebar={sidebar} actions={acciones}>
+          <div style={{ minHeight: '400px' }}></div>
+        </ModuleLayout>
+      </div>
+    );
+  }
+
+  // Una vez cargados, verificar existencia del tipo
+  if (!tipoMap[tiporecibed]) {
+    return (
+      <div>
+        <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
+        <ModuleLayout sidebar={sidebar} actions={acciones}>
+          <div className="status-message">
+            Error: tipo detalle "{tiporecibed}" no existe en la base de datos.
+          </div>
+        </ModuleLayout>
+      </div>
+    );
+  }
+
+  if (!roles.some(r => rolespermitidos.includes(r))) {
+    return (
+      <div>
+        <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
+        <ModuleLayout sidebar={sidebar} actions={acciones}>
+          <div className="status-message status-message--empty">
+            Tu usuario no tiene permisos para acceder a este módulo.
+          </div>
+        </ModuleLayout>
+      </div>
+    );
+  }
+
+  // Renderizado normal con todos los datos
   return (
     <div>
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
-      <ModuleLayout
-        sidebar={
-          <Sidebar
-            menuItems={modulos.filter(modulo => {
-              if (!modulo) return false;
-              if (!modulo.roles || !Array.isArray(modulo.roles) || modulo.roles.length === 0) return true;
-              return roles.some(r => modulo.roles.includes(r));
-            })}
-            user={{ nombre: userName, rol }}
-            selectedMenu={selectedModule}
-            loadingRoles={loadingRoles}
-            onLogout={logout}
+      <ModuleLayout sidebar={sidebar} actions={acciones}>
+        <div>
+          <SearchBar
+            fields={[
+              { key: "documento", label: "Código", type: "number", maxLength: 10 },
+              { key: "nombre", label: "Nombre", type: "text", maxLength: 100 },
+              {
+                key: "Grado",
+                label: "Grado",
+                type: "select",
+                options: Array.from(new Set(
+                  Object.values(salonesMap)
+                    .filter(s => s.id_periodo === periodoMapname[filtros.Periodo]?.id_periodo)
+                    .map(s => s.grado).filter(Boolean)
+                ))
+              },
+              {
+                key: "Grupo",
+                label: "Grupo",
+                type: "select",
+                options: Array.from(new Set(
+                  Object.values(salonesMap)
+                    .filter(s => (s.grado).toString() === filtros.Grado)
+                    .map(s => s.grupo).filter(Boolean)
+                ))
+              },
+              {
+                key: "Periodo",
+                label: "Periodo",
+                type: "select",
+                options: periodos.map(p => p.nombre).filter(Boolean)
+              }
+            ]}
+            initialValues={{ Periodo: periodos[0]?.nombre }}
+            onChange={(key, value) => {
+              setFiltros(prev => {
+                const nuevos = { ...prev, [key]: value };
+                if (key === "Grado") nuevos.Grupo = "";
+                if (key === "Periodo") {
+                  nuevos.Grado = "";
+                  nuevos.Grupo = "";
+                }
+                return nuevos;
+              });
+            }}
+            onSearch={(f) => {
+              FiltrarEstudiantes(f);
+              setFiltros(f);
+              setFila(null);
+            }}
+            cleanFilter={{ documento: "", nombre: "", Grado: "", Grupo: "", Periodo: filtros.Periodo }}
           />
-        }
-        actions={
-          <ActionButtons
-            filaSeleccionada={fila}
-            botones={
-              roles.some(r => rolespermitidos.includes(r)) && tipoMap[tiporecibed] && !cargandoTipo
-                ? [
-                    {
-                      label: "Validar Pago",
-                      onClick: () => setModal(true),
-                      siempreActivo: false,
-                      variante: "primary",
-                      disabled: isDisabledValidarPago()
-                    },
-                    {
-                      label: "Ver",
-                      onClick: () => setModalVer(true),
-                      siempreActivo: false,
-                      variante: "secondary",
-                      disabled: isDisabledVer()
-                    }
-                  ]
-                : []
-            }
-          />
-        }
-      >
-        {loadingRoles || cargandoPeriodos || cargandoTipo ? (
-          <div className="status-message status-message--loading">
-            Cargando módulo {tiporecibed}...
-          </div>
-        ) : tipoMap[tiporecibed] ? (
-          roles.some(r => rolespermitidos.includes(r)) ? (
-            <div>
-              <SearchBar
-                fields={[
-                  { key: "documento", label: "Código", type: "number", maxLength: 10 },
-                  { key: "nombre", label: "Nombre", type: "text", maxLength: 100 },
-                  {
-                    key: "Grado",
-                    label: "Grado",
-                    type: "select",
-                    options: Array.from(new Set(
-                      Object.values(salonesMap)
-                        .filter(s => s.id_periodo === periodoMapname[filtros.Periodo]?.id_periodo)
-                        .map(s => s.grado).filter(Boolean)
-                    ))
-                  },
-                  {
-                    key: "Grupo",
-                    label: "Grupo",
-                    type: "select",
-                    options: Array.from(new Set(
-                      Object.values(salonesMap)
-                        .filter(s => (s.grado).toString() === filtros.Grado)
-                        .map(s => s.grupo).filter(Boolean)
-                    ))
-                  },
-                  {
-                    key: "Periodo",
-                    label: "Periodo",
-                    type: "select",
-                    options: periodos.map(p => p.nombre).filter(Boolean)
-                  }
-                ]}
-                initialValues={{ Periodo: periodos[0]?.nombre }}
-                onChange={(key, value) => {
-                  setFiltros(prev => {
-                    const nuevos = { ...prev, [key]: value };
-                    if (key === "Grado") nuevos.Grupo = "";
-                    if (key === "Periodo") {
-                      nuevos.Grado = "";
-                      nuevos.Grupo = "";
-                    }
-                    return nuevos;
-                  });
-                }}
-                onSearch={(f) => {
-                  FiltrarEstudiantes(f);
-                  setFiltros(f);
-                  setFila(null);
-                }}
-                cleanFilter={{ documento: "", nombre: "", Grado: "", Grupo: "", Periodo: filtros.Periodo }}
-              />
 
-              <DataTable
-                key={detalles.length}
-                pageSize={10}
-                columns={[
-                  { key: "documento", label: "Documento" },
-                  { key: "nombre", label: "Nombre" },
-                  {
-                    key: "grado",
-                    label: "Grado",
-                    render: (_, val) => <span>{salonesMap[val.id_salon]?.grado}</span>
-                  },
-                  {
-                    key: "grupo",
-                    label: "Grupo",
-                    render: (_, val) => <span>{salonesMap[val.id_salon]?.grupo}</span>
-                  },
-                  {
-                    key: "mes",
-                    label: "Mes",
-                    render: (_, val) => {
-                      const idEst = val.id_estudiante;
-                      return (
-                        <select
-                          value={mesesSeleccionados[idEst] || "Enero"}
-                          onChange={(e) => setMesesSeleccionados(prev => ({ ...prev, [idEst]: e.target.value }))}
-                          className="form-select"
-                        >
-                          {meses.map((m, idx) => <option key={idx} value={m}>{m}</option>)}
-                        </select>
-                      );
-                    }
-                  },
-                  {
-                    key: "pago",
-                    label: "Pago",
-                    render: (_, val) => {
-                      const matricula = matriculasMap[val.id_estudiante];
-                      const mesActual = mesesSeleccionados[val.id_estudiante]?.toLowerCase();
-                      const pagado = matricula && detalles.some(d =>
-                        d.id_matricula === matricula.id_matricula && d.mes === mesActual
-                      );
-                      return <span className={pagado ? "badge--ok" : "badge--no"}>{pagado ? "Pagado" : "Pendiente"}</span>;
-                    }
-                  },
-                  {
-                    key: "fecha_pago",
-                    label: "Fecha de Pago",
-                    render: (_, val) => {
-                      const matricula = matriculasMap[val.id_estudiante];
-                      const mesActual = mesesSeleccionados[val.id_estudiante]?.toLowerCase();
-                      const detalle = matricula && detalles.find(d =>
-                        d.id_matricula === matricula.id_matricula && d.mes === mesActual
-                      );
-                      return <span>{detalle?.created_at ? new Date(detalle.created_at).toLocaleDateString() : "---"}</span>;
-                    }
-                  }
-                ]}
-                rows={estudiantesFiltrados}
-                onRowClick={(f) => setFila(f)}
-              />
-            </div>
-          ) : (
-            <div className="status-message status-message--empty">
-              Tu usuario no tiene permisos para acceder a este módulo.
-            </div>
-          )
-        ) : (
-          <div className="status-message">
-            Error: tipo detalle "{tiporecibed}" no existe
-          </div>
-        )}
+          <DataTable
+            key={detalles.length}
+            pageSize={10}
+            columns={[
+              { key: "documento", label: "Documento" },
+              { key: "nombre", label: "Nombre" },
+              {
+                key: "grado",
+                label: "Grado",
+                render: (_, val) => <span>{salonesMap[val.id_salon]?.grado}</span>
+              },
+              {
+                key: "grupo",
+                label: "Grupo",
+                render: (_, val) => <span>{salonesMap[val.id_salon]?.grupo}</span>
+              },
+              {
+                key: "mes",
+                label: "Mes",
+                render: (_, val) => {
+                  const idEst = val.id_estudiante;
+                  return (
+                    <select
+                      value={mesesSeleccionados[idEst] || "Enero"}
+                      onChange={(e) => setMesesSeleccionados(prev => ({ ...prev, [idEst]: e.target.value }))}
+                      className="form-select"
+                    >
+                      {meses.map((m, idx) => <option key={idx} value={m}>{m}</option>)}
+                    </select>
+                  );
+                }
+              },
+              {
+                key: "pago",
+                label: "Pago",
+                render: (_, val) => {
+                  const matricula = matriculasMap[val.id_estudiante];
+                  const mesActual = mesesSeleccionados[val.id_estudiante]?.toLowerCase();
+                  const pagado = matricula && detalles.some(d =>
+                    d.id_matricula === matricula.id_matricula && d.mes === mesActual
+                  );
+                  return <span className={pagado ? "badge--ok" : "badge--no"}>{pagado ? "Pagado" : "Pendiente"}</span>;
+                }
+              },
+              {
+                key: "fecha_pago",
+                label: "Fecha de Pago",
+                render: (_, val) => {
+                  const matricula = matriculasMap[val.id_estudiante];
+                  const mesActual = mesesSeleccionados[val.id_estudiante]?.toLowerCase();
+                  const detalle = matricula && detalles.find(d =>
+                    d.id_matricula === matricula.id_matricula && d.mes === mesActual
+                  );
+                  return <span>{detalle?.created_at ? new Date(detalle.created_at).toLocaleDateString() : "---"}</span>;
+                }
+              }
+            ]}
+            rows={estudiantesFiltrados}
+            onRowClick={(f) => setFila(f)}
+          />
+        </div>
       </ModuleLayout>
 
-      {/* Modal confirmar pago */}
       <Modal
         title={`¿Confirmas que el estudiante ${fila?.nombre || ""} ha realizado el pago del mes de ${mesesSeleccionados[fila?.id_estudiante] || ""}?`}
         isOpen={modal}
         onAccept={() => { setModal(false); crearDetalle(); }}
         onCancel={() => setModal(false)}
       />
-
-      {/* Modal ver detalles de pagos */}
+      <Alert {...alert} onClose={closeAlert} />
       <Modal
         title={tiporecibed}
         fields={[
