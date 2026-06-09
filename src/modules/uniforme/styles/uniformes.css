@@ -134,3 +134,11 @@
     line-height:1.5;
     padding:var(--space-2) 0;
 }
+/* =========================================
+aca es para que el searchbar no este tan separado
+========================================= */
+@media (min-width: 1400px) {
+    .uniformes-page .searchbar-btn {
+        margin-left: 0 !important;
+    }
+}
