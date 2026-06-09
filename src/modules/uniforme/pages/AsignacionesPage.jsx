@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../../../components/layout/header";
 import ModuleLayout from "../../../components/layout/ModuleLayout";
 import Sidebar from "../../../components/layout/Sidebar";
@@ -6,6 +7,13 @@ import SearchBar from "../../../components/shared/searchBar";
 import ActionButtons from "../../../components/shared/ActionButtons";
 import DataTable from "../../../components/shared/DataTable";
 import Modal from "../../../components/shared/Modal";
+import Alert from "../../../components/shared/Alert";
+import { Icon } from "@mdi/react";
+import {
+  mdiHome,
+  mdiHanger,
+  mdiTshirtCrew
+} from "@mdi/js";
 import {
   getAsignacionesRequest,
   deletePrestamoRequest,
@@ -47,12 +55,12 @@ const COLUMNS = [
     label: "Estado",
     render: (val) => {
       const estado = val?.toLowerCase();
-      let clase = "badge--default";
-      if (estado === "prestado")     clase = "badge--warn";
-      else if (estado === "bueno")   clase = "badge--good";
-      else if (estado === "regular") clase = "badge--regular";
-      else if (estado === "malo")    clase = "badge--bad";
-      else if (estado === "sin asignar") clase = "badge--no";
+      let clase = "uniforme-badge--default";
+      if (estado === "prestado")     clase = "uniforme-badge--warn";
+      else if (estado === "bueno")   clase = "uniforme-badge--good";
+      else if (estado === "regular") clase = "uniforme-badge--regular";
+      else if (estado === "malo")    clase = "uniforme-badge--bad";
+      else if (estado === "sin asignar") clase = "uniforme-badge--no";
       return <span className={clase}>{capitalizar(val)}</span>;
     }
   }
@@ -60,6 +68,7 @@ const COLUMNS = [
 
 export default function AsignacionesPage() {
   const { user, roles, loadingRoles } = useAuth();
+  const navigate = useNavigate();
 
   // ── Estados de la interfaz ──────────────────────────────────────────────────
   const [selectedRow, setSelectedRow]   = useState(null);
@@ -72,6 +81,28 @@ export default function AsignacionesPage() {
   const [openModal, setOpenModal]       = useState(false);
   const [openDevolver, setOpenDevolver] = useState(false);
   const [openEliminar, setOpenEliminar] = useState(false);
+
+  // ── Estado Alerta ───────────────────────────────────────────────────────────
+  const [alerta, setAlerta] = useState({
+    isOpen: false,
+    type: "info",
+    title: "",
+    message: ""
+  });
+
+  // ── Función Alerta ──────────────────────────────────────────────────────────
+  const mostrarAlerta = (
+    type,
+    message,
+    title = ""
+  ) => {
+    setAlerta({
+      isOpen: true,
+      type,
+      title,
+      message
+    });
+  };
 
   // ── Estado interno del modal AsignarPrenda ───────────────────────────────────
   const [prendas, setPrendas]           = useState([]);
@@ -122,15 +153,15 @@ export default function AsignacionesPage() {
     if (loadingModal) return;
 
     if (!formAsignar.id_objeto) {
-      alert("Seleccione una prenda");
+      mostrarAlerta("error", "Seleccione una prenda");
       return;
     }
     if (prendaSeleccionada?.tipo === "vestimenta" && !formAsignar.talla) {
-      alert("Seleccione una talla");
+      mostrarAlerta("error", "Seleccione una talla");
       return;
     }
     if (!selectedRow?.id_estudiante) {
-      alert("Debe seleccionar un estudiante");
+      mostrarAlerta("error", "Debe seleccionar un estudiante");
       return;
     }
 
@@ -145,12 +176,18 @@ export default function AsignacionesPage() {
     try {
       setLoadingModal(true);
       await registrarPrestamoRequest(data);
-      alert("Prenda asignada correctamente");
+      mostrarAlerta(
+        "success",
+        "La prenda fue asignada correctamente."
+      );
       await cargarAsignaciones();
       setOpenModal(false);
     } catch (error) {
       console.error("ERROR BACKEND:", error.response?.data);
-      alert(error.response?.data?.detail || "Error al registrar préstamo");
+      mostrarAlerta(
+        "error",
+        error.response?.data?.detail || "Error al registrar préstamo"
+      );
     } finally {
       setLoadingModal(false);
     }
@@ -243,25 +280,28 @@ export default function AsignacionesPage() {
       setOpenEliminar(false);
     } catch (error) {
       console.error("Error al confirmar la eliminación de la asignación:", error);
-      alert("No se pudo eliminar la asignación. Intente de nuevo.");
+      mostrarAlerta(
+        "error",
+        "No se pudo eliminar la asignación. Intente nuevamente."
+      );
     }
   };
 
   // ── Devolver ─────────────────────────────────────────────────────────────────
   const devolverPrenda = async () => {
     if (!selectedRow) {
-      alert("Seleccione una asignación");
+      mostrarAlerta("error", "Seleccione una asignación");
       return;
     }
     if (!formDevolucion.estado_devolucion) {
-      alert("Seleccione el estado de devolución");
+      mostrarAlerta("error", "Seleccione el estado de devolución");
       return;
     }
     if (
       formDevolucion.estado_devolucion === "Malo" &&
       !formDevolucion.observacion.trim()
     ) {
-      alert("Debe ingresar una observación cuando la prenda se devuelve en mal estado");
+      mostrarAlerta("error", "Debe ingresar una observación cuando la prenda se devuelve en mal estado");
       return;
     }
 
@@ -277,10 +317,16 @@ export default function AsignacionesPage() {
         prenda: "", talla: "", fecha_entrega: "", fecha_devolucion: "",
         estado_entrega: "", estado_devolucion: "", observacion: ""
       });
-      alert("Devolución registrada");
+      mostrarAlerta(
+        "success",
+        "La devolución fue registrada correctamente."
+      );
     } catch (error) {
       console.error(error);
-      alert(error?.response?.data?.detail || "Error devolver prenda");
+      mostrarAlerta(
+        "error",
+        error?.response?.data?.detail || "Error al devolver la prenda."
+      );
     }
   };
 
@@ -325,6 +371,41 @@ export default function AsignacionesPage() {
     [asignaciones, filtrosAplicados]
   );
 
+  const modulos = [
+    {
+      label: "Inicio",
+      icon: <Icon path={mdiHome} size={1} />,
+      path: "/home"
+    },
+    {
+      label: "Asignaciones Uniformes",
+      icon: <Icon path={mdiTshirtCrew} size={1} />,
+      path: "/uniformes/asignaciones",
+      roles: ["admin", "titular"]
+    },
+    {
+      label: "Inventario Uniformes",
+      icon: <Icon path={mdiHanger} size={1} />,
+      path: "/uniformes/inventario",
+      roles: ["admin", "titular"]
+    }
+  ];
+
+  const sidebarMenuItems = modulos.filter(modulo =>
+    !modulo.roles ||
+    roles.some(rol => modulo.roles.includes(rol))
+  );
+
+  const tieneAccesoModulo = roles.some(
+    rol => ["admin", "titular"].includes(rol)
+  );
+
+  useEffect(() => {
+    if (!loadingRoles && !tieneAccesoModulo) {
+      navigate("/home");
+    }
+  }, [loadingRoles, tieneAccesoModulo, navigate]);
+
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
     <div className="uniformes-page">
@@ -335,60 +416,58 @@ export default function AsignacionesPage() {
           <Sidebar
             user={{ nombre: user?.nombre || "admin", rol }}
             loadingRoles={loadingRoles}
-            menuItems={[
-              { label: "Inicio", path: "/home" },
-              { label: "Asignaciones", path: "/uniformes/asignaciones" },
-              { label: "Inventario Prenda", path: "/uniformes/inventario" }
-            ]}
-            selectedMenu="Asignaciones"
+            menuItems={sidebarMenuItems}
+            selectedMenu="Asignaciones Uniformes"
           />
         }
         actions={
-          <ActionButtons
-            filaSeleccionada={selectedRow}
-            botones={[
-              {
-                label: "Asignar Prenda",
-                onClick: () => setOpenModal(true),
-                variante: "primary"
-              },
-              {
-                label: "Devolver Prenda",
-                disabled: !!selectedRow && !selectedRow.id_prestamo,
-                onClick: () => {
-                  if (!selectedRow) {
-                    alert("Seleccione una asignación");
-                    return;
-                  }
-                  setFormDevolucion({
-                    prenda: selectedRow.prenda || "",
-                    talla: selectedRow.talla || "",
-                    fecha_entrega: selectedRow.fecha_entrega
-                      ? new Date(selectedRow.fecha_entrega).toLocaleDateString("es-CO")
-                      : "",
-                    fecha_devolucion: new Date().toLocaleDateString("es-CO"),
-                    estado_entrega: selectedRow.estado_entrega || "",
-                    estado_devolucion: "",
-                    observacion: ""
-                  });
-                  setOpenDevolver(true);
+            !loadingRoles &&  tieneAccesoModulo ? (
+            <ActionButtons
+              filaSeleccionada={selectedRow}
+              botones={[
+                {
+                  label: "Asignar Prenda",
+                  onClick: () => setOpenModal(true),
+                  variante: "primary"
                 },
-                variante: "secondary"
-              },
-              {
-                label: "Eliminar",
-                disabled: !!selectedRow && !selectedRow.id_prestamo,
-                onClick: () => {
-                  if (!selectedRow) {
-                    alert("Seleccione una asignación");
-                    return;
-                  }
-                  setOpenEliminar(true);
+                {
+                  label: "Devolver Prenda",
+                  disabled: !!selectedRow && !selectedRow.id_prestamo,
+                  onClick: () => {
+                    if (!selectedRow) {
+                      mostrarAlerta("error", "Seleccione una asignación");
+                      return;
+                    }
+                    setFormDevolucion({
+                      prenda: selectedRow.prenda || "",
+                      talla: selectedRow.talla || "",
+                      fecha_entrega: selectedRow.fecha_entrega
+                        ? new Date(selectedRow.fecha_entrega).toLocaleDateString("es-CO")
+                        : "",
+                      fecha_devolucion: new Date().toLocaleDateString("es-CO"),
+                      estado_entrega: capitalizar(selectedRow.estado_entrega) || "",
+                      estado_devolucion: "",
+                      observacion: ""
+                    });
+                    setOpenDevolver(true);
+                  },
+                  variante: "secondary"
                 },
-                variante: "primary"
-              }
-            ]}
-          />
+                {
+                  label: "Eliminar",
+                  disabled: !!selectedRow && !selectedRow.id_prestamo,
+                  onClick: () => {
+                    if (!selectedRow) {
+                      mostrarAlerta("error", "Seleccione una asignación");
+                      return;
+                    }
+                    setOpenEliminar(true);
+                  },
+                  variante: "primary"
+                }
+              ]}
+            />
+          ) : null
         }
       >
         <main className="uniformes-main">
@@ -397,11 +476,11 @@ export default function AsignacionesPage() {
               initialValues={filtros}
               loading={loading}
               fields={[
-                { key: "codigo", label: "Código",  type: "text" },
-                { key: "nombre", label: "Nombre",  type: "text" },
-                { key: "grado",  label: "Grado",   type: "select", options: opcionesGrados },
-                { key: "grupo",  label: "Grupo",   type: "select", options: opcionesGrupos },
-                { key: "anio",   label: "Año",     type: "select", options: opcionesAnios }
+                { key: "codigo", label: "Código", type: "text" },
+                { key: "nombre", label: "Nombre", type: "text" },
+                { key: "grado", label: "Grado", type: "select", options: opcionesGrados },
+                { key: "grupo", label: "Grupo", type: "select", options: opcionesGrupos },
+                { key: "anio", label: "Año", type: "select", options: opcionesAnios }
               ]}
               onChange={(key, value) => {
                 setFiltros((prev) => {
@@ -519,11 +598,25 @@ export default function AsignacionesPage() {
         values={{}}
         onChange={() => {}}
         fields={[
-          { key: "mensaje1", type: "label", label: "¿CONFIRMA ELIMINAR LA ASIGNACIÓN?" },
-          { key: "mensaje2", type: "label", label: `${selectedRow?.nombre_completo || ""}` },
-          { key: "mensaje3", type: "label", label: `${selectedRow?.prenda || ""}` },
-          { key: "mensaje4", type: "label", label: "Esta acción no se puede deshacer." }
+          { 
+            key: "mensaje",
+            type: "label",
+            className: "uniformes-modal-message",
+            label: `${selectedRow?.nombre_completo || ""}
+${capitalizar(selectedRow?.prenda || "")}
+Esta acción no se puede deshacer.`
+          }
         ]}
+      />
+
+      <Alert
+        {...alerta}
+        onClose={() =>
+          setAlerta(prev => ({
+            ...prev,
+            isOpen: false
+          }))
+        }
       />
     </div>
   );

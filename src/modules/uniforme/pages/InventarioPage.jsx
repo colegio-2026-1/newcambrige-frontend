@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   getInventarioRequest,
   deleteObjetoRequest,
@@ -14,7 +15,16 @@ import SearchBar from "../../../components/shared/searchBar";
 import Modal from "../../../components/shared/Modal";
 import ActionButtons from "../../../components/shared/ActionButtons";
 import DataTable from "../../../components/shared/DataTable";
+import Alert from "../../../components/shared/Alert";
 import "../styles/uniformes.css";
+
+
+import { Icon } from "@mdi/react";
+import {
+  mdiHome,
+  mdiHanger,
+  mdiTshirtCrew
+} from "@mdi/js";
 
 // ─── Utilidad ────────────────────────────────────────────────────────────────
 const capitalizar = (texto) =>
@@ -38,17 +48,49 @@ const COLUMNS = [
   {
     key: "cantidad_disponible",
     label: "Disponibilidad",
-    render: (val) => (Number(val) > 0 ? "Activo" : "Inactivo")
+    render: (val) => (
+      Number(val) > 0
+        ? <span className="uniforme-badge--good">Activo</span>
+        : <span className="uniforme-badge--bad">Inactivo</span>
+    )
   },
+  
   {
     key: "estado_fisico",
     label: "Estado físico",
-    render: (val) => capitalizar(val)
+    render: (val) => {
+      const estado = val?.toLowerCase();
+
+      let clase = "uniforme-badge--default";
+
+      if (estado === "bueno") clase = "uniforme-badge--good";
+      else if (estado === "regular") clase = "uniforme-badge--regular";
+      else if (estado === "malo") clase = "uniforme-badge--bad";
+
+      return (
+        <span className={clase}>
+          {capitalizar(val)}
+        </span>
+      );
+    }
   }
 ];
 
 export default function InventarioPage() {
   const { user, roles, loadingRoles } = useAuth();
+  const navigate = useNavigate();
+
+  const rolesPermitidos = ["admin", "titular"];
+
+  const tieneAccesoModulo = roles.some(
+    rol => rolesPermitidos.includes(rol)
+  );
+
+  useEffect(() => {
+    if (!loadingRoles && !tieneAccesoModulo) {
+      navigate("/home");
+    }
+  }, [loadingRoles, tieneAccesoModulo, navigate]);
 
   const [selectedRow, setSelectedRow] = useState(null);
   const [inventario, setInventario]   = useState([]);
@@ -58,6 +100,25 @@ export default function InventarioPage() {
   const [openAgregar, setOpenAgregar] = useState(false);
   const [openEditar, setOpenEditar]   = useState(false);
   const [openEliminar, setOpenEliminar] = useState(false);
+  const [openPrestamoActivo, setOpenPrestamoActivo] = useState(false);
+
+  // ── Estado Alerta ───────────────────────────────────────────────────────────
+  const [alerta, setAlerta] = useState({
+    isOpen: false,
+    type: "info",
+    title: "",
+    message: ""
+  });
+
+  // ── Función Alerta ──────────────────────────────────────────────────────────
+  const mostrarAlerta = (type, message, title = "") => {
+    setAlerta({
+      isOpen: true,
+      type,
+      title,
+      message
+    });
+  };
 
   // ── Filtros ──────────────────────────────────────────────────────────────────
   const [filtros, setFiltros] = useState({ codigo: "", prenda: "", tipo: "" });
@@ -90,22 +151,25 @@ export default function InventarioPage() {
   // ── Guardar prenda ────────────────────────────────────────────────────────────
   const guardarPrenda = async () => {
     if (!formAgregar.nombre.trim()) {
-      alert("Ingrese el nombre de la prenda");
+      mostrarAlerta("error", "Ingrese el nombre de la prenda");
       return;
     }
     if (formAgregar.tipo === "vestimenta" && !formAgregar.talla) {
-      alert("Seleccione una talla");
+      mostrarAlerta("error", "Seleccione una talla");
       return;
     }
     if (Number(formAgregar.cantidad_total) < 0) {
-      alert("Cantidad inválida");
+      mostrarAlerta("error", "Cantidad inválida");
       return;
     }
     if (
       ["regular", "malo"].includes(formAgregar.estado_fisico?.toLowerCase()) &&
       !formAgregar.observacion?.trim()
     ) {
-      alert("Debe ingresar una observación para prendas en estado Regular o Malo");
+      mostrarAlerta(
+        "error",
+        "Debe ingresar una observación para prendas en estado Regular o Malo"
+      );
       return;
     }
 
@@ -132,28 +196,37 @@ export default function InventarioPage() {
         observacion: "",
         fecha_registro: new Date().toLocaleDateString("en-CA")
       });
-      alert("Prenda registrada correctamente");
+      mostrarAlerta(
+        "success",
+        "La prenda fue registrada correctamente."
+      );
     } catch (error) {
       console.error(error);
-      alert("Error registrando prenda");
+      mostrarAlerta(
+        "error",
+        "Error registrando prenda"
+      );
     }
   };
 
   // ── Editar prenda ─────────────────────────────────────────────────────────────
   const editarPrenda = async () => {
     if (!selectedRow) {
-      alert("Seleccione una prenda");
+      mostrarAlerta("error", "Seleccione una prenda");
       return;
     }
     if (!formEditar.nombre.trim()) {
-      alert("Ingrese el nombre");
+      mostrarAlerta("error", "Ingrese el nombre");
       return;
     }
     if (
       ["regular", "malo"].includes(formEditar.estado_fisico?.toLowerCase()) &&
       !formEditar.observacion?.trim()
     ) {
-      alert("Debe ingresar una observación para prendas en estado Regular o Malo");
+      mostrarAlerta(
+        "error",
+        "Debe ingresar una observación para prendas en estado Regular o Malo"
+      );
       return;
     }
 
@@ -169,10 +242,16 @@ export default function InventarioPage() {
 
       await cargarInventario();
       setOpenEditar(false);
-      alert("Prenda actualizada correctamente");
+      mostrarAlerta(
+        "success",
+        "La prenda fue actualizada correctamente."
+      );
     } catch (error) {
       console.error(error);
-      alert(error?.response?.data?.detail || "Error actualizando prenda");
+      mostrarAlerta(
+        "error",
+        error?.response?.data?.detail || "Error actualizando prenda"
+      );
     }
   };
 
@@ -184,10 +263,16 @@ export default function InventarioPage() {
       await cargarInventario();
       setSelectedRow(null);
       setOpenEliminar(false);
-      alert("Prenda eliminada correctamente");
+      mostrarAlerta(
+        "success",
+        "La prenda fue eliminada correctamente."
+      );
     } catch (error) {
       console.error(error);
-      alert(error?.response?.data?.detail || "Error eliminando prenda");
+      mostrarAlerta(
+        "error",
+        error?.response?.data?.detail || "Error eliminando la prenda"
+      );
     }
   };
 
@@ -201,7 +286,7 @@ export default function InventarioPage() {
       );
       setInventario(ordenado);
     } catch (error) {
-      console.error("Error cargando inventario", error);
+      console.error("Error loading inventory", error);
     } finally {
       setLoading(false);
     }
@@ -228,6 +313,31 @@ export default function InventarioPage() {
     [inventario, filtrosAplicados]
   );
 
+  const modulos = [
+    {
+      label: "Inicio",
+      icon: <Icon path={mdiHome} size={1} />,
+      path: "/home"
+    },
+    {
+      label: "Asignaciones Uniformes",
+      icon: <Icon path={mdiTshirtCrew} size={1} />,
+      path: "/uniformes/asignaciones",
+      roles: ["admin", "titular"]
+    },
+    {
+      label: "Inventario Uniformes",
+      icon: <Icon path={mdiHanger} size={1} />,
+      path: "/uniformes/inventario",
+      roles: ["admin", "titular"]
+    }
+  ];
+
+  const sidebarMenuItems = modulos.filter(modulo =>
+    !modulo.roles ||
+    roles.some(rol => modulo.roles.includes(rol))
+  );
+
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
     <div className="uniformes-page">
@@ -238,74 +348,77 @@ export default function InventarioPage() {
           <Sidebar
             user={{ nombre: user?.nombre || "Usuario", rol }}
             loadingRoles={loadingRoles}
-            menuItems={[
-              { label: "Inicio", path: "/home" },
-              { label: "Asignaciones", path: "/uniformes/asignaciones" },
-              { label: "Inventario Prendas", path: "/uniformes/inventario" }
-            ]}
-            selectedMenu="Inventario Prendas"
+            menuItems={sidebarMenuItems}
+            selectedMenu="Inventario Uniformes"
           />
         }
         actions={
-          <ActionButtons
-            filaSeleccionada={selectedRow}
-            botones={[
-              {
-                label: "Agregar Prenda",
-                onClick: () => {
-                  setFormAgregar({
-                    nombre: "",
-                    tipo: "vestimenta",
-                    cantidad_total: 1,
-                    estado_fisico: "Bueno",
-                    talla: "",
-                    observacion: "",
-                    fecha_registro: new Date().toLocaleDateString("en-CA")
-                  });
-                  setOpenAgregar(true);
+          !loadingRoles && tieneAccesoModulo && (
+            <ActionButtons
+              filaSeleccionada={selectedRow}
+              botones={[
+                {
+                  label: "Agregar Prenda",
+                  onClick: () => {
+                    setFormAgregar({
+                      nombre: "",
+                      tipo: "vestimenta",
+                      cantidad_total: 1,
+                      estado_fisico: "Bueno",
+                      talla: "",
+                      observacion: "",
+                      fecha_registro: new Date().toLocaleDateString("en-CA")
+                    });
+                    setOpenAgregar(true);
+                  },
+                  siempreActivo: true,
+                  variante: "primary"
                 },
-                siempreActivo: true,
-                variante: "primary"
-              },
-              {
-                label: "Editar Prenda",
-                onClick: () => {
-                  if (!selectedRow) {
-                    alert("Seleccione una prenda");
-                    return;
-                  }
-                  setFormEditar({
-                    nombre: selectedRow.nombre || "",
-                    tipo: selectedRow.tipo || "vestimenta",
-                    cantidad_total: selectedRow.cantidad_total || 0,
-                    estado_fisico: selectedRow.estado_fisico || "Bueno",
-                    talla: selectedRow.talla || "",
-                    observacion: selectedRow.observacion || ""
-                  });
-                  setOpenEditar(true);
+                {
+                  label: "Editar Prenda",
+                  onClick: () => {
+                    if (!selectedRow) {
+                      mostrarAlerta("error", "Seleccione una prenda");
+                      return;
+                    }
+                    setFormEditar({
+                      nombre: selectedRow.nombre || "",
+                      tipo: selectedRow.tipo || "vestimenta",
+                      cantidad_total: selectedRow.cantidad_total || 0,
+                      estado_fisico: selectedRow.estado_fisico || "Bueno",
+                      talla: selectedRow.talla || "",
+                      observacion: selectedRow.observacion || ""
+                    });
+                    setOpenEditar(true);
+                  },
+                  variante: "secondary"
                 },
-                variante: "secondary"
-              },
-              {
-                label: "Eliminar Prenda",
-                onClick: () => {
-                  if (!selectedRow) {
-                    alert("Seleccione una prenda");
-                    return;
-                  }
-                  setOpenEliminar(true);
-                },
-                variante: "primary"
-              }
-            ]}
-          />
+                {
+                  label: "Eliminar Prenda",
+                  onClick: () => {
+                    if (!selectedRow) {
+                      mostrarAlerta("error", "Seleccione una prenda");
+                      return;
+                    }
+                    
+                    if (Number(selectedRow.prestadas) > 0) {
+                      setOpenPrestamoActivo(true);
+                      return;
+                    }
+                    setOpenEliminar(true);
+                  },
+                  variante: "primary"
+                }
+              ]}
+            />
+          )
         }
       >
         <main className="uniformes-main">
           <SearchBar
             initialValues={filtros}
             fields={[
-              { key: "codigo", label: "codigo", type: "text" },
+              { key: "codigo", label: "Código", type: "text" },
               { key: "prenda", label: "Prenda",  type: "text" },
               { key: "tipo",   label: "Tipo",    type: "select", options: ["vestimenta", "objeto"] }
             ]}
@@ -411,9 +524,38 @@ export default function InventarioPage() {
           {
             key: "mensaje",
             type: "label",
+            className: "uniformes-modal-message",
             label:`¿CONFIRMA ELIMINAR LA PRENDA ${selectedRow?.nombre || ""}?`
           }  
         ]}
+      />
+
+      {/* ── Modal: Préstamo Activo ────────────────────────────────────────────── */}
+      <Modal
+        title="NO ES POSIBLE ELIMINAR"
+        isOpen={openPrestamoActivo}
+        onCancel={() => setOpenPrestamoActivo(false)}
+        onAccept={() => setOpenPrestamoActivo(false)}
+        values={{}}
+        onChange={() => {}}
+        fields={[
+          {
+            key: "mensaje",
+            type: "label",
+            className: "uniformes-modal-warning",
+            label: "LA PRENDA TIENE UN PRÉSTAMO ACTIVO."
+          }
+        ]}
+      />
+
+      <Alert
+        {...alerta}
+        onClose={() =>
+          setAlerta(prev => ({
+            ...prev,
+            isOpen: false
+          }))
+        }
       />
     </div>
   );
