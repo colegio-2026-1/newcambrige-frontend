@@ -29,7 +29,7 @@
   padding: var(--space-8) var(--space-10);
   padding-top: 50px;       /* ← espacio extra arriba para que el título no quede debajo del botón */
   width: 100%;
-  max-width: 560px;
+  max-width: 750px;
   box-shadow: var(--shadow-md);
   animation: modalIn var(--transition-base) ease;
 }
@@ -91,8 +91,8 @@
 /* ── CAMPOS ── */
 .modal-fields {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-4) var(--space-6);
+  grid-template-columns: repeat(2, minmax(250px, 1fr));
+  gap: 20px;
   margin-bottom: var(--space-8);
 }
 
