@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react"; 
 import "./TiposPruebaPage.css";
 
@@ -19,14 +19,26 @@ import {
   actualizarTipoPruebaRequest
 } from "../../api/endpointsParametrizacion";
 
-// Iconos 
+import { Icon } from '@mdi/react';
+import {
+  mdiHome,
+  mdiCog,
+
+  mdiAccount,
+  mdiCalendar,
+  mdiTestTube,
+  mdiGuitarElectric,
+  mdiCube,
+  mdiBook,
+  mdiAccountGroup,
+} from '@mdi/js';
+
 import salonIcon from "../../assets/Salon/salon.svg";
 import tesoreriaIcon from "../../assets/Tesoreria/tesoreria.svg";
 import rectoriaIcon from "../../assets/Rectoria/estudiante.svg";
 import uniformesIcon from "../../assets/Objetos/objetos.svg";
 import paraIcon from "../../assets/Parametrizacion/parametrizacion.svg";
 
-// Constantes de Grados Escolares
 const GRADOS_ESCOLARES = [
   { id: 1, label: "Primero" }, { id: 2, label: "Segundo" }, { id: 3, label: "Tercero" },
   { id: 4, label: "Cuarto" }, { id: 5, label: "Quinto" }, { id: 6, label: "Sexto" },
@@ -35,14 +47,13 @@ const GRADOS_ESCOLARES = [
 ];
 
 // ==========================================
-// MODAL UNIFICADO (CREAR / EDITAR) CORREGIDO
+// MODAL UNIFICADO (CREAR / EDITAR)
 // ==========================================
 const PruebaModal = ({ isOpen, onClose, pruebaEdit, alTerminar }) => {
   if (!isOpen) return null;
 
   const isEdit = Boolean(pruebaEdit);
   
-  // Estados del formulario
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [rangoSelect, setRangoSelect] = useState("Todo");
@@ -50,7 +61,6 @@ const PruebaModal = ({ isOpen, onClose, pruebaEdit, alTerminar }) => {
   const [gradoMax, setGradoMax] = useState(11);
   const [cargando, setCargando] = useState(false);
 
-  // Cargar datos cuando se abre el modal en modo edición
   useEffect(() => {
     if (isEdit && pruebaEdit) {
       setNombre(pruebaEdit.nombre || "");
@@ -59,7 +69,6 @@ const PruebaModal = ({ isOpen, onClose, pruebaEdit, alTerminar }) => {
       setGradoMax(pruebaEdit.grado_max);
       determinarRangoPorGrados(pruebaEdit.grado_min, pruebaEdit.grado_max);
     } else {
-      // Resetear para creación
       setNombre("");
       setDescripcion("");
       setRangoSelect("Todo");
@@ -101,15 +110,8 @@ const PruebaModal = ({ isOpen, onClose, pruebaEdit, alTerminar }) => {
   };
 
   const handleGuardar = async () => {
-    // Validaciones
-    if (!nombre.trim()) {
-      alert("El nombre de la prueba es obligatorio.");
-      return;
-    }
-    if (gradoMin > gradoMax) {
-      alert("El grado inicial no puede ser mayor al grado final.");
-      return;
-    }
+    if (!nombre.trim()) return alert("El nombre de la prueba es obligatorio.");
+    if (gradoMin > gradoMax) return alert("El grado inicial no puede ser mayor al grado final.");
     
     try {
       setCargando(true);
@@ -126,11 +128,10 @@ const PruebaModal = ({ isOpen, onClose, pruebaEdit, alTerminar }) => {
         await crearTipoPruebaRequest(payload);
       }
       
-      alTerminar(); // Recargar lista
+      alTerminar();
       onClose();
     } catch (error) {
-      const mensaje = error.response?.data?.detail || "Error al guardar el tipo de prueba.";
-      alert(mensaje);
+      alert(error.response?.data?.detail || "Error al guardar el tipo de prueba.");
     } finally {
       setCargando(false);
     }
@@ -145,26 +146,14 @@ const PruebaModal = ({ isOpen, onClose, pruebaEdit, alTerminar }) => {
         </div>
         
         <div className="tp-modal-body">
-          {/* Campo NOMBRE siempre visible */}
           <div className="tp-modal-form-row">
             <div className="tp-input-group">
-              <label>Prueba *</label>
-              <input 
-                type="text" 
-                placeholder="Ej: Saber 11" 
-                value={nombre} 
-                onChange={(e) => setNombre(e.target.value)}
-                disabled={cargando}
-              />
+              <label>Prueba </label>
+              <input type="text" placeholder="Ej: Saber 11" value={nombre} onChange={(e) => setNombre(e.target.value)} disabled={cargando} />
             </div>
             <div className="tp-input-group">
               <label>Descripción</label>
-              <input 
-                type="text" 
-                value={descripcion} 
-                onChange={(e) => setDescripcion(e.target.value)}
-                disabled={cargando}
-              />
+              <input type="text" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} disabled={cargando} />
             </div>
             <div className="tp-input-group">
               <label>Rango</label>
@@ -180,26 +169,14 @@ const PruebaModal = ({ isOpen, onClose, pruebaEdit, alTerminar }) => {
           <div className="tp-modal-form-row">
             <div className="tp-input-group">
               <label>Grado Inicial</label>
-              <select 
-                value={gradoMin} 
-                onChange={(e) => handleGradoManualChange('min', e.target.value)}
-                disabled={cargando}
-              >
-                {GRADOS_ESCOLARES.map(g => (
-                  <option key={`min-${g.id}`} value={g.id}>{g.label}</option>
-                ))}
+              <select value={gradoMin} onChange={(e) => handleGradoManualChange('min', e.target.value)} disabled={cargando}>
+                {GRADOS_ESCOLARES.map(g => <option key={`min-${g.id}`} value={g.id}>{g.label}</option>)}
               </select>
             </div>
             <div className="tp-input-group">
               <label>Grado Final</label>
-              <select 
-                value={gradoMax} 
-                onChange={(e) => handleGradoManualChange('max', e.target.value)}
-                disabled={cargando}
-              >
-                {GRADOS_ESCOLARES.map(g => (
-                  <option key={`max-${g.id}`} value={g.id}>{g.label}</option>
-                ))}
+              <select value={gradoMax} onChange={(e) => handleGradoManualChange('max', e.target.value)} disabled={cargando}>
+                {GRADOS_ESCOLARES.map(g => <option key={`max-${g.id}`} value={g.id}>{g.label}</option>)}
               </select>
             </div>
           </div>
@@ -220,18 +197,10 @@ const PruebaModal = ({ isOpen, onClose, pruebaEdit, alTerminar }) => {
         </div>
 
         <div className="tp-modal-footer">
-          <button 
-            className="tp-btn-primary" 
-            onClick={handleGuardar} 
-            disabled={cargando}
-          >
+          <button className="tp-btn-primary" onClick={handleGuardar} disabled={cargando}>
             {cargando ? "Guardando..." : "Aceptar"}
           </button>
-          <button 
-            className="tp-btn-secondary" 
-            onClick={onClose} 
-            disabled={cargando}
-          >
+          <button className="tp-btn-secondary" onClick={onClose} disabled={cargando}>
             Cancelar
           </button>
         </div>
@@ -270,33 +239,35 @@ const TiposPruebaPage = () => {
   useEffect(() => { cargarPruebas(); }, []);
 
   const menuItems = [
-    { label: "Inicio", path: "/home" }, { label: "Dashboard" },
-    { label: "Salón", icon: salonIcon, path: "/salon" },
-    { label: "Uniformes", icon: uniformesIcon, path: "/objetos" },
-    { label: "Tesorería", icon: tesoreriaIcon, path: "/tesoreria" },
-    { label: "Rectoría", icon: rectoriaIcon, path: "/rectoria" },
-    { label: "Parametrización", icon: paraIcon, path: "/parametrizacion" },
+    { label: "Inicio", icon: <Icon path={mdiHome} size="32px" />, path: "/home" },
+    { label: "Usuarios", icon: <Icon path={mdiAccount} size="32px" />, path: "/parametrizacion/usuarios" },
+    { label: "Año Escolar", icon: <Icon path={mdiCalendar} size="32px" />, path: "/parametrizacion/anio-escolar" },
+    { label: "Pruebas", icon: <Icon path={mdiTestTube} size="32px" />, path: "/parametrizacion/pruebas" },
+    { label: "Instrumentos", icon: <Icon path={mdiGuitarElectric} size="32px" />, path: "/parametrizacion/instrumentos" },
+    { label: "Objetos", icon: <Icon path={mdiCube} size="32px" />, path: "/parametrizacion/objetos" },
+    { label: "Libros", icon: <Icon path={mdiBook} size="32px" />, path: "/parametrizacion/libros" },
+    { label: "Asignar Titular", icon: <Icon path={mdiAccountGroup} size="32px" />, path: "/parametrizacion/titulares" },
   ];
 
   const columnasTabla = [
     { key: "id_tipo_prueba", label: "Código" },
     { key: "nombre", label: "Prueba" },
     { key: "descripcion", label: "Descripción", render: (val) => val || "Sin descripción" },
-    { key: "rango_str", label: "Rango de Grados" }
+    { key: "rango", label: "Rango de Grados", render: (_, row) => `De ${row.grado_min} a ${row.grado_max}` }
   ];
 
-  const pruebasFiltradas = pruebas.filter(p => 
-    p.nombre.toLowerCase().includes(filtroBusqueda.toLowerCase())
-  );
+  const pruebasFiltradas = useMemo(() => {
+    return pruebas.filter(p => 
+      (p.nombre || "").toLowerCase().includes(filtroBusqueda.toLowerCase())
+    );
+  }, [pruebas, filtroBusqueda]);
 
-  const filasProcesadas = pruebasFiltradas.map(p => ({
-    ...p,
-    rango_str: `De ${p.grado_min} a ${p.grado_max}`
-  }));
+  const totalPaginas = Math.ceil(pruebasFiltradas.length / itemsPorPagina) || 1;
 
-  const totalPaginas = Math.ceil(filasProcesadas.length / itemsPorPagina) || 1;
-  const startIndex = (paginaActual - 1) * itemsPorPagina;
-  const filasPaginadas = filasProcesadas.slice(startIndex, startIndex + itemsPorPagina);
+  const filasPaginadas = useMemo(() => {
+    const startIndex = (paginaActual - 1) * itemsPorPagina;
+    return pruebasFiltradas.slice(startIndex, startIndex + itemsPorPagina);
+  }, [pruebasFiltradas, paginaActual]);
 
   const abrirModalCrear = () => { 
     setModalModeEdit(false); 
@@ -316,16 +287,14 @@ const TiposPruebaPage = () => {
     <div className="dashboard-container">
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
       <ModuleLayout
-        sidebar={<Sidebar menuItems={menuItems} selectedMenu="Parametrización" user={{ nombre: user?.nombre || "Usuario", rol: user?.rol || "TITULAR" }} logout={logout} />}
+        sidebar={<Sidebar menuItems={menuItems} selectedMenu="Pruebas" user={{ nombre: user?.nombre || "Usuario", rol: user?.rol || "TITULAR" }} logout={logout} />}
       >
-        <div className="tipos-prueba-content">
+        <div className="tipos-prueba-wrapper page-master-wrapper">
           
           <div className="module-toolbar-container">
             <div className="toolbar-grouped-actions">
               <SearchBar
-                fields={[
-                  { key: 'busqueda', label: 'Prueba:', type: 'text' }
-                ]}
+                fields={[ { key: 'busqueda', label: 'Prueba:', type: 'text' } ]}
                 onSearch={(filtros) => {
                   setFiltroBusqueda(filtros.busqueda || "");
                   setPaginaActual(1);
@@ -359,8 +328,8 @@ const TiposPruebaPage = () => {
                       rows={filasPaginadas} 
                       onRowClick={(fila) => setPruebaSeleccionada(fila)}
                       emptyText="No se encontraron pruebas con esa búsqueda"
-                      filaActiva={pruebaSeleccionada}
                       idKey="id_tipo_prueba"
+                      filaActiva={pruebaSeleccionada}
                     />
                   </div>
                   
