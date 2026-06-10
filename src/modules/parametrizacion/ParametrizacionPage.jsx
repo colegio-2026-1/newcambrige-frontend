@@ -51,11 +51,6 @@ const ParametrizacionPage = () => {
   // ==========================================
   const menuItems = [
     { label: "Inicio", icon: <Icon path={mdiHome} size="32px" />, path: "/home" },
-    { label: "Dashboard", icon: <Icon path={mdiViewDashboard} size="50px" />, path: "/dashboard" },
-    { label: "Salón", icon: <Icon path={mdiSchool} size="32px" />, path: "/salon" },
-    { label: "Uniformes", icon: <Icon path={mdiTshirtCrew} size="32px" />, path: "/uniformes" },
-    { label: "Tesorería", icon: <Icon path={mdiCash} size="32px" />, path: "/tesoreria" },
-    { label: "Rectoría", icon: <Icon path={mdiAccountSchool} size="32px" />, path: "/rectoria" },
     { label: "Parametrización", icon: <Icon path={mdiCog} size="32px" />, path: "/parametrizacion" },
   ];
 
