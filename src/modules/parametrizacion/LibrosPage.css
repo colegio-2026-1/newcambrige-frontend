@@ -1,4 +1,4 @@
-div.usuarios-wrapper {
+div.libros-wrapper {
   width: 100%;
   height: 100%;
   display: flex;
@@ -7,7 +7,8 @@ div.usuarios-wrapper {
   font-family: 'Bentham', serif;
 }
 
-div.usuarios-wrapper .module-toolbar-container {
+/* ── TOOLBAR SUPERIOR ── */
+div.libros-wrapper .module-toolbar-container {
   display: flex;
   align-items: center;
   padding: 20px 30px;
@@ -16,48 +17,21 @@ div.usuarios-wrapper .module-toolbar-container {
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-div.usuarios-wrapper .toolbar-grouped-actions {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  gap: 15px; 
+div.libros-wrapper .searchbar-input {
+  width: 200px; 
 }
 
-/* Modificaciones para mandar Buscar y Crear a la derecha */
-div.usuarios-wrapper .searchbar-wrapper {
-  display: flex;
-  align-items: center;
-  width: auto; /* Evita que la barra ocupe toda la pantalla */
-  padding: 0;
+div.libros-wrapper .searchbar-field:nth-child(2) .searchbar-input {
+  width: 300px; 
 }
 
-div.usuarios-wrapper .searchbar-btn {
-  margin-left: 0; /* Quita el empuje a la derecha */
-}
-
-div.usuarios-wrapper .toolbar-grouped-actions .action-buttons {
-  padding: 0;
-  min-width: auto;
-}
-
-div.usuarios-wrapper .toolbar-grouped-actions .action-btn {
-  height: 42px;
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-div.usuarios-wrapper .searchbar-input {
-  width: 250px; /* Tamaño del input de texto */
-}
-
-div.usuarios-wrapper .main-area {
+/* ── ÁREA PRINCIPAL Y TABLA ── */
+div.libros-wrapper .main-area {
   flex: 1;
   padding: 20px 30px;
 }
 
-div.usuarios-wrapper .empty-state {
+div.libros-wrapper .empty-state {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -66,35 +40,37 @@ div.usuarios-wrapper .empty-state {
   color: #666;
 }
 
-div.usuarios-wrapper .table-layout-wrapper {
+div.libros-wrapper .table-layout-wrapper {
   display: flex;
   align-items: flex-start;
   gap: 30px;
   width: 100%;
 }
 
-div.usuarios-wrapper .table-main-section {
+div.libros-wrapper .table-main-section {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-div.usuarios-wrapper .datatable-fixed-container {
+div.libros-wrapper .datatable-fixed-container {
   min-height: 400px;
 }
 
-div.usuarios-wrapper .side-actions {
+/* ── BOTONES LATERALES ── */
+div.libros-wrapper .side-actions {
   margin-top: 45px; 
 }
 
-div.usuarios-wrapper .pagination-center {
+/* ── PAGINACIÓN ── */
+div.libros-wrapper .pagination-center {
   display: flex;
   justify-content: center;
   gap: 15px;
   margin-top: 20px;
 }
 
-div.usuarios-wrapper .btn-circle {
+div.libros-wrapper .btn-circle {
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -108,23 +84,14 @@ div.usuarios-wrapper .btn-circle {
   box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
 }
 
-div.usuarios-wrapper .btn-circle:disabled {
+div.libros-wrapper .btn-circle:disabled {
   opacity: 0.4;
   cursor: not-allowed;
   box-shadow: none;
 }
 
-.usuarios-badge-ok {
-  color: #008000;
-  font-weight: bold;
-}
-
-.usuarios-badge-no {
-  color: #D00000;
-  font-weight: bold;
-}
-
-.usuarios-modal-overlay {
+/* ==================== MODAL DE LIBROS ==================== */
+.libros-modal-overlay {
   position: fixed; 
   top: 0; 
   left: 0; 
@@ -138,7 +105,7 @@ div.usuarios-wrapper .btn-circle:disabled {
   font-family: 'Bentham', serif;
 }
 
-.usuarios-modal-content {
+.libros-modal-content {
   background-color: white; 
   border-radius: 12px;
   width: 700px; 
@@ -147,7 +114,7 @@ div.usuarios-wrapper .btn-circle:disabled {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-.usuarios-modal-header {
+.libros-modal-content .modal-header {
   background-color: #D0E1FF; 
   padding: 24px 20px; 
   display: flex; 
@@ -156,7 +123,7 @@ div.usuarios-wrapper .btn-circle:disabled {
   position: relative;
 }
 
-.usuarios-modal-header h3 {
+.libros-modal-content .modal-header h3 {
   font-family: 'Staatliches', sans-serif; 
   font-size: 32px; 
   letter-spacing: 2px; 
@@ -167,7 +134,7 @@ div.usuarios-wrapper .btn-circle:disabled {
   text-transform: uppercase;
 }
 
-.usuarios-modal-close {
+.libros-modal-content .modal-close {
   background: none; 
   border: none; 
   font-size: 24px; 
@@ -180,20 +147,21 @@ div.usuarios-wrapper .btn-circle:disabled {
   transform: translateY(-50%);
 }
 
-.usuarios-modal-body { 
+.libros-modal-content .modal-body { 
   padding: 30px; 
   overflow: visible; 
 }
 
-.usuarios-modal-form-row {
+/* ==================== FORMULARIO DEL MODAL ==================== */
+.libros-modal-content .modal-form-row {
   display: flex; 
-  gap: 20px; 
+  gap: 25px; 
   margin-bottom: 25px;
   align-items: flex-start; 
   width: 100%;
 }
 
-.usuarios-input-group {
+.libros-modal-content .input-group {
   display: flex; 
   flex-direction: column; 
   align-items: flex-start;
@@ -202,14 +170,15 @@ div.usuarios-wrapper .btn-circle:disabled {
   overflow: visible;
 }
 
-.usuarios-input-group label {
+.libros-modal-content .input-group label {
   font-size: 18px; 
   font-weight: bold; 
   color: #333; 
   white-space: nowrap;
 }
 
-.usuarios-input-group input {
+.libros-modal-content .input-group input, 
+.libros-modal-content .input-group select {
   background-color: #EBEBEB; 
   border: 1px solid #CCC; 
   border-radius: 6px;
@@ -223,12 +192,13 @@ div.usuarios-wrapper .btn-circle:disabled {
   font-family: 'Bentham', serif;
 }
 
-.usuarios-toggle-group { 
+/* ==================== TOGGLE SWITCH ==================== */
+.libros-modal-content .toggle-group { 
   align-items: center; 
   justify-content: center; 
 }
 
-.usuarios-toggle-switch { 
+.libros-modal-content .toggle-switch { 
   position: relative; 
   display: inline-block; 
   width: 50px; 
@@ -236,13 +206,13 @@ div.usuarios-wrapper .btn-circle:disabled {
   margin-top: 5px; 
 }
 
-.usuarios-toggle-switch input { 
+.libros-modal-content .toggle-switch input { 
   opacity: 0; 
   width: 0; 
   height: 0; 
 }
 
-.usuarios-slider {
+.libros-modal-content .slider {
   position: absolute; 
   cursor: pointer; 
   top: 0; 
@@ -254,7 +224,7 @@ div.usuarios-wrapper .btn-circle:disabled {
   border-radius: 26px;
 }
 
-.usuarios-slider:before {
+.libros-modal-content .slider:before {
   position: absolute; 
   content: ""; 
   height: 20px; 
@@ -266,57 +236,16 @@ div.usuarios-wrapper .btn-circle:disabled {
   border-radius: 50%;
 }
 
-.usuarios-toggle-switch input:checked + .usuarios-slider { 
+.libros-modal-content input:checked + .slider { 
   background-color: #3F5D93; 
 }
 
-.usuarios-toggle-switch input:checked + .usuarios-slider:before { 
+.libros-modal-content input:checked + .slider:before { 
   transform: translateX(24px); 
 }
 
-.usuarios-roles-section {
-  margin-top: 25px;
-}
-
-.usuarios-roles-section h4 {
-  font-family: 'Staatliches', sans-serif;
-  font-size: 24px;
-  color: #333;
-  margin-bottom: 15px;
-  text-align: center;
-}
-
-.usuarios-roles-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 15px;
-}
-
-.usuarios-rol-btn {
-  background-color: #E8F0FE;
-  border: 1px solid #4A6B9C;
-  color: #333;
-  padding: 8px 20px;
-  border-radius: 20px;
-  font-size: 16px;
-  font-family: 'Bentham', serif;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.usuarios-rol-btn:hover {
-  background-color: #D0E1FF;
-}
-
-.usuarios-rol-btn.active {
-  background-color: #3F5D93;
-  color: white;
-  border-color: #3F5D93;
-  font-weight: bold;
-}
-
-.usuarios-modal-footer { 
+/* ==================== FOOTER MODAL ==================== */
+.libros-modal-content .modal-footer { 
   display: flex; 
   justify-content: center; 
   gap: 20px; 

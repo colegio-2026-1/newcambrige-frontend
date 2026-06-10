@@ -1,8 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, ChevronDown, ChevronUp } from "lucide-react";
 import "./AnioEscolarPage.css";
 
-// Importaciones
 import Header from "../../components/layout/header";
 import Sidebar from "../../components/layout/Sidebar";
 import ModuleLayout from "../../components/layout/ModuleLayout";
@@ -12,23 +11,33 @@ import ActionButtons from "../../components/shared/ActionButtons";
 import { useAuth } from "../../api/useAuth";
 import { obtenerAniosRequest, crearAnioRequest, actualizarAnioRequest } from "../../api/endpointsParametrizacion";
 
-// Iconos
+import { Icon } from '@mdi/react';
+import {
+  mdiHome,
+  mdiCog,
+
+  mdiAccount,
+  mdiCalendar,
+  mdiTestTube,
+  mdiGuitarElectric,
+  mdiCube,
+  mdiBook,
+  mdiAccountGroup,
+} from '@mdi/js';
+
 import salonIcon from "../../assets/Salon/salon.svg";
 import tesoreriaIcon from "../../assets/Tesoreria/tesoreria.svg";
 import rectoriaIcon from "../../assets/Rectoria/estudiante.svg";
 import uniformesIcon from "../../assets/Objetos/objetos.svg";
 import paraIcon from "../../assets/Parametrizacion/parametrizacion.svg";
 
-// Helper para formatear el año
+
 const formatAnioDoble = (anioStr) => {
   const anioNum = parseInt(anioStr);
   if (isNaN(anioNum)) return anioStr;
   return `${anioNum} - ${anioNum + 1}`;
 };
 
-// ==========================================
-// COMPONENTE: SELECTOR DE AÑO DINÁMICO
-// ==========================================
 const YearPicker = ({ selectedYear, onYearSelect, placeholder = "Seleccionar año" }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [baseYear, setBaseYear] = useState(selectedYear || new Date().getFullYear());
@@ -47,7 +56,7 @@ const YearPicker = ({ selectedYear, onYearSelect, placeholder = "Seleccionar añ
   const aniosVisibles = Array.from({ length: 16 }, (_, i) => baseYear + i);
 
   return (
-    <div className="anio-form-group" ref={popoverRef} style={{ width: '100%' }}>
+    <div className="anio-form-group" ref={popoverRef} style={{ width: '100%', margin: 0 }}>
       <div className="anio-custom-year-picker" onClick={() => setIsOpen(!isOpen)}>
         <span>{selectedYear ? formatAnioDoble(selectedYear) : placeholder}</span>
         <CalendarIcon size={18} color="#3F5D93" />
@@ -84,9 +93,6 @@ const YearPicker = ({ selectedYear, onYearSelect, placeholder = "Seleccionar añ
   );
 };
 
-// ==========================================
-// MODAL (CREAR / EDITAR) – CON CLASES PREFIJADAS "anio-"
-// ==========================================
 const AnioModal = ({ isOpen, onClose, anioEdit, alTerminar }) => {
   if (!isOpen) return null;
 
@@ -205,11 +211,8 @@ const AnioModal = ({ isOpen, onClose, anioEdit, alTerminar }) => {
   );
 };
 
-// ==========================================
-// COMPONENTE PRINCIPAL
-// ==========================================
 const AnioEscolarPage = () => {
-  const { user, roles, loadingRoles, logout } = useAuth();  // ✅ roles globales
+  const { user, roles, loadingRoles, logout } = useAuth();
   
   const [anios, setAnios] = useState([]);
   const [anioSeleccionado, setAnioSeleccionado] = useState(null);
@@ -218,7 +221,6 @@ const AnioEscolarPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalModeEdit, setModalModeEdit] = useState(false);
 
-  // PAGINACIÓN
   const [paginaActual, setPaginaActual] = useState(1);
   const itemsPorPagina = 10;
 
@@ -234,44 +236,35 @@ const AnioEscolarPage = () => {
 
   useEffect(() => { cargarAnios(); }, []);
 
-  const aniosFiltrados = filtroAnio 
-    ? anios.filter(a => parseInt(a.nombre.substring(0, 4)) === filtroAnio)
-    : anios;
+  const aniosFiltrados = useMemo(() => {
+    return filtroAnio 
+      ? anios.filter(a => parseInt(a.nombre.substring(0, 4)) === filtroAnio)
+      : anios;
+  }, [anios, filtroAnio]);
 
   const totalPaginas = Math.ceil(aniosFiltrados.length / itemsPorPagina) || 1;
-  const startIndex = (paginaActual - 1) * itemsPorPagina;
-  const aniosPaginados = aniosFiltrados.slice(startIndex, startIndex + itemsPorPagina);
 
-  const menuItems = [
-    { label: "Inicio", path: "/home" }, { label: "Dashboard" },
-    { label: "Salón", icon: salonIcon, path: "/salon" },
-    { label: "Uniformes", icon: uniformesIcon, path: "/objetos" },
-    { label: "Tesorería", icon: tesoreriaIcon, path: "/tesoreria" },
-    { label: "Rectoría", icon: rectoriaIcon, path: "/rectoria" },
-    { label: "Parametrización", icon: paraIcon, path: "/parametrizacion" },
+  const aniosPaginados = useMemo(() => {
+    const startIndex = (paginaActual - 1) * itemsPorPagina;
+    return aniosFiltrados.slice(startIndex, startIndex + itemsPorPagina);
+  }, [aniosFiltrados, paginaActual]);
+
+ const menuItems = [
+    { label: "Inicio", icon: <Icon path={mdiHome} size="32px" />, path: "/home" },
+    { label: "Usuarios", icon: <Icon path={mdiAccount} size="32px" />, path: "/parametrizacion/usuarios" },
+    { label: "Año Escolar", icon: <Icon path={mdiCalendar} size="32px" />, path: "/parametrizacion/anio-escolar" },
+    { label: "Pruebas", icon: <Icon path={mdiTestTube} size="32px" />, path: "/parametrizacion/pruebas" },
+    { label: "Instrumentos", icon: <Icon path={mdiGuitarElectric} size="32px" />, path: "/parametrizacion/instrumentos" },
+    { label: "Objetos", icon: <Icon path={mdiCube} size="32px" />, path: "/parametrizacion/objetos" },
+    { label: "Libros", icon: <Icon path={mdiBook} size="32px" />, path: "/parametrizacion/libros" },
+    { label: "Asignar Titular", icon: <Icon path={mdiAccountGroup} size="32px" />, path: "/parametrizacion/titulares" },
   ];
 
   const columnasTabla = [
-    { 
-      key: "nombre", 
-      label: "AÑO ESCOLAR",
-      render: (val) => formatAnioDoble(val) 
-    },
-    { 
-      key: "fecha_inicio", 
-      label: "FECHA INICIO",
-      render: (val) => new Date(val).toLocaleDateString('es-CO', { timeZone: 'UTC' })
-    },
-    { 
-      key: "fecha_fin", 
-      label: "FECHA FIN",
-      render: (val) => new Date(val).toLocaleDateString('es-CO', { timeZone: 'UTC' })
-    },
-    { 
-      key: "activo", 
-      label: "ESTADO", 
-      render: (val) => <span style={{ color: val ? "#008000" : "#D00000", fontWeight: "bold" }}>{val ? 'Activo' : 'Cerrado'}</span> 
-    }
+    { key: "nombre", label: "AÑO ESCOLAR", render: (val) => formatAnioDoble(val) },
+    { key: "fecha_inicio", label: "FECHA INICIO", render: (val) => new Date(val).toLocaleDateString('es-CO', { timeZone: 'UTC' }) },
+    { key: "fecha_fin", label: "FECHA FIN", render: (val) => new Date(val).toLocaleDateString('es-CO', { timeZone: 'UTC' }) },
+    { key: "activo", label: "ESTADO", render: (val) => <span style={{ color: val ? "#008000" : "#D00000", fontWeight: "bold" }}>{val ? 'Activo' : 'Cerrado'}</span> }
   ];
 
   const abrirModalCrear = () => { setModalModeEdit(false); setIsModalOpen(true); };
@@ -284,59 +277,58 @@ const AnioEscolarPage = () => {
     <div className="dashboard-container">
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
       <ModuleLayout
-        sidebar={
-          <Sidebar 
-            menuItems={menuItems} 
-            selectedMenu="Parametrización" 
-            user={{ nombre: userName, rol }}
-            loadingRoles={loadingRoles}
-            logout={logout} 
-          />
-        }
+        sidebar={<Sidebar menuItems={menuItems} selectedMenu="Año Escolar" user={{ nombre: userName, rol }} loadingRoles={loadingRoles} logout={logout} />}
       >
-        <div className="anio-content">
+        <div className="anio-wrapper page-master-wrapper">
           
-          <div className="anio-toolbar-custom">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-              <span className="anio-toolbar-title">Año Escolar:</span>
+          <div className="module-toolbar-container">
+            <div className="toolbar-grouped-actions">
               
-              <div style={{ width: '200px' }}>
-                <YearPicker 
-                  selectedYear={filtroAnio} 
-                  onYearSelect={(anio) => { setFiltroAnio(anio); setPaginaActual(1); }} 
-                  placeholder="Todos los años"
-                />
+              <div className="searchbar-field">
+                <label className="master-search-label">Año Escolar:</label>
+                <div style={{ width: '220px' }}>
+                  <YearPicker 
+                    selectedYear={filtroAnio} 
+                    onYearSelect={(anio) => { setFiltroAnio(anio); setPaginaActual(1); }} 
+                    placeholder="Todos los años"
+                  />
+                </div>
               </div>
               
-              {filtroAnio && (
-                <button 
-                  onClick={() => { setFiltroAnio(null); setPaginaActual(1); }}
-                  className="anio-clear-filter"
-                >
-                  Limpiar Filtro
-                </button>
-              )}
+              <button 
+                onClick={() => { setFiltroAnio(null); setPaginaActual(1); }}
+                className="master-clear-filter"
+                style={{ visibility: filtroAnio ? 'visible' : 'hidden' }}
+              >
+                Limpiar Filtro
+              </button>
+              
+              <ActionButtons
+                botones={[
+                  { 
+                    label: "Crear", 
+                    onClick: abrirModalCrear, 
+                    variante: "primary",
+                    siempreActivo: true 
+                  }
+                ]}
+              />
             </div>
-            
-            {/* Botón Crear independiente (no depende de ActionButtons) */}
-            <button className="anio-btn-crear" onClick={abrirModalCrear}>
-              Crear
-            </button>
           </div>
 
-          <div className="anio-main-area">
+          <div className="main-area">
             {anios.length === 0 ? (
               <div className="anio-empty-state">
               </div>
             ) : aniosFiltrados.length === 0 ? (
-                <div className="anio-empty-state">
+                <div className="empty-state">
                   <p>No se encontraron registros para el año {formatAnioDoble(filtroAnio)}</p>
                 </div>
             ) : (
-              <div className="anio-table-layout-wrapper">
+              <div className="table-layout-wrapper">
                 
-                <div className="anio-table-main-section">
-                  <div className="anio-datatable-fixed-container">
+                <div className="table-main-section">
+                  <div className="datatable-fixed-container">
                     <DataTable 
                       columns={columnasTabla} 
                       rows={aniosPaginados} 
@@ -347,16 +339,16 @@ const AnioEscolarPage = () => {
                     />
                   </div>
                   
-                  <div className="anio-pagination-center">
+                  <div className="pagination-center">
                     <button 
-                      className="anio-btn-circle"
+                      className="btn-circle"
                       onClick={() => { setPaginaActual(p => Math.max(1, p - 1)); setAnioSeleccionado(null); }}
                       disabled={paginaActual === 1}
                     >
                       <ChevronLeft size={20} />
                     </button>
                     <button 
-                      className="anio-btn-circle"
+                      className="btn-circle"
                       onClick={() => { setPaginaActual(p => Math.min(totalPaginas, p + 1)); setAnioSeleccionado(null); }}
                       disabled={paginaActual === totalPaginas}
                     >
@@ -365,7 +357,7 @@ const AnioEscolarPage = () => {
                   </div>
                 </div>
 
-                <div className="anio-side-actions">
+                <div className="side-actions">
                   <ActionButtons
                     filaSeleccionada={anioSeleccionado}
                     botones={[
