@@ -1,8 +1,8 @@
 import { Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 
-import AsignacionesPage from "../modules/uniforme/pages/AsignacionesPage";
-import InventarioPage from "../modules/uniforme/pages/InventarioPage";
+import AsignacionesPage from "../modules/uniforme/AsignacionesPage";
+import InventarioPage from "../modules/uniforme/InventarioPage";
 
 const UniformesRoutes = () => [
   <Route key="uniformes" path="/uniformes" element={<Navigate to="/uniformes/asignaciones" replace />} />,

@@ -14,6 +14,7 @@ import ImportacionRouter from "./ImportacionRouter";
 import NotFound from "../modules/notFound/notFound";
 import Home     from "../modules/Home/HomePage";
 import TestPage from "../modules/test/testPage";
+import RectoriaRoutes from "./RectoriaRouter";
 
 const AppRouter = () => {
   return (
