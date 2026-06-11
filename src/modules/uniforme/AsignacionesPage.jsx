@@ -1,13 +1,13 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "../../../components/layout/header";
-import ModuleLayout from "../../../components/layout/ModuleLayout";
-import Sidebar from "../../../components/layout/Sidebar";
-import SearchBar from "../../../components/shared/searchBar";
-import ActionButtons from "../../../components/shared/ActionButtons";
-import DataTable from "../../../components/shared/DataTable";
-import Modal from "../../../components/shared/Modal";
-import Alert from "../../../components/shared/Alert";
+import Header from "../../components/layout/header";
+import ModuleLayout from "../../components/layout/ModuleLayout";
+import Sidebar from "../../components/layout/Sidebar";
+import SearchBar from "../../components/shared/searchBar";
+import ActionButtons from "../../components/shared/ActionButtons";
+import DataTable from "../../components/shared/DataTable";
+import Modal from "../../components/shared/Modal";
+import Alert from "../../components/shared/Alert";
 import { Icon } from "@mdi/react";
 import {
   mdiHome,
@@ -20,10 +20,10 @@ import {
   devolverPrestamoRequest,
   getObjetosDisponiblesRequest,
   registrarPrestamoRequest
-} from "../../../api/uniformesService";
-import { useAuth } from "../../../api/useAuth";
-import { allaniosacademicosRequest } from "../../../api/endpoints";
-import "../styles/uniformes.css";
+} from "../../api/uniformesService";
+import { useAuth } from "../../api/useAuth";
+import { allaniosacademicosRequest } from "../../api/endpoints";
+
 
 // ─── Utilidad ────────────────────────────────────────────────────────────────
 const capitalizar = (texto) =>

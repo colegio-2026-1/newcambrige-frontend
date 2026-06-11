@@ -5,18 +5,18 @@ import {
   deleteObjetoRequest,
   createObjetoRequest,
   updateObjetoRequest
-} from "../../../api/uniformesService";
-import { useAuth } from "../../../api/useAuth";
+} from "../../api/uniformesService";
+import { useAuth } from "../../api/useAuth";
 
-import Header from "../../../components/layout/header";
-import ModuleLayout from "../../../components/layout/ModuleLayout";
-import Sidebar from "../../../components/layout/Sidebar";
-import SearchBar from "../../../components/shared/searchBar";
-import Modal from "../../../components/shared/Modal";
-import ActionButtons from "../../../components/shared/ActionButtons";
-import DataTable from "../../../components/shared/DataTable";
-import Alert from "../../../components/shared/Alert";
-import "../styles/uniformes.css";
+import Header from "../../components/layout/header";
+import ModuleLayout from "../../components/layout/ModuleLayout";
+import Sidebar from "../../components/layout/Sidebar";
+import SearchBar from "../../components/shared/searchBar";
+import Modal from "../../components/shared/Modal";
+import ActionButtons from "../../components/shared/ActionButtons";
+import DataTable from "../../components/shared/DataTable";
+import Alert from "../../components/shared/Alert";
+
 
 
 import { Icon } from "@mdi/react";
