@@ -148,7 +148,7 @@
   }
 
   .searchbar-btn {
-    margin-left: auto;
+    margin-left: 0; 
   }
 }
 
