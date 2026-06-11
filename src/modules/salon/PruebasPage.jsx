@@ -6,10 +6,16 @@ import {
   updateEstadoPruebaRequest,
   allsalonesRequest,
 } from "../../api/endpointsSalon";
-import { allrolesuserRequest, allaniosacademicosRequest } from "../../api/endpoints";
+import { allaniosacademicosRequest } from "../../api/endpoints";
 
 import PupitresIcon   from "../../assets/Salon/pupitres.svg";
 import BibliotecaIcon from "../../assets/Salon/biblioteca.svg";
+import { Icon } from '@mdi/react';
+import {
+  mdiHome,
+  mdiChairSchool,
+  mdiLibrary,                
+} from '@mdi/js';
 
 import Header        from "../../components/layout/header";
 import ModuleLayout  from "../../components/layout/ModuleLayout";
@@ -20,20 +26,14 @@ import ActionButtons from "../../components/shared/ActionButtons";
 import Modal         from "../../components/shared/Modal";
 
 export default function PruebasPage() {
-  const { user, logout } = useAuth();
+  const { user, roles, loadingRoles, logout } = useAuth();
 
-  // ── Auth ──────────────────────────────────────────────────────────────────
   const userName = user?.nombre || "Usuario";
-  const idUser   = user?.id_usuario;
-  const [roles, setRoles]             = useState([]);
-  const [cargandoRol, setCargandoRol] = useState(true);
-  const rol = roles[0] || "Rol Desconocido";
+  const rol = roles[0] || (loadingRoles ? "Cargando rol..." : "Sin rol");
 
-  // ── UI ────────────────────────────────────────────────────────────────────
   const [fila, setFila]   = useState(null);
   const [modal, setModal] = useState(false);
 
-  // ── Datos ─────────────────────────────────────────────────────────────────
   const [loading, setLoading]           = useState(true);
   const [error, setError]               = useState(null);
   const [rows, setRows]                 = useState([]);
@@ -41,20 +41,24 @@ export default function PruebasPage() {
   const [salones, setSalones]           = useState([]);
   const [periodos, setPeriodos]         = useState([]);
 
-  // ── Maps auxiliares ───────────────────────────────────────────────────────
+  const [filtros, setFiltros] = useState({
+    documento: "",
+    nombre: "",
+    Grado: "",
+    Grupo: "",
+    Periodo: ""
+  });
+
   const salonesMap  = {};
   salones.forEach((s)  => { salonesMap[s.id_salon]    = s; });
   const periodosMap = {};
   periodos.forEach((p) => { periodosMap[p.id_periodo] = p; });
 
-  // ── Sidebar ───────────────────────────────────────────────────────────────
-  const menuItems = [
-    { label: "Inicio",     icon: <Home size={18} />, path: "/salon" },
-    { label: "Biblioteca", icon: BibliotecaIcon,      path: "/salon/biblioteca/inicio" },
-    { label: "Pupitres",   icon: PupitresIcon,        path: "/salon/pupitre" },
-  ];
-
-  // ── Columnas ──────────────────────────────────────────────────────────────
+ const menuItems = [
+  { label: "Inicio",      icon: <Icon path={mdiHome}                    size={1} />, path: "/salon", roles:["titular", "admin"] },
+  { label: "Pupitres",    icon: <Icon path={mdiChairSchool}                size={1} />, path: "/salon/pupitre", roles:["titular", "admin"] },
+  { label: "Biblioteca",  icon: <Icon path={mdiLibrary}  size={1} />, path: "/salon/biblioteca/inicio", roles:["titular", "admin"] },
+];
   const columns = [
     { key: "codigo", label: "CÓDIGO" },
     { key: "nombre", label: "NOMBRE COMPLETO" },
@@ -81,25 +85,6 @@ export default function PruebasPage() {
     },
   ];
 
-  // ── Carga de roles ────────────────────────────────────────────────────────
-  useEffect(() => {
-    const obtenerRoles = async () => {
-      if (!idUser) return;
-      try {
-        setCargandoRol(true);
-        const response = await allrolesuserRequest(idUser);
-        setRoles(response?.data || []);
-      } catch (error) {
-        console.error("Error al obtener el rol:", error);
-        setRoles([]);
-      } finally {
-        setCargandoRol(false);
-      }
-    };
-    obtenerRoles();
-  }, [idUser]);
-
-  // ── Carga de datos ────────────────────────────────────────────────────────
   const cargarPruebas = async () => {
     try {
       const response = await getPruebasRequest();
@@ -124,7 +109,9 @@ export default function PruebasPage() {
   const cargarPeriodos = async () => {
     try {
       const response = await allaniosacademicosRequest();
-      setPeriodos(response.data || []);
+      const data = response.data || [];
+      setPeriodos(data);
+      setFiltros(prev => ({ ...prev, Periodo: data[0]?.nombre || "" }));
     } catch (error) {
       console.error("Error cargando periodos:", error);
     }
@@ -144,24 +131,22 @@ export default function PruebasPage() {
     cargarTodo();
   }, []);
 
-  // ── Filtros ───────────────────────────────────────────────────────────────
-  const FiltrarEstudiantes = (filtros) => {
+  const FiltrarEstudiantes = (f) => {
     let filtered = rows;
-    if (filtros.documento) filtered = filtered.filter((r) => r.codigo?.toString().includes(filtros.documento));
-    if (filtros.nombre)    filtered = filtered.filter((r) => r.nombre?.toLowerCase().includes(filtros.nombre.toLowerCase()));
-    if (filtros.Grado)     filtered = filtered.filter((r) => (salonesMap[r.id_salon]?.grado || r.grado)?.toString() === filtros.Grado.toString());
-    if (filtros.Grupo)     filtered = filtered.filter((r) => (salonesMap[r.id_salon]?.grupo || r.grupo)?.toString() === filtros.Grupo.toString());
-    if (filtros.Periodo) {
+    if (f.documento) filtered = filtered.filter((r) => r.codigo?.toString().includes(f.documento));
+    if (f.nombre)    filtered = filtered.filter((r) => r.nombre?.toLowerCase().includes(f.nombre.toLowerCase()));
+    if (f.Grado)     filtered = filtered.filter((r) => (salonesMap[r.id_salon]?.grado || r.grado)?.toString() === f.Grado.toString());
+    if (f.Grupo)     filtered = filtered.filter((r) => (salonesMap[r.id_salon]?.grupo || r.grupo)?.toString() === f.Grupo.toString());
+    if (f.Periodo) {
       filtered = filtered.filter((r) => {
         const salon   = salonesMap[r.id_salon];
         const periodo = periodosMap[salon?.id_periodo];
-        return periodo?.nombre?.toString() === filtros.Periodo.toString();
+        return periodo?.nombre?.toString() === f.Periodo.toString();
       });
     }
     setRowsFiltered(filtered);
   };
 
-  // ── Acciones ──────────────────────────────────────────────────────────────
   const handleRowClick = (f) => setFila(f);
 
   const handleValidarPago = () => {
@@ -189,11 +174,6 @@ export default function PruebasPage() {
     }
   };
 
-  // ── Loading / Error ───────────────────────────────────────────────────────
-  if (loading) return <div>Cargando pruebas...</div>;
-  if (error)   return <div>Error cargando datos: {error}</div>;
-
-  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div>
       <style>{`
@@ -210,6 +190,7 @@ export default function PruebasPage() {
             selectedMenu="Pruebas"
             setSelectedMenu={() => {}}
             user={{ nombre: userName, rol: rol }}
+            loadingRoles={loadingRoles}
             logout={logout}
           />
         }
@@ -228,31 +209,61 @@ export default function PruebasPage() {
         }
       >
         <div>
-          <SearchBar
-            fields={[
-              { key: "documento", label: "Código",  type: "number", maxLength: 10 },
-              { key: "nombre",    label: "Nombre",  type: "text" },
-              {
-                key: "Grado", label: "Grado", type: "select",
-                options: Array.from(new Set(Object.values(salonesMap).map((s) => s.grado).filter(Boolean))),
-              },
-              {
-                key: "Grupo", label: "Grupo", type: "select",
-                options: Array.from(new Set(Object.values(salonesMap).map((s) => s.grupo).filter(Boolean))),
-              },
-              {
-                key: "Periodo", label: "Periodo", type: "select",
-                options: Array.from(new Set(Object.values(periodosMap).map((p) => p.nombre).filter(Boolean))),
-              },
-            ]}
-            onSearch={(f) => FiltrarEstudiantes(f)}
-          />
+          {filtros.Periodo && (
+            <SearchBar
+              fields={[
+                { key: "documento", label: "Código", type: "number", maxLength: 10 },
+                { key: "nombre",    label: "Nombre", type: "text" },
+                {
+                  key: "Grado", label: "Grado", type: "select",
+                  options: Array.from(new Set(
+                    Object.values(salonesMap).map((s) => s.grado).filter(Boolean)
+                  )),
+                },
+                {
+                  key: "Grupo", label: "Grupo", type: "select",
+                  options: filtros.Grado
+                    ? Array.from(new Set(
+                        Object.values(salonesMap)
+                          .filter(s => s.grado?.toString() === filtros.Grado)
+                          .map(s => s.grupo).filter(Boolean)
+                      ))
+                    : [],
+                },
+                {
+                  key: "Periodo", label: "Periodo", type: "select",
+                  options: Array.from(new Set(
+                    Object.values(periodosMap).map((p) => p.nombre).filter(Boolean)
+                  )),
+                },
+              ]}
+              initialValues={{ Periodo: filtros.Periodo }}
+              onChange={(key, value) => {
+                setFiltros(prev => {
+                  const nuevos = { ...prev, [key]: value };
+                  if (key === "Grado") nuevos.Grupo = "";
+                  if (key === "Periodo") {
+                    nuevos.Grado = "";
+                    nuevos.Grupo = "";
+                  }
+                  return nuevos;
+                });
+              }}
+              onSearch={(f) => {
+                FiltrarEstudiantes(f);
+                setFiltros(f);
+                setFila(null);
+              }}
+              cleanFilter={{ documento: "", nombre: "", Grado: "", Grupo: "", Periodo: filtros.Periodo }}
+            />
+          )}
 
           <DataTable
             columns={columns}
             rows={rowsFiltered}
             emptyText="No hay datos disponibles"
             onRowClick={handleRowClick}
+            pageSize={10}
           />
         </div>
       </ModuleLayout>

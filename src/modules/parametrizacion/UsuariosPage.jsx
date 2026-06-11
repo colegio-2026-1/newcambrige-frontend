@@ -1,14 +1,13 @@
-import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import "./UsuariosPage.css";
 
-// ==========================================
-// IMPORTACIONES
-// ==========================================
 import Header from "../../components/layout/header";
 import Sidebar from "../../components/layout/Sidebar";
 import ModuleLayout from "../../components/layout/ModuleLayout";
 import DataTable from "../../components/shared/DataTable";
+import SearchBar from "../../components/shared/SearchBar";
+import ActionButtons from "../../components/shared/ActionButtons";
 
 import { useAuth } from "../../api/useAuth";
 import {
@@ -18,19 +17,30 @@ import {
   asignarRolesRequest
 } from "../../api/usuariosService";
 
+import { Icon } from '@mdi/react';
+import {
+  mdiHome,
+  mdiCog,
+
+  mdiAccount,
+  mdiCalendar,
+  mdiTestTube,
+  mdiGuitarElectric,
+  mdiCube,
+  mdiBook,
+  mdiAccountGroup,
+} from '@mdi/js';
+
 import salonIcon from "../../assets/Salon/salon.svg";
 import tesoreriaIcon from "../../assets/Tesoreria/tesoreria.svg";
 import rectoriaIcon from "../../assets/Rectoria/estudiante.svg";
 import uniformesIcon from "../../assets/Objetos/objetos.svg";
 import paraIcon from "../../assets/Parametrizacion/parametrizacion.svg";
 
-// ==========================================
-// DICCIONARIOS DE TRADUCCIÓN DE ROLES
-// ==========================================
 const mapaRolesFrontendABackend = {
   "Robot": "robot", "Salón": "salon", "Tesorería": "tesoreria",
   "Rectoría": "rectoria", "Uniformes": "uniformes", "Banda": "banda",
-  "Parametrización": "parametrizacion", "Dashboard": "dashboard"
+  "Parametrización": "parametrizacion", "Dashboard": "dashboard", "Titular": "titular"
 };
 
 const mapaRolesBackendAFrontend = Object.fromEntries(
@@ -39,14 +49,11 @@ const mapaRolesBackendAFrontend = Object.fromEntries(
 
 const rolesDisponibles = Object.keys(mapaRolesFrontendABackend);
 
-// ==========================================
-// MODAL PARA CREAR USUARIO (CORREGIDO)
-// ==========================================
 const CrearUsuarioModal = ({ isOpen, onClose, alTerminar }) => {
   if (!isOpen) return null;
 
   const [nombreUsuario, setNombreUsuario] = useState("");
-  const [documento, setDocumento] = useState("");      // ← ESTADO FALTANTE
+  const [documento, setDocumento] = useState("");
   const [password, setPassword] = useState("");
   const [rolesSeleccionados, setRolesSeleccionados] = useState([]);
   const [cargando, setCargando] = useState(false);
@@ -58,7 +65,6 @@ const CrearUsuarioModal = ({ isOpen, onClose, alTerminar }) => {
   };
 
   const handleCrear = async () => {
-    // Validación incluyendo documento
     if (!nombreUsuario || !documento || !password)
       return alert("Llena usuario, documento y contraseña");
 
@@ -87,50 +93,47 @@ const CrearUsuarioModal = ({ isOpen, onClose, alTerminar }) => {
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">
+    <div className="usuarios-modal-overlay">
+      <div className="usuarios-modal-content">
+        <div className="usuarios-modal-header">
           <h3>ADMINISTRADOR</h3>
-          <button className="modal-close" onClick={onClose} disabled={cargando}>×</button>
+          <button className="usuarios-modal-close" onClick={onClose} disabled={cargando}>×</button>
         </div>
-        <div className="modal-body">
-          <div className="modal-inputs-row">
-            <div className="input-group">
+        <div className="usuarios-modal-body">
+          <div className="usuarios-modal-form-row">
+            <div className="usuarios-input-group">
               <label>Usuario</label>
               <input type="text" value={nombreUsuario} onChange={(e) => setNombreUsuario(e.target.value)} />
             </div>
-            <div className="input-group">
+            <div className="usuarios-input-group">
               <label>Documento</label>
               <input type="text" value={documento} onChange={(e) => setDocumento(e.target.value)} />
             </div>
-            <div className="input-group">
+            <div className="usuarios-input-group">
               <label>Contraseña</label>
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
             </div>
           </div>
-          <div className="roles-section">
+          <div className="usuarios-roles-section">
             <h4>ROLES</h4>
-            <div className="roles-grid">
+            <div className="usuarios-roles-grid">
               {rolesDisponibles.map(rol => (
-                <button key={rol} className={`rol-btn ${rolesSeleccionados.includes(rol) ? 'active' : ''}`} onClick={() => toggleRol(rol)}>
+                <button key={rol} className={`usuarios-rol-btn ${rolesSeleccionados.includes(rol) ? 'active' : ''}`} onClick={() => toggleRol(rol)}>
                   {rol}
                 </button>
               ))}
             </div>
           </div>
         </div>
-        <div className="modal-footer">
-          <button className="btn-primary" onClick={handleCrear} disabled={cargando}>Aceptar</button>
-          <button className="btn-secondary" onClick={onClose} disabled={cargando}>Cancelar</button>
+        <div className="usuarios-modal-footer">
+          <ActionButtons botones={[{ label: "Aceptar", onClick: handleCrear, variante: "primary", siempreActivo: true }]} />
+          <ActionButtons botones={[{ label: "Cancelar", onClick: onClose, variante: "secondary", siempreActivo: true }]} />
         </div>
       </div>
     </div>
   );
 };
 
-// ==========================================
-// MODAL PARA EDITAR USUARIO (CON LIMPIEZA DE NULL)
-// ==========================================
 const EditarUsuarioModal = ({ isOpen, onClose, usuario, alTerminar }) => {
   if (!isOpen || !usuario) return null;
 
@@ -145,7 +148,6 @@ const EditarUsuarioModal = ({ isOpen, onClose, usuario, alTerminar }) => {
       setNombreUsuario(usuario.nombre);
       setEstado(usuario.estado ?? true);
       setPassword("");
-      // Limpieza de nulls al cargar roles
       const rolesLimpios = (usuario.roles || []).filter(r => r && typeof r === 'string');
       const rolesVisuales = rolesLimpios.map(r => mapaRolesBackendAFrontend[r] || r);
       setRolesSeleccionados(rolesVisuales);
@@ -166,7 +168,6 @@ const EditarUsuarioModal = ({ isOpen, onClose, usuario, alTerminar }) => {
 
       await actualizarUsuarioRequest(usuario.id_usuario, payloadBasico);
 
-      // Limpieza de nulls antes de enviar
       const rolesValidos = rolesSeleccionados.filter(r => r && typeof r === 'string');
       const rolesParaBackend = rolesValidos.map(r => mapaRolesFrontendABackend[r]);
 
@@ -182,59 +183,56 @@ const EditarUsuarioModal = ({ isOpen, onClose, usuario, alTerminar }) => {
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">
+    <div className="usuarios-modal-overlay">
+      <div className="usuarios-modal-content">
+        <div className="usuarios-modal-header">
           <h3>EDITAR USUARIO</h3>
-          <button className="modal-close" onClick={onClose} disabled={cargando}>×</button>
+          <button className="usuarios-modal-close" onClick={onClose} disabled={cargando}>×</button>
         </div>
-        <div className="modal-body">
-          <div className="modal-inputs-row">
-            <div className="input-group">
+        <div className="usuarios-modal-body">
+          <div className="usuarios-modal-form-row">
+            <div className="usuarios-input-group">
               <label>Usuario</label>
               <input type="text" value={nombreUsuario} onChange={(e) => setNombreUsuario(e.target.value)} />
             </div>
-            <div className="input-group">
+            <div className="usuarios-input-group">
               <label>Contraseña</label>
               <input type="password" placeholder="Nueva contraseña..." value={password} onChange={(e) => setPassword(e.target.value)} />
             </div>
-            <div className="toggle-group">
+            <div className="usuarios-input-group usuarios-toggle-group">
               <label>{estado ? "Activo" : "Inactivo"}</label>
-              <label className="switch">
+              <label className="usuarios-toggle-switch">
                 <input type="checkbox" checked={estado} onChange={(e) => setEstado(e.target.checked)} />
-                <span className="slider"></span>
+                <span className="usuarios-slider"></span>
               </label>
             </div>
           </div>
-          <div className="roles-section">
+          <div className="usuarios-roles-section">
             <h4>ROLES</h4>
-            <div className="roles-grid">
+            <div className="usuarios-roles-grid">
               {rolesDisponibles.map(rol => (
-                <button key={rol} className={`rol-btn ${rolesSeleccionados.includes(rol) ? 'active' : ''}`} onClick={() => toggleRol(rol)}>
+                <button key={rol} className={`usuarios-rol-btn ${rolesSeleccionados.includes(rol) ? 'active' : ''}`} onClick={() => toggleRol(rol)}>
                   {rol}
                 </button>
               ))}
             </div>
           </div>
         </div>
-        <div className="modal-footer">
-          <button className="btn-primary" onClick={handleActualizar} disabled={cargando}>Aceptar</button>
-          <button className="btn-secondary" onClick={onClose} disabled={cargando}>Cancelar</button>
+        <div className="usuarios-modal-footer">
+          <ActionButtons botones={[{ label: "Aceptar", onClick: handleActualizar, variante: "primary", siempreActivo: true }]} />
+          <ActionButtons botones={[{ label: "Cancelar", onClick: onClose, variante: "secondary", siempreActivo: true }]} />
         </div>
       </div>
     </div>
   );
 };
 
-// ==========================================
-// COMPONENTE PRINCIPAL (SIN CAMBIOS ADICIONALES)
-// ==========================================
 const UsuariosPage = () => {
-  const { user, logout } = useAuth();
+  const { user, roles, loadingRoles, logout } = useAuth();
 
   const [usuarios, setUsuarios] = useState([]);
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null);
-  const [filtroBusqueda, setFiltroBusqueda] = useState("");
+  const [filtros, setFiltros] = useState({ busqueda: "" });
 
   const [isModalCrearOpen, setIsModalCrearOpen] = useState(false);
   const [isModalEditarOpen, setIsModalEditarOpen] = useState(false);
@@ -255,13 +253,16 @@ const UsuariosPage = () => {
   useEffect(() => { cargarUsuarios(); }, []);
 
   const menuItems = [
-    { label: "Inicio", path: "/home" }, { label: "Dashboard" },
-    { label: "Salón", icon: salonIcon, path: "/salon" },
-    { label: "Uniformes", icon: uniformesIcon, path: "/uniformes" },
-    { label: "Tesorería", icon: tesoreriaIcon, path: "/tesoreria" },
-    { label: "Rectoría", icon: rectoriaIcon, path: "/rectoria" },
-    { label: "Parametrización", icon: paraIcon, path: "/parametrizacion" },
+    { label: "Inicio", icon: <Icon path={mdiHome} size="32px" />, path: "/home" },
+    { label: "Usuarios", icon: <Icon path={mdiAccount} size="32px" />, path: "/parametrizacion/usuarios" },
+    { label: "Año Escolar", icon: <Icon path={mdiCalendar} size="32px" />, path: "/parametrizacion/anio-escolar" },
+    { label: "Pruebas", icon: <Icon path={mdiTestTube} size="32px" />, path: "/parametrizacion/pruebas" },
+    { label: "Instrumentos", icon: <Icon path={mdiGuitarElectric} size="32px" />, path: "/parametrizacion/instrumentos" },
+    { label: "Objetos", icon: <Icon path={mdiCube} size="32px" />, path: "/parametrizacion/objetos" },
+    { label: "Libros", icon: <Icon path={mdiBook} size="32px" />, path: "/parametrizacion/libros" },
+    { label: "Asignar Titular", icon: <Icon path={mdiAccountGroup} size="32px" />, path: "/parametrizacion/titulares" },
   ];
+
 
   const columnasTabla = [
     { key: "id_usuario", label: "Código" },
@@ -269,59 +270,86 @@ const UsuariosPage = () => {
     {
       key: "estado",
       label: "Estado",
-      render: (val) => <span className={val ? 'badge--ok' : 'badge--no'}>{val ? 'Activo' : 'Inactivo'}</span>
+      render: (val) => <span className={val ? 'usuarios-badge-ok' : 'usuarios-badge-no'}>{val ? 'Activo' : 'Inactivo'}</span>
     },
     { key: "rolesStr", label: "Roles" }
   ];
 
-  const usuariosFiltrados = usuarios.filter(u =>
-    u.nombre.toLowerCase().includes(filtroBusqueda.toLowerCase()) ||
-    u.id_usuario.toString().includes(filtroBusqueda)
-  );
-
-  const filasProcesadas = usuariosFiltrados.map(u => ({
-    ...u,
-    rolesStr: (u.roles || [])
-      .filter(r => r && typeof r === 'string')   // evitar nulls en la tabla
-      .map(r => mapaRolesBackendAFrontend[r] || r)
-      .join(" - ")
-  }));
+  const filasProcesadas = useMemo(() => {
+    const termino = (filtros.busqueda || "").toLowerCase();
+    
+    return usuarios
+      .filter(u =>
+        u.nombre.toLowerCase().includes(termino) ||
+        u.id_usuario.toString().includes(termino)
+      )
+      .map(u => ({
+        ...u,
+        rolesStr: (u.roles || [])
+          .filter(r => r && typeof r === 'string')
+          .map(r => mapaRolesBackendAFrontend[r] || r)
+          .join(" - ")
+      }));
+  }, [usuarios, filtros]);
 
   const totalPaginas = Math.ceil(filasProcesadas.length / itemsPorPagina) || 1;
-  const startIndex = (paginaActual - 1) * itemsPorPagina;
-  const filasPaginadas = filasProcesadas.slice(startIndex, startIndex + itemsPorPagina);
+
+  const filasPaginadas = useMemo(() => {
+    const startIndex = (paginaActual - 1) * itemsPorPagina;
+    return filasProcesadas.slice(startIndex, startIndex + itemsPorPagina);
+  }, [filasProcesadas, paginaActual]);
+
+  const userName = user?.nombre || "Usuario";
+  const rol = roles[0] || (loadingRoles ? "Cargando rol..." : "Sin rol");
 
   return (
     <div className="dashboard-container">
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
       <ModuleLayout
-        sidebar={<Sidebar menuItems={menuItems} selectedMenu="Parametrización" user={{ nombre: user?.nombre || "Usuario", rol: user?.rol || "TITULAR" }} logout={logout} />}
+        sidebar={
+          <Sidebar
+            menuItems={menuItems}
+            selectedMenu="Usuarios"
+            user={{ nombre: userName, rol }}
+            loadingRoles={loadingRoles}
+            logout={logout}
+          />
+        }
       >
-        <div className="usuarios-page-content">
-          <div className="toolbar-custom">
-            <label>Usuario</label>
-            <input
-              type="text"
-              className="input-compacto"
-              value={filtroBusqueda}
-              onChange={(e) => setFiltroBusqueda(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') setPaginaActual(1); }}
-            />
-            <button className="btn-search-icon" onClick={() => setPaginaActual(1)}>
-              <Search size={16} />
-            </button>
-            <button className="btn-editar" style={{ padding: '0 24px', height: '32px' }} onClick={() => setIsModalCrearOpen(true)}>
-              Crear
-            </button>
+        <div className="usuarios-wrapper page-master-wrapper">
+          
+          <div className="module-toolbar-container">
+            <div className="toolbar-grouped-actions">
+              <SearchBar
+                fields={[
+                  { key: 'busqueda', label: 'Usuario:', type: 'text' }
+                ]}
+                onSearch={(nuevosFiltros) => {
+                  setFiltros(nuevosFiltros);
+                  setPaginaActual(1);
+                }}
+              />
+              
+              <ActionButtons
+                botones={[
+                  { 
+                    label: "Crear", 
+                    onClick: () => setIsModalCrearOpen(true), 
+                    variante: "primary",
+                    siempreActivo: true 
+                  }
+                ]}
+              />
+            </div>
           </div>
 
-          <div className="main-area" style={{ paddingTop: '20px' }}>
+          <div className="main-area">
             {usuarios.length === 0 ? (
               <div className="empty-state">
-                <p>Aún no hay usuarios registrados en el sistema</p>
               </div>
             ) : (
               <div className="table-layout-wrapper">
+                
                 <div className="table-main-section">
                   <div className="datatable-fixed-container">
                     <DataTable
@@ -329,8 +357,11 @@ const UsuariosPage = () => {
                       rows={filasPaginadas}
                       onRowClick={(fila) => setUsuarioSeleccionado(fila)}
                       emptyText="No se encontraron usuarios con esa búsqueda"
+                      filaActiva={usuarioSeleccionado}
+                      idKey="id_usuario"
                     />
                   </div>
+                  
                   <div className="pagination-center">
                     <button
                       className="btn-circle"
@@ -348,11 +379,21 @@ const UsuariosPage = () => {
                     </button>
                   </div>
                 </div>
+
                 <div className="side-actions">
-                  <button className="btn-editar" disabled={!usuarioSeleccionado} onClick={() => setIsModalEditarOpen(true)}>
-                    Editar
-                  </button>
+                  <ActionButtons
+                    filaSeleccionada={usuarioSeleccionado}
+                    botones={[
+                      { 
+                        label: "Editar", 
+                        onClick: () => setIsModalEditarOpen(true), 
+                        variante: "primary", 
+                        siempreActivo: false 
+                      }
+                    ]}
+                  />
                 </div>
+
               </div>
             )}
           </div>

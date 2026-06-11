@@ -16,6 +16,9 @@
 
 }
 
+.module-content > div {
+  width: 100%;
+}
 /* Contenido central */
 .module-content {
   flex: 1;
@@ -28,7 +31,21 @@
   flex-direction: column;
   overflow-x: hidden;
   max-width: 100%;
-  align-items: center;
+  align-items: stretch;
+}
+
+/* Wrapper interno: tabla+searchbar a la izquierda, botones a la derecha */
+.module-body {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;  /* ← clave: botones arrancan desde arriba del children */
+  gap: 16px;
+  width: 100%;
+}
+
+.module-children {
+  flex: 1;
+  min-width: 0;
 }
 
 /* Botones de acción a la derecha */
@@ -38,8 +55,9 @@
   padding: 10px 16px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 12px;
+  padding-top: 70px;
 }
 
 /* Ajustes responsivos */
@@ -52,11 +70,15 @@
     width: 100%;
   }
 
+  .module-body {
+    flex-direction: column;
+  }
+
   .module-actions {
     width: 100%;
     flex-direction: row;
     justify-content: center;
-    padding: 12px;
+    padding: 12px 0;
   }
 
   .module-content {

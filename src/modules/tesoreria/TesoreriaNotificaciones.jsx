@@ -3,8 +3,8 @@ import Sidebar from "../../components/layout/Sidebar";
 import ModuleLayout from "../../components/layout/ModuleLayout";
 
 import { useEffect, useState } from "react";
-import { Home } from "lucide-react";
-
+import { Icon } from '@mdi/react';
+import { mdiHome , mdiCash, mdiBell } from "@mdi/js";
 import { useAuth } from "../../api/useAuth";
 import { useNavigate } from 'react-router-dom';
 
@@ -46,9 +46,9 @@ const TesoreriaNotificaciones = () => {
 
   // MENU ITEMS CON ICONOS
   const modulos = [
-    { label: "Inicio", icon: <Home />, path: "/home" },
-    { label: "Tesoreria", path: "/tesoreria/", roles: ["secretaria", "admin", "tesoreria"] },
-    { label: "Notificaciones", path: "/tesoreria/notificaciones", roles: ["secretaria", "admin", "tesoreria"] },
+    { label: "Inicio", icon: <Icon path={mdiHome} />, path: "/home" },
+    { label: "Tesoreria", icon: <Icon path={mdiCash} />, path: "/tesoreria/", roles: ["secretaria", "admin", "tesoreria"] },
+    { label: "Notificaciones", icon: <Icon path={mdiBell} />, path: "/tesoreria/notificaciones", roles: ["secretaria", "admin", "tesoreria"] },
   ];
 
   return (

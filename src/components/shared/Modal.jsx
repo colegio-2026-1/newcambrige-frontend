@@ -87,7 +87,12 @@ return (
         {/* CAMPOS */}
         <div className="modal-fields">
             {fields.map((field) => (
-            <div key={field.key} className="modal-field">
+            <div
+                key={field.key}
+                className={`modal-field ${
+                    field.type === "label" ? "modal-field--full" : ""
+                }`}
+            >
                 <label className="modal-label">{(field.type == "label" || field.type ==" card")? "" : field.label }</label>
 
                 {field.type === "select" ? (
@@ -115,7 +120,7 @@ return (
                 />
             ) : field.type == "label" ? (
 
-                <div className="modal-label">
+                <div className={`modal-label ${field.className || ""}`}>
                     {field.label}
                 </div>
 

@@ -1,0 +1,199 @@
+/* src/components/CardsGrid/CardsGrid.css */
+
+/* =========================
+   GRID – Centrado flexible
+========================= */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 300px));
+    gap: 45px 45px;
+    
+    /* Ocupa todo el ancho disponible */
+    width: 100%;
+    
+    /* Permite que el grid se estire verticalmente si el padre es flex */
+    flex: 1;
+    
+    margin: 0 auto;
+    padding: 20px;              /* Espacio alrededor del grid */
+    box-sizing: border-box;
+    
+    /* Centrado horizontal de las columnas */
+    justify-content: center;
+    
+    /* Centrado vertical de las filas (funciona si el grid tiene altura definida) */
+    align-content: center;
+}
+
+/* Cuando el grid esté dentro de un contenedor flex con altura completa,
+   se centrará verticalmente. Si no, se comporta como un grid normal. */
+
+/* =========================
+   CARD
+========================= */
+.dashboard-card {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: #ffffff;
+    border-radius: 32px;
+    border: 2px solid #f0f0f0;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    box-sizing: border-box;
+    cursor: pointer;
+    box-shadow: 15px 15px 0px 0px #8E2A25;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.dashboard-card:hover {
+    transform: translate(-4px, -4px);
+    box-shadow: 14px 14px 0px 0px #8E2A25;
+    border-color: #e4e4e4;
+}
+
+.dashboard-card h2 {
+    font-family: 'Bentham', serif;
+    font-size: 32px;
+    font-weight: 400;
+    color: #333333;
+    margin: 0 0 15px 0;
+    text-align: center;
+    line-height: 1.2;
+    word-break: break-word;
+}
+
+/* =========================
+   ICONO
+========================= */
+.card-icon {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.card-icon img {
+    width: auto;
+    height: auto;
+    max-width: 180px;
+    max-height: 180px;
+    object-fit: contain;
+}
+
+/* =========================
+   MENSAJES DE ESTADO
+========================= */
+.status-message {
+    font-family: 'Bentham', serif;
+    font-size: 28px;
+    font-weight: normal;
+    color: #666;
+    text-align: center;
+    padding: 2rem;
+}
+
+.status-message--loading {
+    color: #8E2A25;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.status-message--empty {
+    color: #999;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+/* ============================================
+   RESPONSIVE – ajusta gap, tamaños y sombras
+============================================ */
+
+/* Pantallas medianas (≤1300px) */
+@media (max-width: 1300px) {
+    .cards-grid {
+        gap: 35px;
+        padding: 16px;
+    }
+    .dashboard-card h2 {
+        font-size: 28px;
+    }
+    .card-icon img {
+        max-width: 140px;
+        max-height: 140px;
+    }
+}
+
+/* Tablets (≤900px) */
+@media (max-width: 900px) {
+    .cards-grid {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 260px));
+        gap: 30px;
+        padding: 16px;
+    }
+    .dashboard-card {
+        padding: 20px;
+        border-radius: 24px;
+        box-shadow: 12px 12px 0px 0px #8E2A25;
+    }
+    .dashboard-card h2 {
+        font-size: 24px;
+        margin-bottom: 10px;
+    }
+    .card-icon img {
+        max-width: 110px;
+        max-height: 110px;
+    }
+}
+
+/* Móviles grandes (≤600px) */
+@media (max-width: 600px) {
+    .cards-grid {
+        grid-template-columns: 1fr;
+        max-width: 360px;
+        gap: 24px;
+        padding: 12px;
+        justify-content: center;
+    }
+    .dashboard-card {
+        border-radius: 20px;
+        padding: 18px;
+        box-shadow: 8px 8px 0px 0px #8E2A25;
+    }
+    .dashboard-card:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: 6px 6px 0px 0px #8E2A25;
+    }
+    .dashboard-card h2 {
+        font-size: 22px;
+    }
+    .card-icon img {
+        max-width: 90px;
+        max-height: 90px;
+    }
+}
+
+/* Móviles pequeños (≤400px) */
+@media (max-width: 400px) {
+    .cards-grid {
+        max-width: 300px;
+        gap: 20px;
+        padding: 8px;
+    }
+    .dashboard-card {
+        padding: 14px;
+    }
+    .dashboard-card h2 {
+        font-size: 18px;
+    }
+    .card-icon img {
+        max-width: 70px;
+        max-height: 70px;
+    }
+}

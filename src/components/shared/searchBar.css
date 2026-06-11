@@ -3,12 +3,6 @@
    src/components/shared/SearchBar.css
    ============================================ */
 
-@font-face {
-  font-family: 'Bentham';
-  src: url('../../assets/fonts/Bentham-Regular.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
 
 /* ── WRAPPER ── */
 .searchbar-wrapper {
@@ -154,7 +148,7 @@
   }
 
   .searchbar-btn {
-    margin-left: auto;
+    margin-left: 0; 
   }
 }
 

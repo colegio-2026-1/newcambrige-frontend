@@ -1,152 +1,115 @@
+// useAuth.js
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
-import {
-  loginRequest,
-  getMeRequest
-} from "./authService";
+import { loginRequest, getMeRequest } from "./authService";
+import { allrolesuserRequest } from "../api/endpoints";
 
 export const useAuth = () => {
-
-  const [user, setUser] = useState(null);
-
+  const [user, setUser] = useState(() => {
+    const cached = sessionStorage.getItem("user");
+    return cached ? JSON.parse(cached) : null;
+  });
+  const [roles, setRoles] = useState(() => {
+    const cached = sessionStorage.getItem("roles");
+    return cached ? JSON.parse(cached) : [];
+  });
+  const [loadingRoles, setLoadingRoles] = useState(() => {
+    // Si ya hay roles en caché, no cargamos
+    return !sessionStorage.getItem("roles");
+  });
   const [loading, setLoading] = useState(false);
-
   const [error, setError] = useState(null);
-
-  const [sessionMessage, setSessionMessage] =
-    useState("");
-
+  const [sessionMessage, setSessionMessage] = useState("");
   const navigate = useNavigate();
 
-  // =========================
-  // LOGIN
-  // =========================
-  const login = async (
-    username,
-    password
-  ) => {
-
-    setLoading(true);
-
-    setError(null);
-
+  const fetchRoles = async (userId) => {
+    if (!userId) {
+      setRoles([]);
+      setLoadingRoles(false);
+      return;
+    }
     try {
-
-      const data = await loginRequest(
-        username,
-        password
-      );
-
-      // guardar token
-      localStorage.setItem(
-        "access_token",
-        data.access_token
-      );
-
-      // obtener usuario
-      const meResponse =
-        await getMeRequest();
-
-      setUser(meResponse.data);
-
-      navigate("/home");
-
+      setLoadingRoles(true);
+      const response = await allrolesuserRequest(userId);
+      const rolesData = response?.data || [];
+      setRoles(rolesData);
+      sessionStorage.setItem("roles", JSON.stringify(rolesData));
     } catch (err) {
-
-      setError(
-        err.response?.data?.detail ||
-        "Error al iniciar sesión"
-      );
-
-      throw err;
-
+      console.error("Error al obtener roles:", err);
+      setRoles([]);
     } finally {
+      setLoadingRoles(false);
+    }
+  };
 
+  const login = async (username, password) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await loginRequest(username, password);
+      localStorage.setItem("access_token", data.access_token);
+      const meResponse = await getMeRequest();
+      const userData = meResponse.data;
+      setUser(userData);
+      sessionStorage.setItem("user", JSON.stringify(userData));
+      await fetchRoles(userData.id_usuario);
+      navigate("/home");
+    } catch (err) {
+      setError(err.response?.data?.detail || "Error al iniciar sesión");
+      throw err;
+    } finally {
       setLoading(false);
     }
   };
 
-  // =========================
-  // LOGOUT
-  // =========================
-  const logout = (
-    message = ""
-  ) => {
-
-    localStorage.removeItem(
-      "access_token"
-    );
-
+  const logout = (message = "") => {
+    localStorage.removeItem("access_token");
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("roles");
     setUser(null);
-
-    if (message) {
-      setSessionMessage(message);
-    }
-
+    setRoles([]);
+    setLoadingRoles(true);
+    if (message) setSessionMessage(message);
     navigate("/");
   };
 
-  // =========================
-  // VALIDAR SESIÓN
-  // =========================
   const checkAuth = async () => {
-
-    const token =
-      localStorage.getItem(
-        "access_token"
-      );
-
-    // si no hay token
+    const token = localStorage.getItem("access_token");
     if (!token) {
+      setLoadingRoles(false);
       return;
     }
-
+    // Si ya tenemos usuario y roles en caché, no llamamos a la API
+    const cachedUser = sessionStorage.getItem("user");
+    const cachedRoles = sessionStorage.getItem("roles");
     try {
-
-      const meResponse =
-        await getMeRequest();
-
-      setUser(meResponse.data);
-
+      const meResponse = await getMeRequest();
+      const userData = meResponse.data;
+      setUser(userData);
+      sessionStorage.setItem("user", JSON.stringify(userData));
+      await fetchRoles(userData.id_usuario);
     } catch (err) {
-
-      // sesión inválida
-      if (
-        err.response?.status === 401
-      ) {
-
-        logout(
-          err.response?.data?.detail ||
-          "Sesión expirada por inactividad"
-        );
+      if (err.response?.status === 401) {
+        logout(err.response?.data?.detail || "Sesión expirada por inactividad");
+      } else {
+        setLoadingRoles(false);
       }
     }
   };
 
-  // =========================
-  // AL CARGAR APP
-  // =========================
   useEffect(() => {
-
     checkAuth();
-
   }, []);
 
   return {
-
     user,
-
+    roles,
+    loadingRoles,
     loading,
-
     error,
-
     login,
-
     logout,
-
     sessionMessage,
-
-    setSessionMessage
+    setSessionMessage,
   };
 };
