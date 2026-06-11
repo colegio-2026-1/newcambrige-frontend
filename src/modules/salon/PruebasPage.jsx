@@ -137,13 +137,6 @@ export default function PruebasPage() {
     if (f.nombre)    filtered = filtered.filter((r) => r.nombre?.toLowerCase().includes(f.nombre.toLowerCase()));
     if (f.Grado)     filtered = filtered.filter((r) => (salonesMap[r.id_salon]?.grado || r.grado)?.toString() === f.Grado.toString());
     if (f.Grupo)     filtered = filtered.filter((r) => (salonesMap[r.id_salon]?.grupo || r.grupo)?.toString() === f.Grupo.toString());
-    if (f.Periodo) {
-      filtered = filtered.filter((r) => {
-        const salon   = salonesMap[r.id_salon];
-        const periodo = periodosMap[salon?.id_periodo];
-        return periodo?.nombre?.toString() === f.Periodo.toString();
-      });
-    }
     setRowsFiltered(filtered);
   };
 
@@ -209,8 +202,8 @@ export default function PruebasPage() {
         }
       >
         <div>
-          {filtros.Periodo && (
             <SearchBar
+              key={periodos[0]?.nombre || "loading"} 
               fields={[
                 { key: "documento", label: "Código", type: "number", maxLength: 10 },
                 { key: "nombre",    label: "Nombre", type: "text" },
@@ -237,7 +230,7 @@ export default function PruebasPage() {
                   )),
                 },
               ]}
-              initialValues={{ Periodo: filtros.Periodo }}
+              initialValues={{ Periodo: periodos[0]?.nombre }}
               onChange={(key, value) => {
                 setFiltros(prev => {
                   const nuevos = { ...prev, [key]: value };
@@ -256,7 +249,6 @@ export default function PruebasPage() {
               }}
               cleanFilter={{ documento: "", nombre: "", Grado: "", Grupo: "", Periodo: filtros.Periodo }}
             />
-          )}
 
           <DataTable
             columns={columns}

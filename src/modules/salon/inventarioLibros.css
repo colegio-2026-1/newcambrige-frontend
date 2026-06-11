@@ -1,0 +1,8 @@
+/* inventarioLibros.css */
+.searchbar-inventario .searchbar-wrapper {
+  justify-content: flex-start !important;
+}
+
+.searchbar-inventario .searchbar-input {
+  width: 250px !important;
+}
