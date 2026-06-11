@@ -1,7 +1,7 @@
 import { Route } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
-import RectoriaEstudiantes from "../modules/Rectoria/RectoriaEstudiantes";
-import RectoriaDocentes from "../modules/Rectoria/RectoriaDocentes";
+import RectoriaEstudiantes from "../modules/rectoria/RectoriaEstudiantes";
+import RectoriaDocentes from "../modules/rectoria/RectoriaDocentes";
 import Rectoria from "../modules/rectoria/Rectoria";
 
 
