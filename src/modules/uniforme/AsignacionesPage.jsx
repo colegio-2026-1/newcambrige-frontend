@@ -523,7 +523,10 @@ export default function AsignacionesPage() {
             const nuevo = { ...prev, [key]: value };
             if (key === "id_objeto") {
               const objeto = prendas.find((p) => p.id_objeto === Number(value));
-              nuevo.talla = objeto?.tipo === "objeto" ? "No aplica" : "";
+              nuevo.talla = 
+                objeto?.tipo === "objeto" 
+                  ? "No aplica"
+                  :  objeto?.talla || ""
             }
             return nuevo;
           });
@@ -542,7 +545,9 @@ export default function AsignacionesPage() {
             options:
               prendaSeleccionada?.tipo === "objeto"
                 ? ["No aplica"]
-                : ["S", "M", "L", "XL"]
+                : prendaSeleccionada?.talla
+                  ? [prendaSeleccionada.talla]
+                  : []
           },
           { key: "fecha_prestamo", label: "Fecha de Entrega", type: "text" },
           {

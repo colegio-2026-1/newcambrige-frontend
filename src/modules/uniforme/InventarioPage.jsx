@@ -471,7 +471,7 @@ export default function InventarioPage() {
             key: "talla",
             label: "Talla",
             type: "select",
-            options: formAgregar.tipo === "objeto" ? ["No aplica"] : ["XS", "S", "M", "L", "XL"]
+            options: formAgregar.tipo === "objeto" ? ["No aplica"] : ["S", "M", "L", "XL"]
           },
           { key: "observacion", label: "Observación", type: "text" }
         ]}
@@ -507,7 +507,7 @@ export default function InventarioPage() {
             key: "talla",
             label: "Talla",
             type: "select",
-            options: formEditar.tipo === "objeto" ? ["No aplica"] : ["XS", "S", "M", "L", "XL"]
+            options: formEditar.tipo === "objeto" ? ["No aplica"] : ["S", "M", "L", "XL"]
           },
           { key: "observacion", label: "Observación", type: "text" }
         ]}
