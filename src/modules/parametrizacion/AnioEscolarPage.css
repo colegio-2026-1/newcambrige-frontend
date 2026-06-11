@@ -1,8 +1,4 @@
-/* ============================================
-   ESTILOS PROPIOS DEL MÓDULO "AÑO ESCOLAR"
-============================================ */
-
-.anio-content {
+div.anio-wrapper {
   width: 100%;
   height: 100%;
   display: flex;
@@ -11,366 +7,184 @@
   font-family: 'Bentham', serif;
 }
 
-/* ==================== TOOLBAR ==================== */
-.anio-toolbar-custom {
+div.anio-wrapper .module-toolbar-container {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 20px 30px;
   background: white;
   border-bottom: 1px solid #EBEBEB;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.anio-toolbar-title {
-  font-size: 24px;
-  color: #333;
-  letter-spacing: 1px;
-  font-family: 'Bentham', serif;
-}
-
-.anio-btn-crear {
-  background-color: #3F5D93;
-  color: white;
-  border: none;
-  border-radius: 20px;
-  padding: 0 30px;
-  height: 38px;
-  font-size: 18px;
-  font-family: 'Bentham', serif;
-  cursor: pointer;
-  box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-  transition: background 0.2s;
-}
-.anio-btn-crear:hover {
-  background-color: #2c456e;
-}
-
-.anio-clear-filter {
-  background: none;
-  border: none;
-  color: #666;
-  cursor: pointer;
-  text-decoration: underline;
-  font-family: 'Bentham', serif;
-}
-.anio-clear-filter:hover {
-  color: #3F5D93;
-}
-
-/* ==================== ÁREA PRINCIPAL ==================== */
-.anio-main-area {
-  flex: 1;
-  padding: 20px 30px;
-}
-
-.anio-empty-state {
+div.anio-wrapper .toolbar-grouped-actions {
   display: flex;
-  justify-content: center;
   align-items: center;
-  height: 200px;
-  color: #666;
-  font-size: 18px;
-  font-family: 'Bentham', serif;
-}
-
-.anio-table-layout-wrapper {
-  display: flex;
-  align-items: flex-start;
-  gap: 30px;
+  justify-content: flex-start;
   width: 100%;
+  gap: 15px; 
 }
 
-.anio-table-main-section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+div.anio-wrapper .toolbar-grouped-actions .action-buttons {
+  padding: 0;
+  min-width: auto;
 }
 
-.anio-datatable-fixed-container {
-  min-height: 370px;
-}
-
-.anio-pagination-center {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-top: 20px;
-}
-
-.anio-btn-circle {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background-color: #264A7F;
-  color: white;
-  border: none;
+div.anio-wrapper .toolbar-grouped-actions .action-btn {
+  height: 42px;
+  padding: 0 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
-}
-.anio-btn-circle:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  box-shadow: none;
 }
 
-.anio-side-actions {
-  margin-bottom: 45px;
-}
-
-/* ==================== FORMULARIOS Y CAMPOS (encapsulados) ==================== */
-.anio-form-group {
+div.anio-wrapper .searchbar-field {
   display: flex;
-  flex-direction: column;
-  gap: 5px;
-  position: relative;
-  margin: 0;
-  width: 100%;
+  align-items: center;
+  gap: 10px;
 }
-.anio-form-label {
-  font-weight: bold;
-  color: #333;
-  font-size: 16px;
+
+div.anio-wrapper .master-search-label {
   font-family: 'Bentham', serif;
+  font-size: 20px;
+  color: #333;
+  white-space: nowrap;
 }
-.anio-input-style {
+
+div.anio-wrapper .anio-custom-year-picker {
   background-color: #EBEBEB;
   border: 1px solid #CCC;
   border-radius: 6px;
-  height: 38px;
-  padding: 0 10px;
-  font-size: 16px;
-  outline: none;
-  width: 100%;
-  box-sizing: border-box;
-  font-family: 'Bentham', serif;
-}
-.anio-form-row {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  overflow: visible !important;
-  margin-bottom: 20px;
-}
-
-/* ==================== SELECTOR DE AÑO ==================== */
-.anio-custom-year-picker {
-  background-color: #EBEBEB;
-  border: 1px solid #CCC;
-  border-radius: 6px;
-  height: 38px;
-  padding: 0 10px;
-  font-size: 16px;
+  height: 42px; 
+  padding: 0 12px;
+  font-size: 18px; 
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
-  min-width: 150px;
+  width: 100%; 
   font-family: 'Bentham', serif;
+  color: var(--color-text, #333);
+  box-sizing: border-box;
 }
+
+.anio-modal-content .anio-custom-year-picker {
+  background-color: #EBEBEB;
+  border: 1px solid #CCC;
+  border-radius: 6px;
+  height: 38px; 
+  padding: 0 10px;
+  font-size: 16px; 
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  width: 100%; 
+  font-family: 'Bentham', serif;
+  color: var(--color-text, #333);
+  box-sizing: border-box;
+}
+
+div.anio-wrapper .master-clear-filter {
+  background: none;
+  border: none;
+  color: #666;
+  text-decoration: underline;
+  cursor: pointer;
+  font-family: 'Bentham', serif;
+  font-size: 18px;
+  width: 130px; 
+  text-align: center;
+}
+
+div.anio-wrapper .master-clear-filter:hover { 
+  color: #3F5D93; 
+}
+
+div.anio-wrapper .main-area { flex: 1; padding: 20px 30px; }
+div.anio-wrapper .empty-state { display: flex; justify-content: center; align-items: center; height: 200px; font-size: 20px; color: #666; }
+div.anio-wrapper .table-layout-wrapper { display: flex; align-items: flex-start; gap: 30px; width: 100%; }
+div.anio-wrapper .table-main-section { flex: 1; display: flex; flex-direction: column; }
+div.anio-wrapper .datatable-fixed-container { min-height: 400px; }
+div.anio-wrapper .side-actions { margin-top: 45px; }
+
+div.anio-wrapper .pagination-center { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
+div.anio-wrapper .btn-circle {
+  width: 32px; height: 32px; border-radius: 50%; background-color: #264A7F;
+  color: white; border: none; display: flex; align-items: center;
+  justify-content: center; cursor: pointer; box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
+}
+div.anio-wrapper .btn-circle:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+
 .anio-year-grid-popover {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 250px;
-  background: white;
-  border: 1px solid #3F5D93;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  z-index: 2000;
-  padding: 15px;
-  margin-top: 5px;
+  position: absolute; top: 100%; left: 0; width: 250px;
+  background: white; border: 1px solid #3F5D93; border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 2000;
+  padding: 15px; margin-top: 5px;
 }
 .anio-year-grid-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 15px;
-  font-size: 14px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-weight: bold; color: #333; margin-bottom: 15px; font-size: 14px;
 }
 .anio-year-grid-header button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: none; border: none; cursor: pointer; padding: 5px;
+  display: flex; align-items: center; justify-content: center;
 }
-.anio-year-grid-header button:hover {
-  background-color: #EBEBEB;
-  border-radius: 4px;
-}
-.anio-year-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-}
+.anio-year-grid-header button:hover { background-color: #EBEBEB; border-radius: 4px; }
+.anio-year-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 .anio-year-btn {
-  background: none;
-  border: none;
-  padding: 8px 0;
-  font-size: 16px;
-  cursor: pointer;
-  border-radius: 50%;
-  width: 45px;
-  height: 45px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  font-family: 'Bentham', serif;
+  background: none; border: none; padding: 8px 0; font-size: 16px;
+  cursor: pointer; border-radius: 50%; width: 45px; height: 45px;
+  margin: 0 auto; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; font-family: 'Bentham', serif;
 }
-.anio-year-btn:hover {
-  background-color: #EBEBEB;
-}
-.anio-year-btn.active {
-  background-color: #3F5D93;
-  color: white;
-  font-weight: bold;
-}
+.anio-year-btn:hover { background-color: #EBEBEB; }
+.anio-year-btn.active { background-color: #3F5D93; color: white; font-weight: bold; }
 
-/* ==================== TOGGLE SWITCH ==================== */
-.anio-toggle-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.anio-toggle-wrapper span {
-  font-weight: bold;
-  color: #333;
-  font-size: 16px;
-  font-family: 'Bentham', serif;
-}
-.anio-toggle-switch {
-  position: relative;
-  display: inline-block;
-  width: 50px;
-  height: 26px;
-}
-.anio-toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-.anio-toggle-switch .slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: .4s;
-  border-radius: 26px;
-}
-.anio-toggle-switch .slider:before {
-  position: absolute;
-  content: "";
-  height: 20px;
-  width: 20px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: .4s;
-  border-radius: 50%;
-}
-.anio-toggle-switch input:checked + .slider {
-  background-color: #3F5D93;
-}
-.anio-toggle-switch input:checked + .slider:before {
-  transform: translateX(24px);
-}
-
-/* ==================== MODAL (con prefijo anio-) ==================== */
 .anio-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  font-family: 'Bentham', serif;
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4); display: flex; justify-content: center;
+  align-items: center; z-index: 1000; font-family: 'Bentham', serif;
 }
 .anio-modal-content {
-  background-color: white;
-  border-radius: 12px;
-  width: 550px;
-  max-width: 95%;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  overflow: visible;
+  background-color: white; border-radius: 12px; width: 550px;
+  max-width: 95%; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); overflow: visible;
 }
 .anio-modal-header {
-  background-color: #D0E1FF;
-  padding: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
+  background-color: #D0E1FF; padding: 20px; display: flex;
+  justify-content: center; align-items: center; position: relative;
 }
 .anio-modal-header h3 {
-  font-family: 'Staatliches', sans-serif;
-  font-size: 28px;
-  color: #333;
-  margin: 0;
-  letter-spacing: 1px;
+  font-family: 'Staatliches', sans-serif; font-size: 28px;
+  color: #333; margin: 0; letter-spacing: 1px;
 }
 .anio-modal-close {
-  background: none;
-  border: none;
-  font-size: 24px;
-  font-weight: bold;
-  cursor: pointer;
-  color: #333;
-  position: absolute;
-  right: 20px;
+  background: none; border: none; font-size: 24px; font-weight: bold;
+  cursor: pointer; color: #333; position: absolute; right: 20px;
 }
-.anio-modal-body {
-  padding: 30px;
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-  overflow: visible;
+.anio-modal-body { padding: 30px; display: flex; flex-direction: column; gap: 25px; overflow: visible; }
+.anio-modal-footer { display: flex; justify-content: center; gap: 20px; padding: 0 30px 30px; }
+.anio-btn-primary { background-color: #3F5D93; color: white; border: none; border-radius: 20px; padding: 8px 30px; font-size: 18px; font-family: 'Bentham', serif; cursor: pointer; }
+.anio-btn-primary:hover { background-color: #2c456e; }
+.anio-btn-secondary { background-color: #6C757D; color: white; border: none; border-radius: 20px; padding: 8px 30px; font-size: 18px; font-family: 'Bentham', serif; cursor: pointer; }
+.anio-btn-secondary:hover { background-color: #545b62; }
+
+.anio-form-group { display: flex; flex-direction: column; gap: 5px; position: relative; margin: 0; width: 100%; }
+.anio-form-label { font-weight: bold; color: #333; font-size: 16px; font-family: 'Bentham', serif; }
+.anio-input-style {
+  background-color: #EBEBEB; border: 1px solid #CCC; border-radius: 6px;
+  height: 38px; padding: 0 10px; font-size: 16px; outline: none;
+  width: 100%; box-sizing: border-box; font-family: 'Bentham', serif;
 }
-.anio-modal-footer {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  padding: 0 30px 30px;
+
+.anio-modal-content .anio-form-row { 
+  display: flex; align-items: center; gap: 20px; overflow: visible; margin-bottom: 20px; 
 }
-.anio-btn-primary {
-  background-color: #3F5D93;
-  color: white;
-  border: none;
-  border-radius: 20px;
-  padding: 8px 30px;
-  font-size: 18px;
-  font-family: 'Bentham', serif;
-  cursor: pointer;
-}
-.anio-btn-primary:hover {
-  background-color: #2c456e;
-}
-.anio-btn-secondary {
-  background-color: #6C757D;
-  color: white;
-  border: none;
-  border-radius: 20px;
-  padding: 8px 30px;
-  font-size: 18px;
-  font-family: 'Bentham', serif;
-  cursor: pointer;
-}
-.anio-btn-secondary:hover {
-  background-color: #545b62;
-}
+
+.anio-toggle-wrapper { display: flex; align-items: center; gap: 10px; }
+.anio-toggle-wrapper span { font-weight: bold; color: #333; font-size: 16px; font-family: 'Bentham', serif; }
+.anio-toggle-switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+.anio-toggle-switch input { opacity: 0; width: 0; height: 0; }
+.anio-toggle-switch .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 26px; }
+.anio-toggle-switch .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+.anio-toggle-switch input:checked + .slider { background-color: #3F5D93; }
+.anio-toggle-switch input:checked + .slider:before { transform: translateX(24px); }

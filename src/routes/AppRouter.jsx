@@ -15,6 +15,7 @@ import BandaRouter       from "./BandaRouter";
 import NotFound from "../modules/notFound/notFound";
 import Home     from "../modules/Home/HomePage";
 import TestPage from "../modules/test/testPage";
+import RectoriaRoutes from "./RectoriaRouter";
 
 const AppRouter = () => {
   return (
@@ -40,6 +41,8 @@ const AppRouter = () => {
       {ParametrizacionRouter()}   {/* ✅ AHORA INCLUYE todas las rutas de parametrización */}
       {BandaRouter()}
       
+      {RectoriaRoutes()}
+
       {/* RUTA DE PRUEBAS / TEST */}
       <Route path="/test" element={<TestPage />} />
 

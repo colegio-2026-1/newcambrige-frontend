@@ -1,0 +1,246 @@
+div.asignaciones-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-white, #FFFFFF);
+  font-family: 'Bentham', serif;
+}
+
+/* ── TOOLBAR SUPERIOR ── */
+div.asignaciones-wrapper .module-toolbar-container {
+  display: flex;
+  align-items: center;
+  padding: 20px 30px;
+  background: white;
+  border-bottom: 1px solid #EBEBEB;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+div.asignaciones-wrapper .toolbar-grouped-actions {
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between;
+  width: 100%; 
+}
+
+div.asignaciones-wrapper .custom-asignacion-search {
+  display: flex; 
+  align-items: center; 
+  gap: 15px;
+}
+
+/* ── ÁREA PRINCIPAL Y TABLA ── */
+div.asignaciones-wrapper .main-area {
+  flex: 1;
+  padding: 20px 30px;
+}
+
+div.asignaciones-wrapper .table-layout-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 30px;
+  width: 100%;
+}
+
+div.asignaciones-wrapper .table-main-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+div.asignaciones-wrapper .datatable-fixed-container {
+  min-height: 400px;
+}
+
+/* ── BOTONES LATERALES ── */
+div.asignaciones-wrapper .side-actions {
+  margin-top: 45px;
+}
+
+/* ── PAGINACIÓN ── */
+div.asignaciones-wrapper .pagination-center {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+div.asignaciones-wrapper .btn-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #264A7F;
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
+}
+
+div.asignaciones-wrapper .btn-circle:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+
+/* ============================================
+   MODAL DE ASIGNACIONES
+============================================ */
+
+.modal-overlay {
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  width: 100vw; 
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4); 
+  display: flex; 
+  justify-content: center;
+  align-items: center; 
+  z-index: 1000; 
+  font-family: 'Bentham', serif;
+}
+
+.asignacion-modal-content {
+  background-color: white; 
+  border-radius: 12px; 
+  width: 550px; 
+  max-width: 95%;
+  overflow: visible; 
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.asignacion-modal-content .modal-header {
+  background-color: #D0E1FF; 
+  padding: 20px; 
+  display: flex; 
+  justify-content: center;
+  align-items: center; 
+  position: relative;
+}
+
+.asignacion-modal-content .modal-header h3 {
+  font-family: 'Staatliches', sans-serif; 
+  font-size: 28px; 
+  letter-spacing: 2px; 
+  color: #333333; 
+  margin: 0; 
+  line-height: 1; 
+  text-transform: uppercase;
+}
+
+.asignacion-modal-content .modal-close {
+  background: none; 
+  border: none; 
+  font-size: 24px; 
+  font-weight: bold; 
+  cursor: pointer;
+  color: #333; 
+  position: absolute; 
+  right: 20px; 
+  top: 50%; 
+  transform: translateY(-50%);
+}
+
+.asignacion-modal-content .modal-body { 
+  padding: 30px; 
+}
+
+.asignacion-modal-content .modal-form-row {
+  display: flex; 
+  gap: 15px; 
+  margin-bottom: 25px; 
+  width: 100%;
+}
+
+.asignacion-modal-content .input-group {
+  display: flex; 
+  flex-direction: column; 
+  gap: 8px; 
+  flex: 1;
+}
+
+.asignacion-modal-content .input-group label {
+  font-size: 18px; 
+  font-weight: bold; 
+  color: #333;
+}
+
+.asignacion-modal-content .input-group input, 
+.asignacion-modal-content .input-group select {
+  background-color: #EBEBEB; 
+  border: 1px solid #CCC; 
+  border-radius: 6px;
+  height: 42px; 
+  padding: 0 12px; 
+  font-size: 16px; 
+  color: #333; 
+  width: 100%;
+  box-sizing: border-box; 
+  outline: none; 
+  font-family: 'Bentham', serif;
+}
+
+.asignacion-modal-content .input-group select:disabled { 
+  background-color: #D3D3D3; 
+  color: #666; 
+  cursor: not-allowed; 
+}
+
+.asignacion-modal-content .btn-add-modal { 
+  margin-bottom: 5px; 
+} 
+
+/* ── PILLS DE ASIGNACIONES  ── */
+.asignacion-modal-content .asignaciones-section { 
+  margin-top: 30px; 
+  text-align: center; 
+}
+
+.asignacion-modal-content .asignaciones-section h4 {
+  font-family: 'Staatliches', sans-serif; 
+  font-size: 24px; 
+  color: #333; 
+  margin-bottom: 15px; 
+  letter-spacing: 1px;
+}
+
+.asignacion-modal-content .asignaciones-pills-container {
+  display: flex; 
+  flex-wrap: wrap; 
+  justify-content: center; 
+  gap: 15px;
+}
+
+.asignacion-modal-content .asignacion-pill {
+  background-color: #E8F0FE; 
+  border: 1px solid #4A6B9C; 
+  color: #333;
+  padding: 8px 25px; 
+  font-size: 18px; 
+  font-family: 'Bentham', serif;
+  cursor: pointer; 
+  transition: all 0.2s; 
+  position: relative;
+}
+
+.asignacion-modal-content .asignacion-pill:hover {
+  background-color: #FEE8E8; 
+  border-color: #C0392B; 
+  color: #C0392B;
+}
+
+.asignacion-modal-content .asignacion-pill:hover::after {
+  content: " ×"; 
+  font-weight: bold;
+}
+
+.asignacion-modal-content .modal-footer {
+  display: flex; 
+  justify-content: center; 
+  padding: 0 30px 30px;
+}
