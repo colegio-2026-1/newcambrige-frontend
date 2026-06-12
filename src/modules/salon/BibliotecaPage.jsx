@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import "./inventarioLibros.css";
 import { Home } from "lucide-react";
 import PupitresIcon   from "../../assets/Salon/pupitres.svg";
 import PruebasIcon    from "../../assets/Salon/pruebas.svg";
@@ -479,9 +480,9 @@ export default function BibliotecaPage() {
       >
         {pestanaActiva === "prestamos" && (
           <div>
-            {filtrosPrestamos.periodo && (
               <SearchBar
                 loading={loading}
+                key={periodos[0]?.nombre || "loading"} 
                 fields={[
                   { key: "codigo", label: "Código", type: "number", maxLength: 10 },
                   { key: "nombre", label: "Nombre", type: "text" },
@@ -504,7 +505,7 @@ export default function BibliotecaPage() {
                     options: [...new Set(Object.values(periodosMap).map((p) => p.nombre).filter(Boolean))],
                   },
                 ]}
-                initialValues={{ periodo: filtrosPrestamos.periodo }}
+                initialValues={{ periodo: periodos[0]?.nombre }}
                 onChange={(key, value) => {
                   setFiltrosPrestamos(prev => {
                     const nuevos = { ...prev, [key]: value };
@@ -523,7 +524,7 @@ export default function BibliotecaPage() {
                 }}
                 cleanFilter={{ codigo: "", nombre: "", grado: "", grupo: "", periodo: filtrosPrestamos.periodo }}
               />
-            )}
+
             <div style={{ marginTop: "1rem", background: "#fff", borderRadius: ".8rem", overflow: "hidden", border: "1px solid #D9D9D9" }}>
               <DataTable
                 columns={columnasInicio}
@@ -538,6 +539,7 @@ export default function BibliotecaPage() {
 
         {pestanaActiva === "libros" && (
           <div>
+            <div className="searchbar-inventario">
             <SearchBar
               loading={loading}
               onSearch={filtrarLibros}
@@ -547,6 +549,7 @@ export default function BibliotecaPage() {
                 { key: "edicion", label: "Edición",          type: "text" },
               ]}
             />
+            </div>
             <div style={{ marginTop: "1rem", background: "#fff", borderRadius: ".8rem", overflow: "hidden", border: "1px solid #D9D9D9" }}>
               <DataTable
                 columns={columnasLibros}
