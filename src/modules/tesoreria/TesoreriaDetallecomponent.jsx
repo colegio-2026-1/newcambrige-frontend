@@ -51,7 +51,7 @@ const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }
   const { user, roles, loadingRoles, logout } = useAuth();
   const userName = user?.nombre || "Usuario";
   const rol = roles[0] || (loadingRoles ? "Cargando rol..." : "Sin rol");
-  const rolespermitidos = ["secretaria", "admin", "tesoreria"];
+  const rolespermitidos = ["admin", "tesoreria"];
 
   // =========================
   // Mapeos para acceso rápido

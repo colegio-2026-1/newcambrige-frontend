@@ -1,4 +1,4 @@
-/* ModuleLayout.css  */
+/* ModuleLayout.css */
 
 .module-layout {
   display: flex;
@@ -13,12 +13,8 @@
 /* Sidebar izquierdo */
 .module-sidebar {
   flex-shrink: 0;
-
 }
 
-.module-content > div {
-  width: 100%;
-}
 /* Contenido central */
 .module-content {
   flex: 1;
@@ -27,25 +23,42 @@
   border-radius: 48px;
   margin: 20px;
   padding: 24px;
+
   display: flex;
   flex-direction: column;
+
   overflow-x: hidden;
   max-width: 100%;
-  align-items: stretch;
+
+  /* IMPORTANTE */
+  min-height: 0;
 }
 
-/* Wrapper interno: tabla+searchbar a la izquierda, botones a la derecha */
-.module-body {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;  /* ← clave: botones arrancan desde arriba del children */
-  gap: 16px;
+.module-content > div {
   width: 100%;
 }
 
+/* Wrapper interno */
+.module-body {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  width: 100%;
+
+  /* IMPORTANTE */
+  flex: 1;
+  min-height: 0;
+}
+
+/* Contenido principal */
 .module-children {
   flex: 1;
   min-width: 0;
+
+  /* IMPORTANTE */
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 /* Botones de acción a la derecha */

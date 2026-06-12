@@ -5,7 +5,7 @@ import dashboardClient from "./dashboardClient";
 
 // ── ROLES DEL USUARIO ──────────────────────────────────────────────────────
 // GET /api/usuarios/{id_usuario}/roles
-// Devuelve array de strings: ["admin", "secretaria", ...]
+// Devuelve array de strings: ["admin"]
 // Roles permitidos: todos los roles registrados del sistema
 export const getRolesUsuario = (idUsuario) =>
   dashboardClient.get(`/api/usuarios/${idUsuario}/roles`);

@@ -17,7 +17,7 @@ const TesoreriaNotificaciones = () => {
   const { user, logout } = useAuth();
   const [selectedMenu, setSelectedMenu] = useState("Notificaciones");
   const navigate = useNavigate();
-  const rolespermitidos = ["secretaria", "admin", "tesoreria"]
+  const rolespermitidos = ["admin", "tesoreria"]
   const userName = user?.nombre || "Usuario";
   const idUser = user?.id_usuario;
   const [roles, setRoles] = useState([]);
@@ -47,8 +47,8 @@ const TesoreriaNotificaciones = () => {
   // MENU ITEMS CON ICONOS
   const modulos = [
     { label: "Inicio", icon: <Icon path={mdiHome} />, path: "/home" },
-    { label: "Tesoreria", icon: <Icon path={mdiCash} />, path: "/tesoreria/", roles: ["secretaria", "admin", "tesoreria"] },
-    { label: "Notificaciones", icon: <Icon path={mdiBell} />, path: "/tesoreria/notificaciones", roles: ["secretaria", "admin", "tesoreria"] },
+    { label: "Tesoreria", icon: <Icon path={mdiCash} />, path: "/tesoreria/", roles: ["admin", "tesoreria"] },
+    { label: "Notificaciones", icon: <Icon path={mdiBell} />, path: "/tesoreria/notificaciones", roles: ["admin", "tesoreria"] },
   ];
 
   return (

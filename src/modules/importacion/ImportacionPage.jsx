@@ -31,8 +31,8 @@ export default function ImportacionPage() {
   ];
 
   const cards = [
-    { title: "Estudiante", icon: iconEstudiante, path: "/importacion/estudiante", roles: ["admin", "administrador", "secretaria", "titular", "robot"] },
-    { title: "Docente", icon: iconDocente, path: "/importacion/docente", roles: ["admin", "administrador", "secretaria", "titular", "robot"] },
+    { title: "Estudiante", icon: iconEstudiante, path: "/importacion/estudiante", roles: ["admin"] },
+    { title: "Docente", icon: iconDocente, path: "/importacion/docente", roles: ["admin"] },
   ];
 
   const handleCardClick = (path) => {
