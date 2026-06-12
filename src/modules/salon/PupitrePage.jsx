@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../api/useAuth";
-
+import { createPupitreRequest} from "../../api/endpointsSalon";
 import {
   getPupitresRequest,
   updatePupitreRequest,
@@ -159,9 +159,15 @@ export default function PupitrePage() {
       if (!fila) return;
       const nuevoEstado = "visto";
       const fechaActual = new Date().toISOString().split("T")[0];
-      await updatePupitreRequest(fila.id_mantenimiento, { estado: nuevoEstado, fecha_pago: fechaActual });
+
+      if (fila.id_mantenimiento) {
+        await updatePupitreRequest(fila.id_mantenimiento, { estado: nuevoEstado, fecha_pago: fechaActual });
+      } else {
+        await createPupitreRequest(fila.id_estudiante, { estado: nuevoEstado, fecha_pago: fechaActual });
+      }
+
       const actualizados = rows.map((r) =>
-        r.id_mantenimiento === fila.id_mantenimiento
+        r.id_estudiante === fila.id_estudiante
           ? { ...r, estado: nuevoEstado, fecha_pago: fechaActual }
           : r
       );
@@ -224,7 +230,6 @@ export default function PupitrePage() {
                 key: "Grado", label: "Grado", type: "select",
                 options: Array.from(new Set(
                   Object.values(salonesMap)
-                    .filter(s => s.id_periodo === periodoMapname[filtros.Periodo]?.id_periodo)
                     .map(s => s.grado).filter(Boolean)
                 )),
               },
@@ -234,7 +239,6 @@ export default function PupitrePage() {
                   ? Array.from(new Set(
                       Object.values(salonesMap)
                         .filter(s =>
-                          s.id_periodo === periodoMapname[filtros.Periodo]?.id_periodo &&
                           s.grado?.toString() === filtros.Grado
                         )
                         .map(s => s.grupo).filter(Boolean)

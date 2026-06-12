@@ -5,6 +5,7 @@ import {
   getPruebasRequest,
   updateEstadoPruebaRequest,
   allsalonesRequest,
+  createPruebaRequest,
 } from "../../api/endpointsSalon";
 import { allaniosacademicosRequest } from "../../api/endpoints";
 
@@ -152,10 +153,27 @@ export default function PruebasPage() {
     try {
       if (!fila) return;
       const nuevoEstado = "visto";
-      const fechaActual = new Date().toISOString().split("T")[0];
-      await updateEstadoPruebaRequest(fila.id_prueba, nuevoEstado);
+      const hoy = new Date();
+      const fechaBackend = hoy.toISOString().split("T")[0];
+      let fechaFinal;
+
+      if (fila.id_prueba) {
+        const response = await updateEstadoPruebaRequest(fila.id_prueba, nuevoEstado);
+        fechaFinal = response.data.fecha_pago;
+      } else {
+        const response = await createPruebaRequest({
+          id_estudiante: fila.id_estudiante,
+          id_tipo_prueba: fila.id_tipo_prueba,
+          estado: nuevoEstado,
+          fecha_pago: fechaBackend,
+        });
+        fechaFinal = response.data.fecha_pago;
+      }
+
       const actualizados = rows.map((r) =>
-        r.id_prueba === fila.id_prueba ? { ...r, estado: nuevoEstado, fecha_pago: fechaActual } : r
+        r.id_estudiante === fila.id_estudiante && r.id_tipo_prueba === fila.id_tipo_prueba
+          ? { ...r, estado: nuevoEstado, fecha_pago: fechaFinal }
+          : r
       );
       setRows(actualizados);
       setRowsFiltered(actualizados);

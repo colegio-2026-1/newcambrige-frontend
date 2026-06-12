@@ -32,6 +32,9 @@ export const getPupitresRequest = () =>
 export const updatePupitreRequest = (id, data) =>
   axiosClient.put(`/api/salones/pupitres/${id}`, data);
 
+export const createPupitreRequest = (id_estudiante, data) =>
+  axiosClient.post(`/api/salones/pupitres?id_estudiante=${id_estudiante}`, data);
+
 export const getPruebasRequest = () =>
   axiosClient.get(`/api/salones/pruebas`);
 
