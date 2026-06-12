@@ -9,7 +9,8 @@ import rectoriaIcon from "../../assets/Rectoria/estudiante.svg";
 import uniformesIcon from "../../assets/Objetos/objetos.svg";
 import bandaIcon from "../../assets/Banda/banda.svg";
 import paraIcon from "../../assets/Parametrizacion/parametrizacion.svg";
-import RobotIcon from "../../assets/Robot/Robot.svg";
+import DashboardIcon from "../../assets/Parametrizacion/parametrizacion.svg";
+import importacionIcon from "../../assets/importacion/Robot 1941.svg";
 import Header from "../../components/layout/header";
 import Sidebar from "../../components/layout/Sidebar";
 import ModuleLayout from "../../components/layout/ModuleLayout";
@@ -37,7 +38,7 @@ const HomePage = () => {
     { title: "Uniformes", icon: uniformesIcon, path: "/uniformes", roles: ["administrador", "admin", "uniformes"] },
     { title: "Banda", icon: bandaIcon, path: "/banda", roles: ["administrador", "admin", "banda"] },
     { title: "Parametrización", icon: paraIcon, path: "/parametrizacion", roles: ["secretaria", "administrador", "admin", "rectoria"] },
-    { title: "Robot", icon: RobotIcon, path: "/robot", roles: ["administrador", "admin", "robot"] },
+    { title: "Importaciones", icon: importacionIcon, path: "/importacion", roles: ["admin", "administrador", "secretaria", "titular", "robot"] },
   ];
 
   const handleCardClick = (path) => {
