@@ -19,7 +19,7 @@ const RectoriaEstudiantes = () => {
   const [estudiantes, setEstudiantes] = useState([]);
   const [estudiantesFiltrados, setEstudiantesFiltrados] = useState([]);
   const [periodos, setPeriodos] = useState([]);
-  const rolespermitidos = ["secretaria", "admin", "rectoria"]
+  const rolespermitidos = ["admin", "rectoria"]
   const { user, logout } = useAuth();
   const userName = user?.nombre || "Usuario";
   const idUser = user?.id_usuario;
@@ -41,8 +41,8 @@ const RectoriaEstudiantes = () => {
  
   const modulos = [
     { label: "Inicio", icon: <Home />, path: "/Rectoria" },
-    { label: "Estudiantes", path: "/rectoria/estudiantes", roles: ["secretaria", "admin", "rectoria"] },
-    { label: "Docentes", path: "/rectoria/docentes", roles: ["secretaria", "admin", "rectoria"] },
+    { label: "Estudiantes", path: "/rectoria/estudiantes", roles: ["admin", "rectoria"] },
+    { label: "Docentes", path: "/rectoria/docentes", roles: ["admin", "rectoria"] },
   ];
 
 

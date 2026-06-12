@@ -33,12 +33,12 @@ const HomePage = () => {
 
   const cards = [
     { title: "Salón", icon: salonIcon, path: "/salon", roles: ["admin", "titular"] },
-    { title: "Tesorería", icon: tesoreriaIcon, path: "/tesoreria", roles: ["secretaria", "administrador", "admin", "tesoreria"] },
-    { title: "Rectoría", icon: rectoriaIcon, path: "/rectoria", roles: ["secretaria", "administrador", "admin", "rectoria"] },
-    { title: "Uniformes", icon: uniformesIcon, path: "/uniformes", roles: ["administrador", "admin", "uniformes"] },
-    { title: "Banda", icon: bandaIcon, path: "/banda", roles: ["administrador", "admin", "banda"] },
-    { title: "Parametrización", icon: paraIcon, path: "/parametrizacion", roles: ["secretaria", "administrador", "admin", "rectoria"] },
-    { title: "Importaciones", icon: importacionIcon, path: "/importacion", roles: ["admin", "administrador", "secretaria", "titular", "robot"] },
+    { title: "Tesorería", icon: tesoreriaIcon, path: "/tesoreria", roles: [ "admin", "tesoreria", ] },
+    { title: "Rectoría", icon: rectoriaIcon, path: "/rectoria", roles: ["admin", "rectoria"] },
+    { title: "Uniformes", icon: uniformesIcon, path: "/uniformes", roles: ["admin", "uniformes"] },
+    { title: "Banda", icon: bandaIcon, path: "/banda", roles: ["admin", "banda"] },
+    { title: "Parametrización", icon: paraIcon, path: "/parametrizacion", roles: ["admin", "rectoria"] },
+    { title: "Importaciones", icon: importacionIcon, path: "/importacion", roles: ["admin"] },
   ];
 
   const handleCardClick = (path) => {

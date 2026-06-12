@@ -43,7 +43,7 @@ const TesoreriaMatricula = () => {
   const { user, roles, loadingRoles, logout } = useAuth();
   const userName = user?.nombre || "Usuario";
   const rol = roles[0] || (loadingRoles ? "Cargando rol..." : "Sin rol");
-  const rolespermitidos = ["secretaria", "admin", "tesoreria"];
+  const rolespermitidos = ["admin", "tesoreria"];
 
   // =========================
   // Carga de períodos
@@ -155,9 +155,9 @@ const TesoreriaMatricula = () => {
   // =========================
   const modulos = [
     { label: "Inicio", icon: <Icon path={mdiHome} />, path: "/home" },
-    { label: "Matricula", icon: <Icon path={mdiHandCoin} />, path: "/tesoreria/matricula", roles: ["secretaria", "admin", "tesoreria"] },
-    { label: "Pension", icon: <Icon path={mdiBookEducation} />, path: "/tesoreria/pension", roles: ["secretaria", "admin", "tesoreria"] },
-    { label: "Papeleria", icon: <Icon path={mdiNotebookEdit} />, path: "/tesoreria/papeleria", roles: ["secretaria", "admin", "tesoreria"] },
+    { label: "Matricula", icon: <Icon path={mdiHandCoin} />, path: "/tesoreria/matricula", roles: ["admin", "tesoreria"] },
+    { label: "Pension", icon: <Icon path={mdiBookEducation} />, path: "/tesoreria/pension", roles: ["admin", "tesoreria"] },
+    { label: "Papeleria", icon: <Icon path={mdiNotebookEdit} />, path: "/tesoreria/papeleria", roles: ["admin", "tesoreria"] },
   ];
 
   const showAlert = (type, message, title = "") =>
