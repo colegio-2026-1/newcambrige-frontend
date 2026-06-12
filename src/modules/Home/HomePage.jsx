@@ -1,6 +1,7 @@
-// HomePage.js (sin cambios, igual a como lo tenías)
 import { useState } from "react";
 import { Icon } from '@mdi/react';
+
+/*importacion de iconos*/ 
 import { mdiHome, mdiViewDashboard } from '@mdi/js';
 import "./HomePage.css";
 import salonIcon from "../../assets/Salon/salon.svg";
@@ -15,8 +16,11 @@ import Header from "../../components/layout/header";
 import Sidebar from "../../components/layout/Sidebar";
 import ModuleLayout from "../../components/layout/ModuleLayout";
 import CardsGrid from "../../components/layout/CardsGrid";
+
+
 import { useAuth } from "../../api/useAuth";
 import { useNavigate } from 'react-router-dom';
+
 
 const HomePage = () => {
   const { user, roles, loadingRoles, logout } = useAuth();
@@ -28,7 +32,7 @@ const HomePage = () => {
 
   const menuItems = [
     { label: "Inicio", icon: <Icon path={mdiHome} /> },
-    { label: "Dashboard", icon: <Icon path={mdiViewDashboard} /> },
+    { label: "Dashboard", path: "/dashboard", icon: <Icon path={mdiViewDashboard} /> },
   ];
 
   const cards = [
