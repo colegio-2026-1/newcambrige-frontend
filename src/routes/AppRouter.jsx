@@ -9,6 +9,7 @@ import DashboardRouter  from "./DashboardRouter";
 import SalonRouter      from "./SalonRouter";
 import UniformeRouter   from "./UniformeRouter";
 import ParametrizacionRouter from "./ParametrizacionRouter";
+import ImportacionRouter from "./ImportacionRouter";
 
 import NotFound from "../modules/notFound/notFound";
 import Home     from "../modules/Home/HomePage";
@@ -36,8 +37,8 @@ const AppRouter = () => {
       {DashboardRouter()}
       {SalonRouter()}
       {UniformeRouter()}
-      {ParametrizacionRouter()}   {/* ✅ AHORA INCLUYE todas las rutas de parametrización */}
-      {RectoriaRoutes()}
+      {ParametrizacionRouter()}
+      {ImportacionRouter()}
 
       {/* RUTA DE PRUEBAS / TEST */}
       <Route path="/test" element={<TestPage />} />
