@@ -18,7 +18,7 @@
 
   align-items: center;
 
-  padding: 0 2rem;
+  padding-inline: clamp(1.2rem, 2.2vw, 3.2rem);
 }
 
 /* ============================================
@@ -34,8 +34,8 @@
   justify-content: center;
   align-items: center;
 
-  /* Espacio adicional a la izquierda */
-  margin-left: 4.5rem;
+  margin-left: clamp(1rem, 2vw, 3rem);
+
 }
 
 .header-logo {
@@ -81,6 +81,7 @@
   white-space: normal;
   word-break: break-word;
 }
+
 /* Desktop grande (≤ 1920px) */
 @media (max-width: 1920px) and (min-width: 1537px) {
   .header {
@@ -90,7 +91,6 @@
   .header-logos {
     width: 90px;
     height: 90px;
-    margin-left: 2rem;
   }
 }
 
@@ -99,12 +99,11 @@
   .header {
     min-height: 100px;
     grid-template-columns: 110px 1fr 110px;
-    padding: 0 1.5rem;
+    padding: 0 3rem;
   }
   .header-logos {
     width: 75px;
     height: 75px;
-    margin-left: 1rem;
   }
   .header-title h1 {
     font-size: clamp(1.4rem, 2vw, 1.8rem);
@@ -116,12 +115,11 @@
   .header {
     min-height: 90px;
     grid-template-columns: 100px 1fr 100px;
-    padding: 0 1.25rem;
+    padding: 0 2rem;
   }
   .header-logos {
     width: 68px;
     height: 68px;
-    margin-left: 0.5rem;
   }
   .header-title h1 {
     font-size: clamp(1.3rem, 1.8vw, 1.6rem);
