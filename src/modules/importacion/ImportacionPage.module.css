@@ -1,0 +1,80 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1; /* Para que ocupe todo el espacio del padre */
+  width: 100%;
+  min-height: calc(100vh - var(--header-height));
+  background-color: var(--color-bg); /* Fondo completamente blanco */
+}
+
+.cardsWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 80px; /* Separación amplia como en el diseño */
+}
+
+/* Responsivo para pantallas grandes */
+@media (min-width: 768px) {
+  .cardsWrapper {
+    flex-direction: row;
+    gap: 60px;
+  }
+}
+
+.cardBtn {
+  background-color: var(--color-white);
+  border: 1.5px solid #EAEAEA; /* Borde muy sutil para dar forma antes de la sombra */
+  border-radius: var(--radius-lg);
+  padding: 40px 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  cursor: pointer;
+  
+  /* Aquí usamos la sombra roja gigante tal como el diseño */
+  box-shadow: var(--shadow-card);
+  
+  /* Transición para el hover 3D */
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  width: 320px;
+  min-height: 220px;
+}
+
+.cardBtn:hover {
+  /* Al hacer hover, se levanta un poco visualmente */
+  transform: translateY(-4px) translateX(-4px);
+  box-shadow: 14px 14px 0px var(--color-primary);
+}
+
+.cardBtn:active {
+  /* Al clickear se hunde */
+  transform: translateY(2px) translateX(2px);
+  box-shadow: 6px 6px 0px var(--color-primary);
+}
+
+.cardTitle {
+  font-family: var(--font-body); /* Tipo de letra Serif (Bentham) del diseño */
+  font-size: var(--text-2xl);
+  font-weight: var(--font-normal);
+  color: var(--color-text);
+  margin: 0;
+}
+
+.iconWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.iconColor {
+  color: #C5A866; 
+}
+
+.customIcon {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+}
