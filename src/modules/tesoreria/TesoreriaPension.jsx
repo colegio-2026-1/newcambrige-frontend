@@ -8,9 +8,9 @@ const TesoreriaPension = () => {
   const selectedMenu = "Pension";
   const modulos = [
     { label: "Inicio",  icon: <Icon path={mdiHome} />, path: "/home" },
-    { label: "Matricula", icon: <Icon path={mdiHandCoin} />, path: "/Tesoreria/Matricula", roles: ["secretaria", "admin", "tesoreria"] },
-    { label: "Pension", icon: <Icon path={mdiBookEducation} />, path: "/Tesoreria/Pension", roles: ["secretaria", "admin", "tesoreria"] },
-    { label: "Papeleria", icon: <Icon path={mdiNotebookEdit} />, path: "/Tesoreria/Papeleria", roles: ["secretaria", "admin", "tesoreria"] },
+    { label: "Matricula", icon: <Icon path={mdiHandCoin} />, path: "/Tesoreria/Matricula", roles: ["admin", "tesoreria"] },
+    { label: "Pension", icon: <Icon path={mdiBookEducation} />, path: "/Tesoreria/Pension", roles: ["admin", "tesoreria"] },
+    { label: "Papeleria", icon: <Icon path={mdiNotebookEdit} />, path: "/Tesoreria/Papeleria", roles: ["admin", "tesoreria"] },
   ];
 
   return (
