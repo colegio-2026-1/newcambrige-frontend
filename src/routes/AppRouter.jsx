@@ -10,11 +10,11 @@ import SalonRouter      from "./SalonRouter";
 import UniformeRouter   from "./UniformeRouter";
 import ParametrizacionRouter from "./ParametrizacionRouter";
 import ImportacionRouter from "./ImportacionRouter";
+import RectoriaRoutes from "./RectoriaRouter";
 
 import NotFound from "../modules/notFound/notFound";
 import Home     from "../modules/Home/HomePage";
 import TestPage from "../modules/test/testPage";
-import RectoriaRoutes from "./RectoriaRouter";
 
 const AppRouter = () => {
   return (
@@ -39,6 +39,7 @@ const AppRouter = () => {
       {UniformeRouter()}
       {ParametrizacionRouter()}
       {ImportacionRouter()}
+      {RectoriaRoutes()}
 
       {/* RUTA DE PRUEBAS / TEST */}
       <Route path="/test" element={<TestPage />} />
