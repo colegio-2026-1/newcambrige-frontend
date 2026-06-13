@@ -26,7 +26,7 @@ axiosClient.interceptors.response.use(
         // =========================
         if (url.includes("/api/auth/token")) {
             if (status === 429) {
-                const message = detail || "Demasiados intentos. Intenta nuevamente en 1 minuto.";
+                const message = "Hiciste demaciados intentos de sesión. Intenta nuevamente en 1 minuto.";
                 // Guardar en sessionStorage (no hay redirección)
                 sessionStorage.setItem("popupMessage", message);
                 sessionStorage.setItem("popupType", "login-blocked");
@@ -39,10 +39,11 @@ axiosClient.interceptors.response.use(
         // =========================
         // RESTO DE ENDPOINTS (protegidos) – sesión expirada
         // =========================
+        // Response interceptor - dentro del manejo de 401
         if (status === 401) {
             localStorage.removeItem("access_token");
-            // Redirigir a login con query param para mostrar popup
-            window.location.replace("/?expired=true");
+            sessionStorage.setItem("showLogoutPopup", "true"); 
+            window.location.replace("/"); 
             return Promise.reject(error);
         }
 
