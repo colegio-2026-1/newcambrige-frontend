@@ -127,7 +127,7 @@
 .badge--ok {
   display: inline-block;
   padding: 2px var(--space-3);
-  background: none;
+  background: #D4EDDA;
   color: var(--color-success);
   border-radius: var(--radius-full);
   font-size: var(--text-xs);
@@ -137,7 +137,7 @@
 .badge--no {
   display: inline-block;
   padding: 2px var(--space-3);
-  background: none;
+  background: #F8D7DA;
   color: var(--color-danger);
   border-radius: var(--radius-full);
   font-size: var(--text-xs);
@@ -147,7 +147,7 @@
 .badge--warn {
   display: inline-block;
   padding: 2px var(--space-3);
-  background: var(--color-warning-bg);
+  background: #FFF3CD;
   color: var(--color-warning);
   border-radius: var(--radius-full);
   font-size: var(--text-xs);
