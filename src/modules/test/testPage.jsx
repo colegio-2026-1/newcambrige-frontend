@@ -79,6 +79,7 @@ export default function TestPage() {
           <button onClick={() => showAlert("error",   "No se pudo guardar.", "Error")}>Probar error</button>
           <button onClick={() => showAlert("warning", "El estudiante ya tiene préstamo.", "Atención")}>Probar advertencia</button>
           <button onClick={() => showAlert("info",    "Solo se muestran libros disponibles.", "Información")}>Probar info</button>
+          <button onClick={() => setAlert({isOpen: true,type: "warning",title: "¿Estás seguro?",message: "Esta acción eliminará el registro permanentemente.",hasCancel: true,})}>Probar cancelar</button>
         </div>
 
         <DataTable
@@ -111,7 +112,8 @@ export default function TestPage() {
       )}
 
       {/* Alert — siempre montado, se muestra/oculta con isOpen */}
-      <Alert {...alert} onClose={closeAlert} />
+      <Alert {...alert} onClose={closeAlert} onCancel={alert.hasCancel ? closeAlert : undefined}/>
+
 
     </div>
   );
