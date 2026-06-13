@@ -127,7 +127,7 @@
 .badge--ok {
   display: inline-block;
   padding: 2px var(--space-3);
-  background: none;
+  background: #D4EDDA;
   color: var(--color-success);
   border-radius: var(--radius-full);
   font-size: var(--text-xs);
@@ -137,7 +137,7 @@
 .badge--no {
   display: inline-block;
   padding: 2px var(--space-3);
-  background: none;
+  background: #F8D7DA;
   color: var(--color-danger);
   border-radius: var(--radius-full);
   font-size: var(--text-xs);
@@ -147,7 +147,7 @@
 .badge--warn {
   display: inline-block;
   padding: 2px var(--space-3);
-  background: var(--color-warning-bg);
+  background: #FFF3CD;
   color: var(--color-warning);
   border-radius: var(--radius-full);
   font-size: var(--text-xs);
@@ -216,4 +216,64 @@
   padding: 4px 8px;
   background: var(--color-input-bg);
   cursor: pointer;
+}
+
+/* ── DESKTOP GRANDE (≤ 1920px) ── */
+@media (max-width: 1920px) and (min-width: 1537px) {
+  .datatable th,
+  .datatable td,
+  .datatable td span,
+  .datatable td select {
+    font-size: 18px;
+  }
+  .datatable-empty {
+    font-size: 22px;
+  }
+}
+
+/* ── LAPTOP 15.6" escala 125% (≤ 1536px) ── */
+@media (max-width: 1536px) {
+  .datatable th,
+  .datatable td,
+  .datatable td span,
+  .datatable td select {
+    font-size: 15px;
+    padding: var(--space-1) var(--space-2);
+  }
+  .datatable th {
+    min-width: 65px;
+  }
+  .datatable-empty {
+    font-size: 18px;
+  }
+  .pagination-btn-circular {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+  .datatable-pagination {
+    padding: 14px 0;
+  }
+}
+
+/* ── LAPTOP PEQUEÑO (≤ 1280px) ── */
+@media (max-width: 1280px) {
+  .datatable th,
+  .datatable td,
+  .datatable td span,
+  .datatable td select {
+    font-size: 13px;
+    padding: var(--space-1);
+  }
+  .datatable th {
+    min-width: 55px;
+  }
+  .datatable-empty {
+    font-size: 16px;
+  }
+  .pagination-btn-circular {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
 }

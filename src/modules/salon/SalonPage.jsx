@@ -21,7 +21,7 @@ export default function SalonPage() {
 
   const modulos = [
     { label: "Inicio", icon: <Home />, path: "/home" },
-    { label: "Salón", path: "/salon/", roles: ["admin", "administrador", "titular"] },
+    { label: "Salón", path: "/salon/", roles: ["admin", "titular"] },
   ];
 
   const menuItems = modulos.filter(modulo => {

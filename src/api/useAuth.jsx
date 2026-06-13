@@ -64,6 +64,7 @@ export const useAuth = () => {
 
   const logout = (message = "") => {
     localStorage.removeItem("access_token");
+    sessionStorage.setItem("showLogoutPopup", "true");
     sessionStorage.removeItem("user");
     sessionStorage.removeItem("roles");
     setUser(null);

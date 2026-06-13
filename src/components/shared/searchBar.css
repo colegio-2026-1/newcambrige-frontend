@@ -8,17 +8,15 @@
 .searchbar-wrapper {
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden;
+
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
-  flex-wrap: wrap;
-  gap: 12px 16px;
-  padding: var(--space-4) var(--space-6);
+  flex-wrap: wrap;       /* nunca rompe a otra línea */
+  gap: 8px 10px;
+  padding: var(--space-2) var(--space-4);
   background: var(--color-white);
-  border-bottom: none;
-  box-shadow: none;
   box-sizing: border-box;
 }
 
@@ -44,7 +42,7 @@
 /* ── INPUT ── */
 .searchbar-input {
   height: 42px;
-  width: 100px;
+  width: 50px;
   max-width: 100%;
   min-width: 60px;
   padding: 0 10px;
@@ -121,56 +119,25 @@
   cursor: not-allowed;
 }
 
-/* ── LAPTOP PEQUEÑA (769px - 1399px) ── */
-@media (min-width: 769px) and (max-width: 1399px) {
-  .searchbar-wrapper {
-    flex-wrap: wrap;
-    justify-content: flex-start;
-  }
 
-  .searchbar-field {
-    flex: 0 0 auto;
-    width: auto;
-  }
-
-  .searchbar-btn {
-    flex: 0 0 auto;
-    margin-left: 0;
-    align-self: flex-end;
-  }
+.searchbar-label {
+  font-size: clamp(12px, 1vw, 16px);
+  white-space: wrap;
 }
 
-/* ── DESKTOP (≥1400px) ── */
-@media (min-width: 1400px) {
-  .searchbar-wrapper {
-    flex-wrap: nowrap;
-    overflow-x: visible;
-  }
-
-  .searchbar-btn {
-    margin-left: auto;
-  }
+.searchbar-input {
+  font-size: clamp(12px, 1vw, 16px);
+  height: clamp(28px, 2.2vw, 36px);
+  width: clamp(55px, 4.5vw, 75px);
 }
 
-/* ── MÓVIL (≤768px) ── */
-@media (max-width: 768px) {
-  .searchbar-wrapper {
-    padding: var(--space-3) var(--space-4);
-  }
+.searchbar-field:nth-child(2) .searchbar-input {
+  width: clamp(100px, 8vw, 130px);
+}
 
-  .searchbar-field {
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-  }
-
-  .searchbar-input {
-    width: 100%;
-    min-width: unset;
-  }
-
-  .searchbar-btn {
-    width: 100%;
-    margin-left: 0;
-  }
+.searchbar-btn {
+  font-size: clamp(12px, 1vw, 16px);
+  height: clamp(28px, 2.2vw, 36px);
+  padding: 0 clamp(10px, 1.2vw, 18px);
+  flex-shrink: 0;
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import "./inventarioLibros.css";
 import { Home } from "lucide-react";
 import PupitresIcon   from "../../assets/Salon/pupitres.svg";
 import PruebasIcon    from "../../assets/Salon/pruebas.svg";
@@ -363,7 +364,7 @@ export default function BibliotecaPage() {
     {
       key: "estado", label: "ESTADO",
       render: (val) => (
-        <span className={val === "Prestado" ? "badge--warning" : "badge--ok"}>{val}</span>
+        <span className={val === "Prestado" ? "badge--warn" : "badge--ok"}>{val}</span>
       ),
     },
   ];
@@ -440,11 +441,6 @@ export default function BibliotecaPage() {
 
   return (
     <div>
-      <style>{`
-        .badge--ok      { display:inline-block; padding:.4rem .8rem; background:#D4EDDA; color:#155724; border-radius:.4rem; font-weight:600; font-size:.9rem; }
-        .badge--warning { display:inline-block; padding:.4rem .8rem; background:#FFF3CD; color:#856404; border-radius:.4rem; font-weight:600; font-size:.9rem; }
-        .badge--no      { display:inline-block; padding:.4rem .8rem; background:#F8D7DA; color:#721C24; border-radius:.4rem; font-weight:600; font-size:.9rem; }
-      `}</style>
 
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
 
@@ -479,9 +475,9 @@ export default function BibliotecaPage() {
       >
         {pestanaActiva === "prestamos" && (
           <div>
-            {filtrosPrestamos.periodo && (
               <SearchBar
                 loading={loading}
+                key={periodos[0]?.nombre || "loading"} 
                 fields={[
                   { key: "codigo", label: "Código", type: "number", maxLength: 10 },
                   { key: "nombre", label: "Nombre", type: "text" },
@@ -504,7 +500,7 @@ export default function BibliotecaPage() {
                     options: [...new Set(Object.values(periodosMap).map((p) => p.nombre).filter(Boolean))],
                   },
                 ]}
-                initialValues={{ periodo: filtrosPrestamos.periodo }}
+                initialValues={{ periodo: periodos[0]?.nombre }}
                 onChange={(key, value) => {
                   setFiltrosPrestamos(prev => {
                     const nuevos = { ...prev, [key]: value };
@@ -523,7 +519,7 @@ export default function BibliotecaPage() {
                 }}
                 cleanFilter={{ codigo: "", nombre: "", grado: "", grupo: "", periodo: filtrosPrestamos.periodo }}
               />
-            )}
+
             <div style={{ marginTop: "1rem", background: "#fff", borderRadius: ".8rem", overflow: "hidden", border: "1px solid #D9D9D9" }}>
               <DataTable
                 columns={columnasInicio}
@@ -538,6 +534,7 @@ export default function BibliotecaPage() {
 
         {pestanaActiva === "libros" && (
           <div>
+            <div className="searchbar-inventario">
             <SearchBar
               loading={loading}
               onSearch={filtrarLibros}
@@ -547,6 +544,7 @@ export default function BibliotecaPage() {
                 { key: "edicion", label: "Edición",          type: "text" },
               ]}
             />
+            </div>
             <div style={{ marginTop: "1rem", background: "#fff", borderRadius: ".8rem", overflow: "hidden", border: "1px solid #D9D9D9" }}>
               <DataTable
                 columns={columnasLibros}
