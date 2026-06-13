@@ -32,14 +32,21 @@ export default function LoginPage() {
     // MOSTRAR POPUP POR EXPIRACIÓN (vía query param)
     // ==========================
     useEffect(() => {
-        const params = new URLSearchParams(location.search);
-        if (params.get("expired") === "true") {
+        const showLogout = sessionStorage.getItem("showLogoutPopup");
+        if (showLogout === "true") {
             setPopupMessage("Su Sesión Ha Finalizado.");
             setShowPopup(true);
-            // Limpiar el query param sin recargar la página
-            navigate("/", { replace: true });
+            sessionStorage.removeItem("showLogoutPopup");
+            return;
         }
-    }, [location, navigate]);
+
+        const token = localStorage.getItem("access_token");
+        if (token) {
+            setPopupMessage("Su Sesión Ha Finalizado.");
+            setShowPopup(true);
+            localStorage.removeItem("access_token");
+        }
+    }, []);
 
     // ==========================
     // LEER MENSAJES DE sessionStorage (para 429)
@@ -84,13 +91,16 @@ export default function LoginPage() {
         setLoading(true);
         try {
             await login(usuario, contrasena);
+
+            sessionStorage.removeItem("popupMessage");
+            sessionStorage.removeItem("popupType");
+
             console.log("Login exitoso");
         } catch (err: any) {
             const status = err.response?.status;
             if (status === 429) {
                 setError("");
             } else if (status === 403) {
-
                 const mensaje = err.response?.data?.detail || "Usuario inactivo. Contacte al administrador.";
                 setPopupMessage(mensaje);
                 setShowPopup(true);
