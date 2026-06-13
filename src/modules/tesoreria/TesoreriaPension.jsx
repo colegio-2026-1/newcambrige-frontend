@@ -5,12 +5,12 @@ import { mdiHome,  mdiHandCoin, mdiBookEducation, mdiNotebookEdit  } from "@mdi/
 
 const TesoreriaPension = () => {
   const tipo= "pension";
-  const selectedMenu = "Pension";
+  const selectedMenu = "Pensión";
   const modulos = [
     { label: "Inicio",  icon: <Icon path={mdiHome} />, path: "/home" },
-    { label: "Matricula", icon: <Icon path={mdiHandCoin} />, path: "/Tesoreria/Matricula", roles: ["admin", "tesoreria"] },
-    { label: "Pension", icon: <Icon path={mdiBookEducation} />, path: "/Tesoreria/Pension", roles: ["admin", "tesoreria"] },
-    { label: "Papeleria", icon: <Icon path={mdiNotebookEdit} />, path: "/Tesoreria/Papeleria", roles: ["admin", "tesoreria"] },
+    { label: "Matrícula", icon: <Icon path={mdiHandCoin} />, path: "/Tesoreria/Matricula", roles: ["admin", "tesoreria"] },
+    { label: "Pensión", icon: <Icon path={mdiBookEducation} />, path: "/Tesoreria/Pension", roles: ["admin", "tesoreria"] },
+    { label: "Papelería", icon: <Icon path={mdiNotebookEdit} />, path: "/Tesoreria/Papeleria", roles: ["admin", "tesoreria"] },
   ];
 
   return (
