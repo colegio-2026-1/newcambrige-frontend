@@ -195,7 +195,7 @@ export default function ImportacionRobotPage() {
          resSync = await sincronizarDocentesRequest(ejecucionInfo.id);
       }
       setRobotState("success");
-      setMensaje(`¡Sincronización exitosa!\\nInsertados: ${resSync.data.insertados} | Actualizados: ${resSync.data.actualizados} | Rechazados: ${resSync.data.rechazados}`);
+      setMensaje(`¡Sincronización exitosa!\nInsertados: ${resSync.data.insertados} | Actualizados: ${resSync.data.actualizados} | Rechazados: ${resSync.data.rechazados}`);
       setProcesoConcluido(true); // Liberar guard: proceso terminó correctamente
     } catch (e) {
       setRobotState("error");
@@ -205,13 +205,16 @@ export default function ImportacionRobotPage() {
   };
 
   const handleCancelar = async () => {
+    const confirmar = window.confirm("Estás en medio de un proceso, si cambias de vista o cancelas, los datos serán eliminados. ¿Seguro que deseas cancelar?");
+    if (!confirmar) return;
+
     setShowModal(false);
     setRobotState("loading");
     setMensaje("Cancelando ejecución y limpiando datos temporales...");
     try {
       await cancelarScrapingRequest(ejecucionInfo.id, tipo);
       setRobotState("idle");
-      setMensaje("Operación cancelada. Datos truncados exitosamente.");
+      setMensaje("Operación cancelada. Datos temporales eliminados exitosamente.");
       setProgress(0);
       setProcesoConcluido(true); // Liberar guard: cancelación completada
     } catch (e) {

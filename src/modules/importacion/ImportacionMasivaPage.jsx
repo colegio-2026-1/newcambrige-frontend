@@ -225,11 +225,14 @@ export default function ImportacionMasivaPage() {
   };
 
   const handleCancelar = async () => {
+    const confirmar = window.confirm("Estás en medio de un proceso, si cambias de vista o cancelas, los datos serán eliminados. ¿Seguro que deseas cancelar?");
+    if (!confirmar) return;
+
     setShowModal(false);
     setIsUploading(true);
     try {
       await cancelarScrapingRequest(ejecucionInfo.id, tipo);
-      showAlert("info", "Operación cancelada. Datos truncados.", "Cancelado");
+      showAlert("info", "Operación cancelada. Datos temporales eliminados.", "Cancelado");
       setProcesoConcluido(true); // Liberar guard: cancelación completada
     } catch (error) {
       showAlert("error", "Error al cancelar la operación.");
