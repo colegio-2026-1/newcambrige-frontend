@@ -14,8 +14,8 @@ const Rectoria = () => {
   const navigate = useNavigate();
   //para las tarjetas del dashboard
   const cards = [
-    { title: 'Estudiantes', icon: EstudianteLogo, path: "/rectoria/estudiantes", roles: ["secretaria", "admin", "rectoria"] },
-    { title: 'Docentes', icon: DocenteLogo, path: "/rectoria/docentes", roles: ["secretaria", "admin", "rectoria"] },
+    { title: 'Estudiantes', icon: EstudianteLogo, path: "/rectoria/estudiantes", roles: ["admin", "rectoria"] },
+    { title: 'Docentes', icon: DocenteLogo, path: "/rectoria/docentes", roles: ["admin", "rectoria"] },
   ];
   //para el sidebar
   const modulos = [

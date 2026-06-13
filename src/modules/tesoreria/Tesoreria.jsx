@@ -24,16 +24,16 @@ const Tesoreria = () => {
 
   // Cards (submódulos de tesorería)
   const cards = [
-    { title: 'Matrícula', icon: MatriculaLogo, path: "/tesoreria/matricula", roles: ["secretaria", "admin", "tesoreria"] },
-    { title: 'Pensión', icon: PensionLogo, path: "/tesoreria/pension", roles: ["secretaria", "admin", "tesoreria"] },
-    { title: 'Papelería', icon: PapeleriaLogo, path: "/tesoreria/papeleria", roles: ["secretaria", "admin", "tesoreria"] },
+    { title: 'Matrícula', icon: MatriculaLogo, path: "/tesoreria/matricula", roles: ["admin", "tesoreria"] },
+    { title: 'Pensión', icon: PensionLogo, path: "/tesoreria/pension", roles: ["admin", "tesoreria"] },
+    { title: 'Papelería', icon: PapeleriaLogo, path: "/tesoreria/papeleria", roles: ["admin", "tesoreria"] },
   ];
 
   // Items del sidebar (con roles para filtrar)
   const modulos = [
     { label: "Inicio", icon: <Icon path={mdiHome} />, path: "/home" },
-    { label: "Tesoreria", icon: <Icon path={mdiCash} />, path: "/tesoreria/", roles: ["secretaria", "admin", "tesoreria"] },
-    { label: "Notificaciones", icon: <Icon path={mdiBell} />, path: "/tesoreria/notificaciones", roles: ["secretaria", "admin", "tesoreria"] },
+    { label: "Tesoreria", icon: <Icon path={mdiCash} />, path: "/tesoreria/", roles: ["admin", "tesoreria"] },
+    { label: "Notificaciones", icon: <Icon path={mdiBell} />, path: "/tesoreria/notificaciones", roles: ["admin", "tesoreria"] },
   ];
 
   // Filtrar los módulos del sidebar según los roles del usuario

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import { Home } from "lucide-react";
 import { useAuth } from "../../api/useAuth";
-
+import { createPupitreRequest} from "../../api/endpointsSalon";
 import {
   getPupitresRequest,
   updatePupitreRequest,
@@ -10,22 +9,19 @@ import {
 
 import { Icon } from '@mdi/react';
 import {
-  mdiHome,                    
-  mdiLibrary,                 
-  mdiClipboardTextOutline,    
+  mdiHome,
+  mdiLibrary,
+  mdiClipboardTextOutline,
 } from '@mdi/js';
 
-import PruebasIcon    from "../../assets/Salon/pruebas.svg";
-import BibliotecaIcon from "../../assets/Salon/biblioteca.svg";
-
 import { allaniosacademicosRequest } from "../../api/endpoints";
-import Header         from "../../components/layout/header";
-import ModuleLayout   from "../../components/layout/ModuleLayout";
-import Sidebar        from "../../components/layout/Sidebar";
-import SearchBar      from "../../components/shared/searchBar";
-import DataTable      from "../../components/shared/DataTable";
-import ActionButtons  from "../../components/shared/ActionButtons";
-import Modal          from "../../components/shared/Modal";
+import Header       from "../../components/layout/header";
+import ModuleLayout from "../../components/layout/ModuleLayout";
+import Sidebar      from "../../components/layout/Sidebar";
+import SearchBar    from "../../components/shared/searchBar";
+import DataTable    from "../../components/shared/DataTable";
+import ActionButtons from "../../components/shared/ActionButtons";
+import Modal        from "../../components/shared/Modal";
 
 export default function PupitrePage() {
   const { user, roles, loadingRoles, logout } = useAuth();
@@ -42,6 +38,7 @@ export default function PupitrePage() {
   const [rowsFiltered, setRowsFiltered] = useState([]);
   const [salones, setSalones]           = useState([]);
   const [periodos, setPeriodos]         = useState([]);
+  const [cargandoPeriodos, setCargandoPeriodos] = useState(true);
 
   const [filtros, setFiltros] = useState({
     documento: "",
@@ -51,16 +48,22 @@ export default function PupitrePage() {
     Periodo: ""
   });
 
+  // Mapas
   const salonesMap = {};
   salones.forEach((s) => { salonesMap[s.id_salon] = s; });
+
   const periodosMap = {};
   periodos.forEach((p) => { periodosMap[p.id_periodo] = p; });
 
+  // Mapa por nombre (igual que TesoreriaMatricula) para filtrar grados/grupos por periodo
+  const periodoMapname = {};
+  periodos.forEach((p) => { periodoMapname[p.nombre] = p; });
+
   const menuItems = [
-  { label: "Inicio",      icon: <Icon path={mdiHome}                    size={1} />, path: "/salon" , roles:["titular", "admin"]},
-  { label: "Biblioteca",  icon: <Icon path={mdiLibrary}  size={1} />, path: "/salon/biblioteca/inicio" , roles:["titular", "admin"]},
-  { label: "Pruebas",     icon: <Icon path={mdiClipboardTextOutline}    size={1} />, path: "/salon/pruebas", roles:["titular", "admin"]},
-];
+    { label: "Inicio",     icon: <Icon path={mdiHome}                 size={1} />, path: "/salon",                   roles: ["titular", "admin"] },
+    { label: "Biblioteca", icon: <Icon path={mdiLibrary}              size={1} />, path: "/salon/biblioteca/inicio", roles: ["titular", "admin"] },
+    { label: "Pruebas",    icon: <Icon path={mdiClipboardTextOutline} size={1} />, path: "/salon/pruebas",           roles: ["titular", "admin"] },
+  ];
 
   const columns = [
     { key: "codigo", label: "CODIGO" },
@@ -116,6 +119,8 @@ export default function PupitrePage() {
       setFiltros(prev => ({ ...prev, Periodo: data[0]?.nombre || "" }));
     } catch (error) {
       console.error("Error cargando periodos:", error);
+    } finally {
+      setCargandoPeriodos(false);
     }
   };
 
@@ -139,13 +144,6 @@ export default function PupitrePage() {
     if (f.nombre)    filtered = filtered.filter((r) => r.nombre?.toLowerCase().includes(f.nombre.toLowerCase()));
     if (f.Grado)     filtered = filtered.filter((r) => (salonesMap[r.id_salon]?.grado || r.grado)?.toString() === f.Grado.toString());
     if (f.Grupo)     filtered = filtered.filter((r) => (salonesMap[r.id_salon]?.grupo || r.grupo)?.toString() === f.Grupo.toString());
-    if (f.Periodo) {
-      filtered = filtered.filter((r) => {
-        const salon   = salonesMap[r.id_salon];
-        const periodo = periodosMap[salon?.id_periodo];
-        return periodo?.nombre?.toString() === f.Periodo.toString();
-      });
-    }
     setRowsFiltered(filtered);
   };
 
@@ -161,9 +159,15 @@ export default function PupitrePage() {
       if (!fila) return;
       const nuevoEstado = "visto";
       const fechaActual = new Date().toISOString().split("T")[0];
-      await updatePupitreRequest(fila.id_mantenimiento, { estado: nuevoEstado, fecha_pago: fechaActual });
+
+      if (fila.id_mantenimiento) {
+        await updatePupitreRequest(fila.id_mantenimiento, { estado: nuevoEstado, fecha_pago: fechaActual });
+      } else {
+        await createPupitreRequest(fila.id_estudiante, { estado: nuevoEstado, fecha_pago: fechaActual });
+      }
+
       const actualizados = rows.map((r) =>
-        r.id_mantenimiento === fila.id_mantenimiento
+        r.id_estudiante === fila.id_estudiante
           ? { ...r, estado: nuevoEstado, fecha_pago: fechaActual }
           : r
       );
@@ -217,55 +221,54 @@ export default function PupitrePage() {
         }
       >
         <div>
-          {/* SearchBar solo se monta cuando filtros.Periodo ya tiene valor */}
-          {filtros.Periodo && (
-            <SearchBar
-              fields={[
-                { key: "documento", label: "Codigo", type: "number", maxLength: 10 },
-                { key: "nombre",    label: "Nombre", type: "text" },
-                {
-                  key: "Grado", label: "Grado", type: "select",
-                  options: Array.from(new Set(
-                    Object.values(salonesMap).map((s) => s.grado).filter(Boolean)
-                  )),
-                },
-                {
-                  key: "Grupo", label: "Grupo", type: "select",
-                  options: filtros.Grado
-                    ? Array.from(new Set(
-                        Object.values(salonesMap)
-                          .filter(s => s.grado?.toString() === filtros.Grado)
-                          .map(s => s.grupo).filter(Boolean)
-                      ))
-                    : [],
-                },
-                {
-                  key: "Periodo", label: "Periodo", type: "select",
-                  options: Array.from(new Set(
-                    Object.values(periodosMap).map((p) => p.nombre).filter(Boolean)
-                  )),
-                },
-              ]}
-              initialValues={{ Periodo: filtros.Periodo }}
-              onChange={(key, value) => {
-                setFiltros(prev => {
-                  const nuevos = { ...prev, [key]: value };
-                  if (key === "Grado") nuevos.Grupo = "";
-                  if (key === "Periodo") {
-                    nuevos.Grado = "";
-                    nuevos.Grupo = "";
-                  }
-                  return nuevos;
-                });
-              }}
-              onSearch={(f) => {
-                FiltrarEstudiantes(f);
-                setFiltros(f);
-                setFila(null);
-              }}
-              cleanFilter={{ documento: "", nombre: "", Grado: "", Grupo: "", Periodo: filtros.Periodo }}
-            />
-          )}
+          <SearchBar
+            key={periodos[0]?.nombre || "loading"}
+            fields={[
+              { key: "documento", label: "Codigo", type: "number", maxLength: 10 },
+              { key: "nombre",    label: "Nombre", type: "text" },
+              {
+                key: "Grado", label: "Grado", type: "select",
+                options: Array.from(new Set(
+                  Object.values(salonesMap)
+                    .map(s => s.grado).filter(Boolean)
+                )),
+              },
+              {
+                key: "Grupo", label: "Grupo", type: "select",
+                options: filtros.Grado
+                  ? Array.from(new Set(
+                      Object.values(salonesMap)
+                        .filter(s =>
+                          s.grado?.toString() === filtros.Grado
+                        )
+                        .map(s => s.grupo).filter(Boolean)
+                    ))
+                  : [],
+              },
+              {
+                key: "Periodo", label: "Periodo", type: "select",
+                options: periodos.map(p => p.nombre).filter(Boolean),
+              },
+            ]}
+            initialValues={{ Periodo: periodos[0]?.nombre }}
+            onChange={(key, value) => {
+              setFiltros(prev => {
+                const nuevos = { ...prev, [key]: value };
+                if (key === "Grado") nuevos.Grupo = "";
+                if (key === "Periodo") {
+                  nuevos.Grado = "";
+                  nuevos.Grupo = "";
+                }
+                return nuevos;
+              });
+            }}
+            onSearch={(f) => {
+              FiltrarEstudiantes(f);
+              setFiltros(f);
+              setFila(null);
+            }}
+            cleanFilter={{ documento: "", nombre: "", Grado: "", Grupo: "", Periodo: filtros.Periodo }}
+          />
 
           <DataTable
             columns={columns}
