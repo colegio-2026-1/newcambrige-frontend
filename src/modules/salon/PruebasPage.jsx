@@ -8,14 +8,15 @@ import {
   createPruebaRequest,
 } from "../../api/endpointsSalon";
 import { allaniosacademicosRequest } from "../../api/endpoints";
-
+import Alert from "../../components/shared/Alert";
 import PupitresIcon   from "../../assets/Salon/pupitres.svg";
 import BibliotecaIcon from "../../assets/Salon/biblioteca.svg";
 import { Icon } from '@mdi/react';
 import {
   mdiHome,
   mdiChairSchool,
-  mdiLibrary,                
+  mdiLibrary,    
+  mdiClipboardTextOutline,            
 } from '@mdi/js';
 
 import Header        from "../../components/layout/header";
@@ -41,7 +42,7 @@ export default function PruebasPage() {
   const [rowsFiltered, setRowsFiltered] = useState([]);
   const [salones, setSalones]           = useState([]);
   const [periodos, setPeriodos]         = useState([]);
-
+  const [alert, setAlert] = useState({ isOpen: false, type: "", title: "", message: "" });
   const [filtros, setFiltros] = useState({
     documento: "",
     nombre: "",
@@ -49,6 +50,11 @@ export default function PruebasPage() {
     Grupo: "",
     Periodo: ""
   });
+  const showAlert = (type, message, title = "") =>
+  setAlert({ isOpen: true, type, message, title });
+
+  const closeAlert = () =>
+    setAlert((prev) => ({ ...prev, isOpen: false }));
 
   const salonesMap  = {};
   salones.forEach((s)  => { salonesMap[s.id_salon]    = s; });
@@ -56,9 +62,10 @@ export default function PruebasPage() {
   periodos.forEach((p) => { periodosMap[p.id_periodo] = p; });
 
  const menuItems = [
-  { label: "Inicio",      icon: <Icon path={mdiHome}                    size={1} />, path: "/salon", roles:["titular", "admin"] },
+  { label: "Inicio",      icon: <Icon path={mdiHome}                    size={1} />, path: "/home", roles:["titular", "admin"] },
   { label: "Pupitres",    icon: <Icon path={mdiChairSchool}                size={1} />, path: "/salon/pupitre", roles:["titular", "admin"] },
   { label: "Biblioteca",  icon: <Icon path={mdiLibrary}  size={1} />, path: "/salon/biblioteca/inicio", roles:["titular", "admin"] },
+  { label: "Pruebas",    icon: <Icon path={mdiClipboardTextOutline} size={1} />, path: "/salon/pruebas",roles: ["titular", "admin"] },
 ];
   const columns = [
     { key: "codigo", label: "CÓDIGO" },
@@ -144,8 +151,8 @@ export default function PruebasPage() {
   const handleRowClick = (f) => setFila(f);
 
   const handleValidarPago = () => {
-    if (!fila) { alert("Debes seleccionar una fila"); return; }
-    if (fila.estado === "visto") { alert(`EL ESTUDIANTE [${fila.nombre}] YA TIENE PAGO REGISTRADO.`); return; }
+    if (!fila) { showAlert("error", "Debes seleccionar una fila"); return; }
+    if (fila.estado === "visto") { showAlert("warning", `El estudiante ${fila.nombre} ya tiene pago registrado.`); return; }
     setModal(true);
   };
 
@@ -179,9 +186,10 @@ export default function PruebasPage() {
       setRowsFiltered(actualizados);
       setFila(null);
       setModal(false);
+      showAlert("success", `Pago de ${fila.nombre} validado correctamente`);
     } catch (error) {
       console.error("Error al validar pago:", error.response?.data || error);
-      alert("Error al validar el pago");
+      showAlert("error", error.response?.data?.detail || "Error al validar el pago");
     }
   };
 
@@ -242,7 +250,7 @@ export default function PruebasPage() {
                     : [],
                 },
                 {
-                  key: "Periodo", label: "Periodo", type: "select",
+                  key: "Periodo", label: "Período", type: "select",
                   options: Array.from(new Set(
                     Object.values(periodosMap).map((p) => p.nombre).filter(Boolean)
                   )),
@@ -277,12 +285,26 @@ export default function PruebasPage() {
           />
         </div>
       </ModuleLayout>
-
+      <Alert {...alert} onClose={closeAlert} />
       <Modal
-        title={`¿CONFIRMAS QUE EL ESTUDIANTE ${fila?.nombre ? fila.nombre.toUpperCase() : "[NOMBRE]"} HA CUMPLIDO CON EL PAGO DE LA PRUEBA?`}
+        title="CONFIRMAR PAGO"
         isOpen={modal}
+        fields={[
+          {
+            type: "label",
+            className: "confirm-delete",
+            label: `¿Confirmas que el estudiante ${
+              fila?.nombre || "[NOMBRE]"
+            } ha cumplido con el pago de la prueba?`,
+          },
+        ]}
+        values={{}}
+        onChange={() => {}}
         onAccept={handleConfirmarPago}
-        onCancel={() => { setModal(false); setFila(null); }}
+        onCancel={() => {
+          setModal(false);
+          setFila(null);
+        }}
       />
     </div>
   );
