@@ -364,7 +364,7 @@ export default function BibliotecaPage() {
     {
       key: "estado", label: "ESTADO",
       render: (val) => (
-        <span className={val === "Prestado" ? "badge--warning" : "badge--ok"}>{val}</span>
+        <span className={val === "Prestado" ? "badge--warn" : "badge--ok"}>{val}</span>
       ),
     },
   ];
@@ -441,11 +441,6 @@ export default function BibliotecaPage() {
 
   return (
     <div>
-      <style>{`
-        .badge--ok      { display:inline-block; padding:.4rem .8rem; background:#D4EDDA; color:#155724; border-radius:.4rem; font-weight:600; font-size:.9rem; }
-        .badge--warning { display:inline-block; padding:.4rem .8rem; background:#FFF3CD; color:#856404; border-radius:.4rem; font-weight:600; font-size:.9rem; }
-        .badge--no      { display:inline-block; padding:.4rem .8rem; background:#F8D7DA; color:#721C24; border-radius:.4rem; font-weight:600; font-size:.9rem; }
-      `}</style>
 
       <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
 
