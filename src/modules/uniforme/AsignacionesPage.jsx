@@ -111,7 +111,7 @@ export default function AsignacionesPage() {
     id_objeto: "",
     talla: "",
     fecha_prestamo: "",
-    estado: "bueno",
+    estado: "",
     observacion: ""
   });
 
@@ -131,10 +131,10 @@ export default function AsignacionesPage() {
     if (openModal) {
       cargarPrendas();
       setFormAsignar({
-        id_objeto: "",
+        id_objeto: "seleccionar",
         talla: "",
         fecha_prestamo: fechaVisual,
-        estado: "bueno",
+        estado: "seleccionar",
         observacion: ""
       });
     }
@@ -152,7 +152,10 @@ export default function AsignacionesPage() {
   const handleAsignarSubmit = async () => {
     if (loadingModal) return;
 
-    if (!formAsignar.id_objeto) {
+    if (
+      !formAsignar.id_objeto ||
+      formAsignar.id_objeto === "seleccionar"
+    ) {
       mostrarAlerta("error", "Seleccione una prenda");
       return;
     }
@@ -164,7 +167,21 @@ export default function AsignacionesPage() {
       mostrarAlerta("error", "Debe seleccionar un estudiante");
       return;
     }
+    if (
+      !formAsignar.estado ||
+      formAsignar.estado === "seleccionar"
+    ) {
+      mostrarAlerta(
+        "error",
+        "Seleccione el estado de la prenda"
+      );
+      return;
+    }
 
+    if (prendaSeleccionada?.tipo === "vestimenta" && !formAsignar.talla) {
+      mostrarAlerta("error", "Seleccione una talla");
+      return;
+    }
     const data = {
       id_objeto: parseInt(formAsignar.id_objeto),
       id_estudiante: selectedRow.id_estudiante,
@@ -200,7 +217,7 @@ export default function AsignacionesPage() {
     fecha_entrega: "",
     fecha_devolucion: "",
     estado_entrega: "",
-    estado_devolucion: "",
+    estado_devolucion: "seleccionar",
     observacion: ""
   });
 
@@ -261,7 +278,7 @@ export default function AsignacionesPage() {
     cargarPeriodos();
   }, []);
 
-  // ── Eliminar ─────────────────────────────────────────────────────────────────
+  // ── Eliminar ─────────────────────────── 
   const eliminarAsignacion = async (id) => {
     try {
       await deletePrestamoRequest(id);
@@ -293,7 +310,10 @@ export default function AsignacionesPage() {
       mostrarAlerta("error", "Seleccione una asignación");
       return;
     }
-    if (!formDevolucion.estado_devolucion) {
+    if (
+      !formDevolucion.estado_devolucion ||
+      formDevolucion.estado_devolucion === "seleccionar"
+    ) {
       mostrarAlerta("error", "Seleccione el estado de devolución");
       return;
     }
@@ -381,13 +401,13 @@ export default function AsignacionesPage() {
       label: "Asignaciones Uniformes",
       icon: <Icon path={mdiTshirtCrew} size={1} />,
       path: "/uniformes/asignaciones",
-      roles: ["admin", "titular"]
+      roles: ["admin", "titular", "uniformes"]
     },
     {
       label: "Inventario Uniformes",
       icon: <Icon path={mdiHanger} size={1} />,
       path: "/uniformes/inventario",
-      roles: ["admin", "titular"]
+      roles: ["admin", "titular", "uniformes"]
     }
   ];
 
@@ -397,7 +417,7 @@ export default function AsignacionesPage() {
   );
 
   const tieneAccesoModulo = roles.some(
-    rol => ["admin", "titular"].includes(rol)
+    rol => ["admin", "titular","uniformes"].includes(rol)
   );
 
   useEffect(() => {
@@ -446,7 +466,7 @@ export default function AsignacionesPage() {
                         : "",
                       fecha_devolucion: new Date().toLocaleDateString("es-CO"),
                       estado_entrega: capitalizar(selectedRow.estado_entrega) || "",
-                      estado_devolucion: "",
+                      estado_devolucion: "seleccionar",
                       observacion: ""
                     });
                     setOpenDevolver(true);
@@ -454,7 +474,7 @@ export default function AsignacionesPage() {
                   variante: "secondary"
                 },
                 {
-                  label: "Eliminar",
+                  label: "Eliminar Prenda",
                   disabled: !!selectedRow && !selectedRow.id_prestamo,
                   onClick: () => {
                     if (!selectedRow) {
@@ -536,7 +556,14 @@ export default function AsignacionesPage() {
             key: "id_objeto",
             label: "Prenda",
             type: "select",
-            options: opcionesPrendas
+            options: [
+              {
+                value: "seleccionar",
+                label: "Seleccionar"
+              },
+              ...opcionesPrendas
+            ]
+            
           },
           {
             key: "talla",
@@ -555,6 +582,7 @@ export default function AsignacionesPage() {
             label: "Estado de la prenda",
             type: "select",
             options: [
+              { value: "seleccionar", label: "Seleccionar" },
               { value: "bueno",   label: "Bueno" },
               { value: "regular", label: "Regular" },
               { value: "malo",    label: "Malo" }
@@ -585,6 +613,7 @@ export default function AsignacionesPage() {
             label: "Estado de Devolución",
             type: "select",
             options: [
+              { value: "seleccionar", label: "Seleccionar" },
               { value: "Bueno",   label: "Bueno" },
               { value: "Regular", label: "Regular" },
               { value: "Malo",    label: "Malo" }
