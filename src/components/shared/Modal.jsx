@@ -89,9 +89,7 @@ return (
             {fields.map((field) => (
             <div
                 key={field.key}
-                className={`modal-field ${
-                    field.type === "label" ? "modal-field--full" : ""
-                }`}
+                className={`modal-field`}
             >
                 <label className="modal-label">{(field.type == "label" || field.type ==" card")? "" : field.label }</label>
 
