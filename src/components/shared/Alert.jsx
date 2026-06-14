@@ -4,103 +4,104 @@ import "./Alert.css";
  * Alert — componente reutilizable para mensajes al usuario
  *
  * Props:
- *  type     {String}   — 'success' | 'error' | 'warning' | 'info'
- *  title    {String}   — título del mensaje (opcional)
- *  message  {String}   — mensaje principal
- *  isOpen   {Boolean}  — controla si se muestra
- *  onClose  {Function} — se llama al presionar Aceptar
+ *  type       {String}   — 'success' | 'error' | 'warning' | 'info'
+ *  title      {String}   — título del mensaje (opcional)
+ *  message    {String}   — mensaje principal
+ *  isOpen     {Boolean}  — controla si se muestra
+ *  onClose    {Function} — se llama al presionar Aceptar
+ *  onCancel   {Function} — (opcional) si se pasa, aparece botón Cancelar
+ *  cancelText {String}   — (opcional) texto del botón cancelar, default 'Cancelar'
+ *  acceptText {String}   — (opcional) texto del botón aceptar, default 'Aceptar'
  *
- * Ejemplo — éxito:
+ * Ejemplo — solo Aceptar (comportamiento anterior, sin cambios):
  *  <Alert
  *    type="success"
  *    title="Operación exitosa"
  *    message="El libro fue asignado correctamente."
  *    isOpen={alertOpen}
- *    onClose={() => setAlertOpen(false)}
+ *    onClose={closeAlert}
  *  />
  *
- * Ejemplo — error:
- *  <Alert
- *    type="error"
- *    message="Ocurrió un error al guardar. Intenta de nuevo."
- *    isOpen={alertOpen}
- *    onClose={() => setAlertOpen(false)}
- *  />
- *
- * Ejemplo — advertencia:
+ * Ejemplo — con Cancelar (confirmación):
  *  <Alert
  *    type="warning"
- *    title="Atención"
- *    message="Este estudiante ya tiene un libro asignado."
+ *    title="¿Estás seguro?"
+ *    message="Esta acción eliminará el registro permanentemente."
  *    isOpen={alertOpen}
- *    onClose={() => setAlertOpen(false)}
+ *    onClose={handleConfirm}
+ *    onCancel={closeAlert}
  *  />
  *
- * Ejemplo — información:
+ * Ejemplo — textos personalizados:
  *  <Alert
- *    type="info"
- *    title="Información"
- *    message="El periodo activo es 2026."
+ *    type="warning"
+ *    title="¿Estás seguro?"
+ *    message="Se perderán los cambios sin guardar."
  *    isOpen={alertOpen}
- *    onClose={() => setAlertOpen(false)}
+ *    onClose={handleConfirm}
+ *    onCancel={closeAlert}
+ *    acceptText="Sí, continuar"
+ *    cancelText="No, volver"
  *  />
  *
- * Uso típico en un módulo:
- *  const [alert, setAlert] = useState({ isOpen: false, type: '', title: '', message: '' });
+ * Uso típico con confirmación:
+ *  const [alert, setAlert] = useState({
+ *    isOpen: false, type: '', title: '', message: '',
+ *    onClose: null, onCancel: null
+ *  });
  *
- *  const showAlert = (type, message, title = '') =>
- *    setAlert({ isOpen: true, type, message, title });
+ *  const showConfirm = (message, onConfirm) =>
+ *    setAlert({
+ *      isOpen: true, type: 'warning',
+ *      title: '¿Estás seguro?', message,
+ *      onClose: () => { onConfirm(); closeAlert(); },
+ *      onCancel: closeAlert,
+ *    });
  *
  *  const closeAlert = () =>
  *    setAlert((prev) => ({ ...prev, isOpen: false }));
- *
- *  // Llamadas:
- *  showAlert('success', 'Libro asignado correctamente.');
- *  showAlert('error',   'No se pudo guardar. Intenta de nuevo.');
- *  showAlert('warning', 'El estudiante ya tiene préstamo activo.', 'Atención');
- *  showAlert('info',    'Solo se muestran libros disponibles.', 'Información');
- *
- *  // En el JSX:
- *  <Alert {...alert} onClose={closeAlert} />
  */
 
 const CONFIG = {
   success: {
-    icon:       "✓",
-    iconClass:  "alert-icon--success",
-    btnClass:   "alert-btn--success",
+    icon:         "✓",
+    iconClass:    "alert-icon--success",
+    btnClass:     "alert-btn--success",
     defaultTitle: "Operación exitosa",
   },
   error: {
-    icon:       "✕",
-    iconClass:  "alert-icon--error",
-    btnClass:   "alert-btn--error",
+    icon:         "✕",
+    iconClass:    "alert-icon--error",
+    btnClass:     "alert-btn--error",
     defaultTitle: "Ha ocurrido un error",
   },
   warning: {
-    icon:       "⚠",
-    iconClass:  "alert-icon--warning",
-    btnClass:   "alert-btn--warning",
+    icon:         "⚠",
+    iconClass:    "alert-icon--warning",
+    btnClass:     "alert-btn--warning",
     defaultTitle: "Advertencia",
   },
   info: {
-    icon:       "i",
-    iconClass:  "alert-icon--info",
-    btnClass:   "alert-btn--info",
+    icon:         "i",
+    iconClass:    "alert-icon--info",
+    btnClass:     "alert-btn--info",
     defaultTitle: "Información",
   },
 };
 
 export default function Alert({
-  type = "info",
+  type       = "info",
   title,
-  message = "",
-  isOpen = false,
+  message    = "",
+  isOpen     = false,
   onClose,
+  onCancel,
+  cancelText = "Cancelar",
+  acceptText = "Aceptar",
 }) {
   if (!isOpen) return null;
 
-  const config = CONFIG[type] ?? CONFIG.info;
+  const config       = CONFIG[type] ?? CONFIG.info;
   const displayTitle = title || config.defaultTitle;
 
   return (
@@ -118,13 +119,17 @@ export default function Alert({
         {/* MENSAJE */}
         <p className="alert-message">{message}</p>
 
-        {/* BOTÓN */}
-        <button
-          className={`alert-btn ${config.btnClass}`}
-          onClick={onClose}
-        >
-          Aceptar
-        </button>
+        {/* BOTONES */}
+        <div className={`alert-actions ${onCancel ? "alert-actions--two" : ""}`}>
+          {onCancel && (
+            <button className="alert-btn alert-btn--cancel" onClick={onCancel}>
+              {cancelText}
+            </button>
+          )}
+          <button className={`alert-btn ${config.btnClass}`} onClick={onClose}>
+            {acceptText}
+          </button>
+        </div>
 
       </div>
     </div>
