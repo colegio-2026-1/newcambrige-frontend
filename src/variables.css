@@ -50,14 +50,15 @@ Importar en main.jsx o index.css:
 --color-text-white:     #FFFFFF;
 
   /* ── ESTADOS ── */
---color-success:        #2A7A4B;
+--color-success:        #155724;
 --color-success-bg:     #D6F0E0;
 --color-success-dark:   #1F5C38;
---color-warning:        #C47A00;
+--color-warning:        #856404;
 --color-warning-bg:     #FFF0D6;
 --color-warning-dark:   #9A6000;
---color-danger:         #8E2A25;
---color-danger-bg:      #FDECEA;
+--color-danger:         #721C24;
+--color-danger-dark:    #4E1219;
+--color-danger-bg:      #F2E4E5;
 --color-info:           #1B3A5C;
 --color-info-bg:        #E0EAF4;
 

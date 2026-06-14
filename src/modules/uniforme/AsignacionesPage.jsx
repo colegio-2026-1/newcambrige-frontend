@@ -56,11 +56,11 @@ const COLUMNS = [
     render: (val) => {
       const estado = val?.toLowerCase();
       let clase = "uniforme-badge--default";
-      if (estado === "prestado")     clase = "uniforme-badge--warn";
-      else if (estado === "bueno")   clase = "uniforme-badge--good";
-      else if (estado === "regular") clase = "uniforme-badge--regular";
-      else if (estado === "malo")    clase = "uniforme-badge--bad";
-      else if (estado === "sin asignar") clase = "uniforme-badge--no";
+      if (estado === "prestado")     clase = "badge--warn";
+      else if (estado === "bueno")   clase = "badge--ok";
+      else if (estado === "regular") clase = "badge--warn";
+      else if (estado === "malo")    clase = "badge--no";
+      else if (estado === "sin asignar") clase = "badge--no";
       return <span className={clase}>{capitalizar(val)}</span>;
     }
   }
