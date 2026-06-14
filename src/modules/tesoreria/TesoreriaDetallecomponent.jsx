@@ -213,6 +213,13 @@ const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }
       d.id_matricula === matricula.id_matricula && d.mes === mesActual
     );
     if (yaPagado) return true;
+    const mesActualNombre = mesesSeleccionados[fila.id_estudiante];
+    const indiceMes = meses.indexOf(mesActualNombre);
+    const mesAnterior = meses[indiceMes - 1]?.toLowerCase();
+    const mesAnteriorPagado = Object.values(detalles).some(d =>
+      d.id_matricula === matricula.id_matricula && d.mes === mesAnterior
+    );
+    if (mesActualNombre !== 'Enero' && !mesAnteriorPagado) return true;
     return false;
   };
 
@@ -378,7 +385,7 @@ const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }
               },
               {
                 key: "Periodo",
-                label: "Periodo",
+                label: "Período",
                 type: "select",
                 options: periodos.map(p => p.nombre).filter(Boolean)
               }
@@ -407,7 +414,7 @@ const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }
             key={detalles.length}
             pageSize={10}
             columns={[
-              { key: "documento", label: "Documento" },
+              { key: "documento", label: "Código" },
               { key: "nombre", label: "Nombre" },
               {
                 key: "grado",
@@ -456,7 +463,8 @@ const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }
                   const detalle = matricula && detalles.find(d =>
                     d.id_matricula === matricula.id_matricula && d.mes === mesActual
                   );
-                  return <span>{detalle?.created_at ? new Date(detalle.created_at).toLocaleDateString() : "---"}</span>;
+                  return <span>{detalle?.created_at ?  new Date(matricula.created_at).toLocaleDateString('es-CO', {day: '2-digit', month: '2-digit', year: 'numeric'}) 
+                          : "---"}</span>;
                 }
               }
             ]}
@@ -467,17 +475,18 @@ const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }
       </ModuleLayout>
 
       <Modal
-        title={`¿Confirmas que el estudiante ${fila?.nombre || ""} ha realizado el pago del mes de ${mesesSeleccionados[fila?.id_estudiante] || ""}?`}
+        title={"Validar Pago"}
+        fields={[{ key: "label", type: "label", label: `¿Confirmas que el estudiante ${fila?.nombre || ""} ha realizado el pago del mes de ${mesesSeleccionados[fila?.id_estudiante] || ""}?` }]}
         isOpen={modal}
         onAccept={() => { setModal(false); crearDetalle(); }}
         onCancel={() => setModal(false)}
       />
       <Alert {...alert} onClose={closeAlert} />
       <Modal
-        title={tiporecibed}
+        title={selectedMenu}
         fields={[
           { key: "nombre", type: "label", label: `Nombre: ${fila?.nombre}` },
-          { key: "documento", type: "label", label: `Documento: ${fila?.documento}` },
+          { key: "documento", type: "label", label: `Código: ${fila?.documento}` },
           {
             key: "card",
             type: "card",

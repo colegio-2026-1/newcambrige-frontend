@@ -19,7 +19,7 @@ import Modal from "../../components/shared/Modal";
 import Alert from "../../components/shared/Alert";
 
 const TesoreriaMatricula = () => {
-  const [selectedMenu, setSelectedMenu] = useState("Matricula");
+  const [selectedMenu, setSelectedMenu] = useState("Matrícula");
   const [estudiantes, setEstudiantes] = useState([]);
   const [estudiantesFiltrados, setEstudiantesFiltrados] = useState([]);
   const [salones, setSalones] = useState([]);
@@ -155,9 +155,9 @@ const TesoreriaMatricula = () => {
   // =========================
   const modulos = [
     { label: "Inicio", icon: <Icon path={mdiHome} />, path: "/home" },
-    { label: "Matricula", icon: <Icon path={mdiHandCoin} />, path: "/tesoreria/matricula", roles: ["admin", "tesoreria"] },
-    { label: "Pension", icon: <Icon path={mdiBookEducation} />, path: "/tesoreria/pension", roles: ["admin", "tesoreria"] },
-    { label: "Papeleria", icon: <Icon path={mdiNotebookEdit} />, path: "/tesoreria/papeleria", roles: ["admin", "tesoreria"] },
+    { label: "Matrícula", icon: <Icon path={mdiHandCoin} />, path: "/tesoreria/matricula", roles: ["admin", "tesoreria"] },
+    { label: "Pensión", icon: <Icon path={mdiBookEducation} />, path: "/tesoreria/pension", roles: ["admin", "tesoreria"] },
+    { label: "Papelería", icon: <Icon path={mdiNotebookEdit} />, path: "/tesoreria/papeleria", roles: ["admin", "tesoreria"] },
   ];
 
   const showAlert = (type, message, title = "") =>
@@ -263,7 +263,7 @@ const TesoreriaMatricula = () => {
               },
               {
                 key: "Periodo",
-                label: "Periodo",
+                label: "Período",
                 type: "select",
                 options: periodos.map(p => p.nombre).filter(Boolean)
               }
@@ -292,7 +292,7 @@ const TesoreriaMatricula = () => {
             key={matriculas.length}
             pageSize={10}
             columns={[
-              { key: "documento", label: "Documento" },
+              { key: "documento", label: "Código" },
               { key: "nombre", label: "Nombre" },
               {
                 key: "grado",
@@ -328,7 +328,7 @@ const TesoreriaMatricula = () => {
                 render: (_, val) => {
                   const matricula = matriculasMap[val.id_estudiante];
                   return matricula?.estado === "activa" && matricula?.created_at
-                    ? new Date(matricula.created_at).toLocaleDateString()
+                    ? new Date(matricula.created_at).toLocaleDateString('es-CO', {day: '2-digit', month: '2-digit', year: 'numeric'})
                     : "---";
                 }
               }
@@ -340,7 +340,8 @@ const TesoreriaMatricula = () => {
       </ModuleLayout>
       <Alert {...alert} onClose={closeAlert} />
       <Modal
-        title={`¿Confirmas que el estudiante ${fila?.nombre || ""} ha realizado el pago de la matrícula?`}
+        title={"Validar Pago"}
+         fields={[{ key: "label", type: "label", label:`¿Confirmas que el estudiante ${fila?.nombre || ""} ha realizado el pago de la matrícula?`  }]}
         isOpen={modal}
         onAccept={() => {
           crearMatricula();
