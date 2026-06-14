@@ -19,7 +19,7 @@ import { useImportacionGuard } from "./hooks/useImportacionGuard";
 import styles from "./ImportacionRobotPage.module.css";
 
 import Icon from "../../components/common/Icon";
-import { mdiHome, mdiRobot, mdiServer, mdiCardAccountDetails } from '@mdi/js';
+import { mdiHome, mdiRobot, mdiServer, mdiCardAccountDetails, mdiAccountTie, mdiAccountSchool } from '@mdi/js';
 import Alert from "../../components/shared/Alert";
 import Modal from "../../components/shared/Modal";
 
@@ -96,11 +96,16 @@ export default function ImportacionRobotPage() {
   const showAlert = (type, message, title = '') => setAlertInfo({ isOpen: true, type, message, title });
   const closeAlert = () => setAlertInfo((prev) => ({ ...prev, isOpen: false }));
 
+  const oppositeTipo = tipo === 'estudiante' ? 'docente' : 'estudiante';
+  const oppositeLabel = tipo === 'estudiante' ? 'Docentes' : 'Estudiantes';
+  const oppositeIcon = tipo === 'estudiante' ? mdiAccountTie : mdiAccountSchool;
+
   const menuItems = [
     { label: "Inicio", path: "/home", icon: <Icon icon={mdiHome} size={1.2} /> },
     { label: "Conexión", path: `/importacion/${tipo}`, icon: <Icon icon={mdiRobot} size={1.5} /> },
     { label: "Carga Masiva", path: `/importacion/masiva/${tipo}`, icon: <Icon icon={mdiServer} size={1.5} /> },
-    { label: "Carga Individual", path: `/importacion/individual/${tipo}`, icon: <Icon icon={mdiCardAccountDetails} size={1.5} /> }
+    { label: "Carga Individual", path: `/importacion/individual/${tipo}`, icon: <Icon icon={mdiCardAccountDetails} size={1.5} /> },
+    { label: oppositeLabel, path: `/importacion/${oppositeTipo}`, icon: <Icon icon={oppositeIcon} size={1.5} /> }
   ];
 
   // 1. Cargar credenciales al iniciar
@@ -129,7 +134,7 @@ export default function ImportacionRobotPage() {
       const res = await obtenerCredencialesRequest();
       setUrl(res.data.url);
       setUsuario(res.data.nombre_usuario);
-      setPassword(res.data.password_hash);
+      setPassword(""); // Se exceptúa la contraseña por seguridad
     } catch (error) {
       // Credenciales no existen o no cargadas
     }
@@ -253,7 +258,7 @@ export default function ImportacionRobotPage() {
           
           {/* CABECERA: Formulario + Bandera */}
           <div className={styles.topSection}>
-            <form className={styles.formSection} onSubmit={handleConectar}>
+            <form className={styles.formSection} onSubmit={handleConectar} autoComplete="off">
               <div className={styles.inputGroup}>
                 <label>Url</label>
                 <input 
@@ -261,6 +266,7 @@ export default function ImportacionRobotPage() {
                   value={url} 
                   onChange={(e) => setUrl(e.target.value)} 
                   required 
+                  autoComplete="off"
                 />
               </div>
               
@@ -271,6 +277,7 @@ export default function ImportacionRobotPage() {
                   value={usuario} 
                   onChange={(e) => setUsuario(e.target.value)} 
                   required 
+                  autoComplete="off"
                 />
               </div>
 
@@ -281,6 +288,7 @@ export default function ImportacionRobotPage() {
                   value={password} 
                   onChange={(e) => setPassword(e.target.value)} 
                   required 
+                  autoComplete="new-password"
                 />
                 <button type="submit" className={styles.connectBtn} disabled={robotState === "loading"}>
                   {robotState === "loading" ? "Conectando..." : "Conectar"}
@@ -292,7 +300,7 @@ export default function ImportacionRobotPage() {
               <div 
                 className={styles.badgeFlag}
                 onClick={() => navigate("/importacion")}
-                title="Volver a Importaciones"
+                title="Volver a Robot"
               >
                 {tituloBandera}
               </div>

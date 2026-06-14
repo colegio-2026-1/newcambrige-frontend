@@ -67,8 +67,10 @@ export default function ModalCargaIndividual({ tipo, modo, datosIniciales, salon
   };
 
   const validar = () => {
-    if (!form.codigo.trim())   return "El código es obligatorio.";
-    if (form.codigo.trim().length > 10) return "El código no puede superar 10 caracteres.";
+    if (esCrear) {
+      if (!form.codigo.trim())   return "El código es obligatorio.";
+      if (form.codigo.trim().length > 10) return "El código no puede superar 10 caracteres.";
+    }
     if (!form.nombre.trim())   return "El nombre es obligatorio.";
     if (!form.apellido.trim()) return "El apellido es obligatorio.";
 
@@ -108,7 +110,6 @@ export default function ModalCargaIndividual({ tipo, modo, datosIniciales, salon
         telefono_acudiente: form.contacto.trim() || null,
       };
       if (!esCrear) {
-        payload.estado = form.activo;
         delete payload.documento;
       } else {
         // Para crear usamos carga-individual (staging), mandamos grado/curso como strings
@@ -184,7 +185,7 @@ export default function ModalCargaIndividual({ tipo, modo, datosIniciales, salon
                       <option value={form.grupo}>{form.grupo}</option>
                     )}
                     {gruposDelGrado.map((g, i) => <option key={i} value={g}>{g}</option>)}
-                    <option value="__AGREGAR__" className={styles.optionAgregar}>+ Agregar Grupo</option>
+                    {esCrear && <option value="__AGREGAR__" className={styles.optionAgregar}>+ Agregar Grupo</option>}
                   </select>
                 </div>
               </>
