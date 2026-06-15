@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import "./AsignacionTitularesPage.css";
 
 import Header from "../../components/layout/header";
@@ -7,183 +6,30 @@ import Sidebar from "../../components/layout/Sidebar";
 import ModuleLayout from "../../components/layout/ModuleLayout";
 import DataTable from "../../components/shared/DataTable";
 import ActionButtons from "../../components/shared/ActionButtons";
+import ParamModal from "../../components/shared/ParamModal";
+import Alert from "../../components/shared/Alert";
 
 import { useAuth } from "../../api/useAuth";
 import { 
   obtenerTitularesRequest, 
   obtenerSalonesPorPeriodoRequest, 
-  asignarTitularRequest 
+  asignarTitularRequest,
+  obtenerAniosRequest,
+  crearSalonRequest
 } from "../../api/endpointsParametrizacion";
 
 import { Icon } from '@mdi/react';
 import {
-  mdiHome,
-  mdiCog,
-
-  mdiAccount,
-  mdiCalendar,
-  mdiTestTube,
-  mdiGuitarElectric,
-  mdiCube,
-  mdiBook,
-  mdiAccountGroup,
+  mdiHome, mdiAccount, mdiCalendar, mdiTestTube,
+  mdiGuitarElectric, mdiCube, mdiBook, mdiAccountGroup,
 } from '@mdi/js';
 
-import salonIcon from "../../assets/Salon/salon.svg";
-import tesoreriaIcon from "../../assets/Tesoreria/tesoreria.svg";
-import rectoriaIcon from "../../assets/Rectoria/estudiante.svg";
-import uniformesIcon from "../../assets/Objetos/objetos.svg";
-import paraIcon from "../../assets/Parametrizacion/parametrizacion.svg";
-
-// ==========================================
-// MODAL UNIFICADO (ASIGNAR / EDITAR)
-// ==========================================
-const AsignacionModal = ({ isOpen, onClose, titularSeleccionado, titulares, salones, alTerminar }) => {
-  if (!isOpen) return null;
-
-  const [titularIdModal, setTitularIdModal] = useState("");
-  const [gradoSelect, setGradoSelect] = useState("");
-  const [grupoSelect, setGrupoSelect] = useState("");
-  const [cargando, setCargando] = useState(false);
-
-  useEffect(() => {
-    if (isOpen) {
-      if (titularSeleccionado) {
-        setTitularIdModal(titularSeleccionado.id_usuario.toString());
-      } else {
-        setTitularIdModal("");
-      }
-      setGradoSelect("");
-      setGrupoSelect("");
-    }
-  }, [isOpen, titularSeleccionado]);
-
-  const gradosUnicos = useMemo(() => [...new Set(salones.map(s => s.grado))], [salones]);
-  const gruposDisponibles = useMemo(() => 
-    salones.filter(s => s.grado === gradoSelect), 
-  [salones, gradoSelect]);
-
-  const titularActivo = useMemo(() => 
-    titulares.find(t => t.id_usuario.toString() === titularIdModal), 
-  [titulares, titularIdModal]);
-
-  const salonesAsignadosActivos = useMemo(() => 
-    titularActivo ? salones.filter(s => s.id_usuario === titularActivo.id_usuario) : [],
-  [titularActivo, salones]);
-
-  const handleAsignar = async () => {
-    if (!titularIdModal) return alert("Seleccione un Titular primero.");
-    if (!gradoSelect || !grupoSelect) return alert("Seleccione grado y grupo");
-    
-    const salon = gruposDisponibles.find(s => s.grupo === grupoSelect);
-    if (!salon) return;
-
-    try {
-      setCargando(true);
-      await asignarTitularRequest(salon.id_salon, { id_usuario: parseInt(titularIdModal) });
-      setGradoSelect("");
-      setGrupoSelect("");
-      alTerminar(); 
-    } catch (error) {
-      alert("Error al asignar el salón: " + (error.response?.data?.detail || error.message));
-    } finally {
-      setCargando(false);
-    }
-  };
-
-  const handleRemoverAsignacion = async (id_salon) => {
-    const confirmar = window.confirm("¿Estás seguro de remover esta asignación?");
-    if (!confirmar) return;
-    try {
-      setCargando(true);
-      await asignarTitularRequest(id_salon, { id_usuario: null });
-      alTerminar();
-    } catch (error) {
-      alert("Error al remover asignación: " + (error.response?.data?.detail || error.message));
-    } finally {
-      setCargando(false);
-    }
-  };
-
-  return (
-    <div className="modal-overlay">
-      <div className="asignacion-modal-content">
-        <div className="modal-header">
-          <h3>{titularSeleccionado ? "EDITAR" : "ASIGNAR TITULAR"}</h3>
-          <button className="modal-close" onClick={onClose} disabled={cargando}>×</button>
-        </div>
-        
-        <div className="modal-body">
-          <div className="modal-form-row">
-            <div className="input-group" style={{ flex: 2 }}>
-              <label>Titular</label>
-              <select 
-                value={titularIdModal} 
-                onChange={(e) => setTitularIdModal(e.target.value)}
-                disabled={!!titularSeleccionado} 
-              >
-                <option value="">Seleccione un titular...</option>
-                {titulares.map(t => (
-                  <option key={t.id_usuario} value={t.id_usuario}>{t.nombre}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="modal-form-row" style={{ alignItems: "flex-end" }}>
-            <div className="input-group">
-              <label>Grado</label>
-              <select value={gradoSelect} onChange={(e) => { setGradoSelect(e.target.value); setGrupoSelect(""); }} disabled={!titularIdModal}>
-                <option value="">Seleccione...</option>
-                {gradosUnicos.map(g => <option key={g} value={g}>{g}</option>)}
-              </select>
-            </div>
-            <div className="input-group">
-              <label>Grupo</label>
-              <select value={grupoSelect} onChange={(e) => setGrupoSelect(e.target.value)} disabled={!gradoSelect || !titularIdModal}>
-                <option value="">Seleccione...</option>
-                {gruposDisponibles.map(s => <option key={s.id_salon} value={s.grupo}>{s.grupo}</option>)}
-              </select>
-            </div>
-            <button className="btn-circle btn-add-modal" onClick={handleAsignar} disabled={cargando || !grupoSelect}>
-              +
-            </button>
-          </div>
-
-          <div className="asignaciones-section">
-            <h4>ASIGNACIONES</h4>
-            <div className="asignaciones-pills-container">
-              {!titularActivo ? (
-                <p style={{ color: "#666", width: "100%", textAlign: "center" }}>Seleccione un titular arriba</p>
-              ) : salonesAsignadosActivos.length === 0 ? (
-                <p style={{ color: "#666", width: "100%", textAlign: "center" }}>No tiene salones asignados</p>
-              ) : (
-                salonesAsignadosActivos.map(salon => (
-                  <div key={salon.id_salon} className="asignacion-pill" onClick={() => handleRemoverAsignacion(salon.id_salon)} title="Clic para remover">
-                    {salon.grado} - {salon.grupo}
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="modal-footer">
-          <ActionButtons botones={[{ label: "Cerrar", onClick: onClose, variante: "primary", siempreActivo: true }]} />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ==========================================
-// COMPONENTE PRINCIPAL
-// ==========================================
 const AsignacionTitularesPage = () => {
   const { user, roles, loadingRoles, logout } = useAuth();
   
   const [titulares, setTitulares] = useState([]);
   const [salones, setSalones] = useState([]);
+  const [idPeriodoActivo, setIdPeriodoActivo] = useState(null);
   const [titularTablaSelec, setTitularTablaSelec] = useState(null);
   
   const [filtroTitularTexto, setFiltroTitularTexto] = useState("");
@@ -191,47 +37,48 @@ const AsignacionTitularesPage = () => {
   const [filtroGrupo, setFiltroGrupo] = useState("");
   const [busquedaActiva, setBusquedaActiva] = useState(null); 
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [paginaActual, setPaginaActual] = useState(1);
-  const itemsPorPagina = 10;
-  const ID_PERIODO_ACTUAL = 1; 
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState("crear"); 
+  const [formValues, setFormValues] = useState({});
+  const [cargandoAccion, setCargandoAccion] = useState(false);
+
+  const [salonesTemp, setSalonesTemp] = useState([]);
+  
+  const [alertConfig, setAlertConfig] = useState({ isOpen: false, type: "info", message: "", onClose: null, onCancel: null });
+  const closeAlert = () => setAlertConfig(prev => ({ ...prev, isOpen: false }));
+  const showAlert = (type, message, title = "", customConfig = {}) => {
+    setAlertConfig({ isOpen: true, type, message, title, onClose: closeAlert, onCancel: null, ...customConfig });
+  };
 
   const cargarDatos = async () => {
     try {
+      const resAnios = await obtenerAniosRequest();
+      const periodoAct = resAnios.data.find(a => a.activo === true);
+      const idPer = periodoAct ? periodoAct.id_periodo : 1;
+      setIdPeriodoActivo(idPer);
+
       const [resTitulares, resSalones] = await Promise.all([
         obtenerTitularesRequest(),
-        obtenerSalonesPorPeriodoRequest(ID_PERIODO_ACTUAL)
+        obtenerSalonesPorPeriodoRequest(idPer)
       ]);
       setTitulares(resTitulares.data || []);
       setSalones(resSalones.data || []);
     } catch (error) {
-      console.error("Error al cargar datos:", error);
+      showAlert("error", "Error al cargar la información del servidor.");
     }
   };
 
   useEffect(() => { cargarDatos(); }, []);
 
   const gradosUnicosBusqueda = useMemo(() => [...new Set(salones.map(s => s.grado))], [salones]);
-  const gruposDisponiblesBusqueda = useMemo(() => {
-    return salones.filter(s => s.grado === filtroGrado);
-  }, [salones, filtroGrado]);
+  const gruposDisponiblesBusqueda = useMemo(() => salones.filter(s => s.grado === filtroGrado), [salones, filtroGrado]);
+  
+  const gradosUnicosModal = useMemo(() => [...new Set(salones.map(s => s.grado))], [salones]);
+  const gruposDisponiblesModal = useMemo(() => salones.filter(s => s.grado === formValues.grado), [salones, formValues.grado]);
 
   const handleBusqueda = () => {
-    setBusquedaActiva({
-      titular: filtroTitularTexto.trim().toLowerCase(),
-      grado: filtroGrado,
-      grupo: filtroGrupo
-    });
-    setPaginaActual(1);
+    setBusquedaActiva({ titular: filtroTitularTexto.trim().toLowerCase(), grado: filtroGrado, grupo: filtroGrupo });
     setTitularTablaSelec(null);
-  };
-
-  const limpiarBusqueda = () => {
-    setBusquedaActiva(null);
-    setFiltroTitularTexto("");
-    setFiltroGrado("");
-    setFiltroGrupo("");
-    setPaginaActual(1);
   };
 
   const datosTabla = useMemo(() => {
@@ -241,40 +88,153 @@ const AsignacionTitularesPage = () => {
         ...titular,
         salones_asignados: salonesAsignados,
         asignaciones_str: salonesAsignados.length > 0 
-          ? salonesAsignados.map(s => `${s.grado} - ${s.grupo}`).join(", ")
-          : "Sin asignar"
+          ? salonesAsignados.map(s => `${s.grado} - ${s.grupo}`).join(", ") : "Sin asignar"
       };
     });
 
     if (busquedaActiva) {
-      if (busquedaActiva.titular) {
-        filtrados = filtrados.filter(t => t.nombre.toLowerCase().includes(busquedaActiva.titular));
-      }
-      if (busquedaActiva.grado) {
-        filtrados = filtrados.filter(t => t.salones_asignados.some(s => s.grado === busquedaActiva.grado));
-      }
-      if (busquedaActiva.grupo) {
-        filtrados = filtrados.filter(t => t.salones_asignados.some(s => s.grupo === busquedaActiva.grupo));
-      }
+      if (busquedaActiva.titular) filtrados = filtrados.filter(t => t.nombre.toLowerCase().includes(busquedaActiva.titular));
+      if (busquedaActiva.grado) filtrados = filtrados.filter(t => t.salones_asignados.some(s => s.grado === busquedaActiva.grado));
+      if (busquedaActiva.grupo) filtrados = filtrados.filter(t => t.salones_asignados.some(s => s.grupo === busquedaActiva.grupo));
     }
-
     return filtrados;
   }, [titulares, salones, busquedaActiva]);
 
-  const totalPaginas = Math.ceil(datosTabla.length / itemsPorPagina) || 1;
-  const filasPaginadas = datosTabla.slice((paginaActual - 1) * itemsPorPagina, paginaActual * itemsPorPagina);
+  useEffect(() => {
+    if (modalOpen && modalMode !== "crearSalon" && formValues.id_usuario) {
+      const asignadosOriginales = salones.filter(s => s.id_usuario === parseInt(formValues.id_usuario));
+      setSalonesTemp(asignadosOriginales);
+    } else if (modalOpen && !formValues.id_usuario) {
+      setSalonesTemp([]);
+    }
+  }, [modalOpen, formValues.id_usuario, salones, modalMode]);
 
-  const abrirModalCrear = () => {
+  const abrirModalCrearSalon = () => {
     setTitularTablaSelec(null); 
-    setIsModalOpen(true);
+    setModalMode("crearSalon");
+    setFormValues({ grado: "", grupo: "", id_usuario: "" });
+    setModalOpen(true);
   };
 
-  const abrirModalEditar = () => {
-    if (!titularTablaSelec) return alert("Seleccione una fila primero");
-    setIsModalOpen(true);
+  const abrirModalAsignar = () => {
+    setTitularTablaSelec(null); 
+    setModalMode("crear");
+    setFormValues({ id_usuario: "", grado: "", grupo: "" });
+    setModalOpen(true);
   };
 
- const menuItems = [
+  const abrirModalEditarAsignacion = () => {
+    if (!titularTablaSelec) return;
+    setModalMode("editar");
+    setFormValues({ id_usuario: titularTablaSelec.id_usuario.toString(), grado: "", grupo: "" });
+    setModalOpen(true);
+  };
+
+  const handleModalChange = (key, value) => {
+    setFormValues(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleAddSalonTemp = () => {
+    if (!formValues.id_usuario) return showAlert("warning", "Seleccione un Titular primero.");
+    if (!formValues.grado || !formValues.grupo) return;
+    
+    const salonTarget = gruposDisponiblesModal.find(s => s.grupo === formValues.grupo);
+    if (!salonTarget) return;
+
+    if (salonesTemp.some(s => s.id_salon === salonTarget.id_salon)) {
+      return showAlert("warning", "Este salón ya está asignado en la lista temporal.");
+    }
+
+    if (salonTarget.id_usuario && salonTarget.id_usuario !== parseInt(formValues.id_usuario)) {
+      const otroTitular = titulares.find(t => t.id_usuario === salonTarget.id_usuario);
+      const nombreOtro = otroTitular ? otroTitular.nombre : "otro docente";
+
+      return showAlert(
+        "warning", 
+        `El Grado ${salonTarget.grado} - Grupo ${salonTarget.grupo} ya se encuentra asignado a ${nombreOtro}. \n\n¿Deseas reasignarlo a este titular?`, 
+        "SALÓN YA ASIGNADO", 
+        {
+          acceptText: "Sí, reasignar",
+          cancelText: "Cancelar",
+          onCancel: closeAlert,
+          onClose: () => {
+            closeAlert();
+            setSalonesTemp(prev => [...prev, salonTarget]);
+            setFormValues(prev => ({ ...prev, grado: "", grupo: "" }));
+          }
+        }
+      );
+    }
+
+    setSalonesTemp([...salonesTemp, salonTarget]);
+    setFormValues(prev => ({ ...prev, grado: "", grupo: "" }));
+  };
+
+  const handleRemoveSalonTemp = (salonTarget) => {
+    setSalonesTemp(salonesTemp.filter(s => s.id_salon !== salonTarget.id_salon));
+  };
+
+  const handleGuardarAsignaciones = async () => {
+    if (!formValues.id_usuario) {
+      return showAlert("warning", "Seleccione un Titular primero.");
+    }
+
+    const idUsuarioActual = parseInt(formValues.id_usuario);
+    const salonesOriginales = salones.filter(s => s.id_usuario === idUsuarioActual);
+
+    const toAdd = salonesTemp.filter(temp => !salonesOriginales.some(orig => orig.id_salon === temp.id_salon));
+    const toRemove = salonesOriginales.filter(orig => !salonesTemp.some(temp => temp.id_salon === orig.id_salon));
+
+    if (toAdd.length === 0 && toRemove.length === 0) {
+      setModalOpen(false); 
+      return;
+    }
+
+    try {
+      setCargandoAccion(true);
+      const promesas = [];
+
+      toAdd.forEach(salon => {
+        promesas.push(asignarTitularRequest(salon.id_salon, { id_usuario: idUsuarioActual }));
+      });
+
+      toRemove.forEach(salon => {
+        promesas.push(asignarTitularRequest(salon.id_salon, { id_usuario: null }));
+      });
+
+      await Promise.all(promesas);
+
+      showAlert("success", "Asignaciones actualizadas correctamente.");
+      setModalOpen(false);
+      cargarDatos();
+    } catch (error) {
+      showAlert("error", error.response?.data?.detail || "Error al actualizar las asignaciones.");
+    } finally {
+      setCargandoAccion(false);
+    }
+  };
+
+  const handleCrearSalonSubmit = async () => {
+    if (!formValues.grado || !formValues.grupo || !formValues.id_usuario) {
+      return showAlert("warning", "Todos los campos son obligatorios para crear un salón.");
+    }
+    try {
+      const payload = {
+        grado: formValues.grado.trim(),
+        grupo: formValues.grupo.trim(),
+        id_usuario: parseInt(formValues.id_usuario),
+        id_periodo: idPeriodoActivo
+      };
+      await crearSalonRequest(payload);
+      showAlert("success", "Salón creado y asignado exitosamente.");
+      setModalOpen(false);
+      cargarDatos();
+    } catch (error) {
+      showAlert("error", error.response?.data?.detail || "Error al crear el salón.");
+    }
+  };
+
+  const menuItems = [
     { label: "Inicio", icon: <Icon path={mdiHome} size="32px" />, path: "/home" },
     { label: "Usuarios", icon: <Icon path={mdiAccount} size="32px" />, path: "/parametrizacion/usuarios" },
     { label: "Año Escolar", icon: <Icon path={mdiCalendar} size="32px" />, path: "/parametrizacion/anio-escolar" },
@@ -304,16 +264,12 @@ const AsignacionTitularesPage = () => {
           <div className="module-toolbar-container">
             <div className="toolbar-grouped-actions">
               
-
               <div className="searchbar-wrapper custom-asignacion-search">
                 <div className="searchbar-field">
                   <label className="searchbar-label">Titular:</label>
                   <input 
-                    type="text" 
-                    className="searchbar-input" 
-                    style={{ width: "200px" }}
-                    placeholder="Buscar..." 
-                    value={filtroTitularTexto} 
+                    type="text" className="searchbar-input" style={{ width: "220px" }}
+                    placeholder="Buscar..." value={filtroTitularTexto} 
                     onChange={(e) => setFiltroTitularTexto(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') handleBusqueda(); }}
                   />
@@ -322,34 +278,20 @@ const AsignacionTitularesPage = () => {
                 <div className="searchbar-field">
                   <label className="searchbar-label">Grado:</label>
                   <select className="searchbar-input" style={{ width: "120px" }} value={filtroGrado} onChange={(e) => { setFiltroGrado(e.target.value); setFiltroGrupo(""); }}>
-                    <option value="">...</option>
+                    <option value="">Todos...</option>
                     {gradosUnicosBusqueda.map(g => <option key={g} value={g}>{g}</option>)}
                   </select>
                 </div>
 
                 <div className="searchbar-field">
                   <label className="searchbar-label">Grupo:</label>
-                  <select className="searchbar-input" style={{ width: "90px" }} value={filtroGrupo} onChange={(e) => setFiltroGrupo(e.target.value)} disabled={!filtroGrado}>
-                    <option value="">...</option>
+                  <select className="searchbar-input" style={{ width: "100px" }} value={filtroGrupo} onChange={(e) => setFiltroGrupo(e.target.value)} disabled={!filtroGrado}>
+                    <option value="">Todos...</option>
                     {gruposDisponiblesBusqueda.map(s => <option key={s.id_salon} value={s.grupo}>{s.grupo}</option>)}
                   </select>
                 </div>
 
                 <button className="searchbar-btn" onClick={handleBusqueda}>Buscar</button>
-
-                {busquedaActiva && (
-                  <button className="clear-filter-btn" onClick={limpiarBusqueda} style={{ background: "none", border: "none", textDecoration: "underline", color: "#666", cursor: "pointer", fontSize: "16px", marginLeft: "5px" }}>
-                    Limpiar
-                  </button>
-                )}
-              </div>
-
-              <div className="toolbar-actions-right">
-                <ActionButtons 
-                  botones={[
-                    { label: "Asignar", onClick: abrirModalCrear, variante: "primary", siempreActivo: true }
-                  ]} 
-                />
               </div>
 
             </div>
@@ -359,28 +301,24 @@ const AsignacionTitularesPage = () => {
             <div className="table-layout-wrapper">
               
               <div className="table-main-section">
-                <div className="datatable-fixed-container">
-                  <DataTable 
-                    columns={columnasTabla} 
-                    rows={filasPaginadas} 
-                    onRowClick={(fila) => setTitularTablaSelec(fila)}
-                    emptyText="No hay titulares o no coinciden con la búsqueda"
-                    filaActiva={titularTablaSelec}
-                    idKey="id_usuario"
-                  />
-                </div>
-                
-                <div className="pagination-center">
-                  <button className="btn-circle" onClick={() => { setPaginaActual(p => Math.max(1, p - 1)); setTitularTablaSelec(null); }} disabled={paginaActual === 1}><ChevronLeft size={20} /></button>
-                  <button className="btn-circle" onClick={() => { setPaginaActual(p => Math.min(totalPaginas, p + 1)); setTitularTablaSelec(null); }} disabled={paginaActual === totalPaginas}><ChevronRight size={20} /></button>
-                </div>
+                <DataTable 
+                  columns={columnasTabla} 
+                  rows={datosTabla} 
+                  onRowClick={(fila) => setTitularTablaSelec(fila)}
+                  emptyText="No hay titulares o no coinciden con la búsqueda"
+                  filaActiva={titularTablaSelec}
+                  idKey="id_usuario"
+                  pageSize={10} 
+                />
               </div>
 
               <div className="side-actions">
                 <ActionButtons
                   filaSeleccionada={titularTablaSelec}
                   botones={[
-                    { label: "Editar", onClick: abrirModalEditar, variante: "primary", siempreActivo: false }
+                    { label: "Crear Salón", onClick: abrirModalCrearSalon, variante: "primary", siempreActivo: true },
+                    { label: "Asignar Titular", onClick: abrirModalAsignar, variante: "primary", siempreActivo: true },
+                    { label: "Editar Asignación", onClick: abrirModalEditarAsignacion, variante: "secondary", siempreActivo: false }
                   ]}
                 />
               </div>  
@@ -389,7 +327,123 @@ const AsignacionTitularesPage = () => {
           </div>
         </div>
 
-        <AsignacionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} titularSeleccionado={titularTablaSelec} titulares={titulares} salones={salones} alTerminar={cargarDatos} />
+
+        <ParamModal 
+          title={modalMode === "crearSalon" ? "CREAR NUEVO SALÓN" : modalMode === "crear" ? "ASIGNAR TITULAR" : "EDITAR TITULAR"}
+          isOpen={modalOpen} 
+          onClose={() => setModalOpen(false)} 
+        >
+          {modalMode === "crearSalon" && (
+            <>
+              <div className="asig-flex-row">
+                <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+                  <label className="modal-label" style={{ paddingTop: 0 }}>Grado</label>
+                  <select 
+                    className="modal-input modal-select" 
+                    value={formValues.grado || ""} 
+                    onChange={(e) => handleModalChange("grado", e.target.value)}
+                  >
+                    <option value="" disabled>Seleccionar...</option>
+                    {Array.from({ length: 12 }, (_, i) => (
+                      <option key={i} value={i.toString()}>{i}</option>
+                    ))}
+                  </select>
+                </div>
+                <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+                  <label className="modal-label" style={{ paddingTop: 0 }}>Grupo</label>
+                  <input 
+                    type="text" 
+                    className="modal-input" 
+                    placeholder="Ej: A" 
+                    value={formValues.grupo || ""} 
+                    onChange={(e) => handleModalChange("grupo", e.target.value.toUpperCase())}
+                  />
+                </div>
+              </div>
+
+              <div className="asig-flex-row" style={{ marginTop: "16px" }}>
+                <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+                  <label className="modal-label" style={{ paddingTop: 0 }}>Titular Asignado</label>
+                  <select className="modal-input modal-select" value={formValues.id_usuario || ""} onChange={(e) => handleModalChange("id_usuario", e.target.value)}>
+                    <option value="" disabled>Seleccionar titular...</option>
+                    {titulares.map(t => <option key={t.id_usuario} value={t.id_usuario}>{t.nombre}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className="modal-actions" style={{ marginTop: "30px" }}>
+                <button className="modal-btn modal-btn--accept" onClick={handleCrearSalonSubmit}>Aceptar</button>
+                <button className="modal-btn modal-btn--cancel" onClick={() => setModalOpen(false)}>Cancelar</button>
+              </div>
+            </>
+          )}
+
+          {modalMode !== "crearSalon" && (
+            <>
+              <div className="asig-flex-row">
+                <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+                  <label className="modal-label" style={{ paddingTop: 0 }}>Titular</label>
+                  <select 
+                    className="modal-input modal-select" value={formValues.id_usuario || ""} 
+                    onChange={(e) => handleModalChange("id_usuario", e.target.value)} disabled={modalMode === "editar"} 
+                  >
+                    <option value="" disabled>Seleccionar titular...</option>
+                    {titulares.map(t => <option key={t.id_usuario} value={t.id_usuario}>{t.nombre}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className="asig-flex-row" style={{ marginTop: "16px", alignItems: "flex-end" }}>
+                <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+                  <label className="modal-label" style={{ paddingTop: 0 }}>Grado</label>
+                  <select className="modal-input modal-select" value={formValues.grado || ""} onChange={(e) => { handleModalChange("grado", e.target.value); handleModalChange("grupo", ""); }} disabled={!formValues.id_usuario}>
+                    <option value="" disabled>Seleccionar...</option>
+                    {gradosUnicosModal.map(g => <option key={g} value={g}>{g}</option>)}
+                  </select>
+                </div>
+                <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+                  <label className="modal-label" style={{ paddingTop: 0 }}>Grupo</label>
+                  <select className="modal-input modal-select" value={formValues.grupo || ""} onChange={(e) => handleModalChange("grupo", e.target.value)} disabled={!formValues.grado || !formValues.id_usuario}>
+                    <option value="" disabled>Seleccionar...</option>
+                    {gruposDisponiblesModal.map(s => <option key={s.id_salon} value={s.grupo}>{s.grupo}</option>)}
+                  </select>
+                </div>
+                <div style={{ paddingBottom: "1px" }}>
+                  <button className="asig-btn-add" onClick={handleAddSalonTemp} disabled={cargandoAccion || !formValues.grupo}>Agregar +</button>
+                </div>
+              </div>
+
+              <div className="asig-asignaciones-section">
+                <h4 className="asig-section-title">ASIGNACIONES ACTUALES</h4>
+                <div className="asig-pills-container">
+                  {!formValues.id_usuario ? (
+                    <p className="asig-empty-text">Seleccione un titular arriba</p>
+                  ) : salonesTemp.length === 0 ? (
+                    <p className="asig-empty-text">El titular no tiene salones asignados</p>
+                  ) : (
+                    salonesTemp.map(salon => (
+                      <div key={salon.id_salon} className="asig-pill-modern">
+                        <span>{salon.grado} - {salon.grupo}</span>
+                        <button className="asig-remove-btn" title="Remover Asignación" onClick={() => handleRemoveSalonTemp(salon)}>✕</button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              <div className="modal-actions" style={{ marginTop: "30px" }}>
+                <button className="modal-btn modal-btn--accept" onClick={handleGuardarAsignaciones} disabled={cargandoAccion}>
+                  Aceptar
+                </button>
+                <button className="modal-btn modal-btn--cancel" onClick={() => setModalOpen(false)}>
+                  Cancelar
+                </button>
+              </div>
+            </>
+          )}
+        </ParamModal>
+
+        <Alert {...alertConfig} onClose={alertConfig.onClose || closeAlert} />
       </ModuleLayout>
     </div>
   );
