@@ -42,7 +42,7 @@ const AppRouter = () => {
       {ParametrizacionRouter()}
       {ImportacionRouter()}
       {RectoriaRoutes()}
-{BandaRouter()}
+      {BandaRouter()}
 
       {/* RUTA DE PRUEBAS / TEST */}
       <Route path="/test" element={<TestPage />} />

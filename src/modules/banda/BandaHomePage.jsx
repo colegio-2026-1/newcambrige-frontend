@@ -20,9 +20,8 @@ const BandaHomePage = () => {
   if (loading || !user) return <div className="status-message status-message--loading">Cargando...</div>;
 
  const menuBanda = [
-  { label: "Inicio", path: "/banda", icon: <Home size={18} /> },
-  { label: "Inventario", path: "/banda/inventario", icon: <LayoutList size={18} /> },
-  { label: "Asignaciones", path: "/banda/prestamos", icon: <ClipboardCheck size={18} /> }
+  { label: "Inicio", path: "/home", icon: <Home size={18} /> },
+ 
  ];
 
 const primerRol = roles?.[0];

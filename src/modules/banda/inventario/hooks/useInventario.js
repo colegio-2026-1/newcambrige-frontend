@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { FORM_VACIO, ERRORES_VACIO, POR_PAGINA } from "../utils/inventarioConstants";
-import { getInstrumentosRequest, 
+import { FORM_VACIO } from "../utils/inventarioConstants";
+import { 
+  getInstrumentosRequest, 
   getCategoriasRequest, 
-  getUbicacionesRequest,
   createInstrumentoRequest,
   updateInstrumentoRequest,
   deleteInstrumentoRequest 
@@ -11,29 +11,49 @@ import { getInstrumentosRequest,
 const useInventario = () => {
   const [instrumentos, setInstrumentos] = useState([]);
   const [categorias, setCategorias] = useState([]);
-  const [ubicaciones, setUbicaciones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [seleccionado, setSeleccionado] = useState(null);
 
   const [filtroId, setFiltroId] = useState(""); 
   const [filtroNombre, setFiltroNombre] = useState("");
   const [filtroCategoria, setFiltroCategoria] = useState("");
-  const [pagina, setPagina] = useState(1);
 
   const [form, setForm] = useState(FORM_VACIO);
-  const [toast, setToast] = useState(null);
+  
+  const [alert, setAlert] = useState({
+    isOpen: false,
+    type: "info",
+    title: "",
+    message: "",
+    onClose: null,
+    onCancel: null,
+    acceptText: "Aceptar",
+  });
+
+  const closeAlert = useCallback(() => {
+    setAlert((prev) => ({
+      ...prev,
+      isOpen: false
+    }));
+  }, []);
+
 
   const [modalAgregar, setModalAgregar] = useState(false);
   const [modalEditar, setModalEditar] = useState(false);
-  const [modalEliminar, setModalEliminar] = useState(false);
-  const [modalErrorEliminar, setModalErrorEliminar] = useState(false);
-  const [modalAdvertencia, setModalAdvertencia] = useState(false);
+  
+  const showAlert = useCallback((type, title, message, onConfirmAction = null, onCancelAction = null, acceptText = "Aceptar") => {
+    setAlert({
+      isOpen: true,
+      type,
+      title,
+      message,
+      onClose: onConfirmAction ? () => { onConfirmAction(); closeAlert(); } : closeAlert,
+      onCancel: onCancelAction || null,
+      acceptText
+    });
+  }, [closeAlert]);
 
-  const mostrarToast = (mensaje) => {
-    setToast(mensaje);
-    setTimeout(() => setToast(null), 4000);
-  };
-
+  
   const extraerErrorBackend = (e, mensajePorDefecto) => {
     if (e.response?.data?.detail) {
       const detail = e.response.data.detail;
@@ -44,34 +64,26 @@ const useInventario = () => {
 
   const cargarDatos = useCallback(async () => {
     try {
-      const [instRes, catRes, ubiRes] = await Promise.all([
+      const [instRes, catRes] = await Promise.all([
         getInstrumentosRequest(),
         getCategoriasRequest(),
-        getUbicacionesRequest(),
       ]);
-      setInstrumentos(instRes.data);
-      setCategorias(catRes.data);
-      setUbicaciones(ubiRes.data);
+      setInstrumentos(instRes.data || []);
+      setCategorias(catRes.data || []);
     } catch (error) {
-      console.error("Error cargando inventario:", error);
-      mostrarToast("Error de conexión con el servidor.");
+      showAlert("error", "Error", "Error de conexión con el servidor.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [showAlert]);
 
   useEffect(() => { cargarDatos(); }, [cargarDatos]);
 
   const validaciones = useMemo(() => {
     const nombreVal = form.nombre?.trim();
-    const cantidadVal = parseInt(form.cantidad_total);
-
-    const nombreUnico = !instrumentos.some(
-      (i) => i.nombre.toLowerCase() === nombreVal?.toLowerCase() && i.id_instrumento !== seleccionado?.id_instrumento
-    );
-
-    const todoValido = (nombreVal?.length >= 2 && nombreUnico) &&
-                       (!!form.id_categoria && !isNaN(cantidadVal) && cantidadVal >= 0);
+    const todoValido = nombreVal?.length >= 2 && nombreUnico &&
+    !!form.id_categoria;
+    const nombreUnico = !instrumentos.some(i => i.nombre.toLowerCase() === nombreVal?.toLowerCase() && i.id_instrumento !== seleccionado?.id_instrumento);
 
     return {
       nombre: nombreVal?.length >= 2 && nombreUnico,
@@ -81,75 +93,70 @@ const useInventario = () => {
   }, [form, instrumentos, seleccionado]);
 
   const handleAgregar = async () => {
-  if (!form.nombre || !form.id_categoria || !form.cantidad_total) {
-    mostrarToast("Por favor complete los campos obligatorios.");
-    return;
-  }
-  
-  try {
-    const payload = {
-      nombre: form.nombre.trim(),
-      id_categoria: parseInt(form.id_categoria),
-      id_ubicacion: form.id_ubicacion ? parseInt(form.id_ubicacion) : null,
-      cantidad_total: parseInt(form.cantidad_total),
-      estado: form.estado || "Activo"
-    };
+    if (!form.nombre || !form.id_categoria || form.cantidad_total === "" || form.cantidad_total === null) {
+      showAlert("error", "Error", "Todos los campos son obligatorios.");
+      return;
+    }
 
-    await createInstrumentoRequest(payload);
-    setModalAgregar(false);
-    cargarDatos();
-    mostrarToast("Instrumento agregado correctamente.");
-  } catch (e) { 
-    console.error("Error al guardar:", e.response?.data);
-    mostrarToast(extraerErrorBackend(e, "Error al crear el instrumento."));
-  }
-};
+    try {
+      const payload = {
+        nombre: form.nombre.trim(),
+        id_categoria: parseInt(form.id_categoria),
+        cantidad_total: 1,
+        estado: form.estado || "Activo"
+      };
+
+      await createInstrumentoRequest(payload);
+      setModalAgregar(false);
+      await cargarDatos();
+      showAlert("success", "Operación Exitosa", "Instrumento agregado correctamente.");
+    } catch (e) { 
+      showAlert("error", "Error", extraerErrorBackend(e, "Error al crear el instrumento."));
+    }
+  };
 
   const ejecutarEdicion = async () => {
     try {
       const payload = {
         nombre: form.nombre.trim(),
         id_categoria: parseInt(form.id_categoria),
-        id_ubicacion: form.id_ubicacion ? parseInt(form.id_ubicacion) : null,
-        cantidad_total: parseInt(form.cantidad_total),
+        cantidad_total: 1,
         estado: form.estado
       };
+      console.log("EDITANDO", payload);
 
       await updateInstrumentoRequest(seleccionado.id_instrumento, payload);
       setModalEditar(false);
-      setModalAdvertencia(false);
       await cargarDatos();
-      mostrarToast("Cambios guardados.");
+      showAlert("success", "Operación Exitosa", "Cambios guardados.");
     } catch (e) { 
-      mostrarToast( "Error al actualizar.");
+      showAlert("error", "Error", extraerErrorBackend(e, "Error al actualizar."));
     }
   };
 
   const handleEditar = async () => {
     if (!validaciones.todoValido) return;
     if (seleccionado?.estado === "Activo" && form.estado !== "Activo" && seleccionado?.cantidad_disponible < seleccionado?.cantidad_total) {
-      setModalAdvertencia(true);
+      showAlert("warning", "Advertencia", "El instrumento tiene unidades prestadas. Cambiar su estado a inactivo puede afectar las asignaciones actuales. ¿Deseas continuar?", 
+        ejecutarEdicion, closeAlert, "Sí, continuar");
       return;
     }
-    ejecutarEdicion();
+    await ejecutarEdicion();
   };
 
-  const handleEliminar = async () => {
+   const handleEliminar = async () => {
     try {
       await deleteInstrumentoRequest(seleccionado.id_instrumento);
-      setModalEliminar(false);
       setSeleccionado(null);
       await cargarDatos();
-      mostrarToast("Registro eliminado.");
+      showAlert("success", "Operación Exitosa", "Registro eliminado.");
     } catch (e) {
-      setModalEliminar(false);
       if (e.response?.status === 400) {
-      setModalErrorEliminar(true); 
-    } else {
-      mostrarToast(extraerErrorBackend(e, "Ocurrió un error inesperado al eliminar."));
+        showAlert("error", "OPERACIÓN DENEGADA", "No es posible eliminar este instrumento porque existen préstamos vigentes asociados a él.");
+      } else {
+        showAlert("error", "Error", extraerErrorBackend(e, "Ocurrió un error inesperado al eliminar."));
+      }
     }
-    console.warn("Error al eliminar:", e.response?.data?.detail);
-  }
   };
 
   const filtrados = useMemo(() => {
@@ -161,24 +168,34 @@ const useInventario = () => {
     });
   }, [instrumentos, filtroId, filtroNombre, filtroCategoria]);
 
-  const paginados = useMemo(() => {
-    return filtrados.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
-  }, [filtrados, pagina]);
-
-  const totalPaginas = Math.max(1, Math.ceil(filtrados.length / POR_PAGINA));
-
+  
   return {
-    loading, categorias, ubicaciones, seleccionado, setSeleccionado,
-    setFiltroId, setFiltroNombre, setFiltroCategoria,
-    pagina, setPagina, totalPaginas, paginados,
-    modalAgregar, setModalAgregar, modalEditar, setModalEditar, modalEliminar, setModalEliminar,
-    modalErrorEliminar, setModalErrorEliminar, modalAdvertencia, setModalAdvertencia,
-    form, setForm, toast, validaciones, ejecutarEdicion,
-    abrirAgregar: () => { setForm(FORM_VACIO); setModalAgregar(true); },
-    abrirEditar: (inst) => { setForm(inst); setModalEditar(true); },
-    abrirEliminar: () => setModalEliminar(true),
-    handleAgregar, handleEditar, handleEliminar, handleBuscar: () => setPagina(1),
-    handleLimpiar: () => { setFiltroId(""); setFiltroNombre(""); setFiltroCategoria(""); setPagina(1); }
+    loading, categorias, seleccionado, setSeleccionado,
+    setFiltroId, setFiltroNombre, setFiltroCategoria, filtrados,
+    modalAgregar, setModalAgregar, modalEditar, setModalEditar,
+    form, setForm, alert, showAlert, closeAlert, validaciones, ejecutarEdicion,
+    abrirAgregar: () => { setSeleccionado(null); setForm(FORM_VACIO); setModalAgregar(true); },
+    abrirEditar: (inst) => {
+      if (!inst) return;
+      setForm({
+        id_instrumento: inst.id_instrumento,
+        nombre: inst.nombre,
+        id_categoria: inst.id_categoria,
+        cantidad_total: inst.cantidad_total,
+        estado: inst.estado
+      });
+      setModalEditar(true);
+    }, 
+    abrirEliminar: () => {
+      if (!seleccionado) return;
+      showAlert("warning", "ELIMINAR", `¿Eliminar permanentemente ${seleccionado.nombre}?`,
+         handleEliminar, closeAlert, "Eliminar");
+    },
+
+
+    handleAgregar, handleEditar,
+     handleBuscar: () => {},
+    handleLimpiar: () => { setFiltroId(""); setFiltroNombre(""); setFiltroCategoria(""); }
   };
 };
 

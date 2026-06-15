@@ -2,7 +2,7 @@ import React from 'react';
 import usePrestamos from "../hooks/usePrestamos";
 import { useAuth } from "../../../../api/useAuth";
 
-import Icon from '@mdi/react';
+import Icon from '../../../../components/common/Icon';
 import { mdiHome, mdiAccountMusic, mdiPiano } from '@mdi/js';
 import { Home, LayoutList, ClipboardCheck } from "lucide-react";
 
@@ -13,7 +13,6 @@ import DataTable from "../../../../components/shared/DataTable";
 import SearchBar from "../../../../components/shared/searchBar";
 import ActionButtons from "../../../../components/shared/ActionButtons";
 import Alert from "../../../../components/shared/Alert";
-import InventarioPagination from "../../inventario/components/InventarioPagination";
 import EstadoBadge from "../../inventario/components/EstadoBadge";
 
 import AgregarPrestamoModal from "../components/modals/AgregarPrestamoModal";
@@ -25,7 +24,7 @@ const PrestamosPage = () => {
   const prestamos = usePrestamos();
   const { user, roles } = useAuth();
 
-   const primerRol = roles?.[0];
+  const primerRol = roles?.[0];
   const rolTexto = typeof primerRol === 'object' ? primerRol.nombre : (primerRol || "Banda");
  
   const estudianteSel = prestamos.estudianteSeleccionado;
@@ -40,24 +39,16 @@ const PrestamosPage = () => {
     path: "/banda", 
     icon: <Home size={18} /> 
   },
-  { 
-     label: "Inventario", 
-    path: "/banda/inventario", 
-    icon: <LayoutList size={18} /> 
-  },
-  { 
-    label: "Asignaciones", 
-    path: "/banda/prestamos", 
-    icon: <ClipboardCheck size={18} /> 
-  }
+   { label: "Inventario", path: "/banda/inventario", icon: <Icon icon={mdiPiano} size={18} /> },
+      { label: "Asignaciones", path: "/banda/prestamos", icon: <Icon icon={mdiAccountMusic} size={18} /> }
 ];
 
 
 const columnasEstudiantes = [
     { key: "documento", label: "CÓDIGO" }, 
     { key: "nombre", label: "NOMBRE COMPLETO" },
-    { key: "grado", label: "GRADO", render: (_, row) => row.salon?.grado || "—" },
-    { key: "grupo", label: "GRUPO", render: (_, row) => row.salon?.grupo || "—" },
+    { key: "grado", label: "GRADO", render: (_, row) => prestamos.salonesMap[row.id_salon]?.grado || "—"  },
+    { key: "grupo", label: "GRUPO", render: (_, row) => prestamos.salonesMap[row.id_salon]?.grupo || "_" },
     { 
       key: "instrumento_nombre", 
       label: "INSTRUMENTO",
@@ -94,7 +85,6 @@ const columnasEstudiantes = [
         }
       >
         <div className="banda-content-wrapper"style={{ width: '100%' }}>
-          {/*REEMPLAZO: Alert en lugar de Toast */}
           <Alert 
             isOpen={prestamos.alert.isOpen} 
             type={prestamos.alert.type} 
@@ -104,32 +94,44 @@ const columnasEstudiantes = [
           />
 
           <div className="banda-filters-fullwidth">
-            <SearchBar 
-              fields={[
-                { key: "documento", label: "Código", type: "text" },
-                { key: "nombre", label: "Nombre", type: "text" },
-                { key: "grado", label: "Grado", type: "select", options: prestamos.opcionesGrado },
-                { key: "grupo", label: "Grupo", type: "select", options: prestamos.opcionesGrupo } 
-              ]} 
-              onSearch={(f) => {
-                prestamos.setFiltroDocumento(f.documento);
-                prestamos.setFiltroNombre(f.nombre);
-                prestamos.setFiltroGrado(f.grado);
-                prestamos.setFiltroGrupo(f.grupo);
-                prestamos.handleBuscar();
-              }} 
-            />
+            <SearchBar
+            onChange={(key, value) => {
+              if (key === "grado") {
+                prestamos.setFiltroGrado(value);
+                prestamos.setFiltroGrupo("");
+              }
+            }
+          }
+          fields={[
+            { key: "documento", label: "Código", type: "text" },
+            { key: "nombre", label: "Nombre", type: "text" },
+            {
+              key: "grado",
+              label: "Grado",
+              type: "select",
+              options: prestamos.opcionesGrado
+            },
+            {
+              key: "grupo",
+              label: "Grupo",
+              type: "select",
+              options: prestamos.opcionesGrupo
+            }
+          ]
+        }
+        onSearch={(f) => {
+          prestamos.setFiltroDocumento(f.documento);
+          prestamos.setFiltroNombre(f.nombre);
+          prestamos.setFiltroGrado(f.grado);
+          prestamos.setFiltroGrupo(f.grupo);
+          }
+          }
+          />
           </div>
 
           <div className="inventario-table-card">
-            <DataTable columns={columnasEstudiantes} rows={prestamos.estudiantesPaginados} onRowClick={(row) => prestamos.seleccionarEstudiante(row)} emptyText="No hay estudiantes" />
+            <DataTable columns={columnasEstudiantes} rows={prestamos.estudiantesFiltrados} pageSize={10} onRowClick={(row) => prestamos.seleccionarEstudiante(row)} emptyText="No hay estudiantes" />
           </div>
-          {/*PAGINACIÓN AGREGADA DEBAJO DE LA TABLA */}
-          <InventarioPagination 
-            paginaActual={prestamos.paginaEstudiantes} 
-            totalPaginas={prestamos.totalPaginasEstudiantes} 
-            setPagina={prestamos.setPaginaEstudiantes} 
-          />
         </div>
       </ModuleLayout>
 

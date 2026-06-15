@@ -3,11 +3,12 @@ import {
   getPrestamosRequest, 
   getInstrumentosDisponiblesRequest, 
   getEstudiantesRequest,
+  getSalonesRequest,
   asignarInstrumentoRequest, 
   devolverInstrumentoRequest 
 } from "../../../../api/endpointsBanda";
 
-import { FORM_VACIO, FORM_DEVOLUCION_VACIO, POR_PAGINA } from "../utils/prestamosConstants";
+import { FORM_VACIO, FORM_DEVOLUCION_VACIO } from "../utils/prestamosConstants";
 
 const usePrestamos = () => {
   // ── ESTADOS ──
@@ -15,6 +16,7 @@ const usePrestamos = () => {
   const [instrumentos, setInstrumentos] = useState([]);
   const [estudiantes, setEstudiantes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [salones, setSalones] = useState([]);
 
   const [estudianteSeleccionado, setEstudianteSeleccionado] = useState(null);
   const [prestamoSeleccionado, setPrestamoSeleccionado] = useState(null);
@@ -23,49 +25,83 @@ const usePrestamos = () => {
   const [filtroDocumento, setFiltroDocumento] = useState("");
   const [filtroGrado, setFiltroGrado] = useState("");
   const [filtroGrupo, setFiltroGrupo] = useState("");
-  const [paginaEstudiantes, setPaginaEstudiantes] = useState(1);
 
   const [alert, setAlert] = useState({ isOpen: false, type: 'info', title: '', message: '' });
-  const showAlert = (type, message, title = '') => setAlert({ isOpen: true, type, message, title });
-  const closeAlert = () => setAlert(prev => ({ ...prev, isOpen: false }));
+    const closeAlert = () => setAlert(prev => ({ ...prev, isOpen: false }));
+
+ const showAlert = useCallback((type, title, message) => {
+    setAlert({ isOpen: true, type, title, message });
+  }, []);
 
   const [modalAgregar, setModalAgregar] = useState(false);
   const [modalDevolver, setModalDevolver] = useState(false);
 
   const [form, setForm] = useState(FORM_VACIO);
   const [formDevolucion, setFormDevolucion] = useState(FORM_DEVOLUCION_VACIO);
-  const [toast, setToast] = useState(null);
   const [errores, setErrores] = useState({});
 
   // ── CARGA DE DATOS ──
   const cargarDatos = useCallback(async () => {
     try {
-      const [pRes, iRes, eRes] = await Promise.all([
+      const [pRes, iRes, eRes, sRes] = await Promise.all([
         getPrestamosRequest(),
         getInstrumentosDisponiblesRequest(),
         getEstudiantesRequest(),
+        getSalonesRequest(),
       ]);
       setPrestamos(pRes.data || []);
       setInstrumentos(iRes.data || []);
       setEstudiantes(eRes.data || []);
+      console.log("ESTUDIANTES:", eRes.data);
+      console.log("SALONES:", sRes.data);
+      setSalones(sRes.data || []);
     } catch (e) {
       console.error("Error en conexión:", e);
+      showAlert("error", "Error de Conexión", "No se pudieron cargar los datos del servidor.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [showAlert]);
 
   useEffect(() => { cargarDatos(); }, [cargarDatos]);
 
-  const opcionesGrado = useMemo(() => {
-    return [...new Set(estudiantes.map(e => e.salon?.grado).filter(Boolean))].sort();
-  }, [estudiantes]);
+  const salonesMap = useMemo(() => {
+    return Object.fromEntries(salones.map(s => [s.id_salon, s]));
+  }, [salones]);
+
+   const opcionesGrado = useMemo(() => 
+    [...new Set(salones.map(s => s.grado).filter(Boolean))].sort(),
+    [salones]
+  );
 
   const opcionesGrupo = useMemo(() => {
-    if (!filtroGrado) return [];
-    const filtrados = estudiantes.filter(e => e.salon?.grado === filtroGrado);
-    return [...new Set(filtrados.map(e => e.salon?.grupo).filter(Boolean))].sort();
-  }, [estudiantes, filtroGrado]);
+  if (!filtroGrado) return [];
+
+  return [...new Set(
+    salones
+      .filter(s => String(s.grado) === String(filtroGrado))
+      .map(s => s.grupo)
+      .filter(Boolean)
+  )].sort();
+}, [salones, filtroGrado]);
+
+  // ── FILTRADO DE TABLA ──
+  const estudiantesFiltrados = useMemo(() => {
+    return estudiantes.filter(e => {
+      const salon = salonesMap[e.id_salon];
+
+      const matchDoc = !filtroDocumento || String(e.documento).includes(filtroDocumento);
+      const matchNom = !filtroNombre || e.nombre.toLowerCase().includes(filtroNombre.toLowerCase());
+      const matchGra =
+  !filtroGrado ||
+  String(salon?.grado) === String(filtroGrado);
+
+const matchGru =
+  !filtroGrupo ||
+  String(salon?.grupo) === String(filtroGrupo);
+      return matchDoc && matchNom && matchGra && matchGru;
+    });
+  }, [estudiantes, filtroDocumento, filtroNombre, filtroGrado, filtroGrupo, salonesMap]);
 
   // ── LÓGICA DE SELECCIÓN SEGURA ──
   const seleccionarEstudiante = (est) => {
@@ -76,24 +112,6 @@ const usePrestamos = () => {
       setForm(FORM_VACIO);
     }
   };
-
-  // ── FILTRADO Y PAGINACIÓN ──
-  const estudiantesFiltrados = useMemo(() => {
-    return estudiantes.filter(e => {
-      const matchDoc = !filtroDocumento || String(e.documento).includes(filtroDocumento);
-      const matchNom = !filtroNombre || e.nombre.toLowerCase().includes(filtroNombre.toLowerCase());
-      const matchGra = !filtroGrado || e.salon?.grado === filtroGrado;
-      const matchGru = !filtroGrupo || e.salon?.grupo === filtroGrupo;
-      return matchDoc && matchNom && matchGra && matchGru;
-    });
-  }, [estudiantes, filtroDocumento, filtroNombre, filtroGrado, filtroGrupo]);
-
-  const estudiantesPaginados = useMemo(() => {
-    const inicio = (paginaEstudiantes - 1) * POR_PAGINA;
-    return estudiantesFiltrados.slice(inicio, inicio + POR_PAGINA);
-  }, [estudiantesFiltrados, paginaEstudiantes]);
-
-  const totalPaginasEstudiantes = Math.max(1, Math.ceil(estudiantesFiltrados.length / POR_PAGINA));
 
   // ── HANDLERS (LOGICA DE BOTONES) ──
 
@@ -114,11 +132,12 @@ const usePrestamos = () => {
       setErrores({ observaciones: "Requerido para mantenimiento." }); return;
     }
     try {
+      if (!prestamoSeleccionado)return;
       await devolverInstrumentoRequest(prestamoSeleccionado.id_prestamo, formDevolucion);
       setModalDevolver(false); 
       await cargarDatos();
-      showAlert("success", "Instrumento devuelto exitosamente."); 
-    } catch (e) { showAlert("error", "No se pudo procesar la devolución."); }
+      showAlert("success", "exito", "Instrumento devuelto exitosamente."); 
+    } catch (e) { showAlert("error","error", "No se pudo procesar la devolución."); }
   };
 
    return {
@@ -126,17 +145,16 @@ const usePrestamos = () => {
     estudianteSeleccionado, seleccionarEstudiante,
     prestamoSeleccionado, filtroNombre, setFiltroNombre, 
     filtroDocumento, setFiltroDocumento, filtroGrado, setFiltroGrado, filtroGrupo, setFiltroGrupo,
-    opcionesGrado, opcionesGrupo, 
-    estudiantesPaginados, paginaEstudiantes, setPaginaEstudiantes,
-    totalPaginasEstudiantes,
+    opcionesGrado, opcionesGrupo, salonesMap,
+    estudiantesFiltrados,
     modalAgregar, setModalAgregar, modalDevolver, setModalDevolver,
     form, setForm, formDevolucion, setFormDevolucion, 
     alert, closeAlert, errores, setErrores,
     handleAgregar, handleDevolver,
-    handleBuscar: () => setPaginaEstudiantes(1),
+    handleBuscar: () => {},
     handleLimpiar: () => {
       setFiltroDocumento(""); setFiltroNombre(""); setFiltroGrado(""); 
-      setFiltroGrupo(""); setPaginaEstudiantes(1);
+      setFiltroGrupo("");
     },
     abrirModalDevolver: (estudiante) => { 
       const p = (prestamos || []).find(p => String(p.id_estudiante) === String(estudiante.id_estudiante) && p.estado_entrega === "prestado");

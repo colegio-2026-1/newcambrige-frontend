@@ -2,14 +2,15 @@ import axiosClient from "./axiosClient";
 
 // ============ ESTUDIANTES ============
 export const getEstudiantesRequest = () => 
-  axiosClient.get(`/api/estudiantes/`);
+  axiosClient.get(`/api/estudiantes`);
+
+export const getSalonesRequest = () => 
+  axiosClient.get(`/api/salones`);
+
 
 // ============ CATEGORÍAS Y UBICACIONES ============
 export const getCategoriasRequest = () => 
   axiosClient.get(`/api/banda/categorias`);
-
-export const getUbicacionesRequest = () => 
-  axiosClient.get(`/api/banda/ubicaciones`);
 
 // ============ INSTRUMENTOS (INVENTARIO) ============
 export const getInstrumentosRequest = () => 
