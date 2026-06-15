@@ -31,6 +31,17 @@ const capitalizar = (texto) =>
     ? texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase()
     : "—";
 
+
+const formatearFecha = (fecha) => {
+  if (!fecha) return "";
+
+  return new Intl.DateTimeFormat("es-CO", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  }).format(new Date(fecha));
+};
+
 // ─── Columnas de la tabla (definidas fuera del componente: una sola instancia) ─
 const COLUMNS = [
   { key: "codigo", label: "Código" },
@@ -47,7 +58,7 @@ const COLUMNS = [
     label: "Fecha Entrega",
     render: (_, row) =>
       row.fecha_entrega
-        ? new Date(row.fecha_entrega).toLocaleDateString("es-CO")
+        ? formatearFecha(row.fecha_entrega)
         : "—"
   },
   {
@@ -115,7 +126,7 @@ export default function AsignacionesPage() {
     observacion: ""
   });
 
-  const fechaVisual = new Date().toLocaleDateString("es-CO");
+  const fechaVisual = formatearFecha(new Date());
 
   // Cargar prendas disponibles y resetear formulario al abrir el modal
   useEffect(() => {
@@ -278,7 +289,7 @@ export default function AsignacionesPage() {
     cargarPeriodos();
   }, []);
 
-  // ── Eliminar ─────────────────────────── 
+  // ── Eliminar ───────────────────────────
   const eliminarAsignacion = async (id) => {
     try {
       await deletePrestamoRequest(id);
@@ -398,7 +409,7 @@ export default function AsignacionesPage() {
       path: "/home"
     },
     {
-      label: "Asignaciones Uniformes",
+      label: "Asignación Uniformes",
       icon: <Icon path={mdiTshirtCrew} size={1} />,
       path: "/uniformes/asignaciones",
       roles: ["admin", "titular", "uniformes"]
@@ -437,7 +448,7 @@ export default function AsignacionesPage() {
             user={{ nombre: user?.nombre || "admin", rol }}
             loadingRoles={loadingRoles}
             menuItems={sidebarMenuItems}
-            selectedMenu="Asignaciones Uniformes"
+            selectedMenu="Asignación Uniformes"
           />
         }
         actions={
@@ -457,14 +468,16 @@ export default function AsignacionesPage() {
                     if (!selectedRow) {
                       mostrarAlerta("error", "Seleccione una asignación");
                       return;
+                    
                     }
+                    console.log(selectedRow)
                     setFormDevolucion({
                       prenda: selectedRow.prenda || "",
-                      talla: selectedRow.talla || "",
+                      talla: selectedRow.talla || "No aplica",
                       fecha_entrega: selectedRow.fecha_entrega
-                        ? new Date(selectedRow.fecha_entrega).toLocaleDateString("es-CO")
+                        ? formatearFecha(selectedRow.fecha_entrega)
                         : "",
-                      fecha_devolucion: new Date().toLocaleDateString("es-CO"),
+                      fecha_devolucion: formatearFecha(new Date()),
                       estado_entrega: capitalizar(selectedRow.estado_entrega) || "",
                       estado_devolucion: "seleccionar",
                       observacion: ""
@@ -510,9 +523,16 @@ export default function AsignacionesPage() {
                 });
               }}
               onSearch={(f) => setFiltrosAplicados(f)}
+              cleanFilter={{
+                codigo: "",
+                nombre: "",
+                grado: "",
+                grupo: "",
+                anio: filtros.anio
+              }}
+
             />
           )}
-
           <div className="table-container">
             <DataTable
               columns={COLUMNS}
@@ -636,9 +656,10 @@ export default function AsignacionesPage() {
             key: "mensaje",
             type: "label",
             className: "uniformes-modal-message",
-            label: `${selectedRow?.nombre_completo || ""}
-${capitalizar(selectedRow?.prenda || "")}
-Esta acción no se puede deshacer.`
+            label: `¿CONFIRMA ELIMINAR LA ASIGNACION?"${(selectedRow?.prenda || "").toUpperCase()}"?
+        ESTA ACCIÓN NO SE PUEDE DESHACER.`
+
+
           }
         ]}
       />

@@ -344,7 +344,7 @@ export default function InventarioPage() {
       path: "/home"
     },
     {
-      label: "Asignaciones Uniformes",
+      label: "Asignación Uniformes",
       icon: <Icon path={mdiTshirtCrew} size={1} />,
       path: "/uniformes/asignaciones",
       roles: ["admin", "titular", "uniformes"]
@@ -404,10 +404,12 @@ export default function InventarioPage() {
                     if (!selectedRow) {
                       mostrarAlerta("error", "Seleccione una prenda");
                       return;
+                      console.log(selectedRow);
                     }
+                    console.log(selectedRow);
                     setFormEditar({
                       nombre: selectedRow.nombre || "",
-                      tipo: selectedRow.tipo || "vestimenta",
+                      tipo: selectedRow.tipo?.toLowerCase() || "vestimenta",
                       cantidad_total: selectedRow.cantidad_total || 0,
                       estado_fisico: selectedRow.estado_fisico || "Bueno",
                       talla: selectedRow.talla || "",
@@ -444,13 +446,18 @@ export default function InventarioPage() {
             fields={[
               { key: "codigo", label: "Código", type: "text" },
               { key: "prenda", label: "Prenda",  type: "text" },
-              { key: "tipo",   label: "Tipo",    type: "select", options: ["vestimenta", "objeto"] }
+              { key: "tipo",   label: "Categoría",    type: "select", options: ["Vestimenta", "Objeto"] }
             ]}
             loading={loading}
             onChange={(key, value) =>
               setFiltros((prev) => ({ ...prev, [key]: value }))
             }
             onSearch={(f) => setFiltrosAplicados(f)}
+            cleanFilter={{
+              codigo: "",
+              prenda: "",
+              tipo: ""
+            }}
           />
 
           <div className="table-container">
@@ -544,8 +551,16 @@ export default function InventarioPage() {
           })
         }
         fields={[
-          { key: "nombre",         label: "Nombre",        type: "text" },
-          { key: "tipo",           label: "Tipo",          type: "select", options: ["vestimenta", "objeto"] },
+          { key: "nombre", label: "Nombre", type: "text" },
+          {
+            key: "tipo",
+            label: "Categoría",
+            type: "select",
+            options: [
+              { value: "vestimenta", label: "Vestimenta" },
+              { value: "objeto", label: "Objeto" }
+            ]
+          },
           { key: "cantidad_total", label: "Cantidad Total", type: "number" },
           {
             key: "estado_fisico",
@@ -565,7 +580,7 @@ export default function InventarioPage() {
 
       {/* ── Modal: Confirmar Eliminación ──────────────────────────────────────── */}
       <Modal
-        title="CONFIRMAR ELIMINACIÓN"
+        title="ELIMINAR PRENDA"
         isOpen={openEliminar}
         onCancel={() => setOpenEliminar(false)}
         onAccept={eliminarPrenda}
@@ -575,7 +590,11 @@ export default function InventarioPage() {
             key: "mensaje",
             type: "label",
             className: "uniformes-modal-message",
-            label:`¿CONFIRMA ELIMINAR LA PRENDA ${selectedRow?.nombre || ""}?`
+            label:`¿CONFIRMA ELIMINAR?
+
+            "${capitalizar(selectedRow?.nombre || "").toUpperCase()}"
+
+            ESTA ACCIÓN NO SE PUEDE DESHACER.`
           }  
         ]}
       />
