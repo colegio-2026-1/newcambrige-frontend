@@ -461,6 +461,113 @@
   to { transform: rotate(360deg); }
 }
 
+/* ══════════════════════════════════════════════════════════════
+   DSH-02: RESPONSIVE PARA PANTALLAS DE 14" (1280px – 1440px)
+   Resolución típica: 1366×768 y 1280×800
+   Objetivo: que el dashboard entre sin necesidad de reducir zoom
+══════════════════════════════════════════════════════════════ */
+@media (max-width: 1440px) and (min-width: 1024px) {
+  /* Reducir padding general del wrapper */
+  .dash-wrapper {
+    padding: var(--space-4);
+    gap: var(--space-4);
+  }
+
+  /* Reducir padding del filtro */
+  .dash-filter-bar {
+    padding: var(--space-2) var(--space-4);
+    gap: var(--space-3);
+  }
+
+  /* Reducir densidad de cards KPI y gráficas en roles full/mid */
+  .dash-density-full .dash-kpi-card,
+  .dash-density-full .dash-card {
+    padding: var(--space-4) var(--space-5);
+  }
+  .dash-density-mid .dash-kpi-card,
+  .dash-density-mid .dash-card {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  /* KPI grid: columnas más compactas para caber en 1280px con sidebar */
+  .dash-kpi-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+    gap: var(--space-3);
+  }
+
+  /* Valor numérico KPI: reducir tamaño para que quepa sin overflow */
+  .dash-kpi-value {
+    font-size: clamp(1.4rem, 2.2vw, 2rem);
+  }
+
+  /* Título KPI: permitir dos líneas si el texto es largo */
+  .dash-kpi-title {
+    white-space: normal;
+    line-height: 1.3;
+  }
+
+  /* Grilla gráficas: minmax más pequeño para 2 columnas en 1280px */
+  .dash-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+    gap: var(--space-3);
+  }
+
+  /* Reducir altura de gráficas para que quepan en viewport 768px */
+  .dash-card-inner .recharts-responsive-container,
+  .dash-card-inner > div[style] {
+    /* Recharts usa inline style; este selector actúa como fallback */
+  }
+
+  /* Cards de gráficas: padding compacto */
+  .dash-card {
+    padding: var(--space-4);
+    gap: var(--space-3);
+  }
+
+  /* Header de card: gap más compacto */
+  .dash-card-header {
+    gap: var(--space-1);
+  }
+
+  /* Select del filtro: tamaño base más pequeño */
+  .dash-filter-select {
+    font-size: var(--text-sm);
+    padding: var(--space-1) var(--space-3);
+    min-width: 160px;
+  }
+
+  /* Switch de gráfica: botones más compactos */
+  .dash-switch-btn {
+    padding: 3px 10px;
+  }
+
+  /* Lista pagos: max-height reducido */
+  .dash-pagos-list {
+    max-height: 240px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE TABLET / MOBILE: <= 1023px
+   (comportamiento original conservado + ajustes menores)
+══════════════════════════════════════════════════════════════ */
+@media (max-width: 1023px) {
+  .dash-wrapper    { padding: var(--space-4); gap: var(--space-4); }
+  .dash-filter-bar { padding: var(--space-2) var(--space-3); }
+
+  .dash-kpi-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+    gap: var(--space-3);
+  }
+
+  .dash-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+    gap: var(--space-3);
+  }
+
+  .dash-kpi-value { font-size: var(--text-xl); }
+}
+
 /* ── RESPONSIVE MOBILE: >= 360px garantizado ── */
 @media (max-width: 480px) {
   .dash-wrapper      { padding: var(--space-3); gap: var(--space-4); }

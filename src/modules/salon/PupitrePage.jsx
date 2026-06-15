@@ -6,12 +6,13 @@ import {
   updatePupitreRequest,
   allsalonesRequest,
 } from "../../api/endpointsSalon";
-
+import Alert from "../../components/shared/Alert";
 import { Icon } from '@mdi/react';
 import {
   mdiHome,
   mdiLibrary,
   mdiClipboardTextOutline,
+  mdiChairSchool,
 } from '@mdi/js';
 
 import { allaniosacademicosRequest } from "../../api/endpoints";
@@ -31,7 +32,7 @@ export default function PupitrePage() {
 
   const [fila, setFila]   = useState(null);
   const [modal, setModal] = useState(false);
-
+  const [alert, setAlert] = useState({ isOpen: false, type: "", title: "", message: "" });
   const [loading, setLoading]           = useState(true);
   const [error, setError]               = useState(null);
   const [rows, setRows]                 = useState([]);
@@ -39,6 +40,12 @@ export default function PupitrePage() {
   const [salones, setSalones]           = useState([]);
   const [periodos, setPeriodos]         = useState([]);
   const [cargandoPeriodos, setCargandoPeriodos] = useState(true);
+
+  const showAlert = (type, message, title = "") =>
+  setAlert({ isOpen: true, type, message, title });
+
+  const closeAlert = () =>
+  setAlert((prev) => ({ ...prev, isOpen: false }));
 
   const [filtros, setFiltros] = useState({
     documento: "",
@@ -55,18 +62,19 @@ export default function PupitrePage() {
   const periodosMap = {};
   periodos.forEach((p) => { periodosMap[p.id_periodo] = p; });
 
-  // Mapa por nombre (igual que TesoreriaMatricula) para filtrar grados/grupos por periodo
+  
   const periodoMapname = {};
   periodos.forEach((p) => { periodoMapname[p.nombre] = p; });
 
   const menuItems = [
-    { label: "Inicio",     icon: <Icon path={mdiHome}                 size={1} />, path: "/salon",                   roles: ["titular", "admin"] },
+    { label: "Inicio",     icon: <Icon path={mdiHome}                 size={1} />, path: "/home",                   roles: ["titular", "admin"] },
     { label: "Biblioteca", icon: <Icon path={mdiLibrary}              size={1} />, path: "/salon/biblioteca/inicio", roles: ["titular", "admin"] },
-    { label: "Pruebas",    icon: <Icon path={mdiClipboardTextOutline} size={1} />, path: "/salon/pruebas",           roles: ["titular", "admin"] },
+    { label: "Pruebas",    icon: <Icon path={mdiClipboardTextOutline} size={1} />, path: "/salon/pruebas",roles: ["titular", "admin"] },
+    { label: "Pupitres",   icon: <Icon path={mdiChairSchool}          size={1} />, path: "/salon/pupitre",roles: ["titular", "admin"] },
   ];
 
   const columns = [
-    { key: "codigo", label: "CODIGO" },
+    { key: "codigo", label: "CÓDIGO" },
     { key: "nombre", label: "NOMBRE COMPLETO" },
     {
       key: "grado", label: "GRADO",
@@ -150,7 +158,7 @@ export default function PupitrePage() {
   const handleRowClick = (f) => setFila(f);
 
   const handleValidarPago = () => {
-    if (!fila) { alert("Debes seleccionar una fila"); return; }
+    if (!fila) { showAlert("error", "Debes seleccionar una fila"); return; }
     setModal(true);
   };
 
@@ -175,9 +183,10 @@ export default function PupitrePage() {
       setRowsFiltered(actualizados);
       setFila(null);
       setModal(false);
+      showAlert("success", `Pago de ${fila.nombre} validado correctamente`);
     } catch (error) {
       console.error("Error al validar pago:", error.response?.data || error);
-      alert("Error al validar el pago");
+      showAlert("error", error.response?.data?.detail || "Error al validar el pago");
     }
   };
 
@@ -224,7 +233,7 @@ export default function PupitrePage() {
           <SearchBar
             key={periodos[0]?.nombre || "loading"}
             fields={[
-              { key: "documento", label: "Codigo", type: "number", maxLength: 10 },
+              { key: "documento", label: "Código", type: "number", maxLength: 10 },
               { key: "nombre",    label: "Nombre", type: "text" },
               {
                 key: "Grado", label: "Grado", type: "select",
@@ -246,7 +255,7 @@ export default function PupitrePage() {
                   : [],
               },
               {
-                key: "Periodo", label: "Periodo", type: "select",
+                key: "Periodo", label: "Período", type: "select",
                 options: periodos.map(p => p.nombre).filter(Boolean),
               },
             ]}
@@ -279,10 +288,21 @@ export default function PupitrePage() {
           />
         </div>
       </ModuleLayout>
-
+      <Alert {...alert} onClose={closeAlert} />
       <Modal
-        title={`Confirmas que el estudiante ${fila?.nombre ? fila.nombre.toUpperCase() : ""} ha cumplido con el pago del concepto de pupitres?`}
+        title="CONFIRMAR PAGO"
         isOpen={modal}
+        fields={[
+          {
+            type: "label",
+            className: "confirm-delete",
+            label: `¿Confirmas que el estudiante ${
+              fila?.nombre || "[NOMBRE]"
+            } ha cumplido con el pago del concepto de pupitres?`,
+          },
+        ]}
+        values={{}}
+        onChange={() => {}}
         onAccept={handleConfirmarPago}
         onCancel={cerrarModal}
       />
