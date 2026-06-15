@@ -72,8 +72,8 @@ export default function PazYSalvoModal({
               <div className="firma-item">
                 <div className="firma-imagen-container">
                   {renderFirma(
-                    "Rectoría",
-                    firmasUrls?.Rectoría
+                    "rectoria",
+                    firmasUrls?.rectoria
                   )} 
                 </div>
                 <div className="firma-linea" />
@@ -84,8 +84,8 @@ export default function PazYSalvoModal({
               <div className="firma-item">
                 <div className="firma-imagen-container">
                   {renderFirma(
-                    "Rectoría",
-                    firmasUrls?.Rectoría
+                    "rectoria",
+                    firmasUrls?.rectoria
                   )}
                 </div>
                 <div className="firma-linea" />
@@ -94,8 +94,8 @@ export default function PazYSalvoModal({
               <div className="firma-item">
                 <div className="firma-imagen-container">
                   {renderFirma(
-                    "Coordinadora",
-                    firmasUrls?.Coordinadora
+                    "coordinadora",
+                    firmasUrls?.coordinadora
                   )}
                 </div>
                 <div className="firma-linea" />
@@ -104,8 +104,8 @@ export default function PazYSalvoModal({
               <div className="firma-item">
                 <div className="firma-imagen-container">
                   {renderFirma(
-                    "Titular",
-                    firmasUrls?.Titular
+                    "titular",
+                    firmasUrls?.titular
                   )}
                 </div>
                 <div className="firma-linea" />
@@ -114,8 +114,8 @@ export default function PazYSalvoModal({
               <div className="firma-item">
                 <div className="firma-imagen-container">
                   {renderFirma(
-                    "Banda",
-                    firmasUrls?.Banda
+                    "banda",
+                    firmasUrls?.banda
                   )}
                 </div>
                 <div className="firma-linea" />
@@ -125,8 +125,8 @@ export default function PazYSalvoModal({
               <div className="firma-item">
                 <div className="firma-imagen-container">
                   {renderFirma(
-                    "Uniforme",
-                    firmasUrls?.Uniforme
+                    "uniforme",
+                    firmasUrls?.uniforme
                   )}
                 </div>
 
@@ -137,8 +137,8 @@ export default function PazYSalvoModal({
               <div className="firma-item">
                 <div className="firma-imagen-container">
                   {renderFirma(
-                    "Secretaría",
-                    firmasUrls?.Secretaría
+                    "secretaria",
+                    firmasUrls?.secretaria
                   )}
                 </div>
 

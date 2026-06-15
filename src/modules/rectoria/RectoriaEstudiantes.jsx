@@ -12,7 +12,8 @@ import DataTable from "../../components/shared/DataTable";
 import ActionButtons from "../../components/shared/ActionButtons";
 import Modal from "../../components/shared/Modal";
 import PazYSalvoModal from "./PazYSalvoModal";
-
+import { Icon } from '@mdi/react';
+import { mdiAccountSchool,mdiHome,mdiHumanMaleBoard } from "@mdi/js";
 
 
 const RectoriaEstudiantes = () => {
@@ -31,20 +32,20 @@ const RectoriaEstudiantes = () => {
   const [cargandoPeriodos, setCargandoPeriodos] = useState(true);
   const [filtros, setFiltros] = useState({documento: "",nombre: "",Grado: "",Grupo: "",Periodo: ""});
   const [modalValidarPazSalvo, setModalValidarPazSalvo] = useState(false);
-  const [modalDescargarPdf, setModalDescargarPdf] = useState(false);
   const [modalValidar, setModalValidar] = useState(false);
+  const [modalDescargaExitosa, setModalDescargaExitosa] = useState(false);
   const [estudianteSeleccionado, setEstudianteSeleccionado] = useState(null);
   const [modalVerPazSalvo, setModalVerPazSalvo] = useState(false);
   const [firmasDetalle, setFirmasDetalle] = useState(null);
   const [selloUrl, setSelloUrl] = useState(null);
   const [firmasUrls, setFirmasUrls] = useState({});
+  const selectedMenu = "Estudiantes";
  
   const modulos = [
-    { label: "Inicio", icon: <Home />, path: "/Rectoria" },
-    { label: "Estudiantes", path: "/rectoria/estudiantes", roles: ["admin", "rectoria"] },
-    { label: "Docentes", path: "/rectoria/docentes", roles: ["admin", "rectoria"] },
+    { label: "Inicio", icon: <Icon path={mdiHome} />, path: "/home" },
+    { label: "Estudiantes", icon: <Icon path={mdiAccountSchool} />, path: "/rectoria/estudiantes", roles: ["admin", "rectoria"] },
+    { label: "Docentes", icon: <Icon path={mdiHumanMaleBoard} />, path: "/rectoria/docentes", roles: ["admin", "rectoria"] },
   ];
-
 
   const periodoMapname = {};
   periodos.forEach(p => {
@@ -95,38 +96,47 @@ const cargarEstudiantes = async (id_periodo) => {
     }
   };
 
-  const confirmarDescargaPdf = async () => {
-  try {
-    const periodoId =
-      periodoMapname[filtros.Periodo]?.id_periodo;
-    const response =
-      await descargarPdfEstudianteRequest(
-        fila.id_estudiante,
-        periodoId
-      );
-    const blob = new Blob(
-      [response.data],
-      { type: "application/pdf" }
-    );
-    const url =
-      window.URL.createObjectURL(blob);
 
-    const link =
-      document.createElement("a")
+const descargarPazYSalvos = async () => {
+  try {
+    const periodoId = periodoMapname[filtros.Periodo]?.id_periodo;
+    if (fila) {
+      const response = await descargarPdfEstudianteRequest(fila.id_estudiante,periodoId);
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `paz_y_salvo_${fila.documento}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      setModalDescargaExitosa(true);
+      return;
+    }
+    const estudiantesParaDescargar = estudiantesFiltrados;
+    if (!estudiantesParaDescargar.length) {
+      alert("No hay estudiantes para descargar.");
+      return;
+    }
+    const response = await descargarPdfEstudiantesBatchRequest(periodoId,filtros.Grado || null,filtros.Grupo || null);
+    const blob = new Blob([response.data], { type: "application/zip" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
     link.href = url;
-    link.download = `paz_y_salvo_${fila.documento}.pdf`;
+    link.download = `paz_y_salvo_estudiantes.zip`;
     document.body.appendChild(link);
     link.click();
     link.remove();
     window.URL.revokeObjectURL(url);
-    setModalDescargarPdf(false);
+    setModalDescargaExitosa(true);
   } catch (error) {
     console.error(error);
-    alert(error?.response?.data?.detail ||"Error descargando PDF");
+    alert("Error al descargar los paz y salvo.");
   }
 };
 
-const cargarRecursosPazYSalvo = async () => {
+const cargarRecursosPazYSalvo = async (usuarioIdMap = {}) => {
   try {
     const selloResponse = await selloRequest();
     const selloBlob = new Blob(
@@ -136,19 +146,12 @@ const cargarRecursosPazYSalvo = async () => {
     const selloObjectUrl =
       URL.createObjectURL(selloBlob);
     setSelloUrl(selloObjectUrl);
-    const modulos = [
-      "Banda",
-      "Titular",
-      "Uniforme",
-      "Coordinadora",
-      "Secretaría",
-      "Rectoría"
-    ];
+    const modulos = ["banda","titular","uniforme","coordinadora","secretaria","rectoria"];
     const firmas = {};
     for (const modulo of modulos) {
       try {
         const response =
-          await imagenFirmaRequest(modulo);
+           await imagenFirmaRequest(modulo, usuarioIdMap[modulo]);
         const blob = new Blob(
           [response.data],
           { type: "image/png" }
@@ -169,30 +172,6 @@ const cargarRecursosPazYSalvo = async () => {
       error
     );
     return null;
-  }
-};
-
-const descargarPazYSalvosGrupo = async () => {
-  try {
-    const periodoId =
-      periodoMapname[filtros.Periodo]?.id_periodo;
-    if (!periodoId || !filtros.Grado || !filtros.Grupo) {
-      alert("Seleccione período, grado y grupo");
-      return;
-    }
-    const response =await descargarPdfEstudiantesBatchRequest(periodoId,filtros.Grado,filtros.Grupo)
-    const blob = new Blob([response.data],{ type: "application/zip" })
-    const url = window.URL.createObjectURL(blob)
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `paz_y_salvo_${filtros.Grado}_${filtros.Grupo}.zip`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error(error);
-    alert("Error al descargar los paz y salvo del grupo.");
   }
 };
 
@@ -224,17 +203,24 @@ const verPazYSalvo = async () => {
   try {
     const periodoId =
       periodoMapname[filtros.Periodo]?.id_periodo;
-    const [firmasResponse] = await Promise.all([
-      estudianteFirmasRequest(
+    const firmasResponse =
+      await estudianteFirmasRequest(
         fila.id_estudiante,
         periodoId
-      ),
-      !selloUrl
-        ? cargarRecursosPazYSalvo()
-        : Promise.resolve()
-    ]);
-    console.log(firmasResponse.data);
-    setFirmasDetalle(firmasResponse.data);
+      );
+    const data = firmasResponse.data;
+    const usuarioIdMap = {};
+    data?.detalle_firmas?.forEach((item) => {
+      if (item.id_usuario_firmante) {
+        usuarioIdMap[item.nombre] =
+          item.id_usuario_firmante;
+      }
+    });
+    
+    await cargarRecursosPazYSalvo(usuarioIdMap);
+    
+    console.log(data);
+    setFirmasDetalle(data);
     setModalVerPazSalvo(true);
   } catch (error) {
     console.error(error);
@@ -281,51 +267,20 @@ const verPazYSalvo = async () => {
             if (!modulo) return false;
             if (!modulo.roles || !Array.isArray(modulo.roles) || modulo.roles.length === 0) return true;
             return roles.some(rol => modulo.roles.includes(rol));
+            
           })}
           
           user={{ nombre: userName, rol: rol }}
           onLogout={logout}
+          selectedMenu={selectedMenu}
         />}
         actions={
           <ActionButtons
             filaSeleccionada={fila}
             botones={[
-              {
-                label: "Validar Paz y Salvo",
-                onClick: () => {
-                  if (!fila) {
-                    alert("Seleccione un estudiante");
-                    return;
-                  }
-                  setModalValidarPazSalvo(true);
-                },
-                variante: "primary",
-                disabled: !fila || fila.semaforo == "VERDE"
-              },
-              {
-                label: "Descargar Paz y Salvo",
-                onClick: () => {
-                  if (!fila) {
-                    alert("Seleccione un estudiante");
-                    return;
-                  }
-                  setModalDescargarPdf(true);
-                },
-                variante: "primary",
-                disabled: !fila || fila.semaforo !== "VERDE"
-              },
-              {
-                label: "Ver Paz y Salvo",
-                onClick: verPazYSalvo,
-                variante: "primary"
-              },
-              {
-                label: "Descargar Paz y Salvo Grupo",
-                onClick: descargarPazYSalvosGrupo,
-                variante: "primary",
-                siempreActivo: true,
-                disabled: filtros.Grado == "" || filtros.Grupo == ""
-              }
+              {label: "Validar Paz y Salvo",onClick: () => {if (!fila) {alert("Seleccione un estudiante");return;}setModalValidarPazSalvo(true);},variante: "primary",disabled: !fila || fila.semaforo == "VERDE"},
+              {label: "Descargar Paz y Salvo", onClick: descargarPazYSalvos, variante: "primary", siempreActivo: true },
+              {label: "Ver Paz y Salvo",onClick: verPazYSalvo,variante: "primary"},
             ]}
             
           />
@@ -369,7 +324,7 @@ const verPazYSalvo = async () => {
                 key={`${estudiantes}`}
                 pageSize={10}
                 columns={[
-                  {key: "documento", label: "Documento" },
+                  {key: "documento", label: "Codigo" },
                   {key: "nombre", label: "Nombre" },
                   {key: "grado",label: "Grado",render: (_, val) => (<span>{val.grado}</span>)},
                   {key: "grupo",label: "Grupo",render: (_, val) => (<span>{val.grupo}</span>)},
@@ -378,15 +333,15 @@ const verPazYSalvo = async () => {
                       const config = {
                         VERDE: {
                           texto: "COMPLETO",
-                          color: "#16a34a"
+                          color: "#44D231"
                         },
                         AMARILLO: {
                           texto: "PENDIENTE",
-                          color: "#eab308"
+                          color: "#DABB1D"
                         },
                         ROJO: {
                           texto: "CRÍTICO",
-                          color: "#dc2626"
+                          color: "#8E2A25"
                         }
                       };
                       return (
@@ -428,10 +383,19 @@ const verPazYSalvo = async () => {
           onAccept={confirmarValidacionPazYSalvo}
         />
           <Modal
-          title={`El documento de paz y salvo será generado y descargado en formato PDF.`}
-          isOpen={modalDescargarPdf}
-          onCancel={() => setModalDescargarPdf(false)}
-          onAccept={confirmarDescargaPdf}
+          title="PROCESO COMPLETADO"
+          isOpen={modalDescargaExitosa}
+          onCancel={() => setModalDescargaExitosa(false)}
+          onAccept={() => setModalDescargaExitosa(false)}
+          fields={[
+            {
+              key: "mensaje",
+              type: "label",
+              label:
+                "El documento de paz y salvo ha sido generado y descargado correctamente en formato PDF.",
+              className: "modal-success-message"
+            }
+          ]}
         />
     </div>
   );
