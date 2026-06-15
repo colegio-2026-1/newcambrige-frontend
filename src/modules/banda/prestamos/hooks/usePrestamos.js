@@ -52,8 +52,6 @@ const usePrestamos = () => {
       setPrestamos(pRes.data || []);
       setInstrumentos(iRes.data || []);
       setEstudiantes(eRes.data || []);
-      console.log("ESTUDIANTES:", eRes.data);
-      console.log("SALONES:", sRes.data);
       setSalones(sRes.data || []);
     } catch (e) {
       console.error("Error en conexión:", e);

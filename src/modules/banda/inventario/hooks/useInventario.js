@@ -78,19 +78,27 @@ const useInventario = () => {
   }, [showAlert]);
 
   useEffect(() => { cargarDatos(); }, [cargarDatos]);
-
   const validaciones = useMemo(() => {
-    const nombreVal = form.nombre?.trim();
-    const todoValido = nombreVal?.length >= 2 && nombreUnico &&
-    !!form.id_categoria;
-    const nombreUnico = !instrumentos.some(i => i.nombre.toLowerCase() === nombreVal?.toLowerCase() && i.id_instrumento !== seleccionado?.id_instrumento);
+  const nombreVal = form.nombre?.trim();
 
-    return {
-      nombre: nombreVal?.length >= 2 && nombreUnico,
-      datos: !!form.id_categoria && !isNaN(cantidadVal) && cantidadVal >= 0,
-      todoValido
-    };
-  }, [form, instrumentos, seleccionado]);
+  const nombreUnico = !instrumentos.some(i =>
+    i.nombre.toLowerCase() === nombreVal?.toLowerCase() &&
+    i.id_instrumento !== seleccionado?.id_instrumento
+  );
+
+  const cantidadVal = Number(form.cantidad_total);
+
+  const todoValido =
+    nombreVal?.length >= 2 &&
+    nombreUnico &&
+    !!form.id_categoria;
+
+  return {
+    nombre: nombreVal?.length >= 2 && nombreUnico,
+    datos: !!form.id_categoria && !isNaN(cantidadVal) && cantidadVal >= 0,
+    todoValido
+  };
+}, [form, instrumentos, seleccionado]);
 
   const handleAgregar = async () => {
     if (!form.nombre || !form.id_categoria || form.cantidad_total === "" || form.cantidad_total === null) {
