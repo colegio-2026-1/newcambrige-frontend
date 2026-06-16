@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronUp, ChevronDown, Calendar as CalendarIcon } from "lucide-react";
 import "./AnioEscolarPage.css";
 
 import Header from "../../components/layout/header";
@@ -7,32 +7,20 @@ import Sidebar from "../../components/layout/Sidebar";
 import ModuleLayout from "../../components/layout/ModuleLayout";
 import DataTable from "../../components/shared/DataTable";
 import ActionButtons from "../../components/shared/ActionButtons";
+import ParamModal from "../../components/shared/ParamModal";
+import Alert from "../../components/shared/Alert";
 
 import { useAuth } from "../../api/useAuth";
 import { obtenerAniosRequest, crearAnioRequest, actualizarAnioRequest } from "../../api/endpointsParametrizacion";
 
 import { Icon } from '@mdi/react';
 import {
-  mdiHome,
-  mdiCog,
-
-  mdiAccount,
-  mdiCalendar,
-  mdiTestTube,
-  mdiGuitarElectric,
-  mdiCube,
-  mdiBook,
-  mdiAccountGroup,
+  mdiHome, mdiAccount, mdiCalendar, mdiTestTube,
+  mdiGuitarElectric, mdiCube, mdiBook, mdiAccountGroup,
 } from '@mdi/js';
 
-import salonIcon from "../../assets/Salon/salon.svg";
-import tesoreriaIcon from "../../assets/Tesoreria/tesoreria.svg";
-import rectoriaIcon from "../../assets/Rectoria/estudiante.svg";
-import uniformesIcon from "../../assets/Objetos/objetos.svg";
-import paraIcon from "../../assets/Parametrizacion/parametrizacion.svg";
-
-
 const formatAnioDoble = (anioStr) => {
+  if (!anioStr) return "";
   const anioNum = parseInt(anioStr);
   if (isNaN(anioNum)) return anioStr;
   return `${anioNum} - ${anioNum + 1}`;
@@ -56,10 +44,10 @@ const YearPicker = ({ selectedYear, onYearSelect, placeholder = "Seleccionar añ
   const aniosVisibles = Array.from({ length: 16 }, (_, i) => baseYear + i);
 
   return (
-    <div className="anio-form-group" ref={popoverRef} style={{ width: '100%', margin: 0 }}>
+    <div className="anio-form-group" ref={popoverRef} style={{ width: '100%', margin: 0, position: 'relative' }}>
       <div className="anio-custom-year-picker" onClick={() => setIsOpen(!isOpen)}>
         <span>{selectedYear ? formatAnioDoble(selectedYear) : placeholder}</span>
-        <CalendarIcon size={18} color="#3F5D93" />
+        <CalendarIcon size={18} color="var(--color-secondary)" />
       </div>
 
       {isOpen && (
@@ -79,7 +67,11 @@ const YearPicker = ({ selectedYear, onYearSelect, placeholder = "Seleccionar añ
                 className={`anio-year-btn ${anio === selectedYear ? 'active' : ''}`}
                 onClick={(e) => { 
                   e.stopPropagation(); 
-                  onYearSelect(anio); 
+                  if (anio === selectedYear) {
+                    onYearSelect(null);
+                  } else {
+                    onYearSelect(anio);
+                  }
                   setIsOpen(false); 
                 }}
               >
@@ -93,136 +85,25 @@ const YearPicker = ({ selectedYear, onYearSelect, placeholder = "Seleccionar añ
   );
 };
 
-const AnioModal = ({ isOpen, onClose, anioEdit, alTerminar }) => {
-  if (!isOpen) return null;
-
-  const isEdit = Boolean(anioEdit);
-  
-  const [anioInicio, setAnioInicio] = useState(new Date().getFullYear());
-  const [fechaInicio, setFechaInicio] = useState("");
-  const [fechaFin, setFechaFin] = useState("");
-  const [activo, setActivo] = useState(false);
-  const [cargando, setCargando] = useState(false);
-
-  useEffect(() => {
-    if (isEdit && anioEdit) {
-      setAnioInicio(parseInt(anioEdit.nombre.substring(0, 4))); 
-      setFechaInicio(anioEdit.fecha_inicio.split('T')[0]); 
-      setFechaFin(anioEdit.fecha_fin.split('T')[0]);
-      setActivo(anioEdit.activo);
-    } else {
-      setAnioInicio(new Date().getFullYear());
-      setFechaInicio("");
-      setFechaFin("");
-      setActivo(true);
-    }
-  }, [isOpen, anioEdit]);
-
-  const handleGuardar = async () => {
-    if (!fechaInicio || !fechaFin) return alert("Por favor selecciona ambas fechas.");
-    if (new Date(fechaInicio) >= new Date(fechaFin)) return alert("La fecha de fin debe ser posterior a la de inicio.");
-
-    try {
-      setCargando(true);
-      const payload = {
-        fecha_inicio: `${fechaInicio}T00:00:00`,
-        fecha_fin: `${fechaFin}T23:59:59`,
-        activo: activo
-      };
-
-      const ejecutarPeticion = async (forzarActivo) => {
-        if (isEdit) {
-          await actualizarAnioRequest(anioEdit.id_periodo, payload, forzarActivo);
-        } else {
-          payload.anio_inicio = parseInt(anioInicio);
-          await crearAnioRequest(payload, forzarActivo);
-        }
-      };
-
-      try {
-        await ejecutarPeticion(false);
-        alTerminar();
-        onClose();
-      } catch (error) {
-        if (error.response?.status === 409) {
-          const confirmar = window.confirm(`${error.response.data.detail}\n\n¿Deseas forzar el cambio y desactivar el año anterior?`);
-          if (confirmar) {
-            await ejecutarPeticion(true);
-            alTerminar();
-            onClose();
-          }
-        } else {
-          alert(error.response?.data?.detail || "Error al guardar el periodo académico.");
-        }
-      }
-    } finally {
-      setCargando(false);
-    }
-  };
-
-  return (
-    <div className="anio-modal-overlay">
-      <div className="anio-modal-content">
-        <div className="anio-modal-header">
-          <h3>{isEdit ? "ADMINISTRADOR" : "NUEVO AÑO ESCOLAR"}</h3>
-          <button className="anio-modal-close" onClick={onClose} disabled={cargando}>×</button>
-        </div>
-        
-        <div className="anio-modal-body">
-          <div className="anio-form-row" style={{ justifyContent: "space-between" }}>
-            <div style={{ flex: 0.6 }}>
-              <label className="anio-form-label">Año Escolar</label>
-              {isEdit ? (
-                <div className="anio-input-style" style={{ display: 'flex', alignItems: 'center', backgroundColor: '#d3d3d3', color: '#666' }}>
-                  {formatAnioDoble(anioInicio)}
-                </div>
-              ) : (
-                <YearPicker selectedYear={anioInicio} onYearSelect={setAnioInicio} />
-              )}
-            </div>
-            
-            <div className="anio-toggle-wrapper">
-              <span>Activo</span>
-              <label className="anio-toggle-switch">
-                <input type="checkbox" checked={activo} onChange={(e) => setActivo(e.target.checked)} />
-                <span className="slider"></span>
-              </label>
-            </div>
-          </div>
-
-          <div className="anio-form-row">
-            <div className="anio-form-group">
-              <label className="anio-form-label">Fecha de Inicio</label>
-              <input type="date" className="anio-input-style" value={fechaInicio} onChange={(e) => setFechaInicio(e.target.value)} />
-            </div>
-            <div className="anio-form-group">
-              <label className="anio-form-label">Fecha de Fin</label>
-              <input type="date" className="anio-input-style" value={fechaFin} onChange={(e) => setFechaFin(e.target.value)} min={fechaInicio} />
-            </div>
-          </div>
-        </div>
-
-        <div className="anio-modal-footer">
-          <button className="anio-btn-primary" onClick={handleGuardar} disabled={cargando}>Aceptar</button>
-          <button className="anio-btn-secondary" onClick={onClose} disabled={cargando}>Cancelar</button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const AnioEscolarPage = () => {
   const { user, roles, loadingRoles, logout } = useAuth();
   
   const [anios, setAnios] = useState([]);
   const [anioSeleccionado, setAnioSeleccionado] = useState(null);
-  const [filtroAnio, setFiltroAnio] = useState(null);
   
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalModeEdit, setModalModeEdit] = useState(false);
+  const [filtroAnioSeleccionado, setFiltroAnioSeleccionado] = useState(null);
+  const [filtroAnioAplicado, setFiltroAnioAplicado] = useState(null);
+  
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState("crear"); 
+  const [formValues, setFormValues] = useState({});
+  const [alertConfig, setAlertConfig] = useState({ isOpen: false, type: "info", message: "", onClose: null, onCancel: null });
 
-  const [paginaActual, setPaginaActual] = useState(1);
-  const itemsPorPagina = 10;
+  const closeAlert = () => setAlertConfig(prev => ({ ...prev, isOpen: false }));
+
+  const showAlert = (type, message, title = "") => setAlertConfig({ 
+    isOpen: true, type, message, title, onClose: closeAlert, onCancel: null
+  });
 
   const cargarAnios = async () => {
     try {
@@ -230,26 +111,19 @@ const AnioEscolarPage = () => {
       setAnios(response.data || []);
       setAnioSeleccionado(null); 
     } catch (error) {
-      console.error("Error al cargar años escolares:", error);
+      showAlert("error", "Error al cargar los años escolares.");
     }
   };
 
   useEffect(() => { cargarAnios(); }, []);
 
   const aniosFiltrados = useMemo(() => {
-    return filtroAnio 
-      ? anios.filter(a => parseInt(a.nombre.substring(0, 4)) === filtroAnio)
+    return filtroAnioAplicado 
+      ? anios.filter(a => parseInt(a.nombre.substring(0, 4)) === filtroAnioAplicado)
       : anios;
-  }, [anios, filtroAnio]);
+  }, [anios, filtroAnioAplicado]);
 
-  const totalPaginas = Math.ceil(aniosFiltrados.length / itemsPorPagina) || 1;
-
-  const aniosPaginados = useMemo(() => {
-    const startIndex = (paginaActual - 1) * itemsPorPagina;
-    return aniosFiltrados.slice(startIndex, startIndex + itemsPorPagina);
-  }, [aniosFiltrados, paginaActual]);
-
- const menuItems = [
+  const menuItems = [
     { label: "Inicio", icon: <Icon path={mdiHome} size="32px" />, path: "/home" },
     { label: "Usuarios", icon: <Icon path={mdiAccount} size="32px" />, path: "/parametrizacion/usuarios" },
     { label: "Año Escolar", icon: <Icon path={mdiCalendar} size="32px" />, path: "/parametrizacion/anio-escolar" },
@@ -264,11 +138,102 @@ const AnioEscolarPage = () => {
     { key: "nombre", label: "AÑO ESCOLAR", render: (val) => formatAnioDoble(val) },
     { key: "fecha_inicio", label: "FECHA INICIO", render: (val) => new Date(val).toLocaleDateString('es-CO', { timeZone: 'UTC' }) },
     { key: "fecha_fin", label: "FECHA FIN", render: (val) => new Date(val).toLocaleDateString('es-CO', { timeZone: 'UTC' }) },
-    { key: "activo", label: "ESTADO", render: (val) => <span style={{ color: val ? "#008000" : "#D00000", fontWeight: "bold" }}>{val ? 'Activo' : 'Cerrado'}</span> }
+    { key: "activo", label: "ESTADO", render: (val) => <span className={val ? 'badge--ok' : 'badge--no'}>{val ? 'Activo' : 'Inactivo'}</span> }
   ];
 
-  const abrirModalCrear = () => { setModalModeEdit(false); setIsModalOpen(true); };
-  const abrirModalEditar = () => { setModalModeEdit(true); setIsModalOpen(true); };
+  const abrirModalCrear = () => { 
+    setModalMode("crear"); 
+    setFormValues({ anioInicio: new Date().getFullYear(), fechaInicio: "", fechaFin: "", activo: true });
+    setModalOpen(true); 
+  };
+
+  const abrirModalEditar = () => { 
+    if(!anioSeleccionado) return;
+    setModalMode("editar"); 
+    setFormValues({
+      anioInicio: parseInt(anioSeleccionado.nombre.substring(0, 4)),
+      fechaInicio: anioSeleccionado.fecha_inicio.split('T')[0],
+      fechaFin: anioSeleccionado.fecha_fin.split('T')[0],
+      activo: anioSeleccionado.activo
+    });
+    setModalOpen(true); 
+  };
+
+  const handleModalChange = (key, value) => {
+    setFormValues(prev => ({ ...prev, [key]: value }));
+  };
+
+  const guardarAnio = async () => {
+    if (!formValues.fechaInicio || !formValues.fechaFin) {
+      return showAlert("warning", "Por favor selecciona ambas fechas.");
+    }
+
+    const startYear = parseInt(formValues.fechaInicio.split("-")[0]);
+    const endYear = parseInt(formValues.fechaFin.split("-")[0]);
+    const allowedStartYear = formValues.anioInicio;
+    const allowedEndYear = formValues.anioInicio + 1;
+
+    if (new Date(formValues.fechaInicio) >= new Date(formValues.fechaFin)) {
+      return showAlert("warning", "La fecha de fin debe ser posterior a la de inicio.");
+    }
+
+    if (startYear < allowedStartYear || startYear > allowedEndYear) {
+      return showAlert("warning", `La fecha de inicio debe estar dentro del periodo ${allowedStartYear} - ${allowedEndYear}.`);
+    }
+    if (endYear < allowedStartYear || endYear > allowedEndYear) {
+      return showAlert("warning", `La fecha de fin debe estar dentro del periodo ${allowedStartYear} - ${allowedEndYear}.`);
+    }
+
+    const payload = {
+      fecha_inicio: `${formValues.fechaInicio}T00:00:00`,
+      fecha_fin: `${formValues.fechaFin}T23:59:59`,
+      activo: formValues.activo
+    };
+
+    if (modalMode === "crear") {
+      payload.anio_inicio = parseInt(formValues.anioInicio);
+    }
+
+    const ejecutarPeticion = async (forzarActivo) => {
+      if (modalMode === "editar") {
+        await actualizarAnioRequest(anioSeleccionado.id_periodo, payload, forzarActivo);
+      } else {
+        await crearAnioRequest(payload, forzarActivo);
+      }
+    };
+
+    try {
+      await ejecutarPeticion(false);
+      showAlert("success", modalMode === "crear" ? "Año escolar creado correctamente." : "Año escolar actualizado.");
+      setModalOpen(false);
+      cargarAnios();
+    } catch (error) {
+      if (error.response?.status === 409) {
+        setAlertConfig({
+          isOpen: true,
+          type: "warning",
+          title: "ADVERTENCIA",
+          message: `${error.response.data.detail}\n\n¿Deseas forzar el cambio y desactivar el año anterior?`,
+          onClose: async () => {
+            closeAlert();
+            try {
+              await ejecutarPeticion(true);
+              showAlert("success", "Año escolar actualizado y forzado como activo.");
+              setModalOpen(false);
+              cargarAnios();
+            } catch (err) {
+              showAlert("error", "Error al forzar el año escolar.");
+            }
+          },
+          onCancel: closeAlert,
+          acceptText: "Aceptar",
+          cancelText: "Cancelar"
+        });
+      } else {
+        showAlert("error", error.response?.data?.detail || "Error al guardar el periodo académico.");
+      }
+    }
+  };
 
   const userName = user?.nombre || "Usuario";
   const rol = roles[0] || (loadingRoles ? "Cargando rol..." : "Sin rol");
@@ -282,106 +247,123 @@ const AnioEscolarPage = () => {
         <div className="anio-wrapper page-master-wrapper">
           
           <div className="module-toolbar-container">
-            <div className="toolbar-grouped-actions">
-              
+            <div className="searchbar-wrapper" style={{ padding: 0, width: 'auto' }}>
               <div className="searchbar-field">
-                <label className="master-search-label">Año Escolar:</label>
+                <label className="searchbar-label">Año Escolar:</label>
                 <div style={{ width: '220px' }}>
                   <YearPicker 
-                    selectedYear={filtroAnio} 
-                    onYearSelect={(anio) => { setFiltroAnio(anio); setPaginaActual(1); }} 
-                    placeholder="Todos los años"
+                    selectedYear={filtroAnioSeleccionado} 
+                    onYearSelect={setFiltroAnioSeleccionado} 
+                    placeholder="Seleccionar"
                   />
                 </div>
               </div>
-              
-              <button 
-                onClick={() => { setFiltroAnio(null); setPaginaActual(1); }}
-                className="master-clear-filter"
-                style={{ visibility: filtroAnio ? 'visible' : 'hidden' }}
-              >
-                Limpiar Filtro
+              <button className="searchbar-btn" onClick={() => setFiltroAnioAplicado(filtroAnioSeleccionado)}>
+                Buscar
               </button>
-              
-              <ActionButtons
-                botones={[
-                  { 
-                    label: "Crear", 
-                    onClick: abrirModalCrear, 
-                    variante: "primary",
-                    siempreActivo: true 
-                  }
-                ]}
-              />
             </div>
           </div>
 
           <div className="main-area">
-            {anios.length === 0 ? (
-              <div className="anio-empty-state">
+            <div className="table-layout-wrapper">
+              
+              <div className="table-main-section">
+                <DataTable 
+                  columns={columnasTabla} 
+                  rows={aniosFiltrados} 
+                  onRowClick={(fila) => setAnioSeleccionado(fila)}
+                  emptyText={filtroAnioAplicado ? `No se encontraron registros para el año ${formatAnioDoble(filtroAnioAplicado)}` : "No hay años registrados"}
+                  pageSize={10}
+                />
               </div>
-            ) : aniosFiltrados.length === 0 ? (
-                <div className="empty-state">
-                  <p>No se encontraron registros para el año {formatAnioDoble(filtroAnio)}</p>
-                </div>
-            ) : (
-              <div className="table-layout-wrapper">
-                
-                <div className="table-main-section">
-                  <div className="datatable-fixed-container">
-                    <DataTable 
-                      columns={columnasTabla} 
-                      rows={aniosPaginados} 
-                      onRowClick={(fila) => setAnioSeleccionado(fila)}
-                      emptyText="No hay años registrados"
-                      filaActiva={anioSeleccionado}
-                      idKey="id_periodo"
-                    />
-                  </div>
-                  
-                  <div className="pagination-center">
-                    <button 
-                      className="btn-circle"
-                      onClick={() => { setPaginaActual(p => Math.max(1, p - 1)); setAnioSeleccionado(null); }}
-                      disabled={paginaActual === 1}
-                    >
-                      <ChevronLeft size={20} />
-                    </button>
-                    <button 
-                      className="btn-circle"
-                      onClick={() => { setPaginaActual(p => Math.min(totalPaginas, p + 1)); setAnioSeleccionado(null); }}
-                      disabled={paginaActual === totalPaginas}
-                    >
-                      <ChevronRight size={20} />
-                    </button>
-                  </div>
-                </div>
 
-                <div className="side-actions">
-                  <ActionButtons
-                    filaSeleccionada={anioSeleccionado}
-                    botones={[
-                      { 
-                        label: "Editar", 
-                        onClick: abrirModalEditar, 
-                        variante: "primary",
-                        siempreActivo: false 
-                      }
-                    ]}
-                  />
-                </div>
-
+              <div className="side-actions">
+                <ActionButtons
+                  filaSeleccionada={anioSeleccionado}
+                  botones={[
+                    { label: "Crear Año Escolar", onClick: abrirModalCrear, variante: "primary", siempreActivo: true },
+                    { label: "Editar Año Escolar", onClick: abrirModalEditar, variante: "secondary", siempreActivo: false }
+                  ]}
+                />
               </div>
-            )}
+
+            </div>
           </div>
         </div>
 
-        <AnioModal 
-          isOpen={isModalOpen} 
-          onClose={() => setIsModalOpen(false)} 
-          anioEdit={modalModeEdit ? anioSeleccionado : null} 
-          alTerminar={cargarAnios} 
-        />
+
+        <ParamModal 
+          title={modalMode === "crear" ? "CREAR AÑO ESCOLAR" : "EDITAR AÑO ESCOLAR"}
+          isOpen={modalOpen} 
+          onClose={() => setModalOpen(false)} 
+        >
+          {/* Fila 1: Año y Estado */}
+          <div style={{ display: "flex", gap: "16px", width: "100%", alignItems: "flex-end" }}>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+              <label className="modal-label" style={{ paddingTop: 0 }}>Año Escolar</label>
+              {modalMode === "editar" ? (
+                <div className="anio-input-disabled">
+                  {formatAnioDoble(formValues.anioInicio)}
+                </div>
+              ) : (
+                <YearPicker 
+                  selectedYear={formValues.anioInicio} 
+                  onYearSelect={(val) => handleModalChange("anioInicio", val)} 
+                />
+              )}
+            </div>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+              <label className="modal-label" style={{ paddingTop: 0 }}>Estado</label>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "6px", paddingBottom: "2px" }}>
+                <label className="modal-label" style={{ padding: 0, margin: 0, minWidth: "65px" }}>
+                  {formValues.activo ? "Activo" : "Inactivo"}
+                </label>
+                <label className="anio-toggle-switch" style={{ margin: 0 }}>
+                  <input
+                    type="checkbox"
+                    checked={formValues.activo ?? true}
+                    onChange={(e) => handleModalChange("activo", e.target.checked)}
+                  />
+                  <span className="anio-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Fila 2: Fechas */}
+          <div style={{ display: "flex", gap: "16px", width: "100%", marginTop: "16px" }}>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+              <label className="modal-label" style={{ paddingTop: 0 }}>Fecha de Inicio</label>
+              <input 
+                type="date" 
+                className="modal-input" 
+                value={formValues.fechaInicio || ""} 
+                onChange={(e) => handleModalChange("fechaInicio", e.target.value)} 
+                min={`${formValues.anioInicio}-01-01`}
+                max={`${formValues.anioInicio + 1}-12-31`}
+              />
+            </div>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+              <label className="modal-label" style={{ paddingTop: 0 }}>Fecha de Fin</label>
+              <input 
+                type="date" 
+                className="modal-input" 
+                value={formValues.fechaFin || ""} 
+                onChange={(e) => handleModalChange("fechaFin", e.target.value)} 
+                min={formValues.fechaInicio || `${formValues.anioInicio}-01-01`} 
+                max={`${formValues.anioInicio + 1}-12-31`}
+              />
+            </div>
+          </div>
+
+          {/* Botones de Acción */}
+          <div className="modal-actions" style={{ marginTop: "30px" }}>
+            <button className="modal-btn modal-btn--accept" onClick={guardarAnio}>Aceptar</button>
+            <button className="modal-btn modal-btn--cancel" onClick={() => setModalOpen(false)}>Cancelar</button>
+          </div>
+        </ParamModal>
+
+        <Alert {...alertConfig} onClose={alertConfig.onClose || closeAlert} />
       </ModuleLayout>
     </div>
   );
