@@ -41,7 +41,8 @@ Importar en main.jsx o index.css:
 --color-white:          #FFFFFF;
 --color-bg:             #FFFFFF;   /* fondo general crema */
 --color-input-bg:       #E9E9E7;   /* fondo de inputs */
---color-border:         #C0C0C0;   /* borde inputs (rojo tenue) */
+--color-border:         #C0C0C0;   /* borde inputs */
+--color-border-dark:    #808080;   /* borde oscuro para drag and drop */
 --color-border-light:   #C9B99A;   /* borde suave */
 
   /* ── TEXTO ── */

@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import "./ObjetosPage.css";
 
 import Header from "../../components/layout/header";
@@ -8,9 +7,10 @@ import ModuleLayout from "../../components/layout/ModuleLayout";
 import DataTable from "../../components/shared/DataTable";
 import SearchBar from "../../components/shared/searchBar";
 import ActionButtons from "../../components/shared/ActionButtons";
+import ParamModal from "../../components/shared/ParamModal"; 
+import Alert from "../../components/shared/Alert";
 
 import { useAuth } from "../../api/useAuth";
-
 import { 
   obtenerObjetosRequest, 
   crearObjetoRequest, 
@@ -20,126 +20,287 @@ import {
 
 import { Icon } from '@mdi/react';
 import {
-  mdiHome,
-  mdiCog,
-
-  mdiAccount,
-  mdiCalendar,
-  mdiTestTube,
-  mdiGuitarElectric,
-  mdiCube,
-  mdiBook,
-  mdiAccountGroup,
+  mdiHome, mdiAccount, mdiCalendar, mdiTestTube,
+  mdiGuitarElectric, mdiCube, mdiBook, mdiAccountGroup,
 } from '@mdi/js';
 
-import salonIcon from "../../assets/Salon/salon.svg";
-import tesoreriaIcon from "../../assets/Tesoreria/tesoreria.svg";
-import rectoriaIcon from "../../assets/Rectoria/estudiante.svg";
-import uniformesIcon from "../../assets/Objetos/objetos.svg";
-import paraIcon from "../../assets/Parametrizacion/parametrizacion.svg";
+const capitalizar = (texto) => texto ? texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase() : "—";
 
-// ==========================================
-// MODAL PARA CREAR / EDITAR OBJETO
-// ==========================================
-const ObjetoModal = ({ isOpen, onClose, objetoEdit, alTerminar }) => {
-  if (!isOpen) return null;
+const ObjetosPage = () => {
+  const { user, roles, loadingRoles, logout } = useAuth();
+  
+  const [objetos, setObjetos] = useState([]);
+  const [objetoSeleccionado, setObjetoSeleccionado] = useState(null);
+  const [filtros, setFiltros] = useState({ codigo: "", nombre: "", tipo: "" });
+  
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState("crear");
+  const [formValues, setFormValues] = useState({});
+  const [alertConfig, setAlertConfig] = useState({ isOpen: false, type: "info", message: "", onClose: null, onCancel: null });
 
-  const isEdit = Boolean(objetoEdit);
+  const closeAlert = () => setAlertConfig(prev => ({ ...prev, isOpen: false }));
 
-  const [nombre, setNombre] = useState("");
-  const [tipo, setTipo] = useState("Vestimenta");
-  const [talla, setTalla] = useState("S");
-  const [estadoFisico, setEstadoFisico] = useState("");
-  const [observacion, setObservacion] = useState("");
-  const [cantidadTotal, setCantidadTotal] = useState(0);
-  const [cargando, setCargando] = useState(false);
+  const showAlert = (type, message, title = "", customConfig = {}) => {
+    setAlertConfig({
+      isOpen: true,
+      type,
+      message,
+      title,
+      onClose: closeAlert,
+      onCancel: null,
+      ...customConfig
+    });
+  };
 
-  useEffect(() => {
-    if (isEdit && objetoEdit) {
-      setNombre(objetoEdit.nombre || "");
-      setTipo(objetoEdit.tipo || "Vestimenta");
-      setTalla(objetoEdit.talla || "No aplica");
-      setEstadoFisico(objetoEdit.estado_fisico || "");
-      setObservacion(objetoEdit.observacion || "");
-      setCantidadTotal(objetoEdit.cantidad_total || 0);
-    } else {
-      setNombre("");
-      setTipo("Vestimenta");
-      setTalla("S");
-      setEstadoFisico("");
-      setObservacion("");
-      setCantidadTotal(0);
-    }
-  }, [isOpen, objetoEdit]);
-
-  const handleTipoChange = (e) => {
-    const nuevoTipo = e.target.value;
-    setTipo(nuevoTipo);
-    if (nuevoTipo === "Objeto") {
-      setTalla("No aplica");
-    } else if (nuevoTipo === "Vestimenta" && talla === "No aplica") {
-      setTalla("S"); 
+  const cargarObjetos = async () => {
+    try {
+      const response = await obtenerObjetosRequest();
+      const ordenado = [...(response.data || [])].sort((a, b) => a.nombre.localeCompare(b.nombre));
+      setObjetos(ordenado);
+      setObjetoSeleccionado(null); 
+    } catch (error) {
+      showAlert("error", "Error al cargar el inventario.");
     }
   };
 
-  const handleGuardar = async () => {
-    if (!nombre) return alert("El nombre es obligatorio.");
-    if (cantidadTotal < 0) return alert("La cantidad no puede ser negativa.");
+  useEffect(() => { cargarObjetos(); }, []);
+
+  const abrirModalCrear = () => {
+    setModalMode("crear");
+    setFormValues({ 
+      nombre: "", 
+      tipo: "",           
+      talla: "",         
+      cantidad_total: 1, 
+      estado_fisico: "",  
+      observacion: "" 
+    });
+    setModalOpen(true);
+  };
+
+  const abrirModalEditar = () => {
+    if (!objetoSeleccionado) return;
+    setModalMode("editar");
+    setFormValues({
+      nombre: objetoSeleccionado.nombre || "",
+      tipo: capitalizar(objetoSeleccionado.tipo) || "",
+      talla: objetoSeleccionado.talla || "",
+      cantidad_total: objetoSeleccionado.cantidad_total || 0,
+      estado_fisico: capitalizar(objetoSeleccionado.estado_fisico) || "",
+      observacion: objetoSeleccionado.observacion || ""
+    });
+    setModalOpen(true);
+  };
+
+  const handleModalChange = (key, value) => {
+    setFormValues(prev => {
+      const updated = { ...prev, [key]: value };
+      if (key === "tipo") {
+        updated.talla = value === "Objeto" ? "No aplica" : "";
+      }
+      return updated;
+    });
+  };
+
+  const guardarObjeto = async () => {
+    if (!formValues.nombre || !formValues.nombre.trim()) {
+      return showAlert("warning", "El nombre de la prenda u objeto es obligatorio.");
+    }
+    if (!formValues.tipo) {
+      return showAlert("warning", "Debe seleccionar un Tipo.");
+    }
+    if (formValues.tipo === "Vestimenta" && !formValues.talla) {
+      return showAlert("warning", "Debe seleccionar una Talla para la vestimenta.");
+    }
+    if (formValues.cantidad_total === "" || formValues.cantidad_total < 0) {
+      return showAlert("warning", "La cantidad total ingresada es inválida.");
+    }
+    if (!formValues.estado_fisico) {
+      return showAlert("warning", "Debe seleccionar un Estado Físico.");
+    }
+
+    const estadoL = (formValues.estado_fisico || "").toLowerCase();
+    if (["regular", "malo"].includes(estadoL) && !(formValues.observacion || "").trim()) {
+      return showAlert("warning", "Debe ingresar una observación obligatoria para ítems en estado Regular o Malo.");
+    }
+
+    const payload = {
+      nombre: formValues.nombre,
+      tipo: formValues.tipo,
+      talla: formValues.talla,
+      estado_fisico: formValues.estado_fisico,
+      observacion: formValues.observacion,
+      cantidad_total: parseInt(formValues.cantidad_total),
+      cantidad_disponible: parseInt(formValues.cantidad_total) 
+    };
 
     try {
-      setCargando(true);
-      const payload = {
-        nombre,
-        tipo,
-        talla,
-        estado_fisico: estadoFisico || "Excelente",
-        observacion,
-        cantidad_total: parseInt(cantidadTotal)
-      };
-
-      if (isEdit) {
-        await actualizarObjetoRequest(objetoEdit.id_objeto, payload);
+      if (modalMode === "editar") {
+        delete payload.cantidad_disponible; 
+        await actualizarObjetoRequest(objetoSeleccionado.id_objeto, payload);
       } else {
+        payload.fecha_registro = new Date().toLocaleDateString("en-CA");
         await crearObjetoRequest(payload);
       }
-      
-      alTerminar();
-      onClose();
+      showAlert("success", modalMode === "crear" ? "Prenda/Objeto registrado correctamente." : "Prenda/Objeto actualizado correctamente.");
+      setModalOpen(false);
+      cargarObjetos();
     } catch (error) {
-      alert(error.response?.data?.detail || "Error al guardar el ítem.");
-    } finally {
-      setCargando(false);
+      showAlert("error", error.response?.data?.detail || "Error al guardar el ítem.");
     }
   };
 
+  const confirmarEliminacion = () => {
+    if (!objetoSeleccionado) return;
+    if (Number(objetoSeleccionado.prestadas) > 0) {
+      return showAlert("warning", "LA PRENDA TIENE UN PRÉSTAMO ACTIVO. No es posible eliminarla.");
+    }
+
+    showAlert("warning", `Esta acción eliminará permanentemente la prenda: ${objetoSeleccionado.nombre}`, "ELIMINAR PRENDA", {
+      acceptText: "Eliminar",
+      cancelText: "Cancelar",
+      onCancel: closeAlert,
+      onClose: async () => {
+        closeAlert();
+        try {
+          await eliminarObjetoRequest(objetoSeleccionado.id_objeto);
+          showAlert("success", "La prenda fue eliminada correctamente.");
+          cargarObjetos();
+        } catch (error) {
+          showAlert("error", error.response?.data?.detail || "Error eliminando la prenda.");
+        }
+      }
+    });
+  };
+
+  const menuItems = [
+    { label: "Inicio", icon: <Icon path={mdiHome} size="32px" />, path: "/home" },
+    { label: "Usuarios", icon: <Icon path={mdiAccount} size="32px" />, path: "/parametrizacion/usuarios" },
+    { label: "Año Escolar", icon: <Icon path={mdiCalendar} size="32px" />, path: "/parametrizacion/anio-escolar" },
+    { label: "Pruebas", icon: <Icon path={mdiTestTube} size="32px" />, path: "/parametrizacion/pruebas" },
+    { label: "Instrumentos", icon: <Icon path={mdiGuitarElectric} size="32px" />, path: "/parametrizacion/instrumentos" },
+    { label: "Objetos", icon: <Icon path={mdiCube} size="32px" />, path: "/parametrizacion/objetos" },
+    { label: "Libros", icon: <Icon path={mdiBook} size="32px" />, path: "/parametrizacion/libros" },
+    { label: "Asignar Titular", icon: <Icon path={mdiAccountGroup} size="32px" />, path: "/parametrizacion/titulares" },
+  ];
+
+  const columnasTabla = [
+    { key: "id_objeto", label: "Código" },
+    { key: "nombre", label: "Nombre", render: (val) => capitalizar(val) },
+    { key: "tipo", label: "Categoría", render: (val) => capitalizar(val) },
+    { key: "talla", label: "Talla" },
+    { key: "estado_fisico", label: "Estado", render: (val) => {
+        const est = val?.toLowerCase() || "";
+        let clase = "badge--ok";
+        if (est === "regular") clase = "badge--warn";
+        if (est === "malo") clase = "badge--no";
+        return <span className={clase}>{capitalizar(val)}</span>;
+    }},
+    { key: "cantidad_total", label: "Total" },
+    { key: "cantidad_disponible", label: "Disponibles", 
+      render: (val) => <span className={Number(val) > 0 ? "badge--ok" : "badge--no"}>{val}</span> 
+    }
+  ];
+
+  const objetosFiltrados = useMemo(() => {
+    return objetos.filter(o => {
+      const matchCodigo = filtros.codigo ? String(o.id_objeto).includes(filtros.codigo) : true;
+      const matchNombre = filtros.nombre ? (o.nombre || "").toLowerCase().includes(filtros.nombre.toLowerCase()) : true;
+      const matchTipo = filtros.tipo ? (o.tipo || "").toLowerCase() === filtros.tipo.toLowerCase() : true;
+      return matchCodigo && matchNombre && matchTipo;
+    });
+  }, [objetos, filtros]);
+
+  const userName = user?.nombre || "Usuario";
+  const rol = roles[0] || (loadingRoles ? "Cargando rol..." : "Sin rol");
+
   return (
-    <div className="objetos-modal-overlay">
-      <div className="objetos-modal-content">
-        <div className="modal-header">
-          <h3>{isEdit ? "EDITAR ÍTEM" : "NUEVO ÍTEM"}</h3>
-          <button className="modal-close" onClick={onClose} disabled={cargando}>×</button>
-        </div>
-        <div className="modal-body">
+    <div className="dashboard-container">
+      <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
+      <ModuleLayout
+        sidebar={<Sidebar menuItems={menuItems} selectedMenu="Objetos" user={{ nombre: userName, rol }} logout={logout} />}
+      >
+        <div className="objetos-wrapper page-master-wrapper">
           
-          <div className="modal-form-row">
-            <div className="input-group" style={{ flex: 2 }}>
-              <label>Nombre / Prenda</label>
-              <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej: Camisa Diario" />
+          <div className="module-toolbar-container">
+            <SearchBar
+              fields={[
+                { key: 'codigo', label: 'Código:', type: 'text' },
+                { key: 'nombre', label: 'Nombre:', type: 'text' },
+                { key: 'tipo', label: 'Tipo:', type: 'select', options: ['Vestimenta', 'Objeto'] }
+              ]}
+              onSearch={(nuevosFiltros) => setFiltros(nuevosFiltros)}
+            />
+          </div>
+
+          <div className="main-area">
+            <div className="table-layout-wrapper">
+              
+              <div className="table-main-section">
+                <DataTable 
+                  columns={columnasTabla} 
+                  rows={objetosFiltrados} 
+                  onRowClick={(fila) => setObjetoSeleccionado(fila)}
+                  emptyText="No se encontraron ítems con esos criterios de búsqueda"
+                  pageSize={10}
+                />
+              </div>
+
+              <div className="side-actions">
+                <ActionButtons
+                  filaSeleccionada={objetoSeleccionado}
+                  botones={[
+                    { label: "Agregar Objeto", onClick: abrirModalCrear, variante: "primary", siempreActivo: true },
+                    { label: "Editar Objeto", onClick: abrirModalEditar, variante: "secondary", siempreActivo: false },
+                    { label: "Eliminar Objeto", onClick: confirmarEliminacion, variante: "danger", siempreActivo: false }
+                  ]}
+                />
+              </div>  
+
             </div>
-            <div className="input-group" style={{ flex: 1 }}>
-              <label>Tipo</label>
-              <select value={tipo} onChange={handleTipoChange}>
+          </div>
+        </div>
+
+        <ParamModal 
+          title={modalMode === "crear" ? "AGREGAR OBJETO" : "EDITAR OBJETO"}
+          isOpen={modalOpen} 
+          onClose={() => setModalOpen(false)}
+        >
+          {/* Fila 1: Objeto y Categoría */}
+          <div className="obj-flex-row">
+            <div style={{ flex: 2, display: "flex", flexDirection: "column" }}>
+              <label className="modal-label" style={{ paddingTop: 0 }}>Objeto</label>
+              <input 
+                type="text" className="modal-input" placeholder="Ej: Camisa Diario" 
+                value={formValues.nombre || ""} onChange={(e) => handleModalChange("nombre", e.target.value)} 
+              />
+            </div>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+              <label className="modal-label" style={{ paddingTop: 0 }}>Categoría</label>
+              <select 
+                className="modal-input modal-select" 
+                value={formValues.tipo || ""} 
+                onChange={(e) => handleModalChange("tipo", e.target.value)}
+              >
+                <option value="" disabled>Seleccionar...</option>
                 <option value="Vestimenta">Vestimenta</option>
                 <option value="Objeto">Objeto</option>
               </select>
             </div>
           </div>
 
-          <div className="modal-form-row">
-            <div className="input-group">
-              <label>Talla</label>
-              <select value={talla} onChange={(e) => setTalla(e.target.value)} disabled={tipo === "Objeto"}>
-                {tipo === "Objeto" ? (
+          {/* Fila 2: Talla, Cantidad Total y Estado Físico */}
+          <div className="obj-flex-row" style={{ marginTop: "16px" }}>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+              <label className="modal-label" style={{ paddingTop: 0 }}>Talla</label>
+              <select 
+                className="modal-input modal-select" 
+                value={formValues.talla || ""} 
+                onChange={(e) => handleModalChange("talla", e.target.value)}
+                disabled={!formValues.tipo || formValues.tipo === "Objeto"}
+              >
+                <option value="" disabled>Seleccionar...</option>
+                {formValues.tipo === "Objeto" ? (
                   <option value="No aplica">No aplica</option>
                 ) : (
                   <>
@@ -152,15 +313,22 @@ const ObjetoModal = ({ isOpen, onClose, objetoEdit, alTerminar }) => {
                 )}
               </select>
             </div>
-            <div className="input-group">
-              <label>Cantidad Total</label>
-              <input type="number" min="0" value={cantidadTotal} onChange={(e) => setCantidadTotal(e.target.value)} />
+            <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+              <label className="modal-label" style={{ paddingTop: 0 }}>Cantidad Total</label>
+              <input 
+                type="number" min="0" className="modal-input" 
+                value={formValues.cantidad_total ?? 1} 
+                onChange={(e) => handleModalChange("cantidad_total", e.target.value)} 
+              />
             </div>
-            <div className="input-group">
-              <label>Estado Físico</label>
-              <select value={estadoFisico} onChange={(e) => setEstadoFisico(e.target.value)}>
-                <option value="">Seleccione...</option>
-                <option value="Excelente">Excelente</option>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+              <label className="modal-label" style={{ paddingTop: 0 }}>Estado Físico</label>
+              <select 
+                className="modal-input modal-select" 
+                value={formValues.estado_fisico || ""} 
+                onChange={(e) => handleModalChange("estado_fisico", e.target.value)}
+              >
+                <option value="" disabled>Seleccionar...</option>
                 <option value="Bueno">Bueno</option>
                 <option value="Regular">Regular</option>
                 <option value="Malo">Malo</option>
@@ -168,190 +336,27 @@ const ObjetoModal = ({ isOpen, onClose, objetoEdit, alTerminar }) => {
             </div>
           </div>
 
-          <div className="modal-form-row">
-            <div className="input-group">
-              <label>Observación (Opcional)</label>
-              <input type="text" value={observacion} onChange={(e) => setObservacion(e.target.value)} placeholder="Detalles extra..." />
+          {/* Fila 3: Observación */}
+          <div className="obj-flex-row" style={{ marginTop: "16px" }}>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+              <label className="modal-label" style={{ paddingTop: 0 }}>
+                Observación {["Regular", "Malo"].includes(formValues.estado_fisico) ? <span style={{color: "var(--color-danger)"}}>* (Obligatorio)</span> : "(Opcional)"}
+              </label>
+              <input 
+                type="text" className="modal-input" placeholder="Detalles extra o motivo del estado..." 
+                value={formValues.observacion || ""} onChange={(e) => handleModalChange("observacion", e.target.value)} 
+              />
             </div>
           </div>
 
-        </div>
-        <div className="modal-footer">
-          <ActionButtons botones={[{ label: "Aceptar", onClick: handleGuardar, variante: "primary", siempreActivo: true }]} />
-          <ActionButtons botones={[{ label: "Cancelar", onClick: onClose, variante: "secondary", siempreActivo: true }]} />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ==========================================
-// COMPONENTE PRINCIPAL
-// ==========================================
-const ObjetosPage = () => {
-  const { user, logout } = useAuth();
-  
-  const [objetos, setObjetos] = useState([]);
-  const [objetoSeleccionado, setObjetoSeleccionado] = useState(null);
-  
-  const [filtros, setFiltros] = useState({ nombre: "", tipo: "" });
-  
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalModeEdit, setModalModeEdit] = useState(false);
-
-  const [paginaActual, setPaginaActual] = useState(1);
-  const itemsPorPagina = 10;
-
-  const cargarObjetos = async () => {
-    try {
-      const response = await obtenerObjetosRequest();
-      setObjetos(response.data || []);
-      setObjetoSeleccionado(null); 
-    } catch (error) {
-      console.error("Error al cargar objetos:", error);
-    }
-  };
-
-  useEffect(() => { cargarObjetos(); }, []);
-
- const menuItems = [
-    { label: "Inicio", icon: <Icon path={mdiHome} size="32px" />, path: "/home" },
-    { label: "Usuarios", icon: <Icon path={mdiAccount} size="32px" />, path: "/parametrizacion/usuarios" },
-    { label: "Año Escolar", icon: <Icon path={mdiCalendar} size="32px" />, path: "/parametrizacion/anio-escolar" },
-    { label: "Pruebas", icon: <Icon path={mdiTestTube} size="32px" />, path: "/parametrizacion/pruebas" },
-    { label: "Instrumentos", icon: <Icon path={mdiGuitarElectric} size="32px" />, path: "/parametrizacion/instrumentos" },
-    { label: "Objetos", icon: <Icon path={mdiCube} size="32px" />, path: "/parametrizacion/objetos" },
-    { label: "Libros", icon: <Icon path={mdiBook} size="32px" />, path: "/parametrizacion/libros" },
-    { label: "Asignar Titular", icon: <Icon path={mdiAccountGroup} size="32px" />, path: "/parametrizacion/titulares" },
-  ];
-
-  const columnasTabla = [
-    { key: "id_objeto", label: "Cód" },
-    { key: "nombre", label: "Nombre / Prenda" },
-    { key: "tipo", label: "Tipo" },
-    { key: "talla", label: "Talla" },
-    { key: "estado_fisico", label: "Estado" },
-    { key: "cantidad_total", label: "Total" },
-    { key: "prestadas", label: "Prestadas" },
-    { key: "cantidad_disponible", label: "Disponibles", 
-      render: (val) => <span style={{ color: val > 0 ? "#008000" : "#D00000", fontWeight: "bold" }}>{val}</span> 
-    }
-  ];
-
-  const objetosFiltrados = useMemo(() => {
-    return objetos.filter(o => {
-      const matchNombre = filtros.nombre ? (o.nombre || "").toLowerCase().includes(filtros.nombre.toLowerCase()) : true;
-      const matchTipo = filtros.tipo ? o.tipo === filtros.tipo : true;
-      return matchNombre && matchTipo;
-    });
-  }, [objetos, filtros]);
-
-  const totalPaginas = Math.ceil(objetosFiltrados.length / itemsPorPagina) || 1;
-
-  const filasPaginadas = useMemo(() => {
-    const startIndex = (paginaActual - 1) * itemsPorPagina;
-    return objetosFiltrados.slice(startIndex, startIndex + itemsPorPagina);
-  }, [objetosFiltrados, paginaActual]);
-
-  const abrirModalCrear = () => { setModalModeEdit(false); setIsModalOpen(true); };
-  const abrirModalEditar = () => { setModalModeEdit(true); setIsModalOpen(true); };
-
-  const handleEliminar = async () => {
-    if (!objetoSeleccionado) return;
-    const confirmar = window.confirm(`¿Estás seguro de eliminar: ${objetoSeleccionado.nombre}?`);
-    if (!confirmar) return;
-
-    try {
-      await eliminarObjetoRequest(objetoSeleccionado.id_objeto);
-      cargarObjetos();
-    } catch (error) {
-      alert(error.response?.data?.detail || "No se puede eliminar un ítem con historial de préstamos.");
-    }
-  };
-
-  return (
-    <div className="dashboard-container">
-      <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
-      <ModuleLayout
-        sidebar={<Sidebar menuItems={menuItems} selectedMenu="Objetos" user={{ nombre: user?.nombre || "Usuario", rol: user?.rol || "TITULAR" }} logout={logout} />}
-      >
-        <div className="objetos-wrapper page-master-wrapper">
-          
-          <div className="module-toolbar-container">
-            <SearchBar
-              fields={[
-                { key: 'nombre', label: 'Nombre:', type: 'text' },
-                { key: 'tipo', label: 'Tipo:', type: 'select', options: ['Vestimenta', 'Objeto'] }
-              ]}
-              onSearch={(nuevosFiltros) => {
-                setFiltros(nuevosFiltros);
-                setPaginaActual(1);
-              }}
-            />
+          {/* Botones de Acción */}
+          <div className="modal-actions" style={{ marginTop: "30px" }}>
+            <button className="modal-btn modal-btn--accept" onClick={guardarObjeto}>Aceptar</button>
+            <button className="modal-btn modal-btn--cancel" onClick={() => setModalOpen(false)}>Cancelar</button>
           </div>
+        </ParamModal>
 
-          <div className="main-area">
-            <div className="table-layout-wrapper">
-              
-              <div className="table-main-section">
-                {objetos.length === 0 ? (
-                  <div className="empty-state">
-                    <p>Aún no hay ítems registrados en el inventario</p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="datatable-fixed-container">
-                      <DataTable 
-                        columns={columnasTabla} 
-                        rows={filasPaginadas} 
-                        onRowClick={(fila) => setObjetoSeleccionado(fila)}
-                        emptyText="No se encontraron ítems con esos criterios"
-                        filaActiva={objetoSeleccionado}
-                        idKey="id_objeto"
-                      />
-                    </div>
-                    
-                    <div className="pagination-center">
-                      <button 
-                        className="btn-circle"
-                        onClick={() => { setPaginaActual(p => Math.max(1, p - 1)); setObjetoSeleccionado(null); }}
-                        disabled={paginaActual === 1}
-                      >
-                        <ChevronLeft size={20} />
-                      </button>
-                      <button 
-                        className="btn-circle"
-                        onClick={() => { setPaginaActual(p => Math.min(totalPaginas, p + 1)); setObjetoSeleccionado(null); }}
-                        disabled={paginaActual === totalPaginas}
-                      >
-                        <ChevronRight size={20} />
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              <div className="side-actions">
-                <ActionButtons
-                  filaSeleccionada={objetoSeleccionado}
-                  botones={[
-                    { label: "Agregar Ítem", onClick: abrirModalCrear, variante: "primary", siempreActivo: true },
-                    { label: "Editar Ítem", onClick: abrirModalEditar, variante: "primary", siempreActivo: false },
-                    { label: "Eliminar Ítem", onClick: handleEliminar, variante: "primary", siempreActivo: false }
-                  ]}
-                />
-              </div>  
-
-            </div>
-          </div>
-        </div>
-
-        <ObjetoModal 
-          isOpen={isModalOpen} 
-          onClose={() => setIsModalOpen(false)} 
-          objetoEdit={modalModeEdit ? objetoSeleccionado : null} 
-          alTerminar={cargarObjetos} 
-        />
+        <Alert {...alertConfig} onClose={alertConfig.onClose || closeAlert} />
       </ModuleLayout>
     </div>
   );

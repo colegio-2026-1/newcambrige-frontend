@@ -18,7 +18,7 @@ import { useImportacionGuard } from "./hooks/useImportacionGuard";
 import styles from "./ImportacionMasivaPage.module.css";
 
 import Icon from "../../components/common/Icon";
-import { mdiHome, mdiRobot, mdiServer, mdiCardAccountDetails, mdiDownload, mdiCloudUpload } from '@mdi/js';
+import { mdiHome, mdiRobot, mdiServer, mdiCardAccountDetails, mdiDownload, mdiCloudUpload, mdiAccountTie, mdiAccountSchool } from '@mdi/js';
 import Alert from "../../components/shared/Alert";
 import Modal from "../../components/shared/Modal";
 
@@ -44,8 +44,8 @@ export default function ImportacionMasivaPage() {
   // true cuando la sincronización o cancelación termina: libera el guard
   const [procesoConcluido, setProcesoConcluido] = useState(false);
 
-  // Guard de navegación: activo si hay carga en curso o modal pendiente, pero no si ya concluyó
-  const guardActivo = (isUploading || (showModal && !syncDone)) && !procesoConcluido;
+  // Guard de navegación: activo si hay datos cargados en memoria y no ha concluido la sincronización
+  const guardActivo = fileData.length > 0 && !procesoConcluido;
   const { handleBeforeNavigate } = useImportacionGuard({
     isExecuting: guardActivo,
     ejecucionId: ejecucionInfo?.id,
@@ -68,11 +68,16 @@ export default function ImportacionMasivaPage() {
   const showAlert = (type, message, title = '') => setAlertInfo({ isOpen: true, type, message, title });
   const closeAlert = () => setAlertInfo((prev) => ({ ...prev, isOpen: false }));
 
+  const oppositeTipo = tipo === 'estudiante' ? 'docente' : 'estudiante';
+  const oppositeLabel = tipo === 'estudiante' ? 'Docentes' : 'Estudiantes';
+  const oppositeIcon = tipo === 'estudiante' ? mdiAccountTie : mdiAccountSchool;
+
   const menuItems = [
     { label: "Inicio", path: "/home", icon: <Icon icon={mdiHome} size={1.2} /> },
     { label: "Conexión", path: `/importacion/${tipo}`, icon: <Icon icon={mdiRobot} size={1.5} /> },
     { label: "Carga Masiva", path: `/importacion/masiva/${tipo}`, icon: <Icon icon={mdiServer} size={1.5} /> },
-    { label: "Carga Individual", path: `/importacion/individual/${tipo}`, icon: <Icon icon={mdiCardAccountDetails} size={1.5} /> }
+    { label: "Carga Individual", path: `/importacion/individual/${tipo}`, icon: <Icon icon={mdiCardAccountDetails} size={1.5} /> },
+    { label: oppositeLabel, path: `/importacion/${oppositeTipo}`, icon: <Icon icon={oppositeIcon} size={1.5} /> }
   ];
 
   useEffect(() => {
@@ -92,14 +97,34 @@ export default function ImportacionMasivaPage() {
   }, []);
 
   const handleDownloadTemplate = () => {
-    // Apunta a la carpeta public o assets. Idealmente desde /plantillas/
-    const url = isEstudiante ? "/plantillas/Plantilla_Estudiantes.xlsx" : "/plantillas/Plantilla_Docentes.xlsx";
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Plantilla_${tituloBandera}.xlsx`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const wb = XLSX.utils.book_new();
+    
+    const headers = isEstudiante 
+      ? ["Código", "Nombre Completo", "Grado", "Grupo", "Contacto del Padre"]
+      : ["Código", "Nombre Completo", "Grado Titular", "Grupo Titular"];
+      
+    const ws = XLSX.utils.aoa_to_sheet([headers]);
+    
+    // Dimensionamiento perfecto de columnas para evitar cortes
+    if (isEstudiante) {
+      ws['!cols'] = [
+        { wch: 15 }, // Código
+        { wch: 40 }, // Nombre Completo
+        { wch: 10 }, // Grado
+        { wch: 10 }, // Grupo
+        { wch: 30 }  // Contacto del Padre
+      ];
+    } else {
+      ws['!cols'] = [
+        { wch: 15 }, // Código
+        { wch: 40 }, // Nombre Completo
+        { wch: 15 }, // Grado Titular
+        { wch: 15 }  // Grupo Titular
+      ];
+    }
+    
+    XLSX.utils.book_append_sheet(wb, ws, "Plantilla");
+    XLSX.writeFile(wb, `Plantilla_${tituloBandera}.xlsx`);
   };
 
   // --- DRAG AND DROP ---
@@ -224,20 +249,9 @@ export default function ImportacionMasivaPage() {
     }
   };
 
-  const handleCancelar = async () => {
+  const handleCancelar = () => {
+    // Solo oculta el modal, conservando los datos cargados en la tabla
     setShowModal(false);
-    setIsUploading(true);
-    try {
-      await cancelarScrapingRequest(ejecucionInfo.id, tipo);
-      showAlert("info", "Operación cancelada. Datos truncados.", "Cancelado");
-      setProcesoConcluido(true); // Liberar guard: cancelación completada
-    } catch (error) {
-      showAlert("error", "Error al cancelar la operación.");
-      setProcesoConcluido(true); // Liberar guard de todas formas
-    } finally {
-      setIsUploading(false);
-      setFileData([]);
-    }
   };
 
   return (
@@ -289,7 +303,7 @@ export default function ImportacionMasivaPage() {
               <div 
                 className={styles.badgeFlag}
                 onClick={() => navigate("/importacion")}
-                title="Volver a Importaciones"
+                title="Volver a Robot"
               >
                 {tituloBandera}
               </div>
@@ -341,27 +355,27 @@ export default function ImportacionMasivaPage() {
               </tbody>
             </table>
 
-            {fileData.length > 0 && (
-              <div className={styles.paginationSection}>
-                <button 
-                  onClick={handlePrevPage} 
-                  disabled={currentPage === 1}
-                  className={styles.pageBtn}
-                >
-                  Anterior
-                </button>
+            <div className={styles.paginationSection}>
+              <button 
+                onClick={handlePrevPage} 
+                disabled={currentPage === 1 || fileData.length === 0}
+                className={styles.pageBtn}
+              >
+                Anterior
+              </button>
+              {fileData.length > 0 && (
                 <span className={styles.pageInfo}>
                   Página {currentPage} de {totalPages || 1} ({fileData.length} registros totales)
                 </span>
-                <button 
-                  onClick={handleNextPage} 
-                  disabled={currentPage === totalPages || totalPages === 0}
-                  className={styles.pageBtn}
-                >
-                  Siguiente
-                </button>
-              </div>
-            )}
+              )}
+              <button 
+                onClick={handleNextPage} 
+                disabled={currentPage === totalPages || totalPages === 0 || fileData.length === 0}
+                className={styles.pageBtn}
+              >
+                Siguiente
+              </button>
+            </div>
           </div>
 
           {/* MODAL EMERGENTE COMPONENTE GLOBAL */}
@@ -377,7 +391,6 @@ export default function ImportacionMasivaPage() {
                 label: (
                   <div style={{ textAlign: "center" }}>
                     <p>Información que se cargó.</p>
-                    <p>ID de Ejecución: <strong>{ejecucionInfo?.id}</strong></p>
                     <p>Registros validados: <strong>{ejecucionInfo?.registros}</strong></p>
                     <p style={{ marginTop: "20px" }}>¿Desea validar e insertar los datos?</p>
                   </div>

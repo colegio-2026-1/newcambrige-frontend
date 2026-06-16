@@ -70,3 +70,8 @@ export const obtenerSalonesPorPeriodoRequest = (id_periodo) =>
 
 export const asignarTitularRequest = (id_salon, data) => 
   axiosClient.put(`/api/parametrizacion/salones/${id_salon}/asignar-titular`, data);
+
+export const obtenerSalonesRequest = () => 
+  axiosClient.get('/api/salones');
+
+export const crearSalonRequest = (data) => axiosClient.post('/api/salones/', data);

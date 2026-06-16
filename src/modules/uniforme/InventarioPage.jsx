@@ -80,7 +80,7 @@ export default function InventarioPage() {
   const { user, roles, loadingRoles } = useAuth();
   const navigate = useNavigate();
 
-  const rolesPermitidos = ["admin", "titular"];
+  const rolesPermitidos = ["admin", "titular", "uniformes"];
 
   const tieneAccesoModulo = roles.some(
     rol => rolesPermitidos.includes(rol)
@@ -131,11 +131,11 @@ export default function InventarioPage() {
   // ── Formularios ──────────────────────────────────────────────────────────────
   const [formAgregar, setFormAgregar] = useState({
     nombre: "",
-    tipo: "vestimenta",
+    tipo: "seleccionar",
     cantidad_total: 1,
-    talla: "",
+    talla: "seleccionar",
     observacion: "",
-    estado_fisico: "Bueno",
+    estado_fisico: "seleccionar",
     fecha_registro: new Date().toLocaleDateString("en-CA")
   });
 
@@ -144,7 +144,7 @@ export default function InventarioPage() {
     tipo: "vestimenta",
     cantidad_total: 0,
     estado_fisico: "Bueno",
-    talla: "",
+    talla: "seleccionar",
     observacion: ""
   });
 
@@ -154,7 +154,16 @@ export default function InventarioPage() {
       mostrarAlerta("error", "Ingrese el nombre de la prenda");
       return;
     }
-    if (formAgregar.tipo === "vestimenta" && !formAgregar.talla) {
+    if (!formAgregar.tipo || formAgregar.tipo === "seleccionar") {
+      mostrarAlerta("error", "Seleccione una categoría");
+      return;
+    }
+
+    if (!formAgregar.estado_fisico || formAgregar.estado_fisico === "seleccionar") {
+      mostrarAlerta("error", "Seleccione el estado físico");
+      return;
+    }
+    if (!formAgregar.talla || formAgregar.talla === "seleccionar") {
       mostrarAlerta("error", "Seleccione una talla");
       return;
     }
@@ -189,10 +198,10 @@ export default function InventarioPage() {
       setOpenAgregar(false);
       setFormAgregar({
         nombre: "",
-        tipo: "vestimenta",
+        tipo: "seleccionar",
         cantidad_total: 1,
-        estado_fisico: "Bueno",
-        talla: "",
+        estado_fisico: "seleccionar",
+        talla: "seleccionar",
         observacion: "",
         fecha_registro: new Date().toLocaleDateString("en-CA")
       });
@@ -217,6 +226,21 @@ export default function InventarioPage() {
     }
     if (!formEditar.nombre.trim()) {
       mostrarAlerta("error", "Ingrese el nombre");
+      return;
+    }
+    if (!formEditar.tipo || formEditar.tipo === "seleccionar") {
+      mostrarAlerta("error", "Seleccione una categoría");
+      return;
+    }
+    if (!formEditar.estado_fisico || formEditar.estado_fisico === "seleccionar") {
+      mostrarAlerta("error", "Seleccione el estado físico");
+      return;
+    }
+    if (
+      formEditar.tipo !== "objeto" &&
+      (!formEditar.talla || formEditar.talla === "seleccionar")
+    ) {
+      mostrarAlerta("error", "Seleccione una talla");
       return;
     }
     if (
@@ -320,16 +344,16 @@ export default function InventarioPage() {
       path: "/home"
     },
     {
-      label: "Asignaciones Uniformes",
+      label: "Asignación Uniformes",
       icon: <Icon path={mdiTshirtCrew} size={1} />,
       path: "/uniformes/asignaciones",
-      roles: ["admin", "titular"]
+      roles: ["admin", "titular", "uniformes"]
     },
     {
       label: "Inventario Uniformes",
       icon: <Icon path={mdiHanger} size={1} />,
       path: "/uniformes/inventario",
-      roles: ["admin", "titular"]
+      roles: ["admin", "titular", "uniformes"]
     }
   ];
 
@@ -362,10 +386,10 @@ export default function InventarioPage() {
                   onClick: () => {
                     setFormAgregar({
                       nombre: "",
-                      tipo: "vestimenta",
+                      tipo: "seleccionar",
                       cantidad_total: 1,
-                      estado_fisico: "Bueno",
-                      talla: "",
+                      estado_fisico: "seleccionar",
+                      talla: "seleccionar",
                       observacion: "",
                       fecha_registro: new Date().toLocaleDateString("en-CA")
                     });
@@ -380,10 +404,12 @@ export default function InventarioPage() {
                     if (!selectedRow) {
                       mostrarAlerta("error", "Seleccione una prenda");
                       return;
+                      console.log(selectedRow);
                     }
+                    console.log(selectedRow);
                     setFormEditar({
                       nombre: selectedRow.nombre || "",
-                      tipo: selectedRow.tipo || "vestimenta",
+                      tipo: selectedRow.tipo?.toLowerCase() || "vestimenta",
                       cantidad_total: selectedRow.cantidad_total || 0,
                       estado_fisico: selectedRow.estado_fisico || "Bueno",
                       talla: selectedRow.talla || "",
@@ -420,13 +446,18 @@ export default function InventarioPage() {
             fields={[
               { key: "codigo", label: "Código", type: "text" },
               { key: "prenda", label: "Prenda",  type: "text" },
-              { key: "tipo",   label: "Tipo",    type: "select", options: ["vestimenta", "objeto"] }
+              { key: "tipo",   label: "Categoría",    type: "select", options: ["Vestimenta", "Objeto"] }
             ]}
             loading={loading}
             onChange={(key, value) =>
               setFiltros((prev) => ({ ...prev, [key]: value }))
             }
             onSearch={(f) => setFiltrosAplicados(f)}
+            cleanFilter={{
+              codigo: "",
+              prenda: "",
+              tipo: ""
+            }}
           />
 
           <div className="table-container">
@@ -452,26 +483,52 @@ export default function InventarioPage() {
           setFormAgregar((prev) => {
             const nuevo = { ...prev, [key]: value };
             if (key === "tipo") {
-              nuevo.talla = value === "objeto" ? "No aplica" : "";
+              nuevo.talla = value === "objeto"
+                ? "No aplica"
+                : "seleccionar";
             }
             return nuevo;
           });
         }}
         fields={[
           { key: "nombre",         label: "Nombre",        type: "text" },
-          { key: "tipo",           label: "Categoria",     type: "select", options: ["vestimenta", "objeto"] },
-          { key: "cantidad_total", label: "Cantidad",      type: "number" },
+          {
+            key: "tipo",
+            label: "Categoria",
+            type: "select",
+            options: [
+              { value: "seleccionar", label: "Seleccionar" },
+              { value: "vestimenta", label: "Vestimenta" },
+              { value: "objeto", label: "Objeto" }
+            ]
+          },
+          { key: "cantidad_total", label: "Cantidad", type: "number" },
           {
             key: "estado_fisico",
             label: "Estado Físico",
             type: "select",
-            options: ["Bueno", "Regular", "Malo"]
+            options: [
+              { value: "seleccionar", label: "Seleccionar" },
+              { value: "Bueno", label: "Bueno" },
+              { value: "Regular", label: "Regular" },
+              { value: "Malo", label: "Malo" }
+            ]
           },
           {
             key: "talla",
             label: "Talla",
             type: "select",
-            options: formAgregar.tipo === "objeto" ? ["No aplica"] : ["XS", "S", "M", "L", "XL"]
+            options: formAgregar.tipo === "objeto"
+              ? [
+                  { value: "No aplica", label: "No aplica" }
+                ]
+              : [
+                  { value: "seleccionar", label: "Seleccionar" },
+                  { value: "S", label: "S" },
+                  { value: "M", label: "M" },
+                  { value: "L", label: "L" },
+                  { value: "XL", label: "XL" }
+                ]
           },
           { key: "observacion", label: "Observación", type: "text" }
         ]}
@@ -494,8 +551,16 @@ export default function InventarioPage() {
           })
         }
         fields={[
-          { key: "nombre",         label: "Nombre",        type: "text" },
-          { key: "tipo",           label: "Tipo",          type: "select", options: ["vestimenta", "objeto"] },
+          { key: "nombre", label: "Nombre", type: "text" },
+          {
+            key: "tipo",
+            label: "Categoría",
+            type: "select",
+            options: [
+              { value: "vestimenta", label: "Vestimenta" },
+              { value: "objeto", label: "Objeto" }
+            ]
+          },
           { key: "cantidad_total", label: "Cantidad Total", type: "number" },
           {
             key: "estado_fisico",
@@ -507,7 +572,7 @@ export default function InventarioPage() {
             key: "talla",
             label: "Talla",
             type: "select",
-            options: formEditar.tipo === "objeto" ? ["No aplica"] : ["XS", "S", "M", "L", "XL"]
+            options: formEditar.tipo === "objeto" ? ["No aplica"] : ["S", "M", "L", "XL"]
           },
           { key: "observacion", label: "Observación", type: "text" }
         ]}
@@ -515,7 +580,7 @@ export default function InventarioPage() {
 
       {/* ── Modal: Confirmar Eliminación ──────────────────────────────────────── */}
       <Modal
-        title="CONFIRMAR ELIMINACIÓN"
+        title="ELIMINAR PRENDA"
         isOpen={openEliminar}
         onCancel={() => setOpenEliminar(false)}
         onAccept={eliminarPrenda}
@@ -525,7 +590,11 @@ export default function InventarioPage() {
             key: "mensaje",
             type: "label",
             className: "uniformes-modal-message",
-            label:`¿CONFIRMA ELIMINAR LA PRENDA ${selectedRow?.nombre || ""}?`
+            label:`¿CONFIRMA ELIMINAR?
+
+            "${capitalizar(selectedRow?.nombre || "").toUpperCase()}"
+
+            ESTA ACCIÓN NO SE PUEDE DESHACER.`
           }  
         ]}
       />
