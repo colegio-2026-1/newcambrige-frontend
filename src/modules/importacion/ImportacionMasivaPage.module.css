@@ -57,7 +57,7 @@
 }
 
 .dropzoneArea {
-  border: 2px dashed var(--color-border);
+  border: 2px dashed var(--color-border-dark);
   border-radius: 10px;
   padding: 40px;
   display: flex;
@@ -78,7 +78,7 @@
 
 .uploadIcon {
   font-size: 3rem;
-  color: var(--color-border);
+  color: var(--color-border-dark);
   margin-bottom: 10px;
 }
 

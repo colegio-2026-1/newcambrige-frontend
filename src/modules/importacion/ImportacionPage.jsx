@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Icon from "../../components/common/Icon";
-import { mdiHome } from '@mdi/js';
+import { mdiHome, mdiRobot } from '@mdi/js';
 
 import ModuleLayout from "../../components/layout/ModuleLayout";
 import Sidebar from "../../components/layout/Sidebar";
@@ -23,11 +23,11 @@ export default function ImportacionPage() {
   
   const userName = user?.nombre || "Usuario";
   const rol = roles[0] || (loadingRoles ? "Cargando rol..." : "Sin rol");
-  const selectedMenu = "Importaciones";
+  const selectedMenu = "Robot";
 
   const menuItems = [
     { label: "Inicio", path: "/home", icon: <Icon icon={mdiHome} size={1.2} /> },
-    { label: "Importaciones", path: "/importacion" },
+    { label: "Robot", path: "/importacion", icon: <Icon icon={mdiRobot} size={1.2} /> },
   ];
 
   const cards = [
