@@ -1,6 +1,7 @@
 // src/router/AppRouter.js
 import { Routes, Route } from "react-router-dom";
 
+// AUTH & CORE
 import LoginPage from "../modules/auth/LoginPage";
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -9,6 +10,7 @@ import DashboardRouter  from "./DashboardRouter";
 import SalonRouter      from "./SalonRouter";
 import UniformeRouter   from "./UniformeRouter";
 import ParametrizacionRouter from "./ParametrizacionRouter";
+import BandaRouter       from "./BandaRouter";
 import ImportacionRouter from "./ImportacionRouter";
 import RectoriaRoutes from "./RectoriaRouter";
 
@@ -40,6 +42,7 @@ const AppRouter = () => {
       {ParametrizacionRouter()}
       {ImportacionRouter()}
       {RectoriaRoutes()}
+      {BandaRouter()}
 
       {/* RUTA DE PRUEBAS / TEST */}
       <Route path="/test" element={<TestPage />} />
