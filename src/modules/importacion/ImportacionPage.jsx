@@ -30,10 +30,9 @@ export default function ImportacionPage() {
     { label: "Robot", path: "/importacion", icon: <Icon icon={mdiRobot} size={1.2} /> },
   ];
 
-  const allRoles = roles.length > 0 ? roles : ["*"];
   const cards = [
-    { title: "Estudiante", icon: iconEstudiante, path: "/importacion/estudiante", roles: allRoles },
-    { title: "Docente", icon: iconDocente, path: "/importacion/docente", roles: allRoles },
+    { title: "Estudiante", icon: iconEstudiante, path: "/importacion/estudiante", roles: ["admin"] },
+    { title: "Docente", icon: iconDocente, path: "/importacion/docente", roles: ["admin"] },
   ];
 
   const handleCardClick = (path) => {

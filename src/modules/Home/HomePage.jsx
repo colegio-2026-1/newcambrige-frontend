@@ -42,7 +42,7 @@ const HomePage = () => {
     { title: "Uniformes", icon: uniformesIcon, path: "/uniformes", roles: ["admin", "uniformes"] },
     { title: "Banda", icon: bandaIcon, path: "/banda", roles: ["admin", "banda"] },
     { title: "Parametrización", icon: paraIcon, path: "/parametrizacion", roles: ["admin", "rectoria"] },
-    { title: "Robot", icon: importacionIcon, path: "/importacion", roles: ["admin", "robot"] },
+    { title: "Robot", icon: importacionIcon, path: "/importacion", roles: ["admin"] },
   ];
 
   const handleCardClick = (path) => {
