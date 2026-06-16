@@ -9,7 +9,7 @@ import { Home, LayoutList, ClipboardCheck } from "lucide-react";
 
 import ModuleLayout from "../../../../components/layout/ModuleLayout";
 import Sidebar from "../../../../components/layout/Sidebar";
-import Header from "../../../../components/layout/Header";
+import Header from "../../../../components/layout/header";
 import DataTable from "../../../../components/shared/DataTable";
 import SearchBar from "../../../../components/shared/searchBar";
 import ActionButtons from "../../../../components/shared/ActionButtons";
