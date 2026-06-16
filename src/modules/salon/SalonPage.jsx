@@ -10,6 +10,12 @@ import PupitresIcon from "../../assets/Salon/pupitres.svg";
 import BibliotecaIcon from "../../assets/Salon/biblioteca.svg";
 import PruebasIcon from "../../assets/Salon/pruebas.svg";
 
+import { Icon } from '@mdi/react';
+import {
+mdiSchool,          
+} from '@mdi/js';
+
+
 import "./SalonPage.css";
 
 export default function SalonPage() {
@@ -20,8 +26,8 @@ export default function SalonPage() {
   const selectedMenu = "Salón";
 
   const modulos = [
-    { label: "Inicio", icon: <Home />, path: "/home" },
-    { label: "Salón", path: "/salon/", roles: ["admin", "titular"] },
+    { label: "Inicio", icon: <Home />, path: "/home" , roles: ["titular ", "admin"]},
+    { label: "Salón", icon: <Icon path={mdiSchool} size={1} />, path: "/salon/", roles: ["admin", "titular"] },
   ];
 
   const menuItems = modulos.filter(modulo => {

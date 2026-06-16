@@ -93,12 +93,13 @@ const CustomTooltip = ({ active, payload, label }) => {
   );
 };
 
+// DSH-09: fontFamily Roboto en valores numéricos
 const KpiCard = ({ title, value, sub, color, loading }) => (
   <div className="dash-kpi-card" style={{ borderTopColor: color }}>
     <span className="dash-kpi-title">{title}</span>
     {loading
       ? <span className="dash-kpi-skeleton" />
-      : <span className="dash-kpi-value" style={{ color }}>{value ?? "—"}</span>
+      : <span className="dash-kpi-value" style={{ color, fontFamily: "'Roboto', sans-serif" }}>{value ?? "—"}</span>
     }
     {sub && <span className="dash-kpi-sub">{sub}</span>}
   </div>
@@ -134,6 +135,7 @@ export default function DashboardPage() {
   const [selectedMenu,     setSelectedMenu]     = useState("Dashboard");
   const [periodos,         setPeriodos]         = useState([]);
   const [periodoId,        setPeriodoId]        = useState("");
+  const [periodosLoaded,   setPeriodosLoaded]   = useState(false);
   const [loading,          setLoading]          = useState(false);
   const [error,            setError]            = useState(null);
 
@@ -169,9 +171,11 @@ export default function DashboardPage() {
       .then((res) => {
         const data = res.data ?? [];
         setPeriodos(data);
-        if (data.length > 0) setPeriodoId(String(data[0].id_periodo));
+        // DSH-11: no preseleccionar ningún período, mostrar "Seleccionar" por defecto
+        setPeriodoId("");
       })
-      .catch(() => setError("No se pudieron cargar los períodos."));
+      .catch(() => setError("No se pudieron cargar los períodos."))
+      .finally(() => setPeriodosLoaded(true));
   }, [rolesLoaded]);
 
   // ── PASO 3: Cargar datos según rol + período ────────────────────
@@ -264,7 +268,6 @@ export default function DashboardPage() {
   }, [periodoId, rolesLoaded]);
 
   // ── Helpers de render ────────────────────────────────────────
-  const periodoLabel = periodos.find((p) => String(p.id_periodo) === periodoId)?.nombre ?? "";
 
   // Cuenta cuántas gráficas se van a mostrar para elegir la clase de grilla
   const grafCards = [
@@ -309,54 +312,58 @@ export default function DashboardPage() {
           {/* ERROR GLOBAL */}
           {error && <p className="dash-error">{error}</p>}
 
-          {/* BADGE DE ROLES ACTIVOS */}
-          {roles.length > 0 && (
-            <div className="dash-roles-bar">
-              <span className="dash-roles-label">Acceso como:</span>
-              {roles.map((r) => (
-                <span key={r} className="dash-role-badge">{r}</span>
-              ))}
-            </div>
-          )}
+          {/* DSH-01: Se eliminó el badge "Acceso como:" que mostraba el rol al usuario final */}
 
           {/* FILTRO PERÍODO */}
           <div className="dash-filter-bar">
             <label className="dash-filter-label" htmlFor="periodo-select">
               Período académico
             </label>
+            {/* DSH-03 / DSH-11: selector con estado "Seleccionar" por defecto,
+                manejo correcto del estado de carga y sin datos */}
             <select
               id="periodo-select"
               className="dash-filter-select"
               value={periodoId}
               onChange={(e) => setPeriodoId(e.target.value)}
             >
-              {periodos.length === 0 && (
-                <option value="">Cargando...</option>
+              {!periodosLoaded ? (
+                <option value="" disabled>Cargando períodos académicos...</option>
+              ) : periodos.length === 0 ? (
+                <option value="" disabled>No hay períodos académicos registrados</option>
+              ) : (
+                <>
+                  {/* DSH-11: opción por defecto "Seleccionar" */}
+                  <option value="">Seleccione un período académico</option>
+                  {periodos.map((p) => (
+                    <option key={p.id_periodo} value={String(p.id_periodo)}>
+                      {p.nombre}
+                    </option>
+                  ))}
+                </>
               )}
-              {periodos.map((p) => (
-                <option key={p.id_periodo} value={String(p.id_periodo)}>
-                  {p.nombre}
-                </option>
-              ))}
             </select>
-            {periodoLabel && (
-              <span className="dash-filter-badge">{periodoLabel}</span>
-            )}
+            {/* DSH-04 / DSH-11: Se eliminó el badge que repetía el período seleccionado */}
           </div>
 
           {/* KPI CARDS — auto-fit, no colapsan en pantallas pequeñas */}
           <div className="dash-kpi-grid">
             {can.kpiEstudiantes && (
-              <KpiCard title="Estudiantes"           value={totalEstudiantes} sub="en el período"          color={C_BLUE}  loading={loading} />
+              // DSH-07: primera letra en mayúscula en el sub
+              <KpiCard title="Estudiantes"           value={totalEstudiantes} sub="En el período"          color={C_BLUE}  loading={loading} />
             )}
             {can.kpiPaz && (
-              <KpiCard title="Paz y Salvo OK"        value={totalPazOk}       sub="sin pendientes"          color={C_GREEN} loading={loading} />
+              // DSH-05: título corregido a "PAZ Y SALVO" (sin "OK")
+              // DSH-07: primera letra en mayúscula en el sub
+              <KpiCard title="PAZ Y SALVO"           value={totalPazOk}       sub="Sin pendientes"          color={C_GREEN} loading={loading} />
             )}
             {can.kpiPendientes && (
-              <KpiCard title="Con Pendientes"        value={totalPendientes}  sub="paz y salvo incompleto"  color={C_RED}   loading={loading} />
+              // DSH-06: título "PAZ Y SALVO INCOMPLETO" y sub "Con pendientes"
+              <KpiCard title="PAZ Y SALVO INCOMPLETO" value={totalPendientes}  sub="Con pendientes"         color={C_RED}   loading={loading} />
             )}
             {can.kpiPagos && (
-              <KpiCard title="Matrículas Pendientes" value={totalPagos}       sub="por período"             color={C_WARN}  loading={loading} />
+              // DSH-07: primera letra en mayúscula en el sub
+              <KpiCard title="Matrículas Pendientes" value={totalPagos}       sub="Por período"             color={C_WARN}  loading={loading} />
             )}
           </div>
 
@@ -413,7 +420,8 @@ export default function DashboardPage() {
                 <div className="dash-card">
                   <div className="dash-card-header">
                     <h3 className="dash-card-title">Préstamos Activos</h3>
-                    <span className="dash-card-sub">Banda vs Uniformes</span>
+                    {/* DSH-08: "VS" en negrilla */}
+                    <span className="dash-card-sub">Banda <strong>VS</strong> Uniformes</span>
                   </div>
                   <div className="dash-card-inner">
                     {prestData.length === 0 && !loading
@@ -440,6 +448,7 @@ export default function DashboardPage() {
                 <div className="dash-card">
                   <div className="dash-card-header">
                     <h3 className="dash-card-title">Estudiantes por Salón</h3>
+                    {/* DSH-10: formato unificado "Período actual · Top 10" */}
                     <span className="dash-card-sub">Período actual · Top 10</span>
                   </div>
                   <div className="dash-card-inner">
@@ -465,7 +474,8 @@ export default function DashboardPage() {
                 <div className="dash-card">
                   <div className="dash-card-header">
                     <h3 className="dash-card-title">Matrículas Pendientes</h3>
-                    <span className="dash-card-sub">Top 5 · Período actual</span>
+                    {/* DSH-10: formato unificado "Período actual · Top 5" */}
+                    <span className="dash-card-sub">Período actual · Top 5</span>
                   </div>
                   <div className="dash-card-inner">
                     {pagosData.length === 0 && !loading
