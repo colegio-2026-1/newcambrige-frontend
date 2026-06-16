@@ -13,7 +13,7 @@ import {
 import ModalCargaIndividual from "./ModalCargaIndividual";
 import Alert from "../../components/shared/Alert";
 import Icon from "../../components/common/Icon";
-import { mdiHome, mdiRobot, mdiServer, mdiCardAccountDetails } from "@mdi/js";
+import { mdiHome, mdiRobot, mdiServer, mdiCardAccountDetails, mdiAccountTie, mdiAccountSchool } from "@mdi/js";
 import styles from "./ImportacionIndividualPage.module.css";
 
 const REGISTROS_POR_PAGINA = 10;
@@ -39,6 +39,14 @@ export default function ImportacionIndividualPage() {
   const [filtGrado,   setFiltGrado]   = useState("");
   const [filtGrupo,   setFiltGrupo]   = useState("");
   const [filtPeriodo, setFiltPeriodo] = useState("");
+
+  const [appliedFiltros, setAppliedFiltros] = useState({
+    codigo: "",
+    nombre: "",
+    grado: "",
+    grupo: "",
+    periodo: ""
+  });
 
   // ── UI ─────────────────────────────────────────────────
   const [paginaActual,     setPaginaActual]     = useState(1);
@@ -68,15 +76,20 @@ export default function ImportacionIndividualPage() {
     [salones, filtGrado]
   );
 
+  const oppositeTipo = tipo === 'estudiante' ? 'docente' : 'estudiante';
+  const oppositeLabel = tipo === 'estudiante' ? 'Docentes' : 'Estudiantes';
+  const oppositeIcon = tipo === 'estudiante' ? mdiAccountTie : mdiAccountSchool;
+
   const menuItems = [
     { label: "Inicio",           path: "/home",                          icon: <Icon icon={mdiHome}             size={1.2} /> },
     { label: "Conexión",         path: `/importacion/${tipo}`,           icon: <Icon icon={mdiRobot}            size={1.5} /> },
     { label: "Carga Masiva",     path: `/importacion/masiva/${tipo}`,    icon: <Icon icon={mdiServer}           size={1.5} /> },
     { label: "Carga Individual", path: `/importacion/individual/${tipo}`,icon: <Icon icon={mdiCardAccountDetails} size={1.5} /> },
+    { label: oppositeLabel,      path: `/importacion/${oppositeTipo}`,   icon: <Icon icon={oppositeIcon}        size={1.5} /> }
   ];
 
   // ── Fetch registros ────────────────────────────────────
-  const fetchRegistros = useCallback(async (periodoId = "") => {
+  const fetchRegistros = useCallback(async (periodoId = "", showErrorAlert = true) => {
     setCargando(true);
     try {
       let data = [];
@@ -94,14 +107,16 @@ export default function ImportacionIndividualPage() {
       setPaginaActual(1);
       setFilaSeleccionada(null);
     } catch {
-      showAlert("error", "No se pudieron cargar los registros.");
+      if (showErrorAlert) {
+        showAlert("error", "No se pudieron cargar los registros.");
+      }
     } finally {
       setCargando(false);
     }
   }, [isEstudiante]);
 
   useEffect(() => {
-    fetchRegistros();
+    fetchRegistros("", false);
     axiosClient.get("/api/salones?limit=500")
       .then(r => setSalones(r.data))
       .catch(() => {});
@@ -110,13 +125,47 @@ export default function ImportacionIndividualPage() {
       .catch(() => {});
   }, [fetchRegistros]);
 
-  // ── Cambio de período: recarga datos desde backend ─────
+  // ── Cambio de período (Solo guarda estado local hasta Buscar) ───
   const handlePeriodoChange = (e) => {
     const val = e.target.value;
     setFiltPeriodo(val);
     setFiltGrado("");
     setFiltGrupo("");
-    fetchRegistros(val);
+  };
+
+  const handleBuscar = () => {
+    if (filtPeriodo !== appliedFiltros.periodo) {
+      fetchRegistros(filtPeriodo, true);
+    }
+    setAppliedFiltros({
+      codigo: filtCodigo,
+      nombre: filtNombre,
+      grado: filtGrado,
+      grupo: filtGrupo,
+      periodo: filtPeriodo
+    });
+    setPaginaActual(1);
+  };
+
+  const handleLimpiar = () => {
+    setFiltCodigo("");
+    setFiltNombre("");
+    setFiltGrado("");
+    setFiltGrupo("");
+    setFiltPeriodo("");
+    
+    if (appliedFiltros.periodo !== "") {
+      fetchRegistros("", true);
+    }
+    
+    setAppliedFiltros({
+      codigo: "",
+      nombre: "",
+      grado: "",
+      grupo: "",
+      periodo: ""
+    });
+    setPaginaActual(1);
   };
 
   // ── Filtrado local (código, nombre, grado, grupo) ──────
@@ -125,17 +174,17 @@ export default function ImportacionIndividualPage() {
       const doc    = (r.documento || "").toLowerCase();
       const nombre = (r.nombre    || "").toLowerCase();
 
-      if (filtCodigo && !doc.includes(filtCodigo.toLowerCase()))    return false;
-      if (filtNombre && !nombre.includes(filtNombre.toLowerCase())) return false;
+      if (appliedFiltros.codigo && !doc.includes(appliedFiltros.codigo.toLowerCase()))    return false;
+      if (appliedFiltros.nombre && !nombre.includes(appliedFiltros.nombre.toLowerCase())) return false;
 
       if (isEstudiante) {
         const salon = salonMap[r.id_salon] || {};
-        if (filtGrado && salon.grado !== filtGrado) return false;
-        if (filtGrupo && salon.grupo !== filtGrupo) return false;
+        if (appliedFiltros.grado && salon.grado !== appliedFiltros.grado) return false;
+        if (appliedFiltros.grupo && salon.grupo !== appliedFiltros.grupo) return false;
       }
       return true;
     });
-  }, [registros, filtCodigo, filtNombre, filtGrado, filtGrupo, isEstudiante, salonMap]);
+  }, [registros, appliedFiltros, isEstudiante, salonMap]);
 
   // ── Paginación ─────────────────────────────────────────
   const totalPaginas    = Math.ceil(registrosFiltrados.length / REGISTROS_POR_PAGINA);
@@ -242,7 +291,7 @@ export default function ImportacionIndividualPage() {
             <div 
               className={styles.badgeFlag}
               onClick={() => navigate("/importacion")}
-              title="Volver a Importaciones"
+              title="Volver a Robot"
             >
               {tipo ? tipo.toUpperCase() : "INDIVIDUAL"}
             </div>
@@ -254,7 +303,7 @@ export default function ImportacionIndividualPage() {
               <label>Código</label>
               <input
                 value={filtCodigo}
-                onChange={e => { setFiltCodigo(e.target.value); setPaginaActual(1); }}
+                onChange={e => setFiltCodigo(e.target.value)}
                 placeholder="Buscar..."
               />
             </div>
@@ -262,7 +311,7 @@ export default function ImportacionIndividualPage() {
               <label>Nombre</label>
               <input
                 value={filtNombre}
-                onChange={e => { setFiltNombre(e.target.value); setPaginaActual(1); }}
+                onChange={e => setFiltNombre(e.target.value)}
                 placeholder="Buscar..."
               />
             </div>
@@ -273,7 +322,7 @@ export default function ImportacionIndividualPage() {
                   <label>Grado</label>
                   <select
                     value={filtGrado}
-                    onChange={e => { setFiltGrado(e.target.value); setFiltGrupo(""); setPaginaActual(1); }}
+                    onChange={e => { setFiltGrado(e.target.value); setFiltGrupo(""); }}
                   >
                     <option value="">Todos</option>
                     {gradosUnicos.map((g, i) => <option key={i} value={g}>{g}</option>)}
@@ -283,7 +332,7 @@ export default function ImportacionIndividualPage() {
                   <label>Grupo</label>
                   <select
                     value={filtGrupo}
-                    onChange={e => { setFiltGrupo(e.target.value); setPaginaActual(1); }}
+                    onChange={e => setFiltGrupo(e.target.value)}
                     disabled={!filtGrado}
                   >
                     <option value="">Todos</option>
@@ -306,6 +355,15 @@ export default function ImportacionIndividualPage() {
                   );
                 })}
               </select>
+            </div>
+
+            <div className={styles.grupoFiltro} style={{ flexDirection: 'row', alignItems: 'flex-end', gap: '10px' }}>
+              <button className={styles.btnAccion} onClick={handleBuscar} style={{ height: '38px', minWidth: '100px', padding: '0 15px' }}>
+                Buscar
+              </button>
+              <button className={styles.btnAccion} onClick={handleLimpiar} style={{ height: '38px', minWidth: '100px', padding: '0 15px', backgroundColor: 'var(--color-border)' }}>
+                Limpiar
+              </button>
             </div>
           </div>
 
@@ -353,9 +411,6 @@ export default function ImportacionIndividualPage() {
                 onClick={() => setPaginaActual(p => Math.max(1, p - 1))}
                 disabled={paginaActual === 1}
               >‹</button>
-              <span className={styles.infoPagina}>
-                Página {paginaActual} de {totalPaginas || 1}
-              </span>
               <button
                 className={styles.btnPagina}
                 onClick={() => setPaginaActual(p => Math.min(totalPaginas, p + 1))}

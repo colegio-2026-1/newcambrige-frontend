@@ -135,11 +135,14 @@
 }
 
 .robotMessage {
-  font-size: var(--text-lg);
+  font-size: 1.1rem;
+  font-weight: 500;
   color: var(--color-text);
-  margin-bottom: 30px;
+  margin-bottom: 20px;
+  min-height: 28px;
   text-align: center;
   line-height: 1.5;
+  white-space: pre-line;
 }
 
 /* PROGRESS BAR */

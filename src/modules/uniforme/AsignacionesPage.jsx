@@ -31,6 +31,17 @@ const capitalizar = (texto) =>
     ? texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase()
     : "—";
 
+
+const formatearFecha = (fecha) => {
+  if (!fecha) return "";
+
+  return new Intl.DateTimeFormat("es-CO", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  }).format(new Date(fecha));
+};
+
 // ─── Columnas de la tabla (definidas fuera del componente: una sola instancia) ─
 const COLUMNS = [
   { key: "codigo", label: "Código" },
@@ -47,7 +58,7 @@ const COLUMNS = [
     label: "Fecha Entrega",
     render: (_, row) =>
       row.fecha_entrega
-        ? new Date(row.fecha_entrega).toLocaleDateString("es-CO")
+        ? formatearFecha(row.fecha_entrega)
         : "—"
   },
   {
@@ -56,11 +67,11 @@ const COLUMNS = [
     render: (val) => {
       const estado = val?.toLowerCase();
       let clase = "uniforme-badge--default";
-      if (estado === "prestado")     clase = "uniforme-badge--warn";
-      else if (estado === "bueno")   clase = "uniforme-badge--good";
-      else if (estado === "regular") clase = "uniforme-badge--regular";
-      else if (estado === "malo")    clase = "uniforme-badge--bad";
-      else if (estado === "sin asignar") clase = "uniforme-badge--no";
+      if (estado === "prestado")     clase = "badge--warn";
+      else if (estado === "bueno")   clase = "badge--ok";
+      else if (estado === "regular") clase = "badge--warn";
+      else if (estado === "malo")    clase = "badge--no";
+      else if (estado === "sin asignar") clase = "badge--no";
       return <span className={clase}>{capitalizar(val)}</span>;
     }
   }
@@ -111,11 +122,11 @@ export default function AsignacionesPage() {
     id_objeto: "",
     talla: "",
     fecha_prestamo: "",
-    estado: "bueno",
+    estado: "",
     observacion: ""
   });
 
-  const fechaVisual = new Date().toLocaleDateString("es-CO");
+  const fechaVisual = formatearFecha(new Date());
 
   // Cargar prendas disponibles y resetear formulario al abrir el modal
   useEffect(() => {
@@ -131,10 +142,10 @@ export default function AsignacionesPage() {
     if (openModal) {
       cargarPrendas();
       setFormAsignar({
-        id_objeto: "",
+        id_objeto: "seleccionar",
         talla: "",
         fecha_prestamo: fechaVisual,
-        estado: "bueno",
+        estado: "seleccionar",
         observacion: ""
       });
     }
@@ -152,7 +163,10 @@ export default function AsignacionesPage() {
   const handleAsignarSubmit = async () => {
     if (loadingModal) return;
 
-    if (!formAsignar.id_objeto) {
+    if (
+      !formAsignar.id_objeto ||
+      formAsignar.id_objeto === "seleccionar"
+    ) {
       mostrarAlerta("error", "Seleccione una prenda");
       return;
     }
@@ -164,7 +178,21 @@ export default function AsignacionesPage() {
       mostrarAlerta("error", "Debe seleccionar un estudiante");
       return;
     }
+    if (
+      !formAsignar.estado ||
+      formAsignar.estado === "seleccionar"
+    ) {
+      mostrarAlerta(
+        "error",
+        "Seleccione el estado de la prenda"
+      );
+      return;
+    }
 
+    if (prendaSeleccionada?.tipo === "vestimenta" && !formAsignar.talla) {
+      mostrarAlerta("error", "Seleccione una talla");
+      return;
+    }
     const data = {
       id_objeto: parseInt(formAsignar.id_objeto),
       id_estudiante: selectedRow.id_estudiante,
@@ -200,7 +228,7 @@ export default function AsignacionesPage() {
     fecha_entrega: "",
     fecha_devolucion: "",
     estado_entrega: "",
-    estado_devolucion: "",
+    estado_devolucion: "seleccionar",
     observacion: ""
   });
 
@@ -261,7 +289,7 @@ export default function AsignacionesPage() {
     cargarPeriodos();
   }, []);
 
-  // ── Eliminar ─────────────────────────────────────────────────────────────────
+  // ── Eliminar ───────────────────────────
   const eliminarAsignacion = async (id) => {
     try {
       await deletePrestamoRequest(id);
@@ -293,7 +321,10 @@ export default function AsignacionesPage() {
       mostrarAlerta("error", "Seleccione una asignación");
       return;
     }
-    if (!formDevolucion.estado_devolucion) {
+    if (
+      !formDevolucion.estado_devolucion ||
+      formDevolucion.estado_devolucion === "seleccionar"
+    ) {
       mostrarAlerta("error", "Seleccione el estado de devolución");
       return;
     }
@@ -378,16 +409,16 @@ export default function AsignacionesPage() {
       path: "/home"
     },
     {
-      label: "Asignaciones Uniformes",
+      label: "Asignación Uniformes",
       icon: <Icon path={mdiTshirtCrew} size={1} />,
       path: "/uniformes/asignaciones",
-      roles: ["admin", "titular"]
+      roles: ["admin", "titular", "uniformes"]
     },
     {
       label: "Inventario Uniformes",
       icon: <Icon path={mdiHanger} size={1} />,
       path: "/uniformes/inventario",
-      roles: ["admin", "titular"]
+      roles: ["admin", "titular", "uniformes"]
     }
   ];
 
@@ -397,7 +428,7 @@ export default function AsignacionesPage() {
   );
 
   const tieneAccesoModulo = roles.some(
-    rol => ["admin", "titular"].includes(rol)
+    rol => ["admin", "titular","uniformes"].includes(rol)
   );
 
   useEffect(() => {
@@ -417,7 +448,7 @@ export default function AsignacionesPage() {
             user={{ nombre: user?.nombre || "admin", rol }}
             loadingRoles={loadingRoles}
             menuItems={sidebarMenuItems}
-            selectedMenu="Asignaciones Uniformes"
+            selectedMenu="Asignación Uniformes"
           />
         }
         actions={
@@ -437,16 +468,18 @@ export default function AsignacionesPage() {
                     if (!selectedRow) {
                       mostrarAlerta("error", "Seleccione una asignación");
                       return;
+                    
                     }
+                    console.log(selectedRow)
                     setFormDevolucion({
                       prenda: selectedRow.prenda || "",
-                      talla: selectedRow.talla || "",
+                      talla: selectedRow.talla || "No aplica",
                       fecha_entrega: selectedRow.fecha_entrega
-                        ? new Date(selectedRow.fecha_entrega).toLocaleDateString("es-CO")
+                        ? formatearFecha(selectedRow.fecha_entrega)
                         : "",
-                      fecha_devolucion: new Date().toLocaleDateString("es-CO"),
+                      fecha_devolucion: formatearFecha(new Date()),
                       estado_entrega: capitalizar(selectedRow.estado_entrega) || "",
-                      estado_devolucion: "",
+                      estado_devolucion: "seleccionar",
                       observacion: ""
                     });
                     setOpenDevolver(true);
@@ -454,7 +487,7 @@ export default function AsignacionesPage() {
                   variante: "secondary"
                 },
                 {
-                  label: "Eliminar",
+                  label: "Eliminar Prenda",
                   disabled: !!selectedRow && !selectedRow.id_prestamo,
                   onClick: () => {
                     if (!selectedRow) {
@@ -490,9 +523,16 @@ export default function AsignacionesPage() {
                 });
               }}
               onSearch={(f) => setFiltrosAplicados(f)}
+              cleanFilter={{
+                codigo: "",
+                nombre: "",
+                grado: "",
+                grupo: "",
+                anio: filtros.anio
+              }}
+
             />
           )}
-
           <div className="table-container">
             <DataTable
               columns={COLUMNS}
@@ -523,7 +563,10 @@ export default function AsignacionesPage() {
             const nuevo = { ...prev, [key]: value };
             if (key === "id_objeto") {
               const objeto = prendas.find((p) => p.id_objeto === Number(value));
-              nuevo.talla = objeto?.tipo === "objeto" ? "No aplica" : "";
+              nuevo.talla = 
+                objeto?.tipo === "objeto" 
+                  ? "No aplica"
+                  :  objeto?.talla || ""
             }
             return nuevo;
           });
@@ -533,7 +576,14 @@ export default function AsignacionesPage() {
             key: "id_objeto",
             label: "Prenda",
             type: "select",
-            options: opcionesPrendas
+            options: [
+              {
+                value: "seleccionar",
+                label: "Seleccionar"
+              },
+              ...opcionesPrendas
+            ]
+            
           },
           {
             key: "talla",
@@ -542,7 +592,9 @@ export default function AsignacionesPage() {
             options:
               prendaSeleccionada?.tipo === "objeto"
                 ? ["No aplica"]
-                : ["S", "M", "L", "XL"]
+                : prendaSeleccionada?.talla
+                  ? [prendaSeleccionada.talla]
+                  : []
           },
           { key: "fecha_prestamo", label: "Fecha de Entrega", type: "text" },
           {
@@ -550,6 +602,7 @@ export default function AsignacionesPage() {
             label: "Estado de la prenda",
             type: "select",
             options: [
+              { value: "seleccionar", label: "Seleccionar" },
               { value: "bueno",   label: "Bueno" },
               { value: "regular", label: "Regular" },
               { value: "malo",    label: "Malo" }
@@ -580,6 +633,7 @@ export default function AsignacionesPage() {
             label: "Estado de Devolución",
             type: "select",
             options: [
+              { value: "seleccionar", label: "Seleccionar" },
               { value: "Bueno",   label: "Bueno" },
               { value: "Regular", label: "Regular" },
               { value: "Malo",    label: "Malo" }
@@ -602,9 +656,10 @@ export default function AsignacionesPage() {
             key: "mensaje",
             type: "label",
             className: "uniformes-modal-message",
-            label: `${selectedRow?.nombre_completo || ""}
-${capitalizar(selectedRow?.prenda || "")}
-Esta acción no se puede deshacer.`
+            label: `¿CONFIRMA ELIMINAR LA ASIGNACION?"${(selectedRow?.prenda || "").toUpperCase()}"?
+        ESTA ACCIÓN NO SE PUEDE DESHACER.`
+
+
           }
         ]}
       />

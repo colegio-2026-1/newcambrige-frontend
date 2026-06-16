@@ -3,43 +3,46 @@ div.asignaciones-wrapper {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background-color: var(--color-white, #FFFFFF);
-  font-family: 'Bentham', serif;
+  background-color: var(--color-bg);
+  font-family: var(--font-body);
 }
 
 /* ── TOOLBAR SUPERIOR ── */
 div.asignaciones-wrapper .module-toolbar-container {
   display: flex;
   align-items: center;
-  padding: 20px 30px;
-  background: white;
-  border-bottom: 1px solid #EBEBEB;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  padding: var(--space-5) var(--space-8);
+  background: var(--color-white);
+  border-bottom: var(--border-width) solid var(--color-border-light);
+  box-shadow: var(--shadow-sm);
 }
 
 div.asignaciones-wrapper .toolbar-grouped-actions {
   display: flex; 
   align-items: center; 
-  justify-content: space-between;
+  justify-content: flex-start;
   width: 100%; 
 }
 
 div.asignaciones-wrapper .custom-asignacion-search {
   display: flex; 
   align-items: center; 
-  gap: 15px;
+  gap: var(--space-4);
+  padding: 0;
+  width: auto;
 }
 
 /* ── ÁREA PRINCIPAL Y TABLA ── */
 div.asignaciones-wrapper .main-area {
   flex: 1;
-  padding: 20px 30px;
+  padding: var(--space-5) var(--space-8);
+  overflow-y: auto;
 }
 
 div.asignaciones-wrapper .table-layout-wrapper {
   display: flex;
   align-items: flex-start;
-  gap: 30px;
+  gap: var(--space-8);
   width: 100%;
 }
 
@@ -47,18 +50,24 @@ div.asignaciones-wrapper .table-main-section {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
-div.asignaciones-wrapper .datatable-fixed-container {
-  min-height: 400px;
+div.asignaciones-wrapper .datatable-wrapper {
+  border: none;
 }
 
-/* ── BOTONES LATERALES ── */
+div.asignaciones-wrapper .datatable-scroll {
+  border: 1px solid #e0e0e0;
+  border-radius: var(--radius-sm);
+}
+
+/* ── BOTONES LATERALES Y PAGINACIÓN ── */
 div.asignaciones-wrapper .side-actions {
-  margin-top: 45px;
+  margin-top: 0;
+  flex-shrink: 0;
 }
 
-/* ── PAGINACIÓN ── */
 div.asignaciones-wrapper .pagination-center {
   display: flex;
   justify-content: center;
@@ -70,14 +79,14 @@ div.asignaciones-wrapper .btn-circle {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background-color: #264A7F;
+  background-color: var(--color-primary);
   color: white;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 div.asignaciones-wrapper .btn-circle:disabled {
@@ -86,161 +95,96 @@ div.asignaciones-wrapper .btn-circle:disabled {
   box-shadow: none;
 }
 
-
-/* ============================================
-   MODAL DE ASIGNACIONES
-============================================ */
-
-.modal-overlay {
-  position: fixed; 
-  top: 0; 
-  left: 0; 
-  width: 100vw; 
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.4); 
+.asig-flex-row {
   display: flex; 
-  justify-content: center;
-  align-items: center; 
-  z-index: 1000; 
-  font-family: 'Bentham', serif;
+  gap: 16px; 
+  width: 100%;
+  align-items: flex-end;
 }
 
-.asignacion-modal-content {
-  background-color: white; 
-  border-radius: 12px; 
-  width: 550px; 
-  max-width: 95%;
-  overflow: visible; 
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-.asignacion-modal-content .modal-header {
-  background-color: #D0E1FF; 
-  padding: 20px; 
-  display: flex; 
-  justify-content: center;
-  align-items: center; 
-  position: relative;
-}
-
-.asignacion-modal-content .modal-header h3 {
-  font-family: 'Staatliches', sans-serif; 
-  font-size: 28px; 
-  letter-spacing: 2px; 
-  color: #333333; 
-  margin: 0; 
-  line-height: 1; 
-  text-transform: uppercase;
-}
-
-.asignacion-modal-content .modal-close {
-  background: none; 
-  border: none; 
-  font-size: 24px; 
-  font-weight: bold; 
+.asig-btn-add {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  height: 42px;
+  padding: 0 20px;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: bold;
   cursor: pointer;
-  color: #333; 
-  position: absolute; 
-  right: 20px; 
-  top: 50%; 
-  transform: translateY(-50%);
+  transition: all var(--transition-fast);
 }
 
-.asignacion-modal-content .modal-body { 
-  padding: 30px; 
+.asig-btn-add:disabled {
+  background-color: var(--color-border);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
 }
 
-.asignacion-modal-content .modal-form-row {
-  display: flex; 
-  gap: 15px; 
-  margin-bottom: 25px; 
+.asig-btn-add:hover:not(:disabled) {
+  background-color: var(--color-secondary);
+}
+
+.asig-asignaciones-section { 
+  margin-top: var(--space-5); 
+  padding-top: var(--space-4);
+  border-top: 2px dashed var(--color-border-light);
   width: 100%;
 }
 
-.asignacion-modal-content .input-group {
-  display: flex; 
-  flex-direction: column; 
-  gap: 8px; 
-  flex: 1;
+.asig-section-title {
+  font-family: var(--font-display); 
+  font-size: var(--text-2xl); 
+  color: var(--color-text); 
+  text-align: center;
+  margin-bottom: var(--space-4); 
+  letter-spacing: var(--letter-wide);
 }
 
-.asignacion-modal-content .input-group label {
-  font-size: 18px; 
-  font-weight: bold; 
-  color: #333;
-}
-
-.asignacion-modal-content .input-group input, 
-.asignacion-modal-content .input-group select {
-  background-color: #EBEBEB; 
-  border: 1px solid #CCC; 
-  border-radius: 6px;
-  height: 42px; 
-  padding: 0 12px; 
-  font-size: 16px; 
-  color: #333; 
-  width: 100%;
-  box-sizing: border-box; 
-  outline: none; 
-  font-family: 'Bentham', serif;
-}
-
-.asignacion-modal-content .input-group select:disabled { 
-  background-color: #D3D3D3; 
-  color: #666; 
-  cursor: not-allowed; 
-}
-
-.asignacion-modal-content .btn-add-modal { 
-  margin-bottom: 5px; 
-} 
-
-/* ── PILLS DE ASIGNACIONES  ── */
-.asignacion-modal-content .asignaciones-section { 
-  margin-top: 30px; 
-  text-align: center; 
-}
-
-.asignacion-modal-content .asignaciones-section h4 {
-  font-family: 'Staatliches', sans-serif; 
-  font-size: 24px; 
-  color: #333; 
-  margin-bottom: 15px; 
-  letter-spacing: 1px;
-}
-
-.asignacion-modal-content .asignaciones-pills-container {
+.asig-pills-container {
   display: flex; 
   flex-wrap: wrap; 
   justify-content: center; 
-  gap: 15px;
+  gap: var(--space-3);
 }
 
-.asignacion-modal-content .asignacion-pill {
-  background-color: #E8F0FE; 
-  border: 1px solid #4A6B9C; 
-  color: #333;
-  padding: 8px 25px; 
-  font-size: 18px; 
-  font-family: 'Bentham', serif;
-  cursor: pointer; 
-  transition: all 0.2s; 
-  position: relative;
+.asig-empty-text {
+  color: var(--color-text-muted);
+  width: 100%;
+  text-align: center;
+  font-style: italic;
 }
 
-.asignacion-modal-content .asignacion-pill:hover {
-  background-color: #FEE8E8; 
-  border-color: #C0392B; 
-  color: #C0392B;
+.asig-pill-modern {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--color-info-bg);
+  border: var(--border-width) solid var(--color-secondary);
+  color: var(--color-text);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: var(--text-base);
+  font-family: var(--font-body);
+  gap: 10px;
 }
 
-.asignacion-modal-content .asignacion-pill:hover::after {
-  content: " ×"; 
+.asig-remove-btn {
+  background: var(--color-danger);
+  color: var(--color-white);
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 11px;
   font-weight: bold;
+  transition: background var(--transition-fast);
 }
 
-.asignacion-modal-content .modal-footer {
-  display: flex; 
-  justify-content: center; 
-  padding: 0 30px 30px;
+.asig-remove-btn:hover {
+  background: #a00;
 }

@@ -99,7 +99,7 @@ const ParametrizacionPage = () => {
                 <div className="param-icon-wrapper">
                   <Icon 
                     path={card.iconPath} 
-                    size="32px"
+                    size="42px"
                     color="#b89130"
                     className="param-icon"
                   />

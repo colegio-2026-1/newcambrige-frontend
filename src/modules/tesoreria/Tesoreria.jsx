@@ -20,7 +20,7 @@ const Tesoreria = () => {
   const { user, roles, loadingRoles, logout } = useAuth();
   const userName = user?.nombre || "Usuario";
   const rol = roles[0] || (loadingRoles ? "Cargando rol..." : "Sin rol");
-  const selectedMenu = "Tesoreria";
+  const selectedMenu = "Tesorería";
 
   // Cards (submódulos de tesorería)
   const cards = [
@@ -32,8 +32,7 @@ const Tesoreria = () => {
   // Items del sidebar (con roles para filtrar)
   const modulos = [
     { label: "Inicio", icon: <Icon path={mdiHome} />, path: "/home" },
-    { label: "Tesoreria", icon: <Icon path={mdiCash} />, path: "/tesoreria/", roles: ["admin", "tesoreria"] },
-    { label: "Notificaciones", icon: <Icon path={mdiBell} />, path: "/tesoreria/notificaciones", roles: ["admin", "tesoreria"] },
+    { label: "Tesorería", icon: <Icon path={mdiCash} />, path: "/tesoreria/", roles: ["admin", "tesoreria"] },
   ];
 
   // Filtrar los módulos del sidebar según los roles del usuario
