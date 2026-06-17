@@ -305,7 +305,8 @@ const verPazYSalvoDocente = async () => {
                     rows={docentesFiltrados}
                     onRowClick={(f) => setFila(f)}
                     columns={[
-                        {key: "documento",label: "Documento"},
+                        {key: "documento",label: "Documento",
+                          render: (value) => <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{value}</span>},
                         {key: "nombre",label: "Nombre"},
                         {key: "grado", label: "Grado",render: (_, docente) => (<span>{docente.grado}</span>)},
                         {key: "grupo",label: "Grupo",render: (_, docente) => (<span>{docente.grupo}</span>)},

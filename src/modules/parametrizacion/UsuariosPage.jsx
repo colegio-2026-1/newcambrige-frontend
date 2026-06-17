@@ -142,9 +142,13 @@ const UsuariosPage = () => {
   ];
 
   const columnasTabla = [
-    { key: "id_usuario", label: "Código" },
+    { key: "id_usuario", label: "Código",
+      render: (val) => <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{val}</span>
+     },
     { key: "nombre", label: "Usuario" },
-    { key: "documento", label: "Documento" },
+    { key: "documento", label: "Documento",
+      render: (val) => <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{val}</span>
+    },
     {
       key: "estado",
       label: "Estado",

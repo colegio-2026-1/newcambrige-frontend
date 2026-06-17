@@ -292,7 +292,8 @@ const TesoreriaMatricula = () => {
             key={matriculas.length}
             pageSize={10}
             columns={[
-              { key: "documento", label: "Código" },
+              { key: "documento", label: "Código",
+                render: (value) => <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{value}</span>},
               { key: "nombre", label: "Nombre" },
               {
                 key: "grado",
@@ -327,9 +328,10 @@ const TesoreriaMatricula = () => {
                 label: "Fecha de Pago",
                 render: (_, val) => {
                   const matricula = matriculasMap[val.id_estudiante];
-                  return matricula?.estado === "activa" && matricula?.created_at
+                  const fecha = matricula?.estado === "activa" && matricula?.created_at
                     ? new Date(matricula.created_at).toLocaleDateString('es-CO', {day: '2-digit', month: '2-digit', year: 'numeric'})
                     : "---";
+                  return <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{fecha}</span>;
                 }
               }
             ]}

@@ -44,7 +44,9 @@ const formatearFecha = (fecha) => {
 
 // ─── Columnas de la tabla (definidas fuera del componente: una sola instancia) ─
 const COLUMNS = [
-  { key: "codigo", label: "Código" },
+  { key: "codigo", label: "Código",
+    render: (value) => <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{value}</span>
+   },
   { key: "nombre_completo", label: "Nombre completo" },
   { key: "grado", label: "Grado" },
   { key: "grupo", label: "Grupo" },
@@ -56,10 +58,10 @@ const COLUMNS = [
   {
     key: "fecha_entrega",
     label: "Fecha Entrega",
-    render: (_, row) =>
-      row.fecha_entrega
-        ? formatearFecha(row.fecha_entrega)
-        : "—"
+    render: (_, row) => {
+      const fecha = row.fecha_entrega ? formatearFecha(row.fecha_entrega) : "—";
+      return <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{fecha}</span>;
+    }
   },
   {
     key: "estado",

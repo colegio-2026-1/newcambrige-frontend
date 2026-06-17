@@ -37,7 +37,9 @@ const InventarioPage = () => {
 
 
   const columnas = [
-    { key: "id_instrumento", label: "Código" },
+    { key: "id_instrumento", label: "Código",
+      render: (val) => <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{val}</span>
+     },
     { key: "nombre", label: "Instrumento" },
     { key: "categoria_nombre", label: "Tipo de Instrumento" },
     { key: "estado", label: "Estado", render: (val, row) => <EstadoBadge estado={val} disponible={row.cantidad_disponible > 0} /> },

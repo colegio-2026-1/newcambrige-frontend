@@ -369,7 +369,9 @@ const verPazYSalvo = async () => {
                 key={`${estudiantes}`}
                 pageSize={10}
                 columns={[
-                  {key: "documento", label: "Documento" },
+                  {key: "documento", label: "Documento",
+                    render: (value) => <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{value}</span>
+                   },
                   {key: "nombre", label: "Nombre" },
                   {key: "grado",label: "Grado",render: (_, val) => (<span>{val.grado}</span>)},
                   {key: "grupo",label: "Grupo",render: (_, val) => (<span>{val.grupo}</span>)},

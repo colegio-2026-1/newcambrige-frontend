@@ -181,10 +181,20 @@ const TiposPruebaPage = () => {
   ];
 
   const columnasTabla = [
-    { key: "id_tipo_prueba", label: "Código" },
+    { key: "id_tipo_prueba", label: "Código",
+      render: (val) => <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{val}</span>
+     },
     { key: "nombre", label: "Prueba" },
     { key: "descripcion", label: "Descripción" },
-    { key: "rango", label: "Rango de Grados", render: (_, row) => `De ${row.grado_min} a ${row.grado_max}` }
+    {
+      key: "rango",
+      label: "Rango de Grados",
+      render: (_, row) => (
+        <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>
+          De {row.grado_min} a {row.grado_max}
+        </span>
+      )
+    }
   ];
 
   const pruebasFiltradas = useMemo(() => {

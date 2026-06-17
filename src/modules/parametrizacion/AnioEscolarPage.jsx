@@ -135,9 +135,25 @@ const AnioEscolarPage = () => {
   ];
 
   const columnasTabla = [
-    { key: "nombre", label: "AÑO ESCOLAR", render: (val) => formatAnioDoble(val) },
-    { key: "fecha_inicio", label: "FECHA INICIO", render: (val) => new Date(val).toLocaleDateString('es-CO', { timeZone: 'UTC' }) },
-    { key: "fecha_fin", label: "FECHA FIN", render: (val) => new Date(val).toLocaleDateString('es-CO', { timeZone: 'UTC' }) },
+    { key: "nombre", label: "AÑO ESCOLAR",
+        render: (val) => <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{formatAnioDoble(val)}</span>
+     },
+    {
+      key: "fecha_inicio",
+      label: "FECHA INICIO",
+      render: (val) => {
+        const fecha = new Date(val).toLocaleDateString('es-CO', { timeZone: 'UTC' });
+        return <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{fecha}</span>;
+      }
+    },
+    {
+      key: "fecha_fin",
+      label: "FECHA FIN",
+      render: (val) => {
+        const fecha = new Date(val).toLocaleDateString('es-CO', { timeZone: 'UTC' });
+        return <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{fecha}</span>;
+      }
+    },
     { key: "activo", label: "ESTADO", render: (val) => <span className={val ? 'badge--ok' : 'badge--no'}>{val ? 'Activo' : 'Inactivo'}</span> }
   ];
 

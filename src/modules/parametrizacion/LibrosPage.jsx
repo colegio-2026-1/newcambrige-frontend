@@ -171,7 +171,9 @@ const LibrosPage = () => {
   ];
 
   const columnasTabla = [
-    { key: "id_libro", label: "Código" },
+    { key: "id_libro", label: "Código",
+      render: (val) => <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{val}</span>
+     },
     { key: "nombre", label: "Título del Libro" },
     { key: "autor", label: "Autor" },
     { key: "edicion", label: "Edición", render: (val) => val || "N/A" },
