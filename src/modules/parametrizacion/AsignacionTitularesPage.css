@@ -188,3 +188,8 @@ div.asignaciones-wrapper .btn-circle:disabled {
 .asig-remove-btn:hover {
   background: #a00;
 }
+
+.asignaciones-wrapper .searchbar-wrapper .searchbar-field:first-child .searchbar-input {
+    min-width: 200px; 
+    width: 100%;
+}

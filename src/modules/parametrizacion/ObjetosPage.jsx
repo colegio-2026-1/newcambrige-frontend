@@ -32,6 +32,7 @@ const ObjetosPage = () => {
   const [objetos, setObjetos] = useState([]);
   const [objetoSeleccionado, setObjetoSeleccionado] = useState(null);
   const [filtros, setFiltros] = useState({ codigo: "", nombre: "", tipo: "" });
+  const [searchKey, setSearchKey] = useState(0);
   
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("crear");
@@ -224,12 +225,17 @@ const ObjetosPage = () => {
           
           <div className="module-toolbar-container">
             <SearchBar
+              key={searchKey} 
               fields={[
                 { key: 'codigo', label: 'Código:', type: 'text' },
                 { key: 'nombre', label: 'Nombre:', type: 'text' },
                 { key: 'tipo', label: 'Tipo:', type: 'select', options: ['Vestimenta', 'Objeto'] }
               ]}
-              onSearch={(nuevosFiltros) => setFiltros(nuevosFiltros)}
+              onSearch={(nuevosFiltros) => {
+                setFiltros(nuevosFiltros);
+                setSearchKey(prev => prev + 1); 
+              }}
+              cleanFilter={{ codigo: "", nombre: "", tipo: "" }} 
             />
           </div>
 
