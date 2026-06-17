@@ -5,7 +5,7 @@ export const getEstudiantesRequest = () =>
   axiosClient.get(`/api/estudiantes/`);
 
 export const getSalonesRequest = () => 
-  axiosClient.get(`/api/salones`);
+  axiosClient.get(`/api/salones/`);
 
 
 // ============ CATEGORÍAS Y UBICACIONES ============
