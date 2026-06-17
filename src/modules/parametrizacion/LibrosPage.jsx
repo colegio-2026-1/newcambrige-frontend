@@ -16,7 +16,8 @@ import {
   crearLibroRequest, 
   actualizarLibroRequest, 
   eliminarLibroRequest,
-  obtenerSalonesRequest
+  obtenerAniosRequest,
+  obtenerSalonesPorPeriodoRequest
 } from "../../api/endpointsParametrizacion"; 
 
 import { Icon } from '@mdi/react';
@@ -51,10 +52,15 @@ const LibrosPage = () => {
 
   const cargarDatos = async () => {
     try {
+      const resAnios = await obtenerAniosRequest();
+      const periodoAct = resAnios.data.find(a => a.activo === true);
+      const idPer = periodoAct ? periodoAct.id_periodo : 1;
+
       const [resLibros, resSalones] = await Promise.all([
         obtenerLibrosRequest(),
-        obtenerSalonesRequest().catch(() => ({ data: [] }))
+        obtenerSalonesPorPeriodoRequest(idPer).catch(() => ({ data: [] }))
       ]);
+      
       setLibros(resLibros.data || []);
       setSalonesDb(resSalones.data || []);
       setLibroSeleccionado(null); 
@@ -213,6 +219,7 @@ const LibrosPage = () => {
                 { key: 'edicion', label: 'Edición:', type: 'text' }
               ]}
               onSearch={(nuevosFiltros) => setFiltros(nuevosFiltros)}
+              cleanFilter={{ nombre: "", autor: "", edicion: "" }}
             />
           </div>
 

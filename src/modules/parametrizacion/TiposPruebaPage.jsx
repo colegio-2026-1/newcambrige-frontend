@@ -36,6 +36,8 @@ const TiposPruebaPage = () => {
   const [pruebas, setPruebas] = useState([]);
   const [pruebaSeleccionada, setPruebaSeleccionada] = useState(null);
   const [filtroBusqueda, setFiltroBusqueda] = useState("");
+
+  const [searchKey, setSearchKey] = useState(0);
   
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("crear"); 
@@ -206,8 +208,13 @@ const TiposPruebaPage = () => {
           
           <div className="module-toolbar-container">
             <SearchBar
+              key={searchKey} 
               fields={[ { key: 'busqueda', label: 'Buscar:', type: 'text' } ]}
-              onSearch={(filtros) => setFiltroBusqueda(filtros.busqueda || "")}
+              onSearch={(filtros) => {
+                setFiltroBusqueda(filtros.busqueda || ""); 
+                setSearchKey(prev => prev + 1);           
+              }}
+              cleanFilter={{ busqueda: "" }} 
             />
           </div>
 
@@ -295,7 +302,7 @@ const TiposPruebaPage = () => {
             </div>
           </div>
 
-          {/* Fila 3: Visualizador de Grados Iluminados (CON MÁS ESPACIO) */}
+          {/* Fila 3: Visualizador de Grados Iluminados  */}
           <div className="tp-grados-section" style={{ marginTop: "35px" }}> 
             <h4 className="tp-grados-title" style={{ marginBottom: "15px" }}>GRADOS</h4> 
             <div className="tp-grados-grid">

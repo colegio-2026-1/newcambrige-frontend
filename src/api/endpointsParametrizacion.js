@@ -75,3 +75,31 @@ export const obtenerSalonesRequest = () =>
   axiosClient.get('/api/salones');
 
 export const crearSalonRequest = (data) => axiosClient.post('/api/salones/', data);
+
+/* ==========================================
+   MÓDULO: INSTRUMENTOS (BANDA)
+========================================== */
+export const obtenerInstrumentosRequest = () => 
+  axiosClient.get('/api/banda/instrumentos');
+
+export const crearInstrumentoRequest = (data) => 
+  axiosClient.post('/api/banda/instrumentos', data);
+
+export const actualizarInstrumentoRequest = (id, data) => 
+  axiosClient.put(`/api/banda/instrumentos/${id}`, data);
+
+export const eliminarInstrumentoRequest = (id) => 
+  axiosClient.delete(`/api/banda/instrumentos/${id}`);
+
+
+export const obtenerCategoriasRequest = () => 
+  axiosClient.get('/api/banda/categorias'); 
+
+export const crearCategoriaRequest = (data) => 
+  axiosClient.post('/api/banda/categorias', data);
+
+export const actualizarCategoriaRequest = (id, data) => 
+  axiosClient.put(`/api/banda/categorias/${id}`, data);
+
+export const eliminarCategoriaRequest = (id) => 
+  axiosClient.delete(`/api/banda/categorias/${id}`);

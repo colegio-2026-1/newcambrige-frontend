@@ -9,6 +9,8 @@ import ObjetosPage from "../modules/parametrizacion/ObjetosPage";
 import AnioEscolarPage from "../modules/parametrizacion/AnioEscolarPage"; 
 import LibrosPage from "../modules/parametrizacion/LibrosPage"; 
 import AsignacionTitularesPage from "../modules/parametrizacion/AsignacionTitularesPage"; 
+import InstrumentosPage from "../modules/parametrizacion/InstrumentosPage"; 
+
 
 
 
@@ -52,6 +54,12 @@ const ParametrizacionRouter = () => [
     key="parametrizacion-titulares" 
     path="/parametrizacion/titulares" 
     element={<ProtectedRoute><AsignacionTitularesPage /></ProtectedRoute>} 
+  />,   
+
+      <Route 
+    key="parametrizacion-instrumentos" 
+    path="/parametrizacion/instrumentos" 
+    element={<ProtectedRoute><InstrumentosPage /></ProtectedRoute>} 
   />,   
 
 ];

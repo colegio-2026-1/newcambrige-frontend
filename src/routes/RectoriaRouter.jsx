@@ -5,10 +5,12 @@ import RectoriaDocentes from "../modules/rectoria/RectoriaDocentes";
 import Rectoria from "../modules/rectoria/Rectoria";
 
 
+
 const RectoriaRoutes = () => [
   <Route key="rectoria" path="/rectoria/" element={<ProtectedRoute><Rectoria/></ProtectedRoute>} />,
   <Route key="rectoria-estudiantes" path="/rectoria/estudiantes" element={<ProtectedRoute><RectoriaEstudiantes/></ProtectedRoute>} />,
   <Route key="rectoria-docentes" path="/rectoria/docentes" element={<ProtectedRoute><RectoriaDocentes/></ProtectedRoute>} />,
+  
 
 ];
 export default RectoriaRoutes;

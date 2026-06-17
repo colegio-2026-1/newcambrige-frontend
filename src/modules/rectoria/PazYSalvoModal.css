@@ -1,134 +1,206 @@
-@import url('https://fonts.googleapis.com/css2?family=Bentham&display=swap');
+@import '../../variables.css';
 
+/* OVERLAY */
 .paz-salvo-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.35);
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
+  z-index: 1000;
 }
+
+/* CONTENEDOR */
 .paz-salvo-modal {
-  width: 900px;
-  min-height: 620px;
-  background: white;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 8px 25px rgba(0,0,0,.25);
-  font-family: 'Bentham', serif;
-}
-.paz-salvo-header {
-  background: #c8d7f0;
-  padding: 18px;
   position: relative;
+  width: 100%;
+  max-width: 900px;
+  min-height: 620px;
+
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  border: var(--border-width) solid var(--color-border-light);
+
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+/* HEADER */
+.paz-salvo-header {
+  position: relative;
+  background: var(--color-secondary);
+  padding: var(--space-4) var(--space-10);
   text-align: center;
 }
+
 .paz-salvo-header h2 {
   margin: 0;
-  font-family: 'Bentham', serif;
-  font-size: 54px;
-  font-weight: bold;
+
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: normal;
+  letter-spacing: var(--letter-wider);
+  color: var(--color-text-white);
 }
+
+/* BOTÓN CERRAR */
 .paz-salvo-close {
   position: absolute;
+  top: 10px;
   right: 12px;
-  top: 8px;
-  border: none;
+
+  width: 32px;
+  height: 32px;
+
   background: transparent;
-  font-size: 24px;
+  border: 2px solid rgba(255,255,255,0.6);
+  border-radius: 50%;
+
+  color: var(--color-text-white);
+  font-size: 18px;
+  font-weight: bold;
+
   cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: all var(--transition-fast);
 }
+
+.paz-salvo-close:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: rgba(255,255,255,0.15);
+}
+
+/* DATOS GENERALES */
 .paz-salvo-info {
   display: flex;
   justify-content: space-between;
-  padding: 20px 30px;
+  padding: 25px 40px;
 }
+
 .paz-salvo-dato {
   display: flex;
   align-items: center;
   gap: 10px;
 }
+
+.paz-salvo-dato span {
+  font-family: var(--font-body);
+  font-size: 20px;
+  color: var(--color-text);
+}
+
 .paz-salvo-linea {
   min-width: 240px;
-  border-bottom: 1px solid #888;
+
+  border-bottom: 1px solid var(--color-border);
+
+  font-family: var(--font-body);
+  font-size: 20px;
+  color: var(--color-text);
+
   padding-bottom: 4px;
 }
+
+/* GRID DE FIRMAS */
 .paz-salvo-grid {
-  padding: 30px 35px;
+  padding: 30px 40px;
+
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+
   row-gap: 45px;
   column-gap: 35px;
 }
+
 .firma-item {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
-.firma-linea {
-  width: 170px;
-  border-top: 1px solid #777;
-  margin-bottom: 8px;
-}
-.firma-item span {
-  font-family: 'Bentham', serif;
-  font-size: 28px;
-  line-height: 1;
-}
-.paz-salvo-sello {
-  max-width: 90px;
-  max-height: 90px;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-}
-.paz-salvo-footer {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  padding: 20px;
-}
-.paz-btn {
-  background: #3f63a5;
-  color: white;
-  border: none;
-  border-radius: 20px;
-  padding: 10px 24px;
-  cursor: pointer;
-  font-size: 15px;
-}
-.paz-btn:hover {
-  opacity: .9;
-}
-.paz-salvo-info {
-  padding: 22px 30px;
-}
-.paz-salvo-dato span {
-  font-size: 24px;
-  font-family: 'Bentham', serif;
-}
-.paz-salvo-linea {
-  font-size: 22px;
-  font-family: 'Bentham', serif;
-}
-.paz-salvo-firma {
-  max-width: 140px;
-  max-height: 60px;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-}
+
 .firma-imagen-container {
   width: 180px;
   height: 100px;
 
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
 
   margin-bottom: 8px;
 }
+
+.paz-salvo-firma {
+  max-width: 140px;
+  max-height: 60px;
+  object-fit: contain;
+}
+
+.firma-linea {
+  width: 170px;
+  border-top: 1px solid var(--color-border);
+  margin-bottom: 8px;
+}
+
+.firma-item span {
+  font-family: var(--font-body);
+  font-size: 20px;
+  color: var(--color-text);
+  text-align: center;
+}
+
+/* SELLO */
+.paz-salvo-sello {
+  max-width: 90px;
+  max-height: 90px;
+  object-fit: contain;
+}
+
+/* FOOTER */
+.paz-salvo-footer {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-6);
+
+  padding: var(--space-6);
+}
+
+/* BOTONES */
+.paz-btn {
+  height: 42px;
+  padding: 0 var(--space-8);
+
+  border: none;
+  border-radius: var(--radius-full);
+
+  background: var(--color-secondary);
+  color: var(--color-text-white);
+
+  font-family: var(--font-body);
+  font-size: 20px;
+  letter-spacing: var(--letter-wide);
+
+  cursor: pointer;
+
+  transition:
+    background var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.paz-btn:hover {
+  background: var(--color-secondary-dark);
+}
+
+.paz-btn:active {
+  transform: scale(0.97);
+}
+
+/* DOCENTES */
 .paz-salvo-grid-docente {
   display: flex;
   justify-content: center;
@@ -137,26 +209,25 @@
   min-height: 260px;
   width: 100%;
 }
+
 .paz-salvo-grid-docente .firma-item {
   width: 320px;
 }
+
 .paz-salvo-grid-docente .firma-imagen-container {
   width: 300px;
   height: 140px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
+
 .paz-salvo-grid-docente .paz-salvo-firma {
   max-width: 280px;
   max-height: 120px;
-  width: auto;
-  height: auto;
-  object-fit: contain;
 }
+
 .paz-salvo-grid-docente .firma-linea {
   width: 250px;
 }
+
 .paz-salvo-grid-docente span {
-  font-size: 34px;
+  font-size: 20px;
 }
