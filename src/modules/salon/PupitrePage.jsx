@@ -74,7 +74,8 @@ export default function PupitrePage() {
   ];
 
   const columns = [
-    { key: "codigo", label: "CÓDIGO" },
+    { key: "codigo", label: "CÓDIGO",
+      render: (value) => <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{value}</span>}, 
     { key: "nombre", label: "NOMBRE COMPLETO" },
     {
       key: "grado", label: "GRADO",
@@ -94,7 +95,11 @@ export default function PupitrePage() {
     },
     {
       key: "fecha_pago", label: "FECHA DE PAGO",
-      render: (val) => (!val || val === "" ? <span>---</span> : <span>{val}</span>),
+      render: (val) => (
+        !val || val === "" 
+          ? <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>---</span>
+          : <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{val}</span>
+      ),
     },
   ];
 

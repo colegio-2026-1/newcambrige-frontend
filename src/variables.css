@@ -3,7 +3,7 @@ VARIABLES GLOBALES — NEW CAMBRIDGE SCHOOL
 Importar en main.jsx o index.css:
 @import './styles/variables.css';
    ============================================ */
-
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 @font-face {
   font-family: 'Bentham';
   src: url('../../assets/fonts/Bentham-Regular.ttf') format('truetype');
@@ -24,6 +24,7 @@ Importar en main.jsx o index.css:
   font-weight: normal;
   font-style: normal;
 }
+
 
 :root {
 
@@ -67,6 +68,8 @@ Importar en main.jsx o index.css:
   --font-display: 'Staatliches', cursive;   /* para títulos llamativos */
   --font-body:    'Bentham', serif;          /* para texto general */
   --font-hand:    'HeyGotcha', serif;      /* texto general */
+  --font-number: 'Roboto', 'Helvetica', sans-serif;
+
 
 --text-xs:    11px;
 --text-sm:    13px;

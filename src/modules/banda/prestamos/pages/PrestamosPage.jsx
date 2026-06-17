@@ -45,7 +45,9 @@ const PrestamosPage = () => {
 
 
 const columnasEstudiantes = [
-    { key: "documento", label: "CÓDIGO" }, 
+    { key: "documento", label: "CÓDIGO",
+      render: (value) => <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{value}</span>
+     }, 
     { key: "nombre", label: "NOMBRE COMPLETO" },
     { key: "grado", label: "GRADO", render: (_, row) => prestamos.salonesMap[row.id_salon]?.grado || "—"  },
     { key: "grupo", label: "GRUPO", render: (_, row) => prestamos.salonesMap[row.id_salon]?.grupo || "_" },

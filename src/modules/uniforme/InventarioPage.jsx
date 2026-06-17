@@ -34,7 +34,9 @@ const capitalizar = (texto) =>
 
 // ─── Columnas de la tabla (definidas fuera del componente: una sola instancia) ─
 const COLUMNS = [
-  { key: "id_objeto", label: "Código" },
+  { key: "id_objeto", label: "Código", 
+    render: (val) => <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{val}</span>
+  },
   {
     key: "nombre",
     label: "Nombre",
