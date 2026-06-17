@@ -2,7 +2,7 @@ import axiosClient from "./axiosClient";
 
 // ============ ESTUDIANTES ============
 export const getEstudiantesRequest = () => 
-  axiosClient.get(`/api/estudiantes`);
+  axiosClient.get(`/api/estudiantes/`);
 
 export const getSalonesRequest = () => 
   axiosClient.get(`/api/salones`);
