@@ -43,6 +43,8 @@ const UsuariosPage = () => {
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null);
   const [filtros, setFiltros] = useState({ busqueda: "" });
 
+  const [searchKey, setSearchKey] = useState(0);
+
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("crear");
   const [formValues, setFormValues] = useState({});
@@ -183,8 +185,13 @@ const UsuariosPage = () => {
           
           <div className="module-toolbar-container">
             <SearchBar
+              key={searchKey} 
               fields={[{ key: 'busqueda', label: 'Usuario:', type: 'text' }]}
-              onSearch={(nuevosFiltros) => setFiltros(nuevosFiltros)}
+              onSearch={(nuevosFiltros) => {
+                setFiltros(nuevosFiltros);
+                setSearchKey(prev => prev + 1); 
+              }}
+              cleanFilter={{ busqueda: "" }}
             />
           </div>
 

@@ -1,0 +1,84 @@
+/* =========================================
+   CONTENEDOR PRINCIPAL AISLADO
+========================================= */
+div.instrumentos-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg);
+  font-family: var(--font-body);
+}
+
+div.instrumentos-wrapper .module-toolbar-container {
+  display: flex;
+  align-items: center;
+  padding: var(--space-5) var(--space-8);
+  background: var(--color-white);
+  border-bottom: var(--border-width) solid var(--color-border-light);
+  box-shadow: var(--shadow-sm);
+}
+
+xdiv.instrumentos-wrapper .searchbar-field:nth-child(1) .searchbar-input { width: 220px; }
+div.instrumentos-wrapper .searchbar-field:nth-child(2) .searchbar-input { width: 180px; }
+div.instrumentos-wrapper .searchbar-field:nth-child(3) .searchbar-input { width: 160px; }
+
+div.instrumentos-wrapper .main-area {
+  flex: 1;
+  padding: var(--space-5) var(--space-8);
+  overflow-y: auto;
+}
+
+div.instrumentos-wrapper .table-layout-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-8);
+  width: 100%;
+}
+
+div.instrumentos-wrapper .table-main-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+div.instrumentos-wrapper .side-actions {
+  margin-top: 0;
+  flex-shrink: 0;
+}
+
+div.instrumentos-wrapper .datatable-wrapper { border: none; }
+div.instrumentos-wrapper .datatable-scroll { border: 1px solid #e0e0e0; border-radius: var(--radius-sm); }
+div.instrumentos-wrapper .datatable-pagination { padding: 15px 0 0 0; }
+
+
+/* =========================================
+   ESTILOS DE MODAL Y TABLA 
+========================================= */
+.instrumentos-flex-row {
+  display: flex; 
+  gap: 16px; 
+  width: 100%;
+  align-items: flex-end;
+}
+
+.instrumentos-badge--ok {
+  background-color: #e6f4ea;
+  color: #1e8e3e;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  display: inline-block;
+}
+
+.instrumentos-badge--warning {
+  background-color: #fff3e0;
+  color: #e65100;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  display: inline-block;
+}

@@ -5,6 +5,7 @@ import Header from "../../components/layout/header";
 import Sidebar from "../../components/layout/Sidebar";
 import ModuleLayout from "../../components/layout/ModuleLayout";
 import DataTable from "../../components/shared/DataTable";
+import SearchBar from "../../components/shared/searchBar";
 import ActionButtons from "../../components/shared/ActionButtons";
 import ParamModal from "../../components/shared/ParamModal";
 import Alert from "../../components/shared/Alert";
@@ -24,6 +25,12 @@ import {
   mdiGuitarElectric, mdiCube, mdiBook, mdiAccountGroup,
 } from '@mdi/js';
 
+const NOMBRES_GRADOS = [
+  "Transicion", "Primero", "Segundo", "Tercero", "Cuarto", 
+  "Quinto", "Sexto", "Septimo", "Octavo", "Noveno", 
+  "Decimo", "Once", "Jardin", "Parvulos", "Prejardin"
+];
+
 const AsignacionTitularesPage = () => {
   const { user, roles, loadingRoles, logout } = useAuth();
   
@@ -32,9 +39,7 @@ const AsignacionTitularesPage = () => {
   const [idPeriodoActivo, setIdPeriodoActivo] = useState(null);
   const [titularTablaSelec, setTitularTablaSelec] = useState(null);
   
-  const [filtroTitularTexto, setFiltroTitularTexto] = useState("");
   const [filtroGrado, setFiltroGrado] = useState("");
-  const [filtroGrupo, setFiltroGrupo] = useState("");
   const [busquedaActiva, setBusquedaActiva] = useState(null); 
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -76,9 +81,14 @@ const AsignacionTitularesPage = () => {
   const gradosUnicosModal = useMemo(() => [...new Set(salones.map(s => s.grado))], [salones]);
   const gruposDisponiblesModal = useMemo(() => salones.filter(s => s.grado === formValues.grado), [salones, formValues.grado]);
 
-  const handleBusqueda = () => {
-    setBusquedaActiva({ titular: filtroTitularTexto.trim().toLowerCase(), grado: filtroGrado, grupo: filtroGrupo });
+  const handleBusqueda = (filtros) => {
+    setBusquedaActiva({ 
+      titular: (filtros.titular || "").trim().toLowerCase(), 
+      grado: filtros.grado || "", 
+      grupo: filtros.grupo || "" 
+    });
     setTitularTablaSelec(null);
+    setFiltroGrado(""); 
   };
 
   const datosTabla = useMemo(() => {
@@ -264,39 +274,18 @@ const AsignacionTitularesPage = () => {
         <div className="asignaciones-wrapper page-master-wrapper">
           
           <div className="module-toolbar-container">
-            <div className="toolbar-grouped-actions">
-              
-              <div className="searchbar-wrapper custom-asignacion-search">
-                <div className="searchbar-field">
-                  <label className="searchbar-label">Titular:</label>
-                  <input 
-                    type="text" className="searchbar-input" style={{ width: "220px" }}
-                    placeholder="Buscar..." value={filtroTitularTexto} 
-                    onChange={(e) => setFiltroTitularTexto(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') handleBusqueda(); }}
-                  />
-                </div>
-
-                <div className="searchbar-field">
-                  <label className="searchbar-label">Grado:</label>
-                  <select className="searchbar-input" style={{ width: "120px" }} value={filtroGrado} onChange={(e) => { setFiltroGrado(e.target.value); setFiltroGrupo(""); }}>
-                    <option value="">Todos...</option>
-                    {gradosUnicosBusqueda.map(g => <option key={g} value={g}>{g}</option>)}
-                  </select>
-                </div>
-
-                <div className="searchbar-field">
-                  <label className="searchbar-label">Grupo:</label>
-                  <select className="searchbar-input" style={{ width: "100px" }} value={filtroGrupo} onChange={(e) => setFiltroGrupo(e.target.value)} disabled={!filtroGrado}>
-                    <option value="">Todos...</option>
-                    {gruposDisponiblesBusqueda.map(s => <option key={s.id_salon} value={s.grupo}>{s.grupo}</option>)}
-                  </select>
-                </div>
-
-                <button className="searchbar-btn" onClick={handleBusqueda}>Buscar</button>
-              </div>
-
-            </div>
+            <SearchBar
+              fields={[
+                { key: 'titular', label: 'Titular:', type: 'text' },
+                { key: 'grado', label: 'Grado:', type: 'select', options: gradosUnicosBusqueda },
+                { key: 'grupo', label: 'Grupo:', type: 'select', options: gruposDisponiblesBusqueda.map(s => s.grupo) }
+              ]}
+              onChange={(key, value) => {
+                if (key === 'grado') setFiltroGrado(value);
+              }}
+              onSearch={handleBusqueda}
+              cleanFilter={{ titular: "", grado: "", grupo: "" }}
+            />
           </div>
 
           <div className="main-area">
@@ -329,7 +318,6 @@ const AsignacionTitularesPage = () => {
           </div>
         </div>
 
-
         <ParamModal 
           title={modalMode === "crearSalon" ? "CREAR NUEVO SALÓN" : modalMode === "crear" ? "ASIGNAR TITULAR" : "EDITAR TITULAR"}
           isOpen={modalOpen} 
@@ -346,8 +334,8 @@ const AsignacionTitularesPage = () => {
                     onChange={(e) => handleModalChange("grado", e.target.value)}
                   >
                     <option value="" disabled>Seleccionar...</option>
-                    {Array.from({ length: 12 }, (_, i) => (
-                      <option key={i} value={i.toString()}>{i}</option>
+                    {NOMBRES_GRADOS.map((gradoNombre) => (
+                      <option key={gradoNombre} value={gradoNombre}>{gradoNombre}</option>
                     ))}
                   </select>
                 </div>

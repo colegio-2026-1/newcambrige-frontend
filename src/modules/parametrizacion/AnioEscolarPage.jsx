@@ -274,9 +274,15 @@ const AnioEscolarPage = () => {
                   />
                 </div>
               </div>
-              <button className="searchbar-btn" onClick={() => setFiltroAnioAplicado(filtroAnioSeleccionado)}>
-                Buscar
-              </button>
+                <button 
+                  className="searchbar-btn" 
+                  onClick={() => {
+                    setFiltroAnioAplicado(filtroAnioSeleccionado); 
+                    setFiltroAnioSeleccionado(null);               
+                  }}
+                >
+                  Buscar
+                </button>
             </div>
           </div>
 

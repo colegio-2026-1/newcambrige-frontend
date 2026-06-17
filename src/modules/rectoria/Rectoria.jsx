@@ -9,8 +9,18 @@ import DocenteLogo from '../../assets/Rectoria/docente.svg';
 import Header from "../../components/layout/header";
 import ModuleLayout from "../../components/layout/ModuleLayout";
 import Sidebar from "../../components/layout/Sidebar";
+import { Icon } from '@mdi/react';
+import {mdiHome,mdiSchool} from "@mdi/js";
 
 const Rectoria = () => {
+  const selectedMenu = "Rectoria";
+  const { user, logout } = useAuth();
+  const userName = user?.nombre || "Usuario";
+  const idUser = user?.id_usuario;
+  const [roles, setRoles] = useState([]);
+  const [cargandoRol, setCargandoRol] = useState(true);
+  const rol = roles[0] || "Rol Desconocido";
+  
   const navigate = useNavigate();
   //para las tarjetas del dashboard
   const cards = [
@@ -19,19 +29,11 @@ const Rectoria = () => {
   ];
   //para el sidebar
   const modulos = [
-    { label: "Inicio", icon: <Home />, path: "/home" },
-    { label: "Estudiantes", path: "/rectoria/estudiantes" },
-    { label: "Docentes",  path: "/rectoria/docentes" },
+    { label: "Inicio", icon: <Icon path={mdiHome} />, path: "/home" },
+    { label: "Rectoria", icon: <Icon path={mdiSchool} />, path: "/Rectoria" }
 
   ];
-  //variables de autenticación y roles
-  const { user, logout } = useAuth();
-  const userName = user?.nombre || "Usuario";
-  const idUser = user?.id_usuario;
-  const [roles, setRoles] = useState([]);
-  const [cargandoRol, setCargandoRol] = useState(true);
-  const rol = roles[0] || "Rol Desconocido";
-  //obtener roles del usuario
+ 
   useEffect(() => {
     const obtenerRoles = async () => {
       if (!idUser) return;
@@ -66,6 +68,7 @@ const Rectoria = () => {
             })}
             user={{ nombre: userName, rol: rol }}
             logout={logout}
+            selectedMenu={selectedMenu}
           />
         }
       >{cargandoRol ? (
