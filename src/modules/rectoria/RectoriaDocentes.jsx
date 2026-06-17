@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { allrolesuserRequest, allaniosacademicosRequest } from '../../api/endpoints';
-import {estudiantesRectoriaRequest,estudianteFirmasRequest,firmarRectoriaEstudianteRequest,docentesRectoriaRequest,firmarDocenteRequest,descargarPdfEstudianteRequest,descargarPdfDocenteRequest,descargarPdfEstudiantesBatchRequest,imagenFirmaRequest,selloRequest} from "../../api/endpointsRectoria";
+import {descargarPdfDocentesBatchRequest,docentesRectoriaRequest,firmarDocenteRequest,descargarPdfDocenteRequest,imagenFirmaRequest,selloRequest} from "../../api/endpointsRectoria";
 import PazYSalvoModal from "./PazYSalvoModal";
 import {allsalonesbyperiodoRequest,} from '../../api/endpointsTesoreria';
 import { Home } from "lucide-react";
@@ -152,31 +152,43 @@ const cargarFirma = async (nombreModulo, usuarioId) => {
 };
 
 const descargarPazYSalvo = async () => {
-  if (!fila) {
-    alert("Seleccione un docente");
-    return;
-  }
   try {
-    const periodoId =periodoMapname[filtros.Periodo]?.id_periodo;
-    const response =await descargarPdfDocenteRequest(fila.id_docente,periodoId);
+    const periodoId =
+      periodoMapname[filtros.Periodo]?.id_periodo;
+    let response;
+    let nombreArchivo;
+    if (fila) {
+      response = await descargarPdfDocenteRequest(
+        fila.id_docente,
+        periodoId
+      );
+      nombreArchivo = `paz_y_salvo_docente_${fila.id_docente}.pdf`;
+    }
+    else {
+      response = await descargarPdfDocentesBatchRequest(periodoId,filtros.Grado ,filtros.Grupo );
+      nombreArchivo = "paz_y_salvo_docentes.zip";
+    }
     const blob = new Blob(
       [response.data],
-      { type: "application/pdf" }
+      { type: "application/zip" }
     );
-    const url =
-      window.URL.createObjectURL(blob);
-    const link =document.createElement("a");
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
     link.href = url;
-    link.download = `paz_y_salvo_docente_${fila.id_docente}.pdf`;
+    link.download = nombreArchivo;
     document.body.appendChild(link);
     link.click();
     link.remove();
     window.URL.revokeObjectURL(url);
   } catch (error) {
     console.error(error);
-    alert( error?.response?.data?.detail || "Error descargando PDF");
+    alert(
+      error?.response?.data?.detail ||
+      "Error descargando PDF"
+    );
   }
 };
+
 const verPazYSalvoDocente = async () => {
   if (!fila) {
     alert("Seleccione un docente");
@@ -216,30 +228,11 @@ const verPazYSalvoDocente = async () => {
   const filtrarDocentes = (filtrosBusqueda) => {
   setDocentesFiltrados(
     docentes.filter((docente) => {
-      const coincideNombre =
-        docente.nombre
-          ?.toLowerCase()
-          .includes(filtrosBusqueda.nombre.toLowerCase());
-
-      const coincideDocumento =
-        docente.documento
-          ?.toString()
-          .includes(filtrosBusqueda.documento);
-
-      const coincideGrado =
-        !filtrosBusqueda.Grado ||
-        docente.grado?.toString() === filtrosBusqueda.Grado;
-
-      const coincideGrupo =
-        !filtrosBusqueda.Grupo ||
-        docente.grupo?.toString() === filtrosBusqueda.Grupo;
-
-      return (
-        coincideNombre &&
-        coincideDocumento &&
-        coincideGrado &&
-        coincideGrupo
-      );
+      const coincideNombre =docente.nombre?.toLowerCase().includes(filtrosBusqueda.nombre.toLowerCase());
+      const coincideDocumento =docente.documento?.toString().includes(filtrosBusqueda.documento);
+      const coincideGrado =!filtrosBusqueda.Grado ||docente.grado?.toString() === filtrosBusqueda.Grado;
+      const coincideGrupo =!filtrosBusqueda.Grupo ||docente.grupo?.toString() === filtrosBusqueda.Grupo;
+      return (coincideNombre &&coincideDocumento &&coincideGrado &&coincideGrupo);
     })
   );
 };
@@ -263,22 +256,9 @@ const verPazYSalvoDocente = async () => {
           <ActionButtons
             filaSeleccionada={fila}
             botones={[
-              {
-                label: "Ver Paz y Salvo",
-                onClick: verPazYSalvoDocente,
-                variante: "primary"
-              },
-              {
-                label: "Firmar Docente",
-                onClick: () => setModalValidar(true),
-                variante: "primary",
-                disabled: !fila || fila.firmado === true
-              },
-              {
-                label: "Descargar Paz y Salvo",
-                onClick: descargarPazYSalvo,
-                variante: "primary"
-              }
+              {label: "Ver Paz y Salvo",onClick: verPazYSalvoDocente,variante: "primary"},
+              {label: "Firmar Docente",onClick: () => setModalValidar(true),variante: "primary",disabled: !fila || fila.firmado === true},
+              {label: "Descargar Paz y Salvo",onClick: descargarPazYSalvo,variante: "primary",siempreActivo: true}
             ]}
           />
         }
@@ -325,6 +305,8 @@ const verPazYSalvoDocente = async () => {
                   {
                     documento:"",
                     nombre:"",
+                    Grado:"",
+                    Grupo:"",
                     Periodo:filtros.Periodo
                     }
                 }

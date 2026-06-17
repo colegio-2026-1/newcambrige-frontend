@@ -10,5 +10,6 @@ export const firmarDocenteRequest = (docente_id,periodo_id) =>axiosClient.post(`
 export const descargarPdfDocenteRequest = (docente_id,periodo_id) =>axiosClient.get(`/api/paz-salvo/descargar-pdf/docente/${docente_id}?periodo_id=${periodo_id}`,{responseType: "blob"});
 export const periodosPazYSalvoRequest = () =>axiosClient.get("/api/paz-salvo/periodos");
 export const pendientesPazYSalvoRequest = (periodo_id) =>axiosClient.get(`/api/paz-salvo/pendientes?periodo_id=${periodo_id}`);
-export const descargarPdfEstudiantesBatchRequest = (periodo_id,grado,grupo) =>axiosClient.get("/api/paz-salvo/descargar-pdf/estudiantes/batch",{params: {periodo_id,grado, grupo}, responseType: "blob" });
+export const descargarPdfEstudiantesBatchRequest = (periodo_id, grado, grupo) => {const params = {}; if (periodo_id) params.periodo_id = periodo_id; if (grado) params.grado = grado; if (grupo) params.grupo = grupo; return axiosClient.get("/api/paz-salvo/descargar-pdf/estudiantes/batch", { params, responseType: "blob" });};
 export const imagenFirmaRequest = (nombreModulo, usuarioId)=> {let url = `/api/paz-salvo/firma/modulo/${nombreModulo}`; if (usuarioId) {url += `?usuario_id=${usuarioId}`;} return axiosClient.get(url, {responseType: "blob"});};
+export const descargarPdfDocentesBatchRequest = (periodo_id, grado, grupo) => {const params = {}; if (periodo_id) params.periodo_id = periodo_id; if (grado) params.grado = grado; if (grupo) params.grupo = grupo; return axiosClient.get("/api/paz-salvo/descargar-pdf/docentes/batch", { params, responseType: "blob" });};

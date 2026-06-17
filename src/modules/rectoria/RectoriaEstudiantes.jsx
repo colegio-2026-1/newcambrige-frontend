@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { allrolesuserRequest, allaniosacademicosRequest } from '../../api/endpoints';
-import {estudiantesRectoriaRequest,estudianteFirmasRequest,firmarRectoriaEstudianteRequest,docentesRectoriaRequest,firmarDocenteRequest,descargarPdfEstudianteRequest,descargarPdfDocenteRequest,descargarPdfEstudiantesBatchRequest,imagenFirmaRequest,selloRequest} from "../../api/endpointsRectoria";
+import {estudiantesRectoriaRequest,estudianteFirmasRequest,firmarRectoriaEstudianteRequest,descargarPdfEstudianteRequest,descargarPdfEstudiantesBatchRequest,imagenFirmaRequest,selloRequest} from "../../api/endpointsRectoria";
 import { Home } from "lucide-react";
 import { useAuth } from "../../api/useAuth";
 import Header from "../../components/layout/header";
@@ -77,14 +77,12 @@ const RectoriaEstudiantes = () => {
 const cargarEstudiantes = async (id_periodo) => {
   try {
     const res = await estudiantesRectoriaRequest(id_periodo);
-
     setEstudiantes(res.data);
     setEstudiantesFiltrados(res.data);
   } catch (error) {
     console.error("Error cargando estudiantes:", error);
   }
-};
-
+}
   const cargarPeriodos = async () => {
     try {
       const res = await allaniosacademicosRequest();
@@ -119,7 +117,7 @@ const descargarPazYSalvos = async () => {
       alert("No hay estudiantes para descargar.");
       return;
     }
-    const response = await descargarPdfEstudiantesBatchRequest(periodoId,filtros.Grado || null,filtros.Grupo || null);
+    const response = await descargarPdfEstudiantesBatchRequest(periodoId,filtros.Grado,filtros.Grupo);
     const blob = new Blob([response.data], { type: "application/zip" });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -216,10 +214,7 @@ const verPazYSalvo = async () => {
           item.id_usuario_firmante;
       }
     });
-    
     await cargarRecursosPazYSalvo(usuarioIdMap);
-    
-    console.log(data);
     setFirmasDetalle(data);
     setModalVerPazSalvo(true);
   } catch (error) {
