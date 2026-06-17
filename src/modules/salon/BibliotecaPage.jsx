@@ -372,12 +372,14 @@ const handleGuardarTodo = async () => {
   };
 
   const columnasInicio = [
-    { key: "codigo",        label: "CÓDIGO" },
+    { key: "codigo",        label: "CÓDIGO",
+      render: (value) => <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{value}</span>}, 
     { key: "nombre",        label: "NOMBRE COMPLETO" },
     { key: "grado",         label: "GRADO" },
     { key: "grupo",         label: "GRUPO" },
     { key: "titulo_libro",  label: "TÍTULO DEL LIBRO" },
-    { key: "fecha_entrega", label: "FECHA DE ENTREGA" },
+    { key: "fecha_entrega", label: "FECHA DE ENTREGA",
+      render: (value) => <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{value}</span>},
     {
       key: "estado", label: "ESTADO",
       render: (val) => (
