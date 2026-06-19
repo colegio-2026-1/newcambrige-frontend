@@ -40,7 +40,8 @@ const useInventario = () => {
 
   const [modalAgregar, setModalAgregar] = useState(false);
   const [modalEditar, setModalEditar] = useState(false);
-  
+  const [modalEliminar, setModalEliminar] = useState(false);
+
   const showAlert = useCallback((type, title, message, onConfirmAction = null, onCancelAction = null, acceptText = "Aceptar") => {
     setAlert({
       isOpen: true,
@@ -156,9 +157,11 @@ const useInventario = () => {
     try {
       await deleteInstrumentoRequest(seleccionado.id_instrumento);
       setSeleccionado(null);
+      setModalEliminar(false);
       await cargarDatos();
       showAlert("success", "Operación Exitosa", "Registro eliminado.");
     } catch (e) {
+      setModalEliminar(false);
       if (e.response?.status === 400) {
         showAlert("error", "OPERACIÓN DENEGADA", "No es posible eliminar este instrumento porque existen préstamos vigentes asociados a él.");
       } else {
@@ -181,6 +184,7 @@ const useInventario = () => {
     loading, categorias, seleccionado, setSeleccionado,
     setFiltroId, setFiltroNombre, setFiltroCategoria, filtrados,
     modalAgregar, setModalAgregar, modalEditar, setModalEditar,
+    modalEliminar, setModalEliminar,
     form, setForm, alert, showAlert, closeAlert, validaciones, ejecutarEdicion,
     abrirAgregar: () => { setSeleccionado(null); setForm(FORM_VACIO); setModalAgregar(true); },
     abrirEditar: (inst) => {
@@ -196,12 +200,11 @@ const useInventario = () => {
     }, 
     abrirEliminar: () => {
       if (!seleccionado) return;
-      showAlert("warning", "ELIMINAR", `¿Eliminar permanentemente ${seleccionado.nombre}?`,
-         handleEliminar, closeAlert, "Eliminar");
+      setModalEliminar(true);
     },
 
 
-    handleAgregar, handleEditar,
+    handleAgregar, handleEditar, handleEliminar,
      handleBuscar: () => {},
     handleLimpiar: () => { setFiltroId(""); setFiltroNombre(""); setFiltroCategoria(""); }
   };

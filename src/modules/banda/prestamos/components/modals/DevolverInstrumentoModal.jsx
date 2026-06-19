@@ -5,16 +5,15 @@ const DevolverInstrumentoModal = ({ open, onClose, onConfirm, prestamo, form, se
   if (!open || !prestamo) return null;
 
   const camposFormulario = [
-    // Usamos type: 'label' para mostrar información estática según el estándar del equipo
-    { key: 'info_inst', label: `Instrumento: ${prestamo.instrumento_nombre}`, type: 'label' },
-    { key: 'info_est', label: `Estudiante: ${prestamo.estudiante_nombre}`, type: 'label' },
+    { key: 'info_inst', label: `Instrumento: ${prestamo.instrumento_nombre}`, type: 'label'},
+    { key: 'info_est', label: `Estudiante: ${prestamo.estudiante_nombre}`, type: 'label'},
     { 
       key: 'estado_al_devolver', 
-      label: 'Estado de recepción', 
+      label: 'Estado del Instrumento', 
       type: 'select', 
       options: [
-        { value: 'Bueno', label: 'Bueno (Reingresa al Stock)' },
-        { value: 'Malo', label: 'Malo (Requiere Mantenimiento)' }
+        { value: 'Bueno', label: 'En BUEN estado' },
+        { value: 'Malo', label: 'En MAL estado' }
       ]
     },
     { key: 'observaciones', label: 'Observaciones (Obligatorio si es Malo)', type: 'text' },

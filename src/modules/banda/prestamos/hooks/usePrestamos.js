@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { 
   getPrestamosRequest, 
   getInstrumentosDisponiblesRequest, 
-  getEstudiantesRequest,
+  getEstudiantesBandaRequest,
   getSalonesRequest,
   asignarInstrumentoRequest, 
   devolverInstrumentoRequest 
@@ -46,7 +46,7 @@ const usePrestamos = () => {
       const [pRes, iRes, eRes, sRes] = await Promise.all([
         getPrestamosRequest(),
         getInstrumentosDisponiblesRequest(),
-        getEstudiantesRequest(),
+        getEstudiantesBandaRequest(),
         getSalonesRequest(),
       ]);
       setPrestamos(pRes.data || []);
