@@ -13,12 +13,10 @@ import DataTable from "../../../../components/shared/DataTable";
 import SearchBar from "../../../../components/shared/searchBar";
 import ActionButtons from "../../../../components/shared/ActionButtons";
 import Alert from "../../../../components/shared/Alert";
-import EstadoBadge from "../../inventario/components/EstadoBadge";
 
 import AgregarPrestamoModal from "../components/modals/AgregarPrestamoModal";
 import DevolverInstrumentoModal from "../components/modals/DevolverInstrumentoModal";
 
-import "../../inventario/pages/InventarioPage.css"; 
 
 const PrestamosPage = () => {
   const prestamos = usePrestamos();
@@ -31,7 +29,7 @@ const PrestamosPage = () => {
   const tieneP = estudianteSel ? prestamos.prestamos.some(p => String(p.id_estudiante) === String(estudianteSel.id_estudiante) && p.estado_entrega === "prestado") : false;
 
 
-  if (prestamos.loading) return <div className="inventario-loading">Cargando...</div>;
+  if (prestamos.loading) return <div>Cargando...</div>;
 
   const menuBanda = [
   { 
@@ -43,10 +41,25 @@ const PrestamosPage = () => {
       { label: "Asignaciones", path: "/banda/prestamos", icon: <Icon icon={mdiAccountMusic} size={18} /> }
 ];
 
+const renderBadge = (estado) => {
+    const isPendiente = estado === "Pendiente";
+    return (
+      <span style={{
+        display: "inline-flex", alignItems: "center", justifyContent: "center",
+        padding: "4px 12px", borderRadius: "var(--radius-full)",
+        fontSize: "var(--text-xs)", fontWeight: "var(--font-bold)",
+        backgroundColor: isPendiente ? 'var(--color-warning-bg)' : 'var(--color-success-bg)', 
+        color: isPendiente ? 'var(--color-warning-dark)' : 'var(--color-success-dark)',
+        textTransform: "uppercase", fontFamily: "var(--font-number)"
+      }}>
+        {estado}
+      </span>
+    );
+  };
 
 const columnasEstudiantes = [
     { key: "documento", label: "CÓDIGO",
-      render: (value) => <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{value}</span>
+      render: (value) => <span style={{ fontFamily: 'var(--font-number)', fontWeight: 400 }}>{value}</span>
      }, 
     { key: "nombre", label: "NOMBRE COMPLETO" },
     { key: "grado", label: "GRADO", render: (_, row) => prestamos.salonesMap[row.id_salon]?.grado || "—"  },
@@ -64,16 +77,16 @@ const columnasEstudiantes = [
       label: "ESTADO",
       render: (val, row) => {
         const tiene = prestamos.prestamos.some(p => String(p.id_estudiante) === String(row.id_estudiante) && p.estado_entrega === "prestado");
-        return <EstadoBadge estado={tiene ? "Pendiente" : "Disponible"} />;
+        return renderBadge(tiene ? "Pendiente" : "Disponible");
       }
     },
   ];
 
   
   return (
-    <div className='banda-module-container view-prestamos'>
-      <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
-      
+    <>
+    <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIDGE SCHOOL" />
+
       <ModuleLayout
         sidebar={<Sidebar selectedMenu="Asignaciones" menuItems={menuBanda} user={{nombre: String(user?.nombre || ""), rol: String(rolTexto)}} logout={() => {}} />}
         actions={
@@ -86,17 +99,14 @@ const columnasEstudiantes = [
           />
         }
       >
-        <div className="banda-content-wrapper"style={{ width: '100%' }}>
-          <Alert 
-            isOpen={prestamos.alert.isOpen} 
-            type={prestamos.alert.type} 
-            title={prestamos.alert.title} 
-            message={prestamos.alert.message} 
-            onClose={prestamos.closeAlert} 
+        <Alert 
+          isOpen={prestamos.alert.isOpen} 
+          type={prestamos.alert.type} 
+          title={prestamos.alert.title} 
+          message={prestamos.alert.message} 
+          onClose={prestamos.closeAlert} 
           />
-
-          <div className="banda-filters-fullwidth">
-            <SearchBar
+          <SearchBar
             onChange={(key, value) => {
               if (key === "grado") {
                 prestamos.setFiltroGrado(value);
@@ -129,12 +139,9 @@ const columnasEstudiantes = [
           }
           }
           />
-          </div>
-
-          <div className="inventario-table-card">
-            <DataTable columns={columnasEstudiantes} rows={prestamos.estudiantesFiltrados} pageSize={10} onRowClick={(row) => prestamos.seleccionarEstudiante(row)} emptyText="No hay estudiantes" />
-          </div>
-        </div>
+            <DataTable
+             columns={columnasEstudiantes} rows={prestamos.estudiantesFiltrados} pageSize={10} onRowClick={(row) => prestamos.seleccionarEstudiante(row)} emptyText="No hay estudiantes"
+          />
       </ModuleLayout>
 
       <AgregarPrestamoModal open={prestamos.modalAgregar} onClose={() =>
@@ -143,7 +150,7 @@ const columnasEstudiantes = [
       <DevolverInstrumentoModal open={prestamos.modalDevolver} onClose={() =>
          prestamos.setModalDevolver(false)} onConfirm={prestamos.handleDevolver}
           prestamo={prestamos.prestamoSeleccionado} form={prestamos.formDevolucion} setForm={prestamos.setFormDevolucion} errores={prestamos.errores} />
-    </div>
+    </>
   );
 };
 

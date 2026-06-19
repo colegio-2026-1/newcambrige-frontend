@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import "./InventarioPage.css";
 import useInventario from "../hooks/useInventario";
 import { useAuth } from "../../../../api/useAuth";
 
@@ -14,11 +13,10 @@ import DataTable from "../../../../components/shared/DataTable";
 import SearchBar from "../../../../components/shared/searchBar";
 import ActionButtons from "../../../../components/shared/ActionButtons";
 import Alert from "../../../../components/shared/Alert";
-import EstadoBadge from "../components/EstadoBadge";
 
 import AgregarInstrumentoModal from "../components/modals/AgregarInstrumentoModal";
 import EditarInstrumentoModal from "../components/modals/EditarInstrumentoModal";
-
+import EliminarInstrumentoModal from '../components/modals/EliminarInstrumentoModal';
 
 const InventarioPage = () => {
   const inventario = useInventario();
@@ -27,7 +25,7 @@ const InventarioPage = () => {
   const primerRol = roles?.[0];
   const rolTexto = typeof primerRol === 'object' ? primerRol.nombre : (primerRol || "Banda");
 
-  if (inventario.loading) return <div className="inventario-loading">Cargando...</div>;
+  if (inventario.loading) return <div>Cargando...</div>;
 
   const menuBanda = [
     { label: "Inicio", path: "/banda", icon: <Home size={18} /> },
@@ -35,23 +33,59 @@ const InventarioPage = () => {
     { label: "Asignaciones", path: "/banda/prestamos", icon: <Icon icon={mdiAccountMusic} size={18} /> }
   ];
 
+ const renderBadge = (estado, disponible) => {
+    let bgVar = 'var(--color-input-bg)';
+    let textVar = 'var(--color-text-muted)';
+    let label = estado;
+
+    if (estado === 'Activo' || estado === 'Disponible') {
+      if (disponible) {
+        bgVar = 'var(--color-success-bg)';
+        textVar = 'var(--color-success-dark)';
+        label = 'Disponible';
+      } else {
+        bgVar = 'var(--color-info-bg)';
+        textVar = 'var(--color-info)';
+        label = 'Asignado';
+      }
+    } else if (estado === 'En mantenimiento' || estado === 'Pendiente') {
+      bgVar = 'var(--color-warning-bg)';
+      textVar = 'var(--color-warning-dark)';
+      label = estado === 'Pendiente' ? 'Pendiente' : 'Mantenimiento';
+    } else if (estado === 'Inactivo') {
+      bgVar = 'var(--color-danger-bg)';
+      textVar = 'var(--color-danger-dark)';
+      label = 'Inactivo';
+    }
+
+    return (
+      <span style={{
+        display: "inline-flex", alignItems: "center", justifyContent: "center",
+        padding: "4px 12px", borderRadius: "var(--radius-full)",
+        fontSize: "var(--text-xs)", fontWeight: "var(--font-bold)",
+        backgroundColor: bgVar, color: textVar,
+        textTransform: "uppercase", fontFamily: "var(--font-number)"
+      }}>
+        {label}
+      </span>
+    );
+  };
 
   const columnas = [
     { key: "id_instrumento", label: "Código",
-      render: (val) => <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{val}</span>
+      render: (val) => <span style={{ fontFamily: 'var(--font-number)', fontWeight: 400 }}>{val}</span>
      },
     { key: "nombre", label: "Instrumento" },
     { key: "categoria_nombre", label: "Tipo de Instrumento" },
-    { key: "estado", label: "Estado", render: (val, row) => <EstadoBadge estado={val} disponible={row.cantidad_disponible > 0} /> },
+    { key: "estado", label: "Estado", render: (val, row) => renderBadge(val, row.cantidad_disponible > 0) },
     //{ key: "cantidad_total", label: "Cantidad Total" },
     { key: "cantidad_disponible", label: "Cantidad Disponible" },
   ];
 
 
   return (
-    <div className='banda-module-container view-inventario'>
-      <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIGDE SCHOOL" />
-
+    <>
+    <Header title="SISTEMA DE PAZ Y SALVO - NEW CAMBRIGDE SCHOOL" />
       <ModuleLayout
         sidebar={<Sidebar selectedMenu="Inventario" menuItems={menuBanda} user={{ nombre: user?.nombre, rol: rolTexto }} logout={() => { }} />}
         actions={
@@ -60,18 +94,17 @@ const InventarioPage = () => {
             botones={[
               { label: "Agregar Instrumento", onClick: inventario.abrirAgregar, siempreActivo: true, variante: "primary" },
               { label: "Editar Instrumento", onClick: () => inventario.abrirEditar(inventario.seleccionado), variante: "secondary" },
-              { label: "Eliminar Instrumento", onClick: inventario.abrirEliminar, variante: "danger" },
+              { label: "Eliminar Instrumento", onClick: inventario.abrirEliminar, variante: "secondary" },
             ]}
           />
         }
       >
-        <div className="banda-content-wrapper" style={{ width: '100%' }}>
-          <Alert
-          {...inventario.alert} 
+        {}
+        <Alert
+        {...inventario.alert} 
             onClose={inventario.alert.onClose} 
             onCancel={inventario.alert.onCancel} 
           />
-          <div className="banda-filters-fullwidth"></div>
           <SearchBar
             fields={[
               { key: "id_instrumento", label: "Código", type: "text" },
@@ -85,22 +118,26 @@ const InventarioPage = () => {
               inventario.handleBuscar();
             }}
           />
-          <div className="inventario-table-card">
             <DataTable 
               columns={columnas} 
               rows={inventario.filtrados} 
               pageSize={10} 
               onRowClick={inventario.setSeleccionado} 
               emptyText="No hay instrumentos registrados" 
-              />
-              </div>      
-        </div>
+              />    
       </ModuleLayout>
 
       {/* MODALES */}
       <AgregarInstrumentoModal open={inventario.modalAgregar} onClose={() => inventario.setModalAgregar(false)} onSave={inventario.handleAgregar} form={inventario.form} setForm={inventario.setForm} categorias={inventario.categorias} />
       <EditarInstrumentoModal open={inventario.modalEditar} onClose={() => inventario.setModalEditar(false)} onSave={inventario.handleEditar} form={inventario.form} setForm={inventario.setForm} categorias={inventario.categorias} />
-    </div>
+        <EliminarInstrumentoModal 
+        open={inventario.modalEliminar} 
+        onClose={() => inventario.setModalEliminar(false)} 
+        onConfirm={inventario.handleEliminar} 
+        instrumento={inventario.seleccionado} 
+      />
+    
+    </>
   );
 };
 
