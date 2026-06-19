@@ -414,7 +414,9 @@ const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }
             key={detalles.length}
             pageSize={10}
             columns={[
-              { key: "documento", label: "Código" },
+              { key: "documento", label: "Código",
+                render: (value) => <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{value}</span>
+               },
               { key: "nombre", label: "Nombre" },
               {
                 key: "grado",
@@ -463,8 +465,10 @@ const TesoreriaDetalleComponent = ({ tiporecibed, modulosRecibed, selectedMenu }
                   const detalle = matricula && detalles.find(d =>
                     d.id_matricula === matricula.id_matricula && d.mes === mesActual
                   );
-                  return <span>{detalle?.created_at ?  new Date(matricula.created_at).toLocaleDateString('es-CO', {day: '2-digit', month: '2-digit', year: 'numeric'}) 
-                          : "---"}</span>;
+                  const fecha = detalle?.created_at 
+                    ? new Date(matricula.created_at).toLocaleDateString('es-CO', {day: '2-digit', month: '2-digit', year: 'numeric'})
+                    : "---";
+                  return <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{fecha}</span>;
                 }
               }
             ]}

@@ -68,7 +68,7 @@ export default function PruebasPage() {
   { label: "Pruebas",    icon: <Icon path={mdiClipboardTextOutline} size={1} />, path: "/salon/pruebas",roles: ["titular", "admin"] },
 ];
   const columns = [
-    { key: "codigo", label: "CÓDIGO" },
+    { key: "codigo", label: "CÓDIGO",render: (value) => <span style={{ fontFamily: 'Arial, sans-serif', fontWeight: 400 }}>{value}</span>},
     { key: "nombre", label: "NOMBRE COMPLETO" },
     {
       key: "grado", label: "GRADO",
@@ -88,9 +88,14 @@ export default function PruebasPage() {
       ),
     },
     {
-      key: "fecha_pago", label: "FECHA DE PAGO",
-      render: (val) => (!val || val === "" ? <span>---</span> : <span>{val}</span>),
-    },
+      key: "fecha_pago",
+      label: "FECHA DE PAGO",
+      render: (val) => (
+        !val || val === "" 
+          ? <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>---</span>
+          : <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{val}</span>
+      ),
+    }
   ];
 
   const cargarPruebas = async () => {

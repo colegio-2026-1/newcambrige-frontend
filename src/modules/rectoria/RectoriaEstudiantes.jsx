@@ -319,40 +319,44 @@ const verPazYSalvo = async () => {
                 key={`${estudiantes}`}
                 pageSize={10}
                 columns={[
-                  {key: "documento", label: "Codigo" },
-                  {key: "nombre", label: "Nombre" },
-                  {key: "grado",label: "Grado",render: (_, val) => (<span>{val.grado}</span>)},
-                  {key: "grupo",label: "Grupo",render: (_, val) => (<span>{val.grupo}</span>)},
-                  {key: "semaforo",label: "Paz y Salvo",render: (_, val) => {
-                      const estado = val.semaforo;
+                  {
+                    key: "documento",
+                    label: "Documento",
+                    render: (value) => (
+                      <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>
+                        {value}
+                      </span>
+                    )
+                  },
+                  { key: "nombre", label: "Nombre" },
+                  {
+                    key: "grado",
+                    label: "Grado",
+                    render: (_, row) => <span>{row.grado}</span>
+                  },
+                  {
+                    key: "grupo",
+                    label: "Grupo",
+                    render: (_, row) => <span>{row.grupo}</span>
+                  },
+                  {
+                    key: "semaforo",
+                    label: "Paz y Salvo",
+                    render: (_, row) => {
+                      const estado = row.semaforo;
                       const config = {
-                        VERDE: {
-                          texto: "COMPLETO",
-                          color: "#44D231"
-                        },
-                        AMARILLO: {
-                          texto: "PENDIENTE",
-                          color: "#DABB1D"
-                        },
-                        ROJO: {
-                          texto: "CRÍTICO",
-                          color: "#8E2A25"
-                        }
+                        VERDE:   { texto: "COMPLETO",  color: "#44D231" },
+                        AMARILLO: { texto: "PENDIENTE", color: "#DABB1D" },
+                        ROJO:    { texto: "CRITICO",   color: "#8E2A25" }
                       };
+                      const conf = config[estado] || config.ROJO;
                       return (
-                        <span
-                          style={{
-                            color: config[estado]?.color || "#6b7280",
-                            fontWeight: "bold",
-                            textTransform: "uppercase"
-                          }}
-                        >
-                          {config[estado]?.texto || estado}
+                        <span style={{ color: conf.color, fontWeight: "bold", textTransform: "uppercase" }}>
+                          {conf.texto}
                         </span>
                       );
                     }
-                  },
-                                    
+                  }
                 ]}
                 rows={estudiantesFiltrados}
                 onRowClick={(f) => setFila(f)}

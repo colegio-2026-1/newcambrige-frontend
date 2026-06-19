@@ -2,10 +2,13 @@ import axiosClient from "./axiosClient";
 
 // ============ ESTUDIANTES ============
 export const getEstudiantesRequest = () => 
-  axiosClient.get(`/api/estudiantes/`);
+  axiosClient.get(`/api/estudiantes`);
+
+export const getEstudiantesBandaRequest = () => 
+  axiosClient.get(`/api/banda/estudiantes`);
 
 export const getSalonesRequest = () => 
-  axiosClient.get(`/api/salones/`);
+  axiosClient.get(`/api/salones`);
 
 
 // ============ CATEGORÍAS Y UBICACIONES ============

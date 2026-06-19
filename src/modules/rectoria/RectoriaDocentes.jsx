@@ -317,22 +317,42 @@ const verPazYSalvoDocente = async () => {
                     rows={docentesFiltrados}
                     onRowClick={(f) => setFila(f)}
                     columns={[
-                        {key: "documento",label: "Codigo"},
-                        {key: "nombre",label: "Nombre"},
-                        {key: "grado", label: "Grado",render: (_, docente) => (<span>{docente.grado}</span>)},
-                        {key: "grupo",label: "Grupo",render: (_, docente) => (<span>{docente.grupo}</span>)},
-                        {key: "estado",label: "Paz y Salvo",render: (_, docente) => {const firmado = docente.firmado;return (<span
-                                style={{
-                                  color: firmado ? "#44D231" : "#8E2A25",
-                                  fontWeight: "bold",
-                                  textTransform: "uppercase"
-                                }}
-                              >
-                                {firmado ? "COMPLETO" : "CRITICO"}
-                              </span>
-                            );
-                          }
+                      {
+                        key: "documento",
+                        label: "Documento",
+                        render: (value) => (
+                          <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>
+                            {value}
+                          </span>
+                        )
+                      },
+                      { key: "nombre", label: "Nombre" },
+                      {
+                        key: "grado",
+                        label: "Grado",
+                        render: (_, row) => <span>{row.grado}</span>
+                      },
+                      {
+                        key: "grupo",
+                        label: "Grupo",
+                        render: (_, row) => <span>{row.grupo}</span>
+                      },
+                      {
+                        key: "estado",
+                        label: "Paz y Salvo",
+                        render: (_, row) => {
+                          const firmado = row.firmado;
+                          return (
+                            <span style={{
+                              color: firmado ? "#44D231" : "#8E2A25",
+                              fontWeight: "bold",
+                              textTransform: "uppercase"
+                            }}>
+                              {firmado ? "COMPLETO" : "CRITICO"}
+                            </span>
+                          );
                         }
+                      }
                     ]}
                     />
             </div>

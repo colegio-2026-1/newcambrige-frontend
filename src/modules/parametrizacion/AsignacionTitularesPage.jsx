@@ -257,7 +257,9 @@ const AsignacionTitularesPage = () => {
 
   const columnasTabla = [
     { key: "nombre", label: "Titular" },
-    { key: "asignaciones_str", label: "Asignaciones" }
+    { key: "asignaciones_str", label: "Asignaciones",
+      render: (val) => <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{val}</span>
+     }
   ];
 
   const userName = user?.nombre || "Usuario";

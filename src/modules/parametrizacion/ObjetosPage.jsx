@@ -186,7 +186,9 @@ const ObjetosPage = () => {
   ];
 
   const columnasTabla = [
-    { key: "id_objeto", label: "Código" },
+    { key: "id_objeto", label: "Código",
+      render: (val) => <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{val}</span>
+     },
     { key: "nombre", label: "Nombre", render: (val) => capitalizar(val) },
     { key: "tipo", label: "Categoría", render: (val) => capitalizar(val) },
     { key: "talla", label: "Talla" },
@@ -197,9 +199,20 @@ const ObjetosPage = () => {
         if (est === "malo") clase = "badge--no";
         return <span className={clase}>{capitalizar(val)}</span>;
     }},
-    { key: "cantidad_total", label: "Total" },
-    { key: "cantidad_disponible", label: "Disponibles", 
-      render: (val) => <span className={Number(val) > 0 ? "badge--ok" : "badge--no"}>{val}</span> 
+    { key: "cantidad_total", label: "Total",
+      render: (val) => <span style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}>{val}</span>
+    },
+    { 
+      key: "cantidad_disponible", 
+      label: "Disponibles", 
+      render: (val) => (
+        <span 
+          className={Number(val) > 0 ? "badge--ok" : "badge--no"}
+          style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 400 }}
+        >
+          {val}
+        </span>
+      )
     }
   ];
 
